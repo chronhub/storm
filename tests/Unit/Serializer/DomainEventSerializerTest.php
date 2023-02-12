@@ -10,9 +10,9 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
-use Chronhub\Storm\Tests\Stubs\V4UniqueId;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Serializer\DomainEventSerializer;
@@ -59,7 +59,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $aggregateId = V4AggregateId::create();
         $datetime = new PointInTime();
         $now = $datetime->now();
-        $uid = V4UniqueId::create();
+        $uid = V4UniqueIdStub::create();
 
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 

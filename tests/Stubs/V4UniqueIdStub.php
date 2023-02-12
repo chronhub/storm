@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Stubs;
 use Stringable;
 use Symfony\Component\Uid\Uuid;
 
-final class V4UniqueId implements Stringable
+final class V4UniqueIdStub implements Stringable
 {
     public static function create(): Uuid
     {

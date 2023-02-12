@@ -9,9 +9,9 @@ use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\ProphecyTestCase;
-use Chronhub\Storm\Tests\Stubs\V4UniqueId;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Serializer\MessagingSerializer;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
@@ -89,7 +89,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
     {
         $datetime = new PointInTime();
         $now = $datetime->now();
-        $uid = V4UniqueId::create();
+        $uid = V4UniqueIdStub::create();
 
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
 

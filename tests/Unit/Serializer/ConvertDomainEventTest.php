@@ -7,9 +7,9 @@ namespace Chronhub\Storm\Tests\Unit\Serializer;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\Stubs\V4UniqueId;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Serializer\ConvertStreamEvent;
 use Chronhub\Storm\Serializer\DomainEventSerializer;
@@ -24,7 +24,7 @@ final class ConvertDomainEventTest extends UnitTestCase
 
         $datetime = new PointInTime();
         $now = $datetime->now();
-        $eventId = V4UniqueId::create();
+        $eventId = V4UniqueIdStub::create();
         $aggregateId = V4AggregateId::create();
 
         $this->headers = [
