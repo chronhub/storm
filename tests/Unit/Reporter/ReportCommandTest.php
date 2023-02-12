@@ -1,0 +1,202 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Chronhub\Storm\Tests\Unit\Reporter;
+
+use Generator;
+use RuntimeException;
+use Chronhub\Storm\Message\Message;
+use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tracker\TrackMessage;
+use Chronhub\Storm\Reporter\DomainCommand;
+use Chronhub\Storm\Reporter\ReportCommand;
+use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Tests\Double\SomeCommand;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Reporter\Subscribers\ConsumeCommand;
+use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
+
+final class ReportCommandTest extends ProphecyTestCase
+{
+    private MessageFactory|ObjectProphecy $messageFactory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->messageFactory = $this->prophesize(MessageFactory::class);
+    }
+
+    /**
+     * @test
+     */
+    public function it_relay_command(): void
+    {
+        $command = SomeCommand::fromContent(['name' => 'steph bug']);
+        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+
+        $reporter = new ReportCommand($tracker);
+
+        $this->assertSame($tracker, $reporter->tracker());
+
+        $messageHandled = false;
+
+        $consumer = function (DomainCommand $dispatchedCommand) use (&$messageHandled): void {
+            $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
+
+            $messageHandled = true;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeCommand(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($command);
+
+        $this->assertTrue($messageHandled);
+    }
+
+    /**
+     * @test
+     */
+    public function it_relay_command_as_array(): void
+    {
+        $commandAsArray = ['some' => 'command'];
+        $command = SomeCommand::fromContent(['name' => 'steph bug']);
+
+        $this->messageFactory->__invoke($commandAsArray)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+
+        $reporter = new ReportCommand($tracker);
+
+        $this->assertSame($tracker, $reporter->tracker());
+
+        $messageHandled = false;
+
+        $consumer = function (DomainCommand $dispatchedCommand) use (&$messageHandled): void {
+            $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
+
+            $messageHandled = true;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeCommand(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($commandAsArray);
+
+        $this->assertTrue($messageHandled);
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider provideCommand
+     */
+    public function it_raise_exception_when_message_has_not_been_handled(DomainCommand $command, string $messageName): void
+    {
+        $this->expectException(MessageNotHandled::class);
+        $this->expectExceptionMessage("Message with name $messageName was not handled");
+
+        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+        $reporter = new ReportCommand($tracker);
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            new ConsumeCommand(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($command);
+    }
+
+    /**
+     * @test
+     */
+    public function it_raise_exception_caught_during_dispatch_of_command(): void
+    {
+        $exception = new RuntimeException('some exception');
+
+        $this->expectException($exception::class);
+        $this->expectExceptionMessage('some exception');
+
+        $command = SomeCommand::fromContent(['name' => 'steph bug']);
+        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+        $reporter = new ReportCommand($tracker);
+
+        $consumer = function (DomainCommand $dispatchedCommand) use ($exception): void {
+            $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
+
+            throw $exception;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeCommand(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($command);
+    }
+
+    public function provideCommand(): Generator
+    {
+        yield [SomeCommand::fromContent(['name' => 'steph bug']), SomeCommand::class];
+
+        yield [SomeCommand::fromContent(['name' => 'steph bug'])
+            ->withHeader(Header::EVENT_TYPE, 'some.command'), 'some.command',
+        ];
+    }
+
+    private function provideRouter(array $consumers): MessageSubscriber
+    {
+        return new class($consumers) implements MessageSubscriber
+        {
+            private array $listeners = [];
+
+            public function __construct(private readonly iterable $consumers)
+            {
+            }
+
+            public function detachFromReporter(MessageTracker $tracker): void
+            {
+                foreach ($this->listeners as $listener) {
+                    $tracker->forget($listener);
+                }
+            }
+
+            public function attachToReporter(MessageTracker $tracker): void
+            {
+                $this->listeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
+                    $story->withConsumers($this->consumers);
+                }, OnDispatchPriority::ROUTE->value);
+            }
+        };
+    }
+}

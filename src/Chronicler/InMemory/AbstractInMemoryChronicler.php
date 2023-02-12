@@ -1,0 +1,129 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Chronhub\Storm\Chronicler\InMemory;
+
+use Generator;
+use Illuminate\Support\Collection;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
+use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use function array_map;
+
+abstract class AbstractInMemoryChronicler implements InMemoryChronicler
+{
+    /**
+     * @var Collection{StreamName, array<DomainEvent>}
+     */
+    protected Collection $streams;
+
+    public function __construct(protected readonly EventStreamProvider $eventStreamProvider,
+                                protected readonly StreamCategory $streamCategory)
+    {
+        $this->streams = new Collection();
+    }
+
+    public function retrieveAll(StreamName $streamName, AggregateIdentity $aggregateId, string $direction = 'asc'): Generator
+    {
+        $queryFilter = new RetrieveAllInMemoryQueryFilter($aggregateId, $direction);
+
+        return $this->retrieveFiltered($streamName, $queryFilter);
+    }
+
+    public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
+    {
+        if (! $queryFilter instanceof InMemoryQueryFilter) {
+            throw new InvalidArgumentException('Query filter must be an instance of '.InMemoryQueryFilter::class);
+        }
+
+        return $this->filterEvents($streamName, $queryFilter);
+    }
+
+    public function delete(StreamName $streamName): void
+    {
+        if (! $this->hasStream($streamName)) {
+            throw StreamNotFound::withStreamName($streamName);
+        }
+
+        $this->eventStreamProvider->deleteStream($streamName->toString());
+
+        $this->streams->forget($streamName->toString());
+    }
+
+    public function filterStreamNames(StreamName ...$streamNames): array
+    {
+        $filteredStreamNames = $this->eventStreamProvider->filterByStreams($streamNames);
+
+        return array_map(
+            static fn (string $streamName): StreamName => new StreamName($streamName),
+            $filteredStreamNames
+        );
+    }
+
+    public function filterCategoryNames(string ...$categoryNames): array
+    {
+        return $this->eventStreamProvider->filterByCategories($categoryNames);
+    }
+
+    public function hasStream(StreamName $streamName): bool
+    {
+        return $this->eventStreamProvider->hasRealStreamName($streamName->name);
+    }
+
+    public function streams(): Collection
+    {
+        return $this->streams;
+    }
+
+    protected function filterEvents(StreamName $streamName, InMemoryQueryFilter $query): Generator
+    {
+        if (! $this->hasStream($streamName)) {
+            throw StreamNotFound::withStreamName($streamName);
+        }
+
+        $streamEvents = (new Collection($this->streams->get($streamName->name)))
+            ->sortBy(static function (DomainEvent $event): int {
+                return $event->header(EventHeader::AGGREGATE_VERSION);
+            }, SORT_NUMERIC, 'desc' === $query->orderBy())
+            ->filter($query->apply());
+
+        if ($streamEvents->isEmpty()) {
+            throw StreamNotFound::withStreamName($streamName);
+        }
+
+        yield from $streamEvents;
+
+        return $streamEvents->count();
+    }
+
+    /**
+     * @param  array<DomainEvent>  $events
+     * @return array<DomainEvent>
+     */
+    protected function decorateEventWithInternalPosition(array $events): array
+    {
+        foreach ($events as &$event) {
+            $internalPosition = EventHeader::INTERNAL_POSITION;
+
+            if ($event->hasNot($internalPosition)) {
+                $event = $event->withHeader($internalPosition, $event->header(EventHeader::AGGREGATE_VERSION));
+            }
+        }
+
+        return $events;
+    }
+
+    public function getEventStreamProvider(): EventStreamProvider
+    {
+        return $this->eventStreamProvider;
+    }
+}

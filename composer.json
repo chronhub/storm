@@ -1,0 +1,51 @@
+{
+  "name": "chronhub/storm",
+  "description": "foundation",
+  "keywords": [
+    "message", "stream", "cqrs", "aggregate", "ddd", "es"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "psr/container": "dev-master",
+    "react/promise": "^2.9",
+    "symfony/uid": "6.3.x",
+    "symfony/clock": "^6.3",
+    "symfony/serializer": "^6.3",
+    "ext-pcntl": "*"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.4",
+    "phpstan/phpstan":"^1.10",
+    "nunomaduro/larastan": "^2.4",
+    "orchestra/testbench": "7.*",
+    "phpspec/prophecy-phpunit": "dev-master",
+    "phpunit/phpunit": "^9.5",
+    "roave/security-advisories": "dev-latest",
+    "ext-posix": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Chronhub\\Storm\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Chronhub\\Storm\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "pint": "vendor/bin/pint"
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

@@ -1,0 +1,232 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Chronhub\Storm\Tests\Unit\Reporter;
+
+use Generator;
+use RuntimeException;
+use PHPUnit\Framework\TestCase;
+use Chronhub\Storm\Message\Message;
+use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Reporter\ReportEvent;
+use Chronhub\Storm\Tracker\TrackMessage;
+use Chronhub\Storm\Tests\Double\SomeEvent;
+use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+
+final class ReportEventTest extends ProphecyTestCase
+{
+    private MessageFactory|ObjectProphecy $messageFactory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->messageFactory = $this->prophesize(MessageFactory::class);
+    }
+
+    /**
+     * @test
+     */
+    public function it_relay_event(): void
+    {
+        $event = SomeEvent::fromContent(['name' => 'steph bug']);
+        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+
+        $reporter = new ReportEvent($tracker);
+        $this->assertSame($tracker, $reporter->tracker());
+
+        $messageHandled = false;
+
+        $consumer = function (DomainEvent $dispatchedEvent) use (&$messageHandled): void {
+            $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
+
+            $messageHandled = true;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeEvent(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($event);
+
+        $this->assertTrue($messageHandled);
+    }
+
+    /**
+     * @test
+     */
+    public function it_relay_command_as_array(): void
+    {
+        $eventAsArray = ['some' => 'event'];
+        $event = SomeEvent::fromContent(['name' => 'steph bug']);
+
+        $this->messageFactory->__invoke($eventAsArray)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+
+        $reporter = new ReportEvent($tracker);
+        $this->assertSame($tracker, $reporter->tracker());
+
+        $messageHandled = false;
+
+        $consumer = function (DomainEvent $dispatchedEvent) use (&$messageHandled): void {
+            $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
+
+            $messageHandled = true;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeEvent(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($eventAsArray);
+
+        $this->assertTrue($messageHandled);
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider provideConsumers
+     */
+    public function it_always_considered_domain_event_acked_regardless_of_consumers(iterable $consumers): void
+    {
+        $event = SomeEvent::fromContent(['name' => 'steph bug']);
+        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+        $reporter = new ReportEvent($tracker);
+
+        $assertMessageIsAcked = new class() implements MessageSubscriber
+        {
+            private array $listeners = [];
+
+            public function detachFromReporter(MessageTracker $tracker): void
+            {
+                foreach ($this->listeners as $listener) {
+                    $tracker->forget($listener);
+                }
+            }
+
+            public function attachToReporter(MessageTracker $tracker): void
+            {
+                $this->listeners[] = $tracker->watch(Reporter::FINALIZE_EVENT, function (MessageStory $story): void {
+                    TestCase::assertTrue($story->isHandled());
+                }, -10000);
+            }
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            new ConsumeEvent(),
+            $this->provideRouter($consumers),
+            $assertMessageIsAcked,
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($event);
+    }
+
+    /**
+     * @test
+     */
+    public function it_raise_exception_caught_during_dispatch_of_event(): void
+    {
+        $exception = new RuntimeException('some exception');
+
+        $this->expectException($exception::class);
+        $this->expectExceptionMessage('some exception');
+
+        $event = SomeEvent::fromContent(['name' => 'steph bug']);
+        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $tracker = new TrackMessage();
+        $reporter = new ReportEvent($tracker);
+
+        $consumer = function (DomainEvent $dispatchedEvent) use ($exception): void {
+            $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
+
+            throw $exception;
+        };
+
+        $subscribers = [
+            new MakeMessage($this->messageFactory->reveal()),
+            $this->provideRouter([$consumer]),
+            new ConsumeEvent(),
+        ];
+
+        $reporter->subscribe(...$subscribers);
+
+        $reporter->relay($event);
+    }
+
+    public function provideEvent(): Generator
+    {
+        yield [SomeEvent::fromContent(['name' => 'steph bug']), SomeEvent::class];
+
+        yield [SomeEvent::fromContent(['name' => 'steph bug'])
+            ->withHeader(Header::EVENT_TYPE, 'some.event'), 'some.event',
+        ];
+    }
+
+    public function provideConsumers(): Generator
+    {
+        yield [[]];
+
+        $consumer = function (DomainEvent $dispatchedEvent): void {
+            $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
+        };
+
+        yield[[$consumer]];
+
+        yield[[$consumer, $consumer]];
+    }
+
+    private function provideRouter(iterable $consumers): MessageSubscriber
+    {
+        return new class($consumers) implements MessageSubscriber
+        {
+            private array $listeners = [];
+
+            public function __construct(private readonly iterable $consumers)
+            {
+            }
+
+            public function detachFromReporter(MessageTracker $tracker): void
+            {
+                foreach ($this->listeners as $listener) {
+                    $tracker->forget($listener);
+                }
+            }
+
+            public function attachToReporter(MessageTracker $tracker): void
+            {
+                $this->listeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
+                    $story->withConsumers($this->consumers);
+                }, OnDispatchPriority::ROUTE->value);
+            }
+        };
+    }
+}
