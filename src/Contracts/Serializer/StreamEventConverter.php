@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Serializer;
 use stdClass;
 use Chronhub\Storm\Reporter\DomainEvent;
 
-interface StreamEventMapper
+interface StreamEventConverter
 {
     /**
      * @param  DomainEvent  $event

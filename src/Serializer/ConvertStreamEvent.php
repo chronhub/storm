@@ -9,10 +9,10 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Serializer\StreamEventMapper;
+use Chronhub\Storm\Contracts\Serializer\StreamEventConverter;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
 
-final readonly class ConvertStreamEvent implements StreamEventMapper
+final readonly class ConvertStreamEvent implements StreamEventConverter
 {
     public function __construct(private StreamEventSerializer $serializer)
     {
