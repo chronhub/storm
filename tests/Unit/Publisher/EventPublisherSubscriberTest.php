@@ -14,6 +14,7 @@ use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Chronicler\EventChronicler;
+use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Publisher\EventPublisherSubscriber;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
@@ -24,6 +25,7 @@ use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use function count;
 
 final class EventPublisherSubscriberTest extends ProphecyTestCase
 {
@@ -216,6 +218,36 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
     /**
      * @test
      */
+    public function it_record_events_on_first_commit_in_transaction(): void
+    {
+        $event = SomeEvent::fromContent(['foo' => 'bar']);
+        $stream = new Stream(new StreamName('baz'), [$event]);
+
+        $streamTracker = new TrackTransactionalStream();
+        $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
+        $streamStory->deferred(fn (): Stream => $stream);
+
+        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
+        $chronicler->firstCommit($stream)->shouldBeCalledOnce();
+
+        $chronicler->inTransaction()->willReturn(true)->shouldBeCalledOnce();
+        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+
+        $pendingEvents = new Collection([$event]);
+
+        $this->eventPublisher->pull()->willReturn($pendingEvents)->shouldNotBeCalled();
+        $this->eventPublisher->publish($pendingEvents)->shouldNotBeCalled();
+        $this->eventPublisher->record($pendingEvents)->shouldBeCalledOnce();
+
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber->attachToChronicler($eventChronicler);
+
+        $streamTracker->disclose($streamStory);
+    }
+
+    /**
+     * @test
+     */
     public function it_record_events_on_persist_in_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -294,5 +326,29 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
+    }
+
+    /**
+     * @test
+     */
+    public function it_detach_stream_subscribers(): void
+    {
+        $streamTracker = new TrackTransactionalStream();
+        $this->assertCount(0, $streamTracker->listeners());
+
+        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
+        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+
+        $countProvidedSubscribers = count($streamTracker->listeners());
+
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber->attachToChronicler($eventChronicler);
+
+        $countFromPublisher = count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers'));
+        $this->assertEquals(4, $countFromPublisher);
+
+        $subscriber->detachFromChronicler($eventChronicler);
+
+        $this->assertEquals(count($streamTracker->listeners()), $countProvidedSubscribers);
     }
 }
