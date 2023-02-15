@@ -17,12 +17,12 @@ interface ChroniclerManager
      * @param  callable  $callback
      * @return $this
      */
-    public function extend(string $name, callable $callback): static;
+    public function extend(string $name, callable $callback): ChroniclerManager;
 
     /**
      * @param  string  $driver
      * @param  string|ChroniclerProvider  $provider
      * @return $this
      */
-    public function shouldUse(string $driver, string|ChroniclerProvider $provider): static;
+    public function shouldUse(string $driver, string|ChroniclerProvider $provider): ChroniclerManager;
 }
