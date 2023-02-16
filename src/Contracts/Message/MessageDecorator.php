@@ -10,9 +10,6 @@ interface MessageDecorator
 {
     /**
      * Decorate message headers
-     *
-     * @param  Message  $message
-     * @return Message
      */
     public function decorate(Message $message): Message;
 }

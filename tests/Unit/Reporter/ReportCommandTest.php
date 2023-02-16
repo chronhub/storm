@@ -148,7 +148,7 @@ final class ReportCommandTest extends ProphecyTestCase
         $tracker = new TrackMessage();
         $reporter = new ReportCommand($tracker);
 
-        $consumer = function (DomainCommand $dispatchedCommand) use ($exception): void {
+        $consumer = function (DomainCommand $dispatchedCommand) use ($exception): never {
             $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
 
             throw $exception;

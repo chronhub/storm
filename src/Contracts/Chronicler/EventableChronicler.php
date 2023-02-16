@@ -26,17 +26,7 @@ interface EventableChronicler extends ChroniclerDecorator
 
     public const HAS_STREAM_EVENT = 'has_stream';
 
-    /**
-     * @param  string  $eventName
-     * @param  callable  $eventContext
-     * @param  int  $priority
-     * @return Listener
-     */
     public function subscribe(string $eventName, callable $eventContext, int $priority = 0): Listener;
 
-    /**
-     * @param  Listener  ...$eventSubscribers
-     * @return void
-     */
     public function unsubscribe(Listener ...$eventSubscribers): void;
 }

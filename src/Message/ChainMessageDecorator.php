@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Message\MessageDecorator;
 
 final class ChainMessageDecorator implements MessageDecorator
 {
-    private array $messageDecorators;
+    private readonly array $messageDecorators;
 
     public function __construct(MessageDecorator ...$messageDecorators)
     {

@@ -66,8 +66,6 @@ abstract class EventProcessor
     /**
      * Persist events when we hit the threshold
      *
-     * @param  Context  $context
-     * @param  ProjectorRepository  $repository
      * @return void
      */
     final protected function persistOnReachedCounter(Context $context, ProjectorRepository $repository): void

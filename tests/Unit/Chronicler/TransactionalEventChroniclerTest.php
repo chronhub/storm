@@ -159,8 +159,6 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
      * @test
      *
      * @dataProvider provideBoolean
-     *
-     * @param  bool  $inTransaction
      */
     public function it_check_if_in_transaction(bool $inTransaction): void
     {

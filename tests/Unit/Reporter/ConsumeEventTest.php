@@ -95,7 +95,7 @@ final class ConsumeEventTest extends UnitTestCase
 
                 $count++;
             },
-            function (DomainEvent $event): void {
+            function (DomainEvent $event): never {
                 $this->assertInstanceOf(SomeEvent::class, $event);
 
                 throw new RuntimeException('stop at 1');

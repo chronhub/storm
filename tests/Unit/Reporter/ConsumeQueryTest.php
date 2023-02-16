@@ -102,7 +102,7 @@ final class ConsumeQueryTest extends UnitTestCase
 
         $query = SomeQuery::fromContent([]);
 
-        $consumer = static function (): void {
+        $consumer = static function (): never {
             throw new RuntimeException('some exception');
         };
 

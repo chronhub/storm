@@ -12,8 +12,6 @@ interface Store
 {
     /**
      * Create projection
-     *
-     * @return bool
      */
     public function create(): bool;
 
@@ -26,51 +24,36 @@ interface Store
 
     /**
      * Stop projection
-     *
-     * @return bool
      */
     public function stop(): bool;
 
     /**
      * Restart projection
-     *
-     * @return bool
      */
     public function startAgain(): bool;
 
     /**
      * Load projection status
-     *
-     * @return ProjectionStatus
      */
     public function loadStatus(): ProjectionStatus;
 
     /**
      * Persist domain events handled
-     *
-     * @return bool
      */
     public function persist(): bool;
 
     /**
      * Reset projection
-     *
-     * @return bool
      */
     public function reset(): bool;
 
     /**
      * Delete projection with or without emitted events
-     *
-     * @param  bool  $withEmittedEvents
-     * @return bool
      */
     public function delete(bool $withEmittedEvents): bool;
 
     /**
      * Check if projection already exists
-     *
-     * @return bool
      */
     public function exists(): bool;
 
@@ -83,22 +66,16 @@ interface Store
 
     /**
      * Update projection lock
-     *
-     * @return bool
      */
     public function updateLock(): bool;
 
     /**
      * Release projection lock
-     *
-     * @return bool
      */
     public function releaseLock(): bool;
 
     /**
      * Get the current projection stream name
-     *
-     * @return string
      */
     public function currentStreamName(): string;
 }

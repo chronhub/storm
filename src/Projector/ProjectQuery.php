@@ -13,12 +13,12 @@ use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Projector\Pipes\PrepareQueryRunner;
 use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
 
-final class ProjectQuery implements QueryProjector
+final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithContext;
 
-    public function __construct(protected readonly Context $context,
-                                private readonly Chronicler $chronicler)
+    public function __construct(protected Context $context,
+                                private Chronicler $chronicler)
     {
     }
 

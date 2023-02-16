@@ -8,15 +8,11 @@ interface EventStreamModel
 {
     /**
      * Get real stream name
-     *
-     * @return string
      */
     public function realStreamName(): string;
 
     /**
      * Get table name if exists
-     *
-     * @return string|null
      */
     public function tableName(): ?string;
 

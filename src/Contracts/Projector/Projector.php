@@ -9,7 +9,6 @@ interface Projector
     /**
      * Run projection
      *
-     * @param  bool  $inBackground
      * @return void
      */
     public function run(bool $inBackground): void;

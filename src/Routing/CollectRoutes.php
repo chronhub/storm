@@ -11,7 +11,7 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
 class CollectRoutes implements RouteCollection
 {
-    private Collection $routes;
+    private readonly Collection $routes;
 
     public function __construct(private readonly MessageAlias $messageAlias)
     {

@@ -8,8 +8,6 @@ interface ProjectorCaster
 {
     /**
      * Stop projection
-     *
-     * @return void
      */
     public function stop(): void;
 

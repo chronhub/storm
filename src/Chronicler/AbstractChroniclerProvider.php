@@ -47,7 +47,7 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
             return new EventChronicler($chronicler, $tracker);
         }
 
-        throw new InvalidArgumentException('Invalid configuration to decorate chronicler from chronicler provider: '.get_called_class());
+        throw new InvalidArgumentException('Invalid configuration to decorate chronicler from chronicler provider: '.static::class);
     }
 
     protected function resolveStreamTracker(array $config): ?StreamTracker

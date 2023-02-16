@@ -11,7 +11,6 @@ interface Story
     /**
      * Set tracker event name
      *
-     * @param  string  $event
      * @return void
      */
     public function withEvent(string $event): void;
@@ -26,7 +25,6 @@ interface Story
     /**
      * Stop propagation of tracker
      *
-     * @param  bool  $stopPropagation
      * @return void
      */
     public function stop(bool $stopPropagation): void;
@@ -41,7 +39,6 @@ interface Story
     /**
      * Set exception on story
      *
-     * @param  Throwable  $exception
      * @return void
      */
     public function withRaisedException(Throwable $exception): void;

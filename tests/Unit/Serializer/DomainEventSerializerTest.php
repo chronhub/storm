@@ -192,7 +192,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $serializer = new DomainEventSerializer();
 
         $event = $serializer->unserializeContent(
-            ['headers' => json_encode($payload['headers']), 'content' => json_encode($payload['content'])]
+            ['headers' => json_encode($payload['headers'], JSON_THROW_ON_ERROR), 'content' => json_encode($payload['content'])]
         )->current();
 
         $this->assertInstanceOf(SomeEvent::class, $event);

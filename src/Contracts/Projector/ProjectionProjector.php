@@ -10,18 +10,11 @@ interface ProjectionProjector extends PersistentProjector
 {
     /**
      * Emit event to a new stream
-     *
-     * @param  DomainEvent  $event
-     * @return void
      */
     public function emit(DomainEvent $event): void;
 
     /**
      * Emit event to a new stream with the given name
-     *
-     * @param  string  $streamName
-     * @param  DomainEvent  $event
-     * @return void
      */
     public function linkTo(string $streamName, DomainEvent $event): void;
 }

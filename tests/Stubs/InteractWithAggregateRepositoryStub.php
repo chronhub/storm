@@ -16,7 +16,7 @@ final class InteractWithAggregateRepositoryStub
 {
     use InteractWithAggregateRepository;
 
-    private ?AggregateRootStub $someAggregateRoot;
+    private ?AggregateRootStub $someAggregateRoot = null;
 
     public function __construct(public readonly Chronicler $chronicler,
                                 public readonly StreamProducer $producer,

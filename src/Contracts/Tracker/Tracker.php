@@ -9,9 +9,6 @@ interface Tracker
     /**
      * Add new listener to tracker
      *
-     * @param  string  $eventName
-     * @param  callable  $story
-     * @param  int  $priority
      * @return Listener
      */
     public function watch(string $eventName, callable $story, int $priority = 0): Listener;
@@ -19,7 +16,6 @@ interface Tracker
     /**
      * Fire tracker story
      *
-     * @param  Story  $story
      * @return void
      */
     public function disclose(Story $story): void;
@@ -27,8 +23,6 @@ interface Tracker
     /**
      * Fire context till a true condition is return
      *
-     * @param  Story  $story
-     * @param  callable  $callback
      * @return void
      */
     public function discloseUntil(Story $story, callable $callback): void;
@@ -36,7 +30,6 @@ interface Tracker
     /**
      * Remove listener given from tracker
      *
-     * @param  Listener  $eventListener
      * @return void
      */
     public function forget(Listener $eventListener): void;

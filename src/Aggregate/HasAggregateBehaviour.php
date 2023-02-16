@@ -49,9 +49,6 @@ trait HasAggregateBehaviour
 
     /**
      * Apply domain events to aggregate root
-     *
-     * @param  DomainEvent  $event
-     * @return void
      */
     protected function apply(DomainEvent $event): void
     {

@@ -42,9 +42,7 @@ final class FindRouteTest extends ProphecyTestCase
 
         $routes = new CollectRoutes($this->messageAlias->reveal());
 
-        $routes->addRoute(SomeCommand::class)->to(static function (): int {
-            return 42;
-        });
+        $routes->addRoute(SomeCommand::class)->to(static fn(): int => 42);
 
         $group = new CommandGroup('default', $routes);
 
@@ -196,9 +194,7 @@ final class FindRouteTest extends ProphecyTestCase
 
         $routes
             ->addRoute(SomeCommand::class)
-            ->to(static function (): int {
-                return 42;
-            })
+            ->to(static fn(): int => 42)
             ->onQueue(['connection' => 'redis', 'tries' => 3]);
 
         $group = new CommandGroup('default', $routes);

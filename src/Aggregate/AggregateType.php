@@ -57,8 +57,6 @@ final readonly class AggregateType implements Type
     }
 
     /**
-     * @param  string  $aggregate
-     * @return void
      *
      * @throws InvalidArgumentException
      */

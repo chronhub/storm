@@ -24,34 +24,16 @@ interface ProjectorOption extends JsonSerializable
 
     public const DETECTION_WINDOWS = 'detection_windows';
 
-    /**
-     * @return bool
-     */
     public function getDispatchSignal(): bool;
 
-    /**
-     * @return int
-     */
     public function getStreamCacheSize(): int;
 
-    /**
-     * @return int
-     */
     public function getPersistBlockSize(): int;
 
-    /**
-     * @return int
-     */
     public function getLockTimeoutMs(): int;
 
-    /**
-     * @return int
-     */
     public function getSleepBeforeUpdateLock(): int;
 
-    /**
-     * @return int
-     */
     public function getUpdateLockThreshold(): int;
 
     /**
@@ -59,8 +41,5 @@ interface ProjectorOption extends JsonSerializable
      */
     public function getRetriesMs(): array;
 
-    /**
-     * @return null|string
-     */
     public function getDetectionWindows(): ?string;
 }

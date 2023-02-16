@@ -8,8 +8,6 @@ interface ReadModelProjectorCaster extends ProjectorCaster
 {
     /**
      * Get the read model
-     *
-     * @return ReadModel
      */
     public function readModel(): ReadModel;
 }

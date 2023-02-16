@@ -120,10 +120,6 @@ trait ProvideProjectorOption
         ];
     }
 
-    /**
-     * @param  array|string  $retriesMs
-     * @return void
-     */
     protected function setUpRetriesMs(array|string $retriesMs): void
     {
         if (is_array($retriesMs)) {

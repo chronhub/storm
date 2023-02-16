@@ -12,7 +12,6 @@ interface ProjectorBuilder extends Projector
     /**
      * Initialize projection with a callback
      *
-     * @param  Closure  $initCallback
      * @return static
      */
     public function initialize(Closure $initCallback): static;
@@ -20,7 +19,6 @@ interface ProjectorBuilder extends Projector
     /**
      * Set stream names to listen to
      *
-     * @param  string  ...$streams
      * @return static
      */
     public function fromStreams(string ...$streams): static;
@@ -28,7 +26,6 @@ interface ProjectorBuilder extends Projector
     /**
      * Set category names to listen to
      *
-     * @param  string  ...$categories
      * @return static
      */
     public function fromCategories(string ...$categories): static;
@@ -74,7 +71,6 @@ interface ProjectorBuilder extends Projector
     /**
      * Set the projection query filter
      *
-     * @param  QueryFilter  $queryFilter
      * @return static
      */
     public function withQueryFilter(QueryFilter $queryFilter): static;

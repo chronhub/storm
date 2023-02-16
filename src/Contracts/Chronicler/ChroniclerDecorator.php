@@ -8,8 +8,6 @@ interface ChroniclerDecorator extends Chronicler
 {
     /**
      * Get the underlying chronicler instance
-     *
-     * @return Chronicler
      */
     public function innerChronicler(): Chronicler;
 }

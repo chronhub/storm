@@ -12,7 +12,6 @@ interface MessageSerializer
     /**
      * Serialize Message
      *
-     * @param  Message  $message
      * @return array{'headers':array<string, mixed>, 'content':array<string, mixed>}
      */
     public function serializeMessage(Message $message): array;
@@ -20,7 +19,6 @@ interface MessageSerializer
     /**
      * Unserialize content of message
      *
-     * @param  array  $payload
      * @return Generator<object>
      */
     public function unserializeContent(array $payload): Generator;

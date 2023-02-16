@@ -344,7 +344,7 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
         $subscriber->attachToChronicler($eventChronicler);
 
-        $countFromPublisher = count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers'));
+        $countFromPublisher = is_countable(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) ? count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) : 0;
         $this->assertEquals(4, $countFromPublisher);
 
         $subscriber->detachFromChronicler($eventChronicler);

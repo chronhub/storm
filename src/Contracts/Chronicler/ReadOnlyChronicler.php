@@ -15,9 +15,6 @@ interface ReadOnlyChronicler
     /**
      * Retrieve all stream events with order
      *
-     * @param  StreamName  $streamName
-     * @param  AggregateIdentity  $aggregateId
-     * @param  string  $direction
      * @return Generator<DomainEvent>
      *
      * @throws StreamNotFound
@@ -25,8 +22,6 @@ interface ReadOnlyChronicler
     public function retrieveAll(StreamName $streamName, AggregateIdentity $aggregateId, string $direction = 'asc'): Generator;
 
     /**
-     * @param  StreamName  $streamName
-     * @param  QueryFilter  $queryFilter
      * @return Generator<DomainEvent>
      *
      * @throws StreamNotFound
@@ -50,7 +45,6 @@ interface ReadOnlyChronicler
     /**
      * Check if stream name exists
      *
-     * @param  StreamName  $streamName
      * @return bool
      */
     public function hasStream(StreamName $streamName): bool;

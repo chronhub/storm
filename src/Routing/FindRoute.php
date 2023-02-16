@@ -62,9 +62,6 @@ final readonly class FindRoute implements RouteLocator
     /**
      * Transform each message handler to callable if not already invokable
      *
-     * @param  callable|object|string  $consumer
-     * @param  string  $messageName
-     * @return callable
      *
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -90,9 +87,6 @@ final readonly class FindRoute implements RouteLocator
 
     /**
      * Return message handler(s) by his message name
-     *
-     * @param  string  $messageName
-     * @return Collection
      */
     private function determineMessageHandler(string $messageName): Collection
     {
@@ -107,9 +101,6 @@ final readonly class FindRoute implements RouteLocator
 
     /**
      * Determine message name from message alias instance
-     *
-     * @param  Message  $message
-     * @return string
      */
     private function determineMessageName(Message $message): string
     {

@@ -12,16 +12,16 @@ use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
 
-final class ProjectReadModel implements ReadModelProjector
+final readonly class ProjectReadModel implements ReadModelProjector
 {
     use InteractWithContext;
     use ProvidePersistentProjector;
 
-    public function __construct(protected readonly Context $context,
-                                protected readonly ProjectorRepository $repository,
-                                protected readonly Chronicler $chronicler,
-                                protected readonly string $streamName,
-                                private readonly ReadModel $readModel)
+    public function __construct(protected Context $context,
+                                protected ProjectorRepository $repository,
+                                protected Chronicler $chronicler,
+                                protected string $streamName,
+                                private ReadModel $readModel)
     {
     }
 

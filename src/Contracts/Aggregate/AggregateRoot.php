@@ -12,9 +12,7 @@ interface AggregateRoot
     /**
      * Reconstitute aggregate root with domain events
      *
-     * @param  AggregateIdentity  $aggregateId
      * @param  Generator<DomainEvent>  $events
-     * @return static|null
      */
     public static function reconstitute(AggregateIdentity $aggregateId, Generator $events): ?static;
 
@@ -27,15 +25,11 @@ interface AggregateRoot
 
     /**
      * Return current aggregate id instance
-     *
-     * @return AggregateIdentity
      */
     public function aggregateId(): AggregateIdentity;
 
     /**
      * Return current version of aggregate root
-     *
-     * @return int
      */
     public function version(): int;
 }

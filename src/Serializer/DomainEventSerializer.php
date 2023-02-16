@@ -19,13 +19,10 @@ use function is_string;
 
 final class DomainEventSerializer implements StreamEventSerializer
 {
-    private MessagingContentSerializer|ContentSerializer $contentSerializer;
+    private readonly Serializer $serializer;
 
-    private Serializer $serializer;
-
-    public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
+    public function __construct(private readonly ContentSerializer $contentSerializer = new MessagingContentSerializer(), NormalizerInterface ...$normalizers)
     {
-        $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
         $this->serializer = new Serializer($normalizers, [new JsonEncoder()]);
     }
 

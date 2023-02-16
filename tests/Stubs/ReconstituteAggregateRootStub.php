@@ -12,13 +12,13 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
-final class ReconstituteAggregateRootStub
+final readonly class ReconstituteAggregateRootStub
 {
     use ReconstituteAggregate;
 
-    public function __construct(protected readonly Chronicler $chronicler,
-                                protected readonly StreamProducer $streamProducer,
-                                protected readonly AggregateType $aggregateType)
+    public function __construct(protected Chronicler $chronicler,
+                                protected StreamProducer $streamProducer,
+                                protected AggregateType $aggregateType)
     {
     }
 

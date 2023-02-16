@@ -15,9 +15,7 @@ final class GenericListenerTest extends UnitTestCase
      */
     public function it_assert_listener(): void
     {
-        $story = function (): bool {
-            return false;
-        };
+        $story = fn(): bool => false;
 
         $listener = new GenericListener('finalize', $story, -100);
 

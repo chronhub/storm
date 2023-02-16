@@ -10,9 +10,6 @@ interface MessageProducer
 {
     /**
      * Produce message sync or async
-     *
-     * @param  Message  $message
-     * @return Message
      */
     public function produce(Message $message): Message;
 }

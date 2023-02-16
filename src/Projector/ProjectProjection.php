@@ -15,17 +15,17 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
 
-final class ProjectProjection implements ProjectionProjector
+final readonly class ProjectProjection implements ProjectionProjector
 {
     use InteractWithContext;
     use ProvidePersistentProjector;
 
     private StreamCache $streamCache;
 
-    public function __construct(protected readonly Context $context,
-                                protected readonly ProjectorRepository $repository,
-                                protected readonly Chronicler $chronicler,
-                                protected readonly string $streamName)
+    public function __construct(protected Context $context,
+                                protected ProjectorRepository $repository,
+                                protected Chronicler $chronicler,
+                                protected string $streamName)
     {
         $this->streamCache = new StreamCache($context->option->getStreamCacheSize());
     }
@@ -58,9 +58,6 @@ final class ProjectProjection implements ProjectionProjector
     /**
      * Persist domain event if stream does not already exist
      * in the event store and not already set in the projection context
-     *
-     * @param  StreamName  $streamName
-     * @return void
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
@@ -73,9 +70,6 @@ final class ProjectProjection implements ProjectionProjector
 
     /**
      * Check if stream name already exists in cache and/or in the chronicler
-     *
-     * @param  StreamName  $streamName
-     * @return bool
      */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {

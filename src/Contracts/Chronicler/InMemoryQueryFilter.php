@@ -6,8 +6,5 @@ namespace Chronhub\Storm\Contracts\Chronicler;
 
 interface InMemoryQueryFilter extends QueryFilter
 {
-    /**
-     * @return string
-     */
     public function orderBy(): string;
 }
