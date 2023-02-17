@@ -19,7 +19,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
     /**
      * @var Collection<string, InMemoryProjection>
      */
-    private Collection $projections;
+    private readonly Collection $projections;
 
     private array $fillable = ['state', 'position', 'status', 'locked_until'];
 

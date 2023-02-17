@@ -21,7 +21,7 @@ final class DomainEventSerializer implements StreamEventSerializer
 {
     private MessagingContentSerializer|ContentSerializer $contentSerializer;
 
-    private Serializer $serializer;
+    private readonly Serializer $serializer;
 
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {

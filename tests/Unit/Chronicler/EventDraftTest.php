@@ -131,6 +131,7 @@ final class EventDraftTest extends UnitTestCase
         /** @var Stream $newStream */
         $newStream = $draft->promise();
 
+        /** @var SomeEvent $event */
         foreach ($newStream->events() as $event) {
             $this->assertEquals(['some' => 'header'], $event->headers());
         }

@@ -253,7 +253,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream($this->streamName));
         $this->chronicler->commitTransaction();
 
-        $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): void {
+        $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): never {
             $chronicler->firstCommit(new Stream(new StreamName('transaction')));
 
             $this->assertCount(1, $this->chronicler->streams());

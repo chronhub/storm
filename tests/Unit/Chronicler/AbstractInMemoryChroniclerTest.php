@@ -300,9 +300,7 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
             ],
         ]);
 
-        $noOpStreamSubscribers = $tracker->listeners()->filter(function (Listener $listener): bool {
-            return $listener->name() === 'foo';
-        });
+        $noOpStreamSubscribers = $tracker->listeners()->filter(fn (Listener $listener): bool => $listener->name() === 'foo');
 
         $this->assertCount(2, $noOpStreamSubscribers);
     }

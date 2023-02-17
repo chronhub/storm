@@ -18,7 +18,7 @@ final class MessagingSerializer implements MessageSerializer
 {
     private MessagingContentSerializer|ContentSerializer $contentSerializer;
 
-    private Serializer $serializer;
+    private readonly Serializer $serializer;
 
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {

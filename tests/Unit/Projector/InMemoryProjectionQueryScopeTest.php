@@ -37,9 +37,7 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         $queryFilter->setCurrentPosition($fromIncludedPosition);
 
         $filteredEvents = $events
-            ->sortBy(static function (DomainEvent $event): int {
-                return $event->header(EventHeader::INTERNAL_POSITION);
-            }, SORT_NUMERIC, 'desc' === $queryFilter->orderBy())
+            ->sortBy(static fn (DomainEvent $event): int => $event->header(EventHeader::INTERNAL_POSITION), SORT_NUMERIC, 'desc' === $queryFilter->orderBy())
             ->filter($queryFilter->apply());
 
         $this->assertEquals(count($filteredEvents), $expectedCount);

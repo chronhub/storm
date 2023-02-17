@@ -12,7 +12,7 @@ use function in_array;
 use function is_string;
 use function str_starts_with;
 
-final class InMemoryEventStream implements EventStreamProvider
+final readonly class InMemoryEventStream implements EventStreamProvider
 {
     /**
      * @var Collection{string, string|null}

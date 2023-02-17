@@ -23,7 +23,6 @@ use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
-use function get_class;
 use function iterator_to_array;
 
 final class ProvideEventsTest extends ProphecyTestCase
@@ -109,7 +108,7 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_raise_exception_on_persist_stream_events(Throwable $exception): void
     {
-        $this->expectException(get_class($exception));
+        $this->expectException($exception::class);
 
         $this->chronicler->amend($this->stream)->willThrow($exception)->shouldBeCalled();
 

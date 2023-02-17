@@ -18,7 +18,7 @@ use function json_decode;
 abstract class AbstractProjectorManager implements ProjectorManager
 {
     //wip
-    public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING;
+    final public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING;
 
     public function __construct(protected readonly ProjectorManagerFactory $factory)
     {

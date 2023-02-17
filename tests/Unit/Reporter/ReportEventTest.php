@@ -165,7 +165,7 @@ final class ReportEventTest extends ProphecyTestCase
         $tracker = new TrackMessage();
         $reporter = new ReportEvent($tracker);
 
-        $consumer = function (DomainEvent $dispatchedEvent) use ($exception): void {
+        $consumer = function (DomainEvent $dispatchedEvent) use ($exception): never {
             $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
 
             throw $exception;

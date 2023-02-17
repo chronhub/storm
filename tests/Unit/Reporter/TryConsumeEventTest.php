@@ -45,7 +45,7 @@ final class TryConsumeEventTest extends UnitTestCase
         $count = 0;
 
         $consumers = [
-            function (DomainEvent $event): void {
+            function (DomainEvent $event): never {
                 $this->assertInstanceOf(SomeEvent::class, $event);
 
                 throw new RuntimeException('first exception');
@@ -55,7 +55,7 @@ final class TryConsumeEventTest extends UnitTestCase
 
                 $count += 1;
             },
-            function (DomainEvent $event): void {
+            function (DomainEvent $event): never {
                 $this->assertInstanceOf(SomeEvent::class, $event);
 
                 throw new RuntimeException('last exception');

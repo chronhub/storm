@@ -82,7 +82,7 @@ final class StreamEventIteratorTest extends UnitTestCase
 
     public function provideStreamNotFoundWhileIterating(): Generator
     {
-        yield from (new LazyCollection())->whenEmpty(function (): void {
+        yield from (new LazyCollection())->whenEmpty(function (): never {
             throw new StreamNotFound('stream not found');
         });
     }

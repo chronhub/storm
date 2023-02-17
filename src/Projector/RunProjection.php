@@ -28,10 +28,6 @@ readonly class RunProjection
 
     /**
      * Run Projection
-     *
-     * @param  Pipeline  $pipeline
-     * @param  Context  $context
-     * @return null|Throwable
      */
     protected function runProjection(Pipeline $pipeline, Context $context): ?Throwable
     {

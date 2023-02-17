@@ -18,7 +18,7 @@ final class QueryFailureTest extends UnitTestCase
      *
      * @dataProvider provideException
      */
-    public function it_wrap_exception_given(Exception $exception): void
+    public function it_wrap_exception_given(Exception $exception): never
     {
         $this->expectException(QueryFailure::class);
         $this->expectExceptionMessage('A query exception occurred: foo');

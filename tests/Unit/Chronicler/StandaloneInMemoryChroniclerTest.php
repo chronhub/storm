@@ -262,9 +262,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(count($range), $recordedEvents->getReturn());
         $this->assertCount(count($range), $allEvents);
 
-        $this->assertEquals($range, array_map(function (DomainEvent $event): int {
-            return $event->header(EventHeader::INTERNAL_POSITION);
-        }, $allEvents));
+        $this->assertEquals($range, array_map(fn (DomainEvent $event): int => $event->header(EventHeader::INTERNAL_POSITION), $allEvents));
     }
 
     /**
@@ -386,9 +384,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return function (DomainEvent $event): bool {
-                        return $event->header(EventHeader::INTERNAL_POSITION) >= 5;
-                    };
+                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 5;
                 }
 
                 public function orderBy(): string
@@ -403,10 +399,8 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return function (DomainEvent $event): bool {
-                        return $event->header(EventHeader::INTERNAL_POSITION) >= 3
-                            && $event->header(EventHeader::INTERNAL_POSITION) <= 5;
-                    };
+                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 3
+                        && $event->header(EventHeader::INTERNAL_POSITION) <= 5;
                 }
 
                 public function orderBy(): string
@@ -421,10 +415,8 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return function (DomainEvent $event): bool {
-                        return $event->header(EventHeader::INTERNAL_POSITION) >= 1
-                            && $event->header(EventHeader::INTERNAL_POSITION) <= 4;
-                    };
+                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 1
+                        && $event->header(EventHeader::INTERNAL_POSITION) <= 4;
                 }
 
                 public function orderBy(): string

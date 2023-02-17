@@ -21,6 +21,7 @@
     "ext-pcntl": "*"
   },
   "require-dev": {
+    "rector/rector": "dev-main",
     "laravel/pint": "^1.4",
     "phpstan/phpstan":"^1.10",
     "nunomaduro/larastan": "^2.4",
@@ -42,7 +43,10 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "pint": "vendor/bin/pint"
+    "pint": "vendor/bin/pint",
+    "rector-init": "vendor/bin/rector init",
+    "rector-dry": "vendor/bin/rector process --dry-run",
+    "rector-process": "vendor/bin/rector process"
   },
   "config": {
     "sort-packages": true

@@ -36,9 +36,9 @@ final readonly class StandaloneStore implements Store
             throw ProjectionNotFound::withName($this->streamName);
         }
 
-        $this->context->streamPosition->discover(json_decode($projection->position(), true));
+        $this->context->streamPosition->discover(json_decode($projection->position(), true, 512, JSON_THROW_ON_ERROR));
 
-        $state = json_decode($projection->state(), true);
+        $state = json_decode($projection->state(), true, 512, JSON_THROW_ON_ERROR);
 
         if (is_array($state) && count($state) !== 0) {
             $this->context->state->put($state);

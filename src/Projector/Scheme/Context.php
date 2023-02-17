@@ -33,7 +33,7 @@ class Context
     /** Only for persistent projection no read model */
     public bool $isStreamCreated = false;
 
-    public ProjectionStatus $status;
+    public ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public readonly PersistentState $state;
 
@@ -47,7 +47,6 @@ class Context
                                 public readonly ?DetectGap $gap = null)
     {
         $this->state = new ProjectionState();
-        $this->status = ProjectionStatus::IDLE;
         $this->runner = new Runner();
         $this->isPersistent = $eventCounter instanceof EventCounter;
     }

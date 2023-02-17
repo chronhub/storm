@@ -16,7 +16,7 @@ class Draft implements MessageStory
     /**
      * The message instance
      */
-    private ?Message $message;
+    private ?Message $message = null;
 
     /**
      * Transient message

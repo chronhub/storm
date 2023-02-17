@@ -26,6 +26,7 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use function count;
+use function is_countable;
 
 final class EventPublisherSubscriberTest extends ProphecyTestCase
 {
@@ -344,7 +345,7 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
         $subscriber->attachToChronicler($eventChronicler);
 
-        $countFromPublisher = count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers'));
+        $countFromPublisher = is_countable(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) ? count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) : 0;
         $this->assertEquals(4, $countFromPublisher);
 
         $subscriber->detachFromChronicler($eventChronicler);

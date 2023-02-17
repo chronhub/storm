@@ -178,7 +178,7 @@ final class ReportQueryTest extends ProphecyTestCase
         $tracker = new TrackMessage();
         $reporter = new ReportQuery($tracker);
 
-        $consumer = function (DomainQuery $dispatchedQuery) use ($exception): void {
+        $consumer = function (DomainQuery $dispatchedQuery) use ($exception): never {
             $this->assertInstanceOf(SomeQuery::class, $dispatchedQuery);
 
             throw $exception;

@@ -57,7 +57,7 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
         $this->expectException(ProjectionAlreadyRunning::class);
 
         $pipes = [
-            function (): void {
+            function (): never {
                 throw new ProjectionAlreadyRunning();
             },
         ];
@@ -80,7 +80,7 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
         $this->expectExceptionMessage('foo');
 
         $pipes = [
-            function (): void {
+            function (): never {
                 throw new RuntimeException('foo');
             },
         ];
@@ -103,7 +103,7 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
         $this->expectExceptionMessage('foo');
 
         $pipes = [
-            function (): void {
+            function (): never {
                 throw new RuntimeException('foo');
             },
         ];

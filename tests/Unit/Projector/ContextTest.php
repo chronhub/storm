@@ -97,9 +97,7 @@ final class ContextTest extends ProphecyTestCase
         $context
             ->initialize(fn (): array => ['start_at' => 1])
             ->fromStreams('foo')
-            ->whenAny(function (DomainEvent $event, array $state): array {
-                return $state;
-            })
+            ->whenAny(fn (DomainEvent $event, array $state): array => $state)
             ->withQueryFilter($this->provideProjectionQueryFilter());
 
         $this->assertFalse($context->runner->inBackground());
@@ -131,9 +129,7 @@ final class ContextTest extends ProphecyTestCase
         $context
             ->fromStreams('foo')
             ->when([
-                DomainEvent::class => function (DomainEvent $event, array $state): array {
-                    return $state;
-                },
+                DomainEvent::class => fn (DomainEvent $event, array $state): array => $state,
             ])
             ->withQueryFilter($this->provideProjectionQueryFilter());
 
@@ -425,9 +421,7 @@ final class ContextTest extends ProphecyTestCase
         $context
             ->initialize($init)
             ->fromStreams('foo')
-            ->whenAny(function (DomainEvent $event, array $state): array {
-                return $state;
-            })
+            ->whenAny(fn (DomainEvent $event, array $state): array => $state)
             ->withQueryFilter($this->provideQueryFilter());
 
         $this->assertSame($init, $context->initCallback);
@@ -448,9 +442,7 @@ final class ContextTest extends ProphecyTestCase
 
         $context
             ->fromStreams('foo')
-            ->whenAny(function (DomainEvent $event, array $state): array {
-                return $state;
-            })
+            ->whenAny(fn (DomainEvent $event, array $state): array => $state)
             ->withQueryFilter($this->provideQueryFilter());
 
         $this->assertNull($context->initCallback);

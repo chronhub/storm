@@ -135,9 +135,7 @@ final class InteractWithTrackerTest extends UnitTestCase
 
         $this->assertCount(3, $tracker->listeners());
 
-        $tracker->discloseUntil($story, function (MessageStory $story): bool {
-            return $story->message()->event()->content['init'] === 3;
-        });
+        $tracker->discloseUntil($story, fn (MessageStory $story): bool => $story->message()->event()->content['init'] === 3);
 
         $this->assertEquals(['init' => 3], $story->message()->event()->content);
     }
