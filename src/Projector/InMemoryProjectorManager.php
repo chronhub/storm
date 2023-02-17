@@ -5,10 +5,29 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Throwable;
+use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Contracts\Projector\Store;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Projector\Repository\InMemoryStore;
+use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
+use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
+use Chronhub\Storm\Projector\Repository\PersistentProjectorRepository;
 
 final class InMemoryProjectorManager extends AbstractProjectorManager
 {
+    public function createProjectorRepository(Context $context, Store $store, ?ReadModel $readModel): ProjectorRepository
+    {
+        $store = new InMemoryStore($store);
+
+        if ($readModel) {
+            return new ReadModelProjectorRepository($context, $store, $readModel);
+        }
+
+        return new PersistentProjectorRepository($context, $store, $this->chronicler);
+    }
+
     /**
      * @throws InMemoryProjectionFailed
      */
@@ -37,10 +56,14 @@ final class InMemoryProjectorManager extends AbstractProjectorManager
         $this->updateProjectionStatus($streamName, $deleteProjectionStatus);
     }
 
+    /**
+     * @throws ProjectionNotFound
+     * @throws InMemoryProjectionFailed
+     */
     protected function updateProjectionStatus(string $streamName, ProjectionStatus $projectionStatus): void
     {
         try {
-            $success = $this->factory->projectionProvider->updateProjection(
+            $success = $this->projectionProvider->updateProjection(
                 $streamName,
                 ['status' => $projectionStatus->value]
             );

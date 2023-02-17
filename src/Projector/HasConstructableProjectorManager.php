@@ -20,39 +20,39 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Options\DefaultProjectorOption;
 use function array_merge;
 
-abstract class ProjectorManagerFactory
+trait HasConstructableProjectorManager
 {
-    public function __construct(public readonly Chronicler $chronicler,
-                                public readonly EventStreamProvider $eventStreamProvider,
-                                public readonly ProjectionProvider $projectionProvider,
-                                public readonly ProjectionQueryScope $queryScope,
-                                public readonly SystemClock $clock,
-                                public ProjectorOption|array $options = [])
+    public function __construct(protected readonly Chronicler $chronicler,
+                                protected readonly EventStreamProvider $eventStreamProvider,
+                                protected readonly ProjectionProvider $projectionProvider,
+                                protected readonly ProjectionQueryScope $queryScope,
+                                protected readonly SystemClock $clock,
+                                protected ProjectorOption|array $options = [])
     {
     }
 
-    public function createStore(Context $context, string $streamName): Store
+    protected function createPersistentStore(Context $context, string $streamName): Store
     {
         return new StandaloneStore(
             $context,
             $this->projectionProvider,
-            $this->makeProjectorLock($context->option),
+            $this->createProjectorLock($context->option),
             $streamName
         );
     }
 
-    public function createContext(array $options, ?EventCounter $eventCounter): Context
+    protected function createProjectorContext(array $options, ?EventCounter $eventCounter): Context
     {
-        $option = $this->makeOption($options);
+        $option = $this->createProjectorOption($options);
 
         $streamPositions = new StreamPosition($this->eventStreamProvider);
 
-        $gapDetector = $eventCounter ? $this->makeGapDetector($streamPositions, $option) : null;
+        $gapDetector = $eventCounter ? $this->createGapDetector($streamPositions, $option) : null;
 
         return new Context($option, $streamPositions, $eventCounter, $gapDetector);
     }
 
-    protected function makeProjectorLock(ProjectorOption $option): RepositoryLock
+    protected function createProjectorLock(ProjectorOption $option): RepositoryLock
     {
         return new RepositoryLock(
             $this->clock,
@@ -61,7 +61,7 @@ abstract class ProjectorManagerFactory
         );
     }
 
-    protected function makeOption(array $option): ProjectorOption
+    protected function createProjectorOption(array $option): ProjectorOption
     {
         if ($this->options instanceof ProjectorOption) {
             return $this->options;
@@ -70,7 +70,7 @@ abstract class ProjectorManagerFactory
         return new DefaultProjectorOption(...array_merge($this->options, $option));
     }
 
-    protected function makeGapDetector(StreamPosition $streamPosition, ProjectorOption $option): DetectGap
+    protected function createGapDetector(StreamPosition $streamPosition, ProjectorOption $option): DetectGap
     {
         return new DetectGap(
             $streamPosition,

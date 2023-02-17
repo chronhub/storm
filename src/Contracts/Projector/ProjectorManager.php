@@ -34,7 +34,6 @@ interface ProjectorManager
     /**
      * Stop projection by stream name
      *
-     *
      * @throws ProjectionNotFound
      */
     public function stop(string $streamName): void;
@@ -42,14 +41,12 @@ interface ProjectorManager
     /**
      * Stop projection by stream name
      *
-     *
      * @throws ProjectionNotFound
      */
     public function reset(string $streamName): void;
 
     /**
      * Delete projection by name and with or without his emitted events
-     *
      *
      * @throws ProjectionNotFound
      */
@@ -81,8 +78,7 @@ interface ProjectorManager
     public function stateOf(string $name): array;
 
     /**
-     * Filter projection by stream name(s)
-     * it return streams order by ascendant name
+     * Filter projection by stream name(s) and ordered by ascendant name
      *
      * @return array<string>
      */

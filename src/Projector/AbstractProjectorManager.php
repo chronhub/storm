@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
@@ -11,51 +13,50 @@ use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectorManager;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
+use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use function json_decode;
 
 abstract class AbstractProjectorManager implements ProjectorManager
 {
+    use HasConstructableProjectorManager;
+
     //wip
     final public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING;
 
-    public function __construct(protected readonly ProjectorManagerFactory $factory)
-    {
-    }
-
     public function projectQuery(array $options = []): QueryProjector
     {
-        $context = $this->factory->createContext($options, null);
+        $context = $this->createProjectorContext($options, null);
 
-        return new ProjectQuery($context, $this->factory->chronicler);
+        return new ProjectQuery($context, $this->chronicler);
     }
 
     public function projectProjection(string $streamName, array $options = []): ProjectionProjector
     {
-        $context = $this->factory->createContext($options, new EventCounter());
+        $context = $this->createProjectorContext($options, new EventCounter());
 
-        $provider = $this->factory->createStore($context, $streamName);
+        $provider = $this->createPersistentStore($context, $streamName);
 
-        $repository = $this->factory->makeRepository($context, $provider, null);
+        $repository = $this->createProjectorRepository($context, $provider, null);
 
-        return new ProjectProjection($context, $repository, $this->factory->chronicler, $streamName);
+        return new ProjectProjection($context, $repository, $this->chronicler, $streamName);
     }
 
     public function projectReadModel(string $streamName, ReadModel $readModel, array $option = []): ReadModelProjector
     {
-        $context = $this->factory->createContext($option, new EventCounter());
+        $context = $this->createProjectorContext($option, new EventCounter());
 
-        $provider = $this->factory->createStore($context, $streamName);
+        $provider = $this->createPersistentStore($context, $streamName);
 
-        $repository = $this->factory->makeRepository($context, $provider, $readModel);
+        $repository = $this->createProjectorRepository($context, $provider, $readModel);
 
-        return new ProjectReadModel($context, $repository, $this->factory->chronicler, $streamName, $readModel);
+        return new ProjectReadModel($context, $repository, $this->chronicler, $streamName, $readModel);
     }
 
     public function statusOf(string $name): string
     {
-        $projection = $this->factory->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($name);
 
         if (! $projection instanceof ProjectionModel) {
             throw ProjectionNotFound::withName($name);
@@ -66,7 +67,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function streamPositionsOf(string $name): array
     {
-        $projection = $this->factory->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($name);
 
         if (! $projection instanceof ProjectionModel) {
             throw ProjectionNotFound::withName($name);
@@ -77,7 +78,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function stateOf(string $name): array
     {
-        $projection = $this->factory->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($name);
 
         if (! $projection) {
             throw ProjectionNotFound::withName($name);
@@ -88,18 +89,20 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function filterNamesOf(string ...$names): array
     {
-        return $this->factory->projectionProvider->filterByNames(...$names);
+        return $this->projectionProvider->filterByNames(...$names);
     }
 
     public function exists(string $name): bool
     {
-        return $this->factory->projectionProvider->projectionExists($name);
+        return $this->projectionProvider->projectionExists($name);
     }
 
     public function queryScope(): ProjectionQueryScope
     {
-        return $this->factory->queryScope;
+        return $this->queryScope;
     }
+
+    abstract protected function createProjectorRepository(Context $context, Store $store, ?ReadModel $readModel): ProjectorRepository;
 
     /**
      * @throws ProjectionNotFound
