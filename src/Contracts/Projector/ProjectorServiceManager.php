@@ -10,5 +10,7 @@ interface ProjectorServiceManager
 
     public function extend(string $name, callable $callback): ProjectorServiceManager;
 
-    public function shouldUse(string $driver, string|ProjectorManager $factory): ProjectorServiceManager;
+    public function setDefaultDriver(string $driver): ProjectorServiceManager;
+
+    public function getDefaultDriver(): string;
 }
