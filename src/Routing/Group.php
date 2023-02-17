@@ -8,6 +8,7 @@ use JsonSerializable;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Producer\ProducerStrategy;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
@@ -72,7 +73,7 @@ abstract class Group implements JsonSerializable
     private array $messageSubscribers = [];
 
     public function __construct(public readonly string $name,
-                                public readonly CollectRoutes $routes)
+                                public readonly RouteCollection $routes)
     {
     }
 
