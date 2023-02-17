@@ -11,7 +11,6 @@ interface ProjectionQueryScope
     /**
      * Filter projection query from included position
      *
-     * @return ProjectionQueryFilter
      *
      * @throws InvalidArgumentException when position is less or equals than 0
      */

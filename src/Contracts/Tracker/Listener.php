@@ -8,15 +8,11 @@ interface Listener
 {
     /**
      * Get the event name
-     *
-     * @return string
      */
     public function name(): string;
 
     /**
      * Get the event priority
-     *
-     * @return int
      */
     public function priority(): int;
 

@@ -10,9 +10,6 @@ interface ProjectionQueryFilter extends QueryFilter
 {
     /**
      * Set current stream position
-     *
-     * @param  int  $position
-     * @return void
      */
     public function setCurrentPosition(int $position): void;
 }

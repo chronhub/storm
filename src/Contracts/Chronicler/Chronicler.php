@@ -36,8 +36,6 @@ interface Chronicler extends ReadOnlyChronicler
 
     /**
      * Get the underlying event stream provider
-     *
-     * @return EventStreamProvider
      */
     public function getEventStreamProvider(): EventStreamProvider;
 }

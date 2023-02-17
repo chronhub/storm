@@ -20,8 +20,6 @@ abstract class Group implements JsonSerializable
      * Reporter service id
      *
      * Use to register the reporter in ioc
-     *
-     * @var string|null
      */
     private ?string $reporterServiceId = null;
 
@@ -29,15 +27,11 @@ abstract class Group implements JsonSerializable
      * Reporter concrete class name
      *
      * will be used as default binding if reporter service id is not set
-     *
-     * @var string|null
      */
     private ?string $reporterConcrete = null;
 
     /**
      * Tracker service id
-     *
-     * @var string|null
      */
     private ?string $messageTrackerId = null;
 
@@ -45,29 +39,21 @@ abstract class Group implements JsonSerializable
      * Message handler method name
      *
      * default null for __invoke magic method
-     *
-     * @var string|null
      */
     private ?string $messageHandlerMethodName = null;
 
     /**
      * Message producer strategy key
-     *
-     * @var ProducerStrategy|null
      */
     private ?ProducerStrategy $producerStrategy = null;
 
     /**
      * Message producer service id
-     *
-     * @var string|null
      */
     private ?string $producerServiceId = null;
 
     /**
      * Group queue
-     *
-     * @var array|null
      */
     private ?array $queue = null;
 

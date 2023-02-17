@@ -30,7 +30,6 @@ final class LogicalProducer implements ProducerUnity
     }
 
     /**
-     * @param  array  $headers
      * @return array{bool, string}
      */
     private function validateHeaders(array $headers): array

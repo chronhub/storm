@@ -11,9 +11,6 @@ final class SortStreamIterator implements Iterator
 {
     use HasTimSort;
 
-    /**
-     * @var array
-     */
     protected array $iterators = [];
 
     public readonly int $numberOfIterators;

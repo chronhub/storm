@@ -23,9 +23,6 @@ use function iterator_to_array;
 
 final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler implements TransactionalChronicler, TransactionalInMemory
 {
-    /**
-     * @var bool
-     */
     protected bool $inTransaction = false;
 
     /**
@@ -155,9 +152,7 @@ final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler i
     }
 
     /**
-     * @param  string  $streamName
      * @param  Generator<DomainEvent>|Collection<DomainEvent>  $events
-     * @return void
      */
     private function storeStreamEvents(string $streamName, Generator|Collection $events): void
     {

@@ -14,8 +14,6 @@ trait HasAggregateBehaviour
 {
     /**
      * Aggregate root version
-     *
-     * @var int
      */
     private int $version = 0;
 
@@ -49,9 +47,6 @@ trait HasAggregateBehaviour
 
     /**
      * Apply domain events to aggregate root
-     *
-     * @param  DomainEvent  $event
-     * @return void
      */
     protected function apply(DomainEvent $event): void
     {

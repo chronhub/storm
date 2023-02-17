@@ -8,8 +8,6 @@ interface ReadModelProjector extends PersistentProjector
 {
     /**
      * Return the current read model
-     *
-     * @return ReadModel
      */
     public function readModel(): ReadModel;
 }

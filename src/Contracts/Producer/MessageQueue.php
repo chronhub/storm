@@ -10,9 +10,6 @@ interface MessageQueue
 {
     /**
      * Queue message to his dispatcher
-     *
-     * @param  Message  $message
-     * @return void
      */
     public function toQueue(Message $message): void;
 }

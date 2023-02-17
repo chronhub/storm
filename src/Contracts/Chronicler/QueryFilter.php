@@ -8,8 +8,6 @@ interface QueryFilter
 {
     /**
      * Get callable query filter
-     *
-     * @return callable
      */
     public function apply(): callable;
 }

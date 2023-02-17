@@ -15,10 +15,6 @@ trait ReconstituteAggregate
 {
     /**
      * Reconstitute aggregate root from his aggregate id and conditionally from a query filter
-     *
-     * @param  AggregateIdentity  $aggregateId
-     * @param  QueryFilter|null  $queryFilter
-     * @return AggregateRoot|null
      */
     protected function reconstituteAggregateRoot(AggregateIdentity $aggregateId, ?QueryFilter $queryFilter = null): ?AggregateRoot
     {
@@ -41,8 +37,6 @@ trait ReconstituteAggregate
     /**
      * Retrieve aggregate root events history
      *
-     * @param  AggregateIdentity  $aggregateId
-     * @param  QueryFilter|null  $queryFilter
      * @return Generator<DomainEvent>
      *
      * @throws StreamNotFound

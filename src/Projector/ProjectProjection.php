@@ -58,9 +58,6 @@ final class ProjectProjection implements ProjectionProjector
     /**
      * Persist domain event if stream does not already exist
      * in the event store and not already set in the projection context
-     *
-     * @param  StreamName  $streamName
-     * @return void
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
@@ -73,9 +70,6 @@ final class ProjectProjection implements ProjectionProjector
 
     /**
      * Check if stream name already exists in cache and/or in the chronicler
-     *
-     * @param  StreamName  $streamName
-     * @return bool
      */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {

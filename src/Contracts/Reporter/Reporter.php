@@ -17,23 +17,17 @@ interface Reporter
     /**
      * Report message
      *
-     * @param  object|array  $message
      * @return void|PromiseInterface
      */
     public function relay(object|array $message);
 
     /**
      * Subscribe to the underlying reporter tracker
-     *
-     * @param  MessageSubscriber  ...$messageSubscribers
-     * @return void
      */
     public function subscribe(MessageSubscriber ...$messageSubscribers): void;
 
     /**
      * Get the message tracker
-     *
-     * @return MessageTracker
      */
     public function tracker(): MessageTracker;
 }

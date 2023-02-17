@@ -13,8 +13,6 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface StreamEventLoaderConnection extends StreamEventLoader
 {
     /**
-     * @param  Builder  $builder
-     * @param  StreamName  $streamName
      * @return Generator<DomainEvent|stdClass|array>
      */
     public function query(Builder $builder, StreamName $streamName): Generator;

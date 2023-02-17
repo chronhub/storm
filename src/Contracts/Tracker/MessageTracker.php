@@ -8,9 +8,6 @@ interface MessageTracker extends Tracker
 {
     /**
      * Create new story instance with given event
-     *
-     * @param  string  $eventName
-     * @return MessageStory
      */
     public function newStory(string $eventName): MessageStory;
 }

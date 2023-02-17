@@ -106,8 +106,6 @@ final class ProvideEventsTest extends ProphecyTestCase
      * @test
      *
      * @dataProvider provideExceptionOnPersistStreamEvents
-     *
-     * @param  Throwable  $exception
      */
     public function it_raise_exception_on_persist_stream_events(Throwable $exception): void
     {
@@ -148,9 +146,6 @@ final class ProvideEventsTest extends ProphecyTestCase
      * @test
      *
      * @dataProvider provideEventWithDirection
-     *
-     * @param  string  $eventName
-     * @param  string  $direction
      */
     public function it_dispatch_retrieve_all_events_with_direction(string $eventName, string $direction): void
     {
@@ -182,9 +177,6 @@ final class ProvideEventsTest extends ProphecyTestCase
      * @test
      *
      * @dataProvider provideEventWithDirection
-     *
-     * @param  string  $eventName
-     * @param  string  $direction
      */
     public function it_raise_stream_not_found_exception_on_retrieve_all_events(string $eventName, string $direction): void
     {
@@ -300,8 +292,6 @@ final class ProvideEventsTest extends ProphecyTestCase
      * @test
      *
      * @dataProvider provideBool
-     *
-     * @param  bool  $streamExists
      */
     public function it_dispatch_has_stream_event(bool $streamExists): void
     {

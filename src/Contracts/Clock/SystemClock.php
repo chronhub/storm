@@ -10,8 +10,6 @@ interface SystemClock extends ClockInterface
 {
     /**
      * Return format
-     *
-     * @return string
      */
     public function getFormat(): string;
 }

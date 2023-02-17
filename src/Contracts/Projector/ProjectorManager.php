@@ -18,7 +18,6 @@ interface ProjectorManager
     /**
      * Create a new persistent projection instance
      *
-     * @param  string  $streamName
      * @param  array<string, int|bool>  $options
      */
     public function projectProjection(string $streamName, array $options = []): ProjectionProjector;
@@ -26,8 +25,6 @@ interface ProjectorManager
     /**
      * Create a new read model projection instance
      *
-     * @param  string  $streamName
-     * @param  ReadModel  $readModel
      * @param  array<string, int|bool>  $option
      */
     public function projectReadModel(string $streamName,
@@ -37,7 +34,6 @@ interface ProjectorManager
     /**
      * Stop projection by stream name
      *
-     * @param  string  $streamName
      *
      * @throws ProjectionNotFound
      */
@@ -46,7 +42,6 @@ interface ProjectorManager
     /**
      * Stop projection by stream name
      *
-     * @param  string  $streamName
      *
      * @throws ProjectionNotFound
      */
@@ -55,8 +50,6 @@ interface ProjectorManager
     /**
      * Delete projection by name and with or without his emitted events
      *
-     * @param  string  $streamName
-     * @param  bool  $withEmittedEvents
      *
      * @throws ProjectionNotFound
      */
@@ -91,23 +84,17 @@ interface ProjectorManager
      * Filter projection by stream name(s)
      * it return streams order by ascendant name
      *
-     * @param  string  ...$names
      * @return array<string>
      */
     public function filterNamesOf(string ...$names): array;
 
     /**
      * Check if stream exists
-     *
-     * @param  string  $name
-     * @return bool
      */
     public function exists(string $name): bool;
 
     /**
      * Get the current query scope
-     *
-     * @return ProjectionQueryScope
      */
     public function queryScope(): ProjectionQueryScope;
 }

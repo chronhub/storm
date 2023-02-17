@@ -8,23 +8,16 @@ interface Projector
 {
     /**
      * Run projection
-     *
-     * @param  bool  $inBackground
-     * @return void
      */
     public function run(bool $inBackground): void;
 
     /**
      * Stop projection
-     *
-     * @return void
      */
     public function stop(): void;
 
     /**
      * Reset projection
-     *
-     * @return void
      */
     public function reset(): void;
 

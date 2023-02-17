@@ -12,57 +12,41 @@ trait ProvideProjectorOption
 {
     /**
      * Dispatch pcntl async signal
-     *
-     * @var bool
      */
     public readonly bool $dispatchSignal;
 
     /**
      * Number of stream to keep in cache
-     *
-     * @var int
      */
     public readonly int $streamCacheSize;
 
     /**
      * Lock timeout in milliseconds
-     *
-     * @var int
      */
     public readonly int $lockTimeoutMs;
 
     /**
      * Sleep before update lock in milliseconds
-     *
-     * @var int
      */
     public readonly int $sleepBeforeUpdateLock;
 
     /**
      * Number of event to keep during process before persisting
-     *
-     * @var int
      */
     public readonly int $persistBlockSize;
 
     /**
      * Update lock Threshold
-     *
-     * @var int
      */
     public readonly int $updateLockThreshold;
 
     /**
      * Number of retries in milliseconds to fill a gap detected
-     *
-     * @var array
      */
     public readonly array $retriesMs;
 
     /**
      * Detection windows as a string interval
-     *
-     * @var string|null
      */
     public readonly string|null $detectionWindows;
 
@@ -120,10 +104,6 @@ trait ProvideProjectorOption
         ];
     }
 
-    /**
-     * @param  array|string  $retriesMs
-     * @return void
-     */
     protected function setUpRetriesMs(array|string $retriesMs): void
     {
         if (is_array($retriesMs)) {

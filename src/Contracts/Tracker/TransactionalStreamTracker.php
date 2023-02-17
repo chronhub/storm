@@ -8,9 +8,6 @@ interface TransactionalStreamTracker extends StreamTracker
 {
     /**
      * Create new transactional stream tracker story
-     *
-     * @param  string  $eventName
-     * @return TransactionalStreamStory
      */
     public function newStory(string $eventName): TransactionalStreamStory;
 }

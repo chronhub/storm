@@ -18,8 +18,6 @@ class ReportCommand implements Reporter
 
     /**
      * Handle one message at a time
-     *
-     * @var bool
      */
     protected bool $isDispatching = false;
 

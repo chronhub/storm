@@ -41,9 +41,7 @@ final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler
     /**
      * Store decorated stream events
      *
-     * @param  string  $streamName
      * @param  Generator<DomainEvent>|Collection<DomainEvent>  $events
-     * @return void
      */
     private function storeStreamEvents(string $streamName, Generator|Collection $events): void
     {

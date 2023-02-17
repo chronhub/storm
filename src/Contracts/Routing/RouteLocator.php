@@ -14,8 +14,6 @@ interface RouteLocator
     /**
      * Return array of message handler if route matched
      *
-     * @param  Message  $message
-     * @return Collection
      *
      * @throws RouteNotFound
      * @throws RouteHandlerNotSupported
@@ -25,8 +23,6 @@ interface RouteLocator
     /**
      * Return route queue options if set
      *
-     * @param  Message  $message
-     * @return array|null
      *
      * @throws RouteNotFound
      */

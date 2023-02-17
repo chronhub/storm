@@ -10,9 +10,6 @@ interface MessageFactory
 {
     /**
      * Create a valid message instance
-     *
-     * @param  object|array  $message
-     * @return Message
      */
     public function __invoke(object|array $message): Message;
 }
