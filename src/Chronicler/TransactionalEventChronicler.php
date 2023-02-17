@@ -13,10 +13,10 @@ final readonly class TransactionalEventChronicler extends EventChronicler implem
 {
     public function __construct(TransactionalChronicler $chronicler, TransactionalStreamTracker $tracker)
     {
+        ProvideEvents::withTransactionalEvent($chronicler, $tracker);
+
         parent::__construct($chronicler, $tracker);
 
-        /** @phpstan-ignore-next-line */
-        ProvideEvents::withTransactionalEvent($this->chronicler, $this->tracker);
     }
 
     public function beginTransaction(): void

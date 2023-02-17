@@ -47,7 +47,9 @@ trait InteractWithAggregateRepository
     }
 
     /**
-     * Store stream conditionally of strategy used
+     * @param array{DomainEvent} $releasedEvents
+     *
+     * @throws Throwable
      */
     protected function storeStream(DomainEvent $firstEvent, AggregateRoot $aggregateRoot, array $releasedEvents): void
     {
@@ -67,9 +69,7 @@ trait InteractWithAggregateRepository
     }
 
     /**
-     * Release and decorate recorded domain events
-     *
-     * @return array<DomainEvent>
+     * @return array{DomainEvent}
      */
     protected function releaseDecoratedEvents(AggregateRoot $aggregateRoot): array
     {

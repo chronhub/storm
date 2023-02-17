@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Aggregate;
 
+use Psr\Container\ContainerInterface;
+
 interface AggregateRepositoryManager
 {
     /**
@@ -13,6 +15,8 @@ interface AggregateRepositoryManager
 
     /**
      * Extends the aggregate repository manager with a given stream name and callable
+     *
+     * @param callable{ContainerInterface, "name": string, array} $aggregateRepository
      */
     public function extends(string $streamName, callable $aggregateRepository): void;
 }

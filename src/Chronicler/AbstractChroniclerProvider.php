@@ -19,6 +19,8 @@ use function is_string;
 
 abstract class AbstractChroniclerProvider implements ChroniclerProvider
 {
+    // todo factory
+
     protected ContainerInterface $container;
 
     public function __construct(Closure $app)

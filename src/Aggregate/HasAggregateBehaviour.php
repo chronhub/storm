@@ -12,14 +12,9 @@ use function explode;
 
 trait HasAggregateBehaviour
 {
-    /**
-     * Aggregate root version
-     */
     private int $version = 0;
 
     /**
-     * Recorded domain events
-     *
      * @var array<DomainEvent>
      */
     private array $recordedEvents = [];
@@ -45,9 +40,6 @@ trait HasAggregateBehaviour
         $this->recordedEvents[] = $event;
     }
 
-    /**
-     * Apply domain events to aggregate root
-     */
     protected function apply(DomainEvent $event): void
     {
         $parts = explode('\\', $event::class);

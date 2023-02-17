@@ -9,9 +9,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface TransactionalInMemoryChronicler extends InMemoryChronicler
 {
     /**
-     * Return pending events and clear cache
-     *
-     * @return array<DomainEvent>
+     * @return array{DomainEvent}
      */
     public function pullUnpublishedEvents(): array;
 }

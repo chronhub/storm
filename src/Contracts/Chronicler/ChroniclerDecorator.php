@@ -6,8 +6,5 @@ namespace Chronhub\Storm\Contracts\Chronicler;
 
 interface ChroniclerDecorator extends Chronicler
 {
-    /**
-     * Get the underlying chronicler instance
-     */
     public function innerChronicler(): Chronicler;
 }

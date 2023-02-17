@@ -13,9 +13,6 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
 trait ReconstituteAggregate
 {
-    /**
-     * Reconstitute aggregate root from his aggregate id and conditionally from a query filter
-     */
     protected function reconstituteAggregateRoot(AggregateIdentity $aggregateId, ?QueryFilter $queryFilter = null): ?AggregateRoot
     {
         try {
@@ -35,9 +32,7 @@ trait ReconstituteAggregate
     }
 
     /**
-     * Retrieve aggregate root events history
-     *
-     * @return Generator<DomainEvent>
+     * @return Generator{DomainEvent}
      *
      * @throws StreamNotFound
      */

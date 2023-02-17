@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Chronicler\InMemory;
 use Generator;
 use Chronhub\Storm\Stream\Stream;
 use Illuminate\Support\Collection;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use function iterator_to_array;
@@ -24,7 +23,7 @@ final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler
             throw StreamAlreadyExists::withStreamName($streamName);
         }
 
-        $this->storeStreamEvents($streamName->__toString(), $stream->events());
+        $this->storeStreamEvents($streamName->toString(), $stream->events());
     }
 
     public function amend(Stream $stream): void
@@ -35,14 +34,9 @@ final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler
             throw StreamNotFound::withStreamName($streamName);
         }
 
-        $this->storeStreamEvents($streamName->__toString(), $stream->events());
+        $this->storeStreamEvents($streamName->toString(), $stream->events());
     }
 
-    /**
-     * Store decorated stream events
-     *
-     * @param  Generator<DomainEvent>|Collection<DomainEvent>  $events
-     */
     private function storeStreamEvents(string $streamName, Generator|Collection $events): void
     {
         $decoratedEvents = $this->decorateEventWithInternalPosition(iterator_to_array($events));

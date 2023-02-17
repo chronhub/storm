@@ -151,9 +151,6 @@ final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler i
         return $this->unpublishedEvents;
     }
 
-    /**
-     * @param  Generator<DomainEvent>|Collection<DomainEvent>  $events
-     */
     private function storeStreamEvents(string $streamName, Generator|Collection $events): void
     {
         if (! $this->inTransaction) {
