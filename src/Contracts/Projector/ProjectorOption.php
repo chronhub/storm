@@ -8,21 +8,21 @@ use JsonSerializable;
 
 interface ProjectorOption extends JsonSerializable
 {
-    public const DISPATCH_SIGNAL = 'dispatch_signal';
+    public const DISPATCH_SIGNAL = 'dispatchSignal';
 
-    public const STREAM_CACHE_SIZE = 'stream_cache_size';
+    public const STREAM_CACHE_SIZE = 'streamCacheSize';
 
-    public const LOCK_TIMEOUT_MS = 'lock_timeout_ms';
+    public const LOCK_TIMEOUT_MS = 'lockTimeoutMs';
 
-    public const SLEEP_BEFORE_UPDATE_LOCK = 'sleep_before_update_lock';
+    public const SLEEP_BEFORE_UPDATE_LOCK = 'sleepBeforeUpdateLock';
 
-    public const UPDATE_LOCK_THRESHOLD = 'update_lock_threshold';
+    public const UPDATE_LOCK_THRESHOLD = 'updateLockThreshold';
 
-    public const PERSIST_BLOCK_SIZE = 'persist_block_size';
+    public const PERSIST_BLOCK_SIZE = 'persistBlockSize';
 
-    public const RETRIES_MS = 'retries_ms';
+    public const RETRIES_MS = 'retriesMs';
 
-    public const DETECTION_WINDOWS = 'detection_windows';
+    public const DETECTION_WINDOWS = 'detectionWindows';
 
     public function getDispatchSignal(): bool;
 

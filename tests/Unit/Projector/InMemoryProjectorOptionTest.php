@@ -34,14 +34,14 @@ final class InMemoryProjectorOptionTest extends UnitTestCase
         $options = new InMemoryProjectorOption();
 
         $this->assertEquals([
-            'dispatch_signal' => false,
-            'stream_cache_size' => 100,
-            'persist_block_size' => 1,
-            'lock_timeout_ms' => 0,
-            'sleep_before_update_lock' => 100,
-            'update_lock_threshold' => 0,
-            'retries_ms' => [],
-            'detection_windows' => null,
+            'dispatchSignal' => false,
+            'streamCacheSize' => 100,
+            'persistBlockSize' => 1,
+            'lockTimeoutMs' => 0,
+            'sleepBeforeUpdateLock' => 100,
+            'updateLockThreshold' => 0,
+            'retriesMs' => [],
+            'detectionWindows' => null,
         ], $options->jsonSerialize());
     }
 }

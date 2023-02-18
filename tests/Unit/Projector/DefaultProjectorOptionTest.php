@@ -63,14 +63,14 @@ final class DefaultProjectorOptionTest extends UnitTestCase
         $options = new DefaultProjectorOption();
 
         $this->assertEquals([
-            'dispatch_signal' => false,
-            'stream_cache_size' => 1000,
-            'persist_block_size' => 1000,
-            'lock_timeout_ms' => 1000,
-            'sleep_before_update_lock' => 100000,
-            'update_lock_threshold' => 100000,
-            'retries_ms' => [0, 5, 50, 100, 150, 200, 250],
-            'detection_windows' => null,
+            'dispatchSignal' => false,
+            'streamCacheSize' => 1000,
+            'persistBlockSize' => 1000,
+            'lockTimeoutMs' => 1000,
+            'sleepBeforeUpdateLock' => 100000,
+            'updateLockThreshold' => 100000,
+            'retriesMs' => [0, 5, 50, 100, 150, 200, 250],
+            'detectionWindows' => null,
         ], $options->jsonSerialize());
     }
 }
