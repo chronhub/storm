@@ -13,6 +13,7 @@ use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Serializer\ConvertStreamEvent;
 use Chronhub\Storm\Serializer\DomainEventSerializer;
+use function json_encode;
 
 final class ConvertDomainEventTest extends UnitTestCase
 {
@@ -55,8 +56,8 @@ final class ConvertDomainEventTest extends UnitTestCase
             'aggregate_id' => $this->headers[EventHeader::AGGREGATE_ID],
             'aggregate_type' => $this->headers[EventHeader::AGGREGATE_TYPE],
             'aggregate_version' => $this->headers[EventHeader::AGGREGATE_VERSION],
-            'headers' => $this->headers,
-            'content' => ['name' => 'steph bug'],
+            'headers' => json_encode($this->headers),
+            'content' => json_encode(['name' => 'steph bug']),
             'created_at' => $this->headers[Header::EVENT_TIME],
         ];
 
@@ -81,8 +82,8 @@ final class ConvertDomainEventTest extends UnitTestCase
             'aggregate_type' => $this->headers[EventHeader::AGGREGATE_TYPE],
             'aggregate_version' => $this->headers[EventHeader::AGGREGATE_VERSION],
             'no' => $this->headers[EventHeader::AGGREGATE_VERSION],
-            'headers' => $this->headers,
-            'content' => ['name' => 'steph bug'],
+            'headers' => json_encode($this->headers),
+            'content' => json_encode(['name' => 'steph bug']),
             'created_at' => $this->headers[Header::EVENT_TIME],
         ];
 
