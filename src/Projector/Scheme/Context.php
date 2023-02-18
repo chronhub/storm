@@ -20,7 +20,10 @@ use function is_array;
  */
 class Context
 {
-    protected null|array|Closure $eventHandlers = null;
+    /**
+     * @var array|callable|null
+     */
+    protected $eventHandlers = null;
 
     protected ?QueryFilter $queryFilter = null;
 
@@ -131,7 +134,7 @@ class Context
         return $this;
     }
 
-    public function whenAny(Closure $eventHandler): self
+    public function whenAny(callable $eventHandler): self
     {
         $this->assertEventHandlersNotSet();
 
@@ -142,11 +145,11 @@ class Context
 
     public function eventHandlers(): callable
     {
-        if ($this->eventHandlers instanceof Closure) {
-            return new ProcessClosureEvent($this->eventHandlers);
+        if (is_array($this->eventHandlers)) {
+            return new ProcessArrayEvent($this->eventHandlers);
         }
 
-        return new ProcessArrayEvent($this->eventHandlers);
+        return new ProcessClosureEvent($this->eventHandlers);
     }
 
     public function queries(): array

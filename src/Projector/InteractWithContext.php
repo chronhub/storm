@@ -44,7 +44,7 @@ trait InteractWithContext
         return $this;
     }
 
-    public function whenAny(Closure $eventsHandler): static
+    public function whenAny(callable $eventsHandler): static
     {
         $this->context->whenAny($eventsHandler);
 
