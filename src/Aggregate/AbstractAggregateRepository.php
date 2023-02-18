@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRepository;
-use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Stream\StreamProducer;
+use Chronhub\Storm\Contracts\Aggregate\AggregateType;
+use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRepository;
 
 abstract readonly class AbstractAggregateRepository implements AggregateRepository
 {
@@ -18,8 +18,8 @@ abstract readonly class AbstractAggregateRepository implements AggregateReposito
 
     public function __construct(
         public Chronicler $chronicler,
-        public StreamProducer $producer,
-        public AggregateCache $cache,
+        public StreamProducer $streamProducer,
+        public AggregateCache $aggregateCache,
         protected AggregateType $aggregateType,
         protected MessageDecorator $messageDecorator
     ) {

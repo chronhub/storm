@@ -18,14 +18,14 @@ trait InteractWithAggregateRepository
 {
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {
-        if ($this->cache->has($aggregateId)) {
-            return $this->cache->get($aggregateId);
+        if ($this->aggregateCache->has($aggregateId)) {
+            return $this->aggregateCache->get($aggregateId);
         }
 
         $aggregateRoot = $this->reconstituteAggregateRoot($aggregateId);
 
         if ($aggregateRoot) {
-            $this->cache->put($aggregateRoot);
+            $this->aggregateCache->put($aggregateRoot);
         }
 
         return $aggregateRoot;
@@ -53,16 +53,16 @@ trait InteractWithAggregateRepository
      */
     protected function storeStream(DomainEvent $firstEvent, AggregateRoot $aggregateRoot, array $releasedEvents): void
     {
-        $stream = $this->producer->toStream($aggregateRoot->aggregateId(), $releasedEvents);
+        $stream = $this->streamProducer->toStream($aggregateRoot->aggregateId(), $releasedEvents);
 
         try {
-            $this->producer->isFirstCommit($firstEvent)
+            $this->streamProducer->isFirstCommit($firstEvent)
                 ? $this->chronicler->firstCommit($stream)
                 : $this->chronicler->amend($stream);
 
-            $this->cache->put($aggregateRoot);
+            $this->aggregateCache->put($aggregateRoot);
         } catch (Throwable $exception) {
-            $this->cache->forget($aggregateRoot->aggregateId());
+            $this->aggregateCache->forget($aggregateRoot->aggregateId());
 
             throw $exception;
         }

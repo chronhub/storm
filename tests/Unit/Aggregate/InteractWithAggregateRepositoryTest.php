@@ -63,8 +63,8 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
         $stub = $this->aggregateRepositoryStub(null);
 
         $this->assertEquals($this->chronicler->reveal(), $stub->chronicler);
-        $this->assertEquals($this->aggregateCache->reveal(), $stub->cache);
-        $this->assertEquals($this->streamProducer->reveal(), $stub->producer);
+        $this->assertEquals($this->aggregateCache->reveal(), $stub->aggregateCache);
+        $this->assertEquals($this->streamProducer->reveal(), $stub->streamProducer);
     }
 
     /**

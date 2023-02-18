@@ -47,7 +47,7 @@ final class AggregateRepositoryTest extends ProphecyTestCase
         );
 
         $this->assertSame($this->chronicler->reveal(), $repository->chronicler);
-        $this->assertSame($this->streamProducer->reveal(), $repository->producer);
-        $this->assertSame($this->aggregateCache->reveal(), $repository->cache);
+        $this->assertSame($this->streamProducer->reveal(), $repository->streamProducer);
+        $this->assertSame($this->aggregateCache->reveal(), $repository->aggregateCache);
     }
 }

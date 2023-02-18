@@ -19,8 +19,8 @@ final class InteractWithAggregateRepositoryStub
     private ?AggregateRootStub $someAggregateRoot = null;
 
     public function __construct(public readonly Chronicler $chronicler,
-                                public readonly StreamProducer $producer,
-                                public readonly AggregateCache $cache,
+                                public readonly StreamProducer $streamProducer,
+                                public readonly AggregateCache $aggregateCache,
                                 protected readonly AggregateType $aggregateType,
                                 protected readonly MessageDecorator $messageDecorator)
     {
