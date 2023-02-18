@@ -8,8 +8,5 @@ use Symfony\Component\Clock\ClockInterface;
 
 interface SystemClock extends ClockInterface
 {
-    /**
-     * Return format
-     */
     public function getFormat(): string;
 }

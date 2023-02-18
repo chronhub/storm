@@ -8,8 +8,5 @@ use Chronhub\Storm\Message\Message;
 
 interface MessageQueue
 {
-    /**
-     * Queue message to his dispatcher
-     */
     public function toQueue(Message $message): void;
 }

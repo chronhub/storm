@@ -27,7 +27,7 @@ interface ReadOnlyChronicler
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator;
 
     /**
-     * @return array<StreamName>
+     * @return array{StreamName}
      */
     public function filterStreamNames(StreamName ...$streamNames): array;
 

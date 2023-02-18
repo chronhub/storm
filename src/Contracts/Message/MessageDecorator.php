@@ -8,8 +8,5 @@ use Chronhub\Storm\Message\Message;
 
 interface MessageDecorator
 {
-    /**
-     * Decorate message headers
-     */
     public function decorate(Message $message): Message;
 }

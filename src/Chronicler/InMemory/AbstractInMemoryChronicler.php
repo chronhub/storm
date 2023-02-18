@@ -79,7 +79,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
         return $this->eventStreamProvider->hasRealStreamName($streamName->name);
     }
 
-    public function streams(): Collection
+    public function getStreams(): Collection
     {
         return $this->streams;
     }

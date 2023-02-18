@@ -8,8 +8,5 @@ use Chronhub\Storm\Message\Message;
 
 interface MessageProducer
 {
-    /**
-     * Produce message sync or async
-     */
     public function produce(Message $message): Message;
 }

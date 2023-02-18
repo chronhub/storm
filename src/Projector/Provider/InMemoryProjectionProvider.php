@@ -122,6 +122,8 @@ final class InMemoryProjectionProvider implements ProjectionProvider
             return true;
         }
 
+        // checkMe bring System clock
+
         $now = new DateTimeImmutable($now, new DateTimeZone('UTC'));
 
         return $now > new DateTimeImmutable($projection->lockedUntil(), new DateTimeZone('UTC'));

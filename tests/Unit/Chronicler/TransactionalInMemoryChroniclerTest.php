@@ -45,7 +45,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
     public function it_can_be_constructed(): void
     {
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
-        $this->assertEmpty($this->chronicler->streams());
+        $this->assertEmpty($this->chronicler->getStreams());
         $this->assertEmpty($this->chronicler->cachedStreams());
         $this->assertFalse($this->chronicler->inTransaction());
     }
@@ -55,7 +55,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
      */
     public function it_first_commit_in_transaction(): void
     {
-        $this->assertEmpty($this->chronicler->streams());
+        $this->assertEmpty($this->chronicler->getStreams());
         $this->assertEmpty($this->chronicler->cachedStreams());
         $this->assertEmpty($this->chronicler->unpublishedEvents());
 
@@ -69,13 +69,13 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->firstCommit(new Stream($this->streamName, $events));
 
-        $this->assertCount(0, $this->chronicler->streams());
+        $this->assertCount(0, $this->chronicler->getStreams());
         $this->assertCount(1, $this->chronicler->cachedStreams());
         $this->assertCount(0, $this->chronicler->unpublishedEvents());
 
         $this->chronicler->commitTransaction();
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
         $this->assertCount(1, $this->chronicler->unpublishedEvents());
 
@@ -84,7 +84,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream(new StreamName('transaction')));
 
         $this->chronicler->commitTransaction();
-        $this->assertCount(2, $this->chronicler->streams());
+        $this->assertCount(2, $this->chronicler->getStreams());
 
         $this->assertFalse($this->chronicler->inTransaction());
     }
@@ -120,7 +120,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
      */
     public function it_persist_in_transaction(): void
     {
-        $this->assertEmpty($this->chronicler->streams());
+        $this->assertEmpty($this->chronicler->getStreams());
         $this->assertEmpty($this->chronicler->cachedStreams());
         $this->assertEmpty($this->chronicler->unpublishedEvents());
 
@@ -135,7 +135,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream($this->streamName, $events));
         $this->chronicler->commitTransaction();
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
         $this->assertCount(1, $this->chronicler->unpublishedEvents());
 
@@ -145,13 +145,13 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->amend(new Stream($this->streamName, $amendEvents));
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(1, $this->chronicler->cachedStreams());
         $this->assertCount(1, $this->chronicler->unpublishedEvents());
 
         $this->chronicler->commitTransaction();
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
         $this->assertCount(2, $this->chronicler->unpublishedEvents());
 
@@ -169,7 +169,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->beginTransaction();
 
-        $this->assertCount(0, $this->chronicler->streams());
+        $this->assertCount(0, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
 
         $this->chronicler->amend(new Stream($this->streamName));
@@ -204,7 +204,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->commitTransaction();
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
         $this->assertCount(10, $this->chronicler->unpublishedEvents());
 
@@ -221,7 +221,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
     public function it_handle_job_fully_transactional(): void
     {
         $result = $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): int {
-            $this->assertEmpty($chronicler->streams());
+            $this->assertEmpty($chronicler->getStreams());
             $this->assertEmpty($chronicler->cachedStreams());
             $this->assertEmpty($chronicler->unpublishedEvents());
 
@@ -234,9 +234,9 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
             return 42;
         });
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertFalse($this->chronicler->inTransaction());
         $this->assertEquals(42, $result);
     }
@@ -256,13 +256,13 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): never {
             $chronicler->firstCommit(new Stream(new StreamName('transaction')));
 
-            $this->assertCount(1, $this->chronicler->streams());
+            $this->assertCount(1, $this->chronicler->getStreams());
             $this->assertCount(1, $this->chronicler->cachedStreams());
 
             throw new RuntimeException('something went wrong');
         });
 
-        $this->assertCount(1, $this->chronicler->streams());
+        $this->assertCount(1, $this->chronicler->getStreams());
         $this->assertCount(0, $this->chronicler->cachedStreams());
         $this->assertFalse($this->chronicler->inTransaction());
     }

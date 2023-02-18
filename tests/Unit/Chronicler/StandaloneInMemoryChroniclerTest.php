@@ -55,7 +55,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
     public function it_can_be_constructed(): void
     {
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
-        $this->assertEmpty($this->chronicler->streams());
+        $this->assertEmpty($this->chronicler->getStreams());
     }
 
     /**
@@ -94,8 +94,8 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->firstCommit($stream);
 
-        $this->assertEquals(['operation' => $events], $this->chronicler->streams()->toArray());
-        $this->assertCount(10, $this->chronicler->streams()->toArray()['operation']);
+        $this->assertEquals(['operation' => $events], $this->chronicler->getStreams()->toArray());
+        $this->assertCount(10, $this->chronicler->getStreams()->toArray()['operation']);
     }
 
     /**
@@ -109,7 +109,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->firstCommit($stream);
 
-        $this->assertEquals(['operation' => $events], $this->chronicler->streams()->toArray());
+        $this->assertEquals(['operation' => $events], $this->chronicler->getStreams()->toArray());
     }
 
     /**
@@ -127,7 +127,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 
         $this->chronicler->firstCommit($stream);
 
-        $pastEvent = $this->chronicler->streams()->first()[0];
+        $pastEvent = $this->chronicler->getStreams()->first()[0];
 
         $this->assertArrayHasKey(EventHeader::INTERNAL_POSITION, $pastEvent->headers());
         $this->assertEquals(12, $pastEvent->header(EventHeader::INTERNAL_POSITION));
@@ -159,16 +159,16 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit($stream);
 
         $this->assertTrue($this->chronicler->hasStream($this->streamName));
-        $this->assertEquals(['operation' => []], $this->chronicler->streams()->toArray());
+        $this->assertEquals(['operation' => []], $this->chronicler->getStreams()->toArray());
 
         $this->chronicler->amend(new Stream($this->streamName, $events));
-        $this->assertEquals(['operation' => $events], $this->chronicler->streams()->toArray());
+        $this->assertEquals(['operation' => $events], $this->chronicler->getStreams()->toArray());
 
         $this->chronicler->delete($this->streamName);
 
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
 
-        $this->assertTrue($this->chronicler->streams()->isEmpty());
+        $this->assertTrue($this->chronicler->getStreams()->isEmpty());
     }
 
     /**

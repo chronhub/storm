@@ -11,9 +11,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface InMemoryChronicler extends Chronicler
 {
     /**
-     * Return the streams collection
-     *
      * @return Collection{StreamName, array<DomainEvent>}
      */
-    public function streams(): Collection;
+    public function getStreams(): Collection;
 }
