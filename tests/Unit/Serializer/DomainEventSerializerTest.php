@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
-use stdClass;
 use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
@@ -37,11 +35,9 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        $message = new Message($event);
-
         $serializer = new DomainEventSerializer();
 
-        $payload = $serializer->serializeMessage($message);
+        $payload = $serializer->serializeEvent($event);
 
         $this->assertArrayHasKey('headers', $payload);
         $this->assertArrayHasKey('content', $payload);
@@ -61,15 +57,14 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $now = $datetime->now();
         $uid = V4UniqueIdStub::create();
 
-        $event = SomeEvent::fromContent(['name' => 'steph bug']);
-
-        $message = new Message($event, [
-            Header::EVENT_ID => $uid,
-            Header::EVENT_TIME => $now,
-            EventHeader::AGGREGATE_ID => $aggregateId->toString(),
-            EventHeader::AGGREGATE_ID_TYPE => $aggregateId::class,
-            EventHeader::AGGREGATE_TYPE => AggregateRootStub::class,
-        ]);
+        $event = SomeEvent::fromContent(['name' => 'steph bug'])
+            ->withHeaders([
+                Header::EVENT_ID => $uid,
+                Header::EVENT_TIME => $now,
+                EventHeader::AGGREGATE_ID => $aggregateId->toString(),
+                EventHeader::AGGREGATE_ID_TYPE => $aggregateId::class,
+                EventHeader::AGGREGATE_TYPE => AggregateRootStub::class,
+            ]);
 
         $serializer = new DomainEventSerializer(null,
             new DateTimeNormalizer([
@@ -79,7 +74,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
             new UidNormalizer()
         );
 
-        $payload = $serializer->serializeMessage($message);
+        $payload = $serializer->serializeEvent($event);
 
         $this->assertArrayHasKey('headers', $payload);
         $this->assertArrayHasKey('content', $payload);
@@ -91,25 +86,13 @@ final class DomainEventSerializerTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_raise_exception_if_event_is_not_an_instance_of_domain_event_during_serialization(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Domain event to be serialized');
-
-        (new DomainEventSerializer())->serializeMessage(new Message(new stdClass()));
-    }
-
-    /**
-     * @test
-     */
     public function it_raise_exception_if_event_header_aggregate_id_is_missing_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->expectExceptionMessage('Missing aggregate id and/or aggregate id type headers');
 
-        (new DomainEventSerializer())->serializeMessage(new Message(SomeEvent::fromContent([])));
+        (new DomainEventSerializer())->serializeEvent(SomeEvent::fromContent([]));
     }
 
     /**
@@ -127,7 +110,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        (new DomainEventSerializer())->serializeMessage(new Message($event));
+        (new DomainEventSerializer())->serializeEvent($event);
     }
 
     /**
@@ -148,7 +131,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        (new DomainEventSerializer())->serializeMessage(new Message($event));
+        (new DomainEventSerializer())->serializeEvent($event);
     }
 
     /**

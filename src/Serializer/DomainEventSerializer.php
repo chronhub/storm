@@ -6,11 +6,12 @@ namespace Chronhub\Storm\Serializer;
 
 use Generator;
 use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
@@ -26,18 +27,20 @@ final class DomainEventSerializer implements StreamEventSerializer
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {
         $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [new JsonEncoder()]);
+
+        $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION;
+
+        $encoder = new JsonEncoder(
+            new JsonEncode([JsonEncode::OPTIONS => $jsonFlags]),
+            new JsonDecode([JsonDecode::OPTIONS => JSON_BIGINT_AS_STRING])
+        );
+
+        $this->serializer = new Serializer($normalizers, [$encoder]);
     }
 
-    public function serializeMessage(Message $message): array
+    public function serializeEvent(DomainEvent $event): array
     {
-        $event = $message->event();
-
-        if (! $event instanceof DomainEvent) {
-            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Domain event to be serialized');
-        }
-
-        $headers = $message->headers();
+        $headers = $event->headers();
 
         if (! isset($headers[EventHeader::AGGREGATE_ID], $headers[EventHeader::AGGREGATE_ID_TYPE])) {
             throw new InvalidArgumentException('Missing aggregate id and/or aggregate id type headers');
@@ -80,5 +83,10 @@ final class DomainEventSerializer implements StreamEventSerializer
         }
 
         yield $event->withHeaders($headers);
+    }
+
+    public function encodePayload(mixed $data): string
+    {
+        return $this->serializer->encode($data, 'json');
     }
 }

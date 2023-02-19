@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Serializer;
 
 use stdClass;
-use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\EventHeader;
@@ -20,17 +19,16 @@ final readonly class ConvertStreamEvent implements StreamEventConverter
 
     public function toArray(DomainEvent $event, bool $isAutoIncremented): array
     {
-        $data = $this->serializer->serializeMessage(new Message($event));
+        $data = $this->serializer->serializeEvent($event);
 
-        //fixMe json encode
         $normalizedEvent = [
             'event_id' => $data['headers'][Header::EVENT_ID],
             'event_type' => $data['headers'][Header::EVENT_TYPE],
             'aggregate_id' => $data['headers'][EventHeader::AGGREGATE_ID],
             'aggregate_type' => $data['headers'][EventHeader::AGGREGATE_TYPE],
             'aggregate_version' => $data['headers'][EventHeader::AGGREGATE_VERSION],
-            'headers' => json_encode($data['headers'], 512, JSON_THROW_ON_ERROR),
-            'content' => json_encode($data['content'], 512, JSON_THROW_ON_ERROR),
+            'headers' => $this->serializer->encodePayload($data['headers']),
+            'content' => $this->serializer->encodePayload($data['content']),
             'created_at' => $data['headers'][Header::EVENT_TIME],
         ];
 

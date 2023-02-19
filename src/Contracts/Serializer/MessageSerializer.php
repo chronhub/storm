@@ -10,16 +10,12 @@ use Chronhub\Storm\Message\Message;
 interface MessageSerializer
 {
     /**
-     * Serialize Message
-     *
      * @return array{'headers':array<string, mixed>, 'content':array<string, mixed>}
      */
     public function serializeMessage(Message $message): array;
 
     /**
-     * Unserialize content of message
-     *
-     * @return Generator<object>
+     * @return Generator{object}
      */
     public function unserializeContent(array $payload): Generator;
 }

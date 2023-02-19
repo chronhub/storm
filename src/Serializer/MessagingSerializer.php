@@ -9,6 +9,8 @@ use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
@@ -23,7 +25,15 @@ final class MessagingSerializer implements MessageSerializer
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {
         $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [new JsonEncoder()]);
+
+        $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION;
+
+        $encoder = new JsonEncoder(
+            new JsonEncode([JsonEncode::OPTIONS => $jsonFlags]),
+            new JsonDecode([JsonDecode::OPTIONS => JSON_BIGINT_AS_STRING])
+        );
+
+        $this->serializer = new Serializer($normalizers, [$encoder]);
     }
 
     public function serializeMessage(Message $message): array

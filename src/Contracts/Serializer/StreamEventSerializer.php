@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Serializer;
 
-interface StreamEventSerializer extends MessageSerializer
+use Generator;
+use Chronhub\Storm\Reporter\DomainEvent;
+
+interface StreamEventSerializer
 {
+    public function serializeEvent(DomainEvent $event): array;
+
+    /**
+     * @return Generator{object}
+     */
+    public function unserializeContent(array $payload): Generator;
+
+    public function encodePayload(mixed $data): string;
 }
