@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\PersistentState;
-use function json_encode;
 
 final class ProjectionState implements PersistentState
 {
@@ -24,10 +23,5 @@ final class ProjectionState implements PersistentState
     public function reset(): void
     {
         $this->state = [];
-    }
-
-    public function jsonSerialize(): string
-    {
-        return json_encode($this->state, JSON_FORCE_OBJECT, JSON_THROW_ON_ERROR);
     }
 }

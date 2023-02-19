@@ -187,29 +187,6 @@ final class StreamPositionTest extends ProphecyTestCase
         $this->assertEquals([], $streamPosition->all());
     }
 
-    /**
-     * @test
-     */
-    public function it_convert_to_json(): void
-    {
-        $streamPosition = new StreamPosition($this->eventStreamProvider->reveal());
-
-        $streamPosition->watch(['names' => ['account', 'customer']]);
-
-        $this->assertEquals('{"account":0,"customer":0}', $streamPosition->jsonSerialize());
-    }
-
-    /**
-     * @test
-     */
-    public function it_convert_to_json_object_from_empty_array(): void
-    {
-        $streamPosition = new StreamPosition($this->eventStreamProvider->reveal());
-
-        $this->assertEmpty($streamPosition->all());
-        $this->assertEquals('{}', $streamPosition->jsonSerialize());
-    }
-
     public function provideInvalidStreamsNames(): Generator
     {
         yield [[]];

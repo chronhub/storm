@@ -155,12 +155,11 @@ final class StandaloneStoreTest extends ProphecyTestCase
     {
         $this->projectorLock->tryUpdate()->willReturn(true)->shouldBeCalledOnce();
         $this->projectorLock->currentLock()->willReturn('current_lock')->shouldBeCalledOnce();
-
-        $this->position->jsonSerialize()->willReturn('{"customer": 5}')->shouldBeCalledOnce();
+        $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider->updateProjection($this->streamName, [
             'locked_until' => 'current_lock',
-            'position' => '{"customer": 5}',
+            'position' => '{"customer":5}',
         ])->willReturn($updated)->shouldBeCalledOnce();
 
         $context = $this->newContext();
@@ -224,9 +223,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->runner->stop(false);
         $context->status = ProjectionStatus::RUNNING;
 
-        $this->position->jsonSerialize()->willReturn('{"customer":5}')->shouldBeCalledOnce();
         $context->state->put(['count' => 5]);
         $this->projectorLock->refresh()->willReturn('time_with_milliseconds')->shouldBeCalledOnce();
+        $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
         $this->projectionProvider->updateProjection($this->streamName, Argument::type('array'));
 
         $this->projectionProvider->updateProjection($this->streamName, [
@@ -249,9 +248,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->runner->stop(false);
         $context->status = ProjectionStatus::RUNNING;
 
-        $this->position->jsonSerialize()->willReturn('{"customer":5}')->shouldBeCalledOnce();
         $context->state->put(['count' => 5]);
         $this->projectorLock->refresh()->willReturn('time_with_milliseconds')->shouldBeCalledOnce();
+        $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
         $this->projectionProvider->updateProjection($this->streamName, Argument::type('array'));
 
         $this->projectionProvider->updateProjection($this->streamName, [
@@ -322,7 +321,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->status = ProjectionStatus::RESETTING;
 
         $this->position->reset()->shouldBeCalledOnce();
-        $this->position->jsonSerialize()->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider->updateProjection($this->streamName, [
             'position' => '{"customer":5}',
@@ -347,7 +346,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->status = ProjectionStatus::RESETTING;
 
         $this->position->reset()->shouldBeCalledOnce();
-        $this->position->jsonSerialize()->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider->updateProjection($this->streamName, [
             'position' => '{"customer":5}',
@@ -399,7 +398,6 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->initialize(fn (): array => ['count' => 0]);
 
         $this->position->reset()->shouldNotBeCalled();
-        $this->position->jsonSerialize()->shouldNotBeCalled();
 
         $this->projectionProvider->deleteProjection($this->streamName)->willReturn(false)->shouldBeCalledOnce();
 

@@ -6,21 +6,24 @@ namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Projector\Store;
+use Chronhub\Storm\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use function count;
 use function is_array;
-use function json_decode;
 
-final readonly class StandaloneStore implements Store
+final class StandaloneStore implements Store
 {
+    private JsonSerializer $jsonEncoder;
+
     public function __construct(public Context $context,
                                 public ProjectionProvider $projectionProvider,
                                 public RepositoryLock $repositoryLock,
                                 public string $streamName)
     {
+        $this->jsonEncoder = new JsonSerializer();
     }
 
     public function create(): bool
@@ -36,9 +39,9 @@ final readonly class StandaloneStore implements Store
             throw ProjectionNotFound::withName($this->streamName);
         }
 
-        $this->context->streamPosition->discover(json_decode($projection->position(), true, 512, JSON_THROW_ON_ERROR));
+        $this->context->streamPosition->discover($this->jsonEncoder->decode($projection->position()));
 
-        $state = json_decode($projection->state(), true, 512, JSON_THROW_ON_ERROR);
+        $state = $this->jsonEncoder->decode($projection->state());
 
         if (is_array($state) && count($state) !== 0) {
             $this->context->state->put($state);
@@ -94,8 +97,8 @@ final readonly class StandaloneStore implements Store
     {
         return $this->projectionProvider->updateProjection(
             $this->streamName, [
-                'position' => $this->context->streamPosition->jsonSerialize(),
-                'state' => $this->context->state->jsonSerialize(),
+                'position' => $this->jsonEncoder->encode($this->context->streamPosition->all(), $this->jsonEncoder::CONTEXT),
+                'state' => $this->jsonEncoder->encode($this->context->state->get(), $this->jsonEncoder::CONTEXT),
                 'locked_until' => $this->repositoryLock->refresh(),
             ]);
     }
@@ -108,8 +111,8 @@ final readonly class StandaloneStore implements Store
 
         return $this->projectionProvider->updateProjection(
             $this->streamName, [
-                'position' => $this->context->streamPosition->jsonSerialize(),
-                'state' => $this->context->state->jsonSerialize(),
+                'position' => $this->jsonEncoder->encode($this->context->streamPosition->all(), $this->jsonEncoder::CONTEXT),
+                'state' => $this->jsonEncoder->encode($this->context->state->get(), $this->jsonEncoder::CONTEXT),
                 'status' => $this->context->status->value,
             ]);
     }
@@ -168,7 +171,7 @@ final readonly class StandaloneStore implements Store
             return $this->projectionProvider->updateProjection(
                 $this->streamName, [
                     'locked_until' => $this->repositoryLock->currentLock(),
-                    'position' => $this->context->streamPosition->jsonSerialize(),
+                    'position' => $this->jsonEncoder->encode($this->context->streamPosition->all(), $this->jsonEncoder::CONTEXT),
                 ]);
         }
 

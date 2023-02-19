@@ -59,28 +59,4 @@ final class ProjectionStateTest extends UnitTestCase
 
         $this->assertEquals([], $state->get());
     }
-
-    /**
-     * @test
-     */
-    public function it_serialize_state(): void
-    {
-        $state = new ProjectionState();
-
-        $state->put(['foo' => 'bar']);
-
-        $this->assertEquals('{"foo":"bar"}', $state->jsonSerialize());
-    }
-
-    /**
-     * @test
-     */
-    public function it_serialize_to_json_object_from_empty_state(): void
-    {
-        $state = new ProjectionState();
-
-        $this->assertEquals([], $state->get());
-
-        $this->assertEquals('{}', $state->jsonSerialize());
-    }
 }
