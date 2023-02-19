@@ -28,9 +28,4 @@ interface StreamPersistence
      * Check sequence no is auto incremented
      */
     public function isAutoIncremented(): bool;
-
-    /**
-     * Get the table index
-     */
-    public function indexName(string $tableName): ?string;
 }
