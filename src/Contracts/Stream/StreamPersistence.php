@@ -4,28 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Stream;
 
+use stdClass;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 interface StreamPersistence
 {
-    /**
-     * Get the table name
-     */
-    public function tableName(StreamName $streamName): string;
-
-    /**
-     * Up table
-     */
     public function up(string $tableName): ?callable;
 
-    /**
-     * Serialize domain event
-     */
-    public function serializeEvent(DomainEvent $event): array;
+    public function tableName(StreamName $streamName): string;
 
-    /**
-     * Check sequence no is auto incremented
-     */
+    public function serialize(DomainEvent $event, bool $isAutoIncremented): array;
+
+    public function toDomainEvent(iterable|stdClass $payload): DomainEvent;
+
     public function isAutoIncremented(): bool;
 }

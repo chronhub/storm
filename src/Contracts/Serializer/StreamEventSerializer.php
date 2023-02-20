@@ -12,7 +12,7 @@ interface StreamEventSerializer
     public function serializeEvent(DomainEvent $event): array;
 
     /**
-     * @return Generator{object}
+     * @return Generator{iterable|object}
      */
     public function unserializeContent(array $payload): Generator;
 
