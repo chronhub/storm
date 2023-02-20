@@ -14,7 +14,7 @@ interface StreamPersistence
 
     public function tableName(StreamName $streamName): string;
 
-    public function serialize(DomainEvent $event, bool $isAutoIncremented): array;
+    public function serialize(DomainEvent $event): array;
 
     public function toDomainEvent(iterable|stdClass $payload): DomainEvent;
 
