@@ -87,7 +87,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
         return json_decode($projection->state(), true, 512, self::JSON_FLAGS);
     }
 
-    public function filterNamesOf(string ...$names): array
+    public function filterNamesByAscendantOrder(string ...$names): array
     {
         return $this->projectionProvider->filterByNames(...$names);
     }
