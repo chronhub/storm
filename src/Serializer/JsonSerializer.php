@@ -8,7 +8,7 @@ use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
-final class JsonSerializer
+final readonly class JsonSerializer
 {
     final const CONTEXT = [JsonEncode::OPTIONS => JSON_FORCE_OBJECT];
 

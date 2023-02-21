@@ -14,7 +14,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use function count;
 use function is_array;
 
-final class StandaloneStore implements Store
+final readonly class StandaloneStore implements Store
 {
     private JsonSerializer $jsonEncoder;
 
