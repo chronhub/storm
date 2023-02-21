@@ -39,9 +39,9 @@ final class InMemoryProjectionQueryScope implements ProjectionQueryScope
                 };
             }
 
-            public function setCurrentPosition(int $position): void
+            public function setCurrentPosition(int $streamPosition): void
             {
-                $this->currentPosition = $position;
+                $this->currentPosition = $streamPosition;
             }
 
             public function orderBy(): string

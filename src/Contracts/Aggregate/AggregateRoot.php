@@ -10,7 +10,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface AggregateRoot
 {
     /**
-     * @param  Generator{DomainEvent}  $events
+     * @param  Generator<int, DomainEvent, null, int>  $events
      */
     public static function reconstitute(AggregateIdentity $aggregateId, Generator $events): ?static;
 

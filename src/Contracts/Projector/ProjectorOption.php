@@ -26,20 +26,40 @@ interface ProjectorOption extends JsonSerializable
 
     public function getDispatchSignal(): bool;
 
+    /**
+     * @return positive-int
+     */
     public function getStreamCacheSize(): int;
 
+    /**
+     * @return positive-int
+     */
     public function getPersistBlockSize(): int;
 
+    /**
+     * @return int<0, max>
+     */
     public function getLockTimeoutMs(): int;
 
+    /**
+     * @return int<0, max>
+     */
     public function getSleepBeforeUpdateLock(): int;
 
+    /**
+     * @return int<0, max>
+     */
     public function getUpdateLockThreshold(): int;
 
     /**
-     * @return array{int}
+     * @return array{int, int<0, max>}
      */
     public function getRetriesMs(): array;
 
+    /**
+     * @return null|string as date interval duration
+     *
+     * @see https://www.php.net/manual/en/dateinterval.construct.php
+     */
     public function getDetectionWindows(): ?string;
 }

@@ -10,6 +10,7 @@ use Chronhub\Storm\Stream\StreamName;
 use Illuminate\Database\Query\Builder;
 use Chronhub\Storm\Reporter\DomainEvent;
 
+// todo move to lara
 interface StreamEventLoaderConnection extends StreamEventLoader
 {
     /**

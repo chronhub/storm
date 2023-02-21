@@ -46,7 +46,7 @@ interface ProjectorManager
     public function statusOf(string $name): string;
 
     /**
-     * @return array<string, int>
+     * @return array<string, int<0, max>>
      *
      * @throws ProjectionNotFound
      */
@@ -60,12 +60,9 @@ interface ProjectorManager
     public function stateOf(string $name): array;
 
     /**
-     * Filter projection by stream name(s) and ordered by ascendant name
-     * //fixMe orderByAsc should be part of method
-     *
      * @return array<string>
      */
-    public function filterNamesOf(string ...$names): array;
+    public function filterNamesByAscendantOrder(string ...$names): array;
 
     public function exists(string $name): bool;
 

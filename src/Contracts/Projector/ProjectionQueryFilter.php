@@ -8,5 +8,8 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 
 interface ProjectionQueryFilter extends QueryFilter
 {
-    public function setCurrentPosition(int $position): void;
+    /**
+     * @param  int<1, max>  $streamPosition
+     */
+    public function setCurrentPosition(int $streamPosition): void;
 }

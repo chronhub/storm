@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Closure;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 
+/**
+ * @template T of Closure(DomainEvent): void|Closure(DomainEvent, array): array
+ */
 interface ProjectorBuilder extends Projector
 {
     public function initialize(Closure $initCallback): static;
@@ -18,14 +22,14 @@ interface ProjectorBuilder extends Projector
     public function fromAll(): static;
 
     /**
-     * @param  array{string, callable}  $eventsHandlers
+     * @param  array{T}  $eventsHandlers
      */
     public function when(array $eventsHandlers): static;
 
     /**
-     * fixMe param
+     * @phpstan-param  T  $eventsHandlers
      */
-    public function whenAny(callable $eventsHandlers): static;
+    public function whenAny(Closure $eventsHandlers): static;
 
     public function withQueryFilter(QueryFilter $queryFilter): static;
 }

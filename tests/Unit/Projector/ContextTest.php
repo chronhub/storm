@@ -476,9 +476,9 @@ final class ContextTest extends ProphecyTestCase
                 return fn (): int => $this->position;
             }
 
-            public function setCurrentPosition(int $position): void
+            public function setCurrentPosition(int $streamPosition): void
             {
-                $this->position = $position;
+                $this->position = $streamPosition;
             }
         };
     }
