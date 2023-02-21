@@ -12,9 +12,6 @@ interface StreamStory extends Story
 
     public function promise(): mixed;
 
-    /**
-     * Decorate stream events
-     */
     public function decorate(MessageDecorator $messageDecorator): void;
 
     public function hasStreamNotFound(): bool;

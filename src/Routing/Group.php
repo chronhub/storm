@@ -59,14 +59,14 @@ abstract class Group implements JsonSerializable
     private ?array $queue = null;
 
     /**
-     * Append Message Decorators
+     * Add Message Decorators
      *
      * @var array<string|MessageDecorator>
      */
     private array $messageDecorators = [];
 
     /**
-     * Append message subscribers
+     * Add Message Subscribers
      *
      * @var array<string|MessageSubscriber>
      */

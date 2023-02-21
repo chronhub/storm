@@ -34,14 +34,14 @@ final class AliasFromInflector implements MessageAlias
     {
         $delimiter = '-';
 
-        $eventClass = basename(str_replace('\\', '/', $eventClass));
+        $eventAlias = basename(str_replace('\\', '/', $eventClass));
 
         if (! ctype_lower($eventClass)) {
-            $eventClass = preg_replace('/\s+/u', '', ucwords($eventClass));
+            $eventAlias = preg_replace('/\s+/u', '', ucwords($eventAlias));
 
-            $eventClass = mb_strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $eventClass));
+            $eventAlias = mb_strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $eventAlias));
         }
 
-        return $eventClass;
+        return $eventAlias;
     }
 }
