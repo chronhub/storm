@@ -12,8 +12,7 @@ use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
 interface RouteLocator
 {
     /**
-     * Return array of message handler if route matched
-     *
+     * @return Collection{string|object|callable}
      *
      * @throws RouteNotFound
      * @throws RouteHandlerNotSupported
@@ -21,9 +20,6 @@ interface RouteLocator
     public function route(Message $message): Collection;
 
     /**
-     * Return route queue options if set
-     *
-     *
      * @throws RouteNotFound
      */
     public function onQueue(Message $message): ?array;

@@ -10,18 +10,12 @@ use Chronhub\Storm\Reporter\DomainType;
 
 interface Registrar
 {
-    /**
-     * Return new group instance
-     */
     public function make(DomainType $domainType, string $name): Group;
 
-    /**
-     * Return group instance by domain type and name if exists
-     */
     public function get(DomainType $type, string $name): ?Group;
 
     /**
-     * Return group collection
+     * @return Collection<Group>
      */
     public function all(): Collection;
 }

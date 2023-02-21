@@ -8,7 +8,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 
 interface PersistentProjectorCaster extends ProjectorCaster
 {
-    public function linkTo(string $streamName, DomainEvent $event): void;
-
     public function emit(DomainEvent $event): void;
+
+    public function linkTo(string $streamName, DomainEvent $event): void;
 }

@@ -60,9 +60,6 @@ final readonly class FindRoute implements RouteLocator
     }
 
     /**
-     * Transform each message handler to callable if not already invokable
-     *
-     *
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -85,9 +82,6 @@ final readonly class FindRoute implements RouteLocator
         throw RouteHandlerNotSupported::withMessageName($messageName);
     }
 
-    /**
-     * Return message handler(s) by his message name
-     */
     private function determineMessageHandler(string $messageName): Collection
     {
         $route = $this->group->routes->match($messageName);
@@ -99,9 +93,6 @@ final readonly class FindRoute implements RouteLocator
         throw RouteNotFound::withMessageName($messageName);
     }
 
-    /**
-     * Determine message name from message alias instance
-     */
     private function determineMessageName(Message $message): string
     {
         return $this->messageAlias->classToAlias($message->header(Header::EVENT_TYPE));
