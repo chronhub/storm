@@ -22,8 +22,9 @@
   },
   "require-dev": {
     "rector/rector": "dev-main",
-    "laravel/pint": "^1.4",
+    "laravel/pint": "^1.5",
     "phpstan/phpstan":"^1.10",
+    "jangregor/phpstan-prophecy": "^1.0",
     "nunomaduro/larastan": "^2.4",
     "orchestra/testbench": "7.*",
     "phpspec/prophecy-phpunit": "dev-master",
