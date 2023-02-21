@@ -40,6 +40,7 @@ class CollectRoutes implements RouteCollection
     public function addRouteInstance(Route $route): static
     {
         $filteredRoutes = $this->routes->filter(
+            /** @phpstan-ignore-next-line  */
             fn (Route $route): string => $route->getOriginalMessageName()
         );
 
