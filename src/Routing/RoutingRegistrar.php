@@ -33,6 +33,21 @@ final class RoutingRegistrar implements Registrar
         return $this->mergeWithGroup($group);
     }
 
+    public function makeCommand(string $name): Group
+    {
+        return $this->make(DomainType::COMMAND, $name);
+    }
+
+    public function makeEvent(string $name): Group
+    {
+        return $this->make(DomainType::EVENT, $name);
+    }
+
+    public function makeQuery(string $name): Group
+    {
+        return $this->make(DomainType::QUERY, $name);
+    }
+
     public function get(DomainType $type, string $name): ?Group
     {
         return $this->groups[$type->value][$name] ?? null;

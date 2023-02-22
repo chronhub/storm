@@ -12,6 +12,12 @@ interface Registrar
 {
     public function make(DomainType $domainType, string $name): Group;
 
+    public function makeCommand(string $name): Group;
+
+    public function makeEvent(string $name): Group;
+
+    public function makeQuery(string $name): Group;
+
     public function get(DomainType $type, string $name): ?Group;
 
     /**

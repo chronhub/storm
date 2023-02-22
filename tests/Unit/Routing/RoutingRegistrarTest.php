@@ -53,6 +53,24 @@ final class RoutingRegistrarTest extends UnitTestCase
     /**
      * @test
      */
+    public function it_create_new_instance_of_group_2(): void
+    {
+        $commandGroup = $this->registrar->makeCommand('default');
+        $this->assertInstanceOf(CommandGroup::class, $commandGroup);
+
+        $eventGroup = $this->registrar->makeEvent('default');
+        $this->assertInstanceOf(EventGroup::class, $eventGroup);
+
+        $queryGroup = $this->registrar->makeQuery('default');
+        $this->assertInstanceOf(QueryGroup::class, $queryGroup);
+
+        $this->assertNotSame($this->registrar->all(), $this->registrar->all());
+        $this->assertCount(3, $this->registrar->all());
+    }
+
+    /**
+     * @test
+     */
     public function it_add_sub_group(): void
     {
         $defaultGroup = $this->registrar->make(DomainType::COMMAND, 'default');
