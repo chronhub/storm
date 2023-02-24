@@ -12,9 +12,4 @@ interface ProjectionQueryScope
      * @throws InvalidArgumentException when position is less or equals than 0
      */
     public function fromIncludedPosition(): ProjectionQueryFilter;
-
-    /**
-     * @throws InvalidArgumentException when position is less or equals than 0
-     */
-    public function fromIncludedPositionWithLimit(int $limit = 1000): ProjectionQueryFilter;
 }
