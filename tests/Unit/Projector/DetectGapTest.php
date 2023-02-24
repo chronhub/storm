@@ -168,29 +168,6 @@ final class DetectGapTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_reset_retries(): void
-    {
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            'PT60S'
-        );
-
-        $gapDetector->sleep();
-        $gapDetector->sleep();
-        $gapDetector->sleep();
-
-        $this->assertRetries($gapDetector, 3);
-
-        $gapDetector->resetRetries();
-
-        $this->assertRetries($gapDetector, 0);
-    }
-
-    /**
-     * @test
-     */
     public function it_reset_retries_and_return_silently_when_no_more_retries_available(): void
     {
         $gapDetector = new DetectGap(
@@ -222,7 +199,7 @@ final class DetectGapTest extends ProphecyTestCase
             null
         );
 
-        $eventTime = $this->clock->now()->format($this->clock::DATE_TIME_FORMAT);
+        $eventTime = $this->clock->now()->format($this->clock->getFormat());
 
         $this->assertTrue($gapDetector->detect('customer', 3, $eventTime));
         $this->assertTrue($gapDetector->hasGap());

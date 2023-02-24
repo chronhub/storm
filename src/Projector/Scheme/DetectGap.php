@@ -89,7 +89,7 @@ class DetectGap
         $this->gapDetected = false;
     }
 
-    public function resetRetries(): void
+    protected function resetRetries(): void
     {
         $this->retries = 0;
     }
