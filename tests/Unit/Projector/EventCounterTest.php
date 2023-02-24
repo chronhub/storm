@@ -14,7 +14,7 @@ final class EventCounterTest extends UnitTestCase
      */
     public function it_can_be_constructed(): void
     {
-        $counter = new EventCounter();
+        $counter = new EventCounter(10);
 
         $this->assertEquals(0, $counter->current());
 
@@ -26,7 +26,7 @@ final class EventCounterTest extends UnitTestCase
      */
     public function it_can_be_incremented(): void
     {
-        $counter = new EventCounter();
+        $counter = new EventCounter(5);
 
         $counter->increment();
         $this->assertEquals(1, $counter->current());
@@ -34,9 +34,13 @@ final class EventCounterTest extends UnitTestCase
         $counter->increment();
         $this->assertEquals(2, $counter->current());
 
-        $counter->reset();
+        $this->assertFalse($counter->isReached());
 
-        $this->assertTrue($counter->isReset());
+        $counter->increment();
+        $counter->increment();
+        $counter->increment();
+
+        $this->assertTrue($counter->isReached());
     }
 
     /**
@@ -44,7 +48,7 @@ final class EventCounterTest extends UnitTestCase
      */
     public function it_can_be_reset(): void
     {
-        $counter = new EventCounter();
+        $counter = new EventCounter(10);
 
         $counter->increment();
 
@@ -58,19 +62,5 @@ final class EventCounterTest extends UnitTestCase
 
         $this->assertTrue($counter->isReset());
         $this->assertEquals(0, $counter->current());
-    }
-
-    /**
-     * @test
-     */
-    public function it_can_compare_counter(): void
-    {
-        $counter = new EventCounter();
-        $this->assertTrue($counter->equals(0));
-
-        $counter->increment();
-        $this->assertTrue($counter->equals(1));
-
-        $this->assertFalse($counter->equals(5));
     }
 }

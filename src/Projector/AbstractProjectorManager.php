@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectorManager;
@@ -27,14 +26,14 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function projectQuery(array $options = []): QueryProjector
     {
-        $context = $this->createProjectorContext($options, null);
+        $context = $this->createProjectorContext($options, false);
 
         return new ProjectQuery($context, $this->chronicler);
     }
 
     public function projectProjection(string $streamName, array $options = []): ProjectionProjector
     {
-        $context = $this->createProjectorContext($options, new EventCounter());
+        $context = $this->createProjectorContext($options, true);
 
         $provider = $this->createPersistentStore($context, $streamName);
 
@@ -45,7 +44,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function projectReadModel(string $streamName, ReadModel $readModel, array $option = []): ReadModelProjector
     {
-        $context = $this->createProjectorContext($option, new EventCounter());
+        $context = $this->createProjectorContext($option, true);
 
         $provider = $this->createPersistentStore($context, $streamName);
 

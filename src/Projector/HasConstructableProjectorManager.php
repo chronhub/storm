@@ -41,9 +41,11 @@ trait HasConstructableProjectorManager
         );
     }
 
-    protected function createProjectorContext(array $options, ?EventCounter $eventCounter): Context
+    protected function createProjectorContext(array $options, $isPersistent): Context
     {
         $option = $this->createProjectorOption($options);
+
+        $eventCounter = $isPersistent ? new EventCounter($option->getPersistBlockSize()) : null;
 
         $streamPositions = new StreamPosition($this->eventStreamProvider);
 

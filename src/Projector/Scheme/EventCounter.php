@@ -6,6 +6,10 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 class EventCounter
 {
+    public function __construct(public readonly int $limit)
+    {
+    }
+
     protected int $counter = 0;
 
     public function increment(): void
@@ -23,9 +27,9 @@ class EventCounter
         return 0 === $this->counter;
     }
 
-    public function equals(int $num): bool
+    public function isReached(): bool
     {
-        return $this->counter === $num;
+        return $this->counter === $this->limit;
     }
 
     public function current(): int

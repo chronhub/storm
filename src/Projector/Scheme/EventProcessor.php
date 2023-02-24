@@ -68,9 +68,7 @@ abstract class EventProcessor
      */
     final protected function persistOnReachedCounter(Context $context, ProjectorRepository $repository): void
     {
-        $persistBlockSize = $context->option->getPersistBlockSize();
-
-        if ($context->eventCounter->equals($persistBlockSize)) {
+        if ($context->eventCounter->isReached()) {
             $repository->store();
 
             $context->eventCounter->reset();

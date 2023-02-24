@@ -128,8 +128,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->option->getPersistBlockSize()->willReturn(1000)->shouldBeCalledOnce();
-        $this->counter->equals(1000)->willReturn(false)->shouldBeCalledOnce();
+        $this->counter->isReached()->willReturn(false)->shouldBeCalledOnce();
 
         $context->runner->stop($stopProcess);
 
@@ -156,8 +155,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->option->getPersistBlockSize()->willReturn(1000)->shouldBeCalledOnce();
-        $this->counter->equals(1000)->willReturn(true)->shouldBeCalledOnce();
+        $this->counter->isReached()->willReturn(true)->shouldBeCalledOnce();
 
         $this->repository->store()->shouldBeCalledOnce();
         $this->counter->reset()->shouldBeCalledOnce();
@@ -188,8 +186,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->option->getPersistBlockSize()->willReturn(1000)->shouldBeCalledOnce();
-        $this->counter->equals(1000)->willReturn(true)->shouldBeCalledOnce();
+        $this->counter->isReached()->willReturn(true)->shouldBeCalledOnce();
 
         $this->repository->store()->shouldBeCalledOnce();
         $this->counter->reset()->shouldBeCalledOnce();
