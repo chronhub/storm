@@ -26,7 +26,7 @@ final class DispatchSignalTest extends ProphecyTestCase
             $this->markTestSkipped('Extension posix not available');
         }
 
-        $this->option->getDispatchSignal()->willReturn(true)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
 
         $result = null;
 
@@ -52,7 +52,7 @@ final class DispatchSignalTest extends ProphecyTestCase
             $this->markTestSkipped('Extension posix not available');
         }
 
-        $this->option->getDispatchSignal()->willReturn(false)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
 
         $result = null;
 

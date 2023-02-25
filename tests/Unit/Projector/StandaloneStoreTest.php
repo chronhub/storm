@@ -108,7 +108,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
     public function it_acquire_lock(bool $acquireLock): void
     {
         $this->projectorLock->acquire()->willReturn('some_lock_time')->shouldBeCalledOnce();
-        $this->projectorLock->lastLockUpdate()->willReturn('last_lock_update')->shouldBeCalledOnce();
+        $this->projectorLock->current()->willReturn('last_lock_update')->shouldBeCalledOnce();
 
         $this->projectionProvider->acquireLock(
             $this->streamName,
@@ -154,7 +154,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
     public function it_update_lock_if_succeeded(bool $updated): void
     {
         $this->projectorLock->tryUpdate()->willReturn(true)->shouldBeCalledOnce();
-        $this->projectorLock->currentLock()->willReturn('current_lock')->shouldBeCalledOnce();
+        $this->projectorLock->update()->willReturn('current_lock')->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider->updateProjection($this->streamName, [

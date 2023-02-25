@@ -45,7 +45,7 @@ trait HasConstructableProjectorManager
     {
         $option = $this->createProjectorOption($options);
 
-        $eventCounter = $isPersistent ? new EventCounter($option->getPersistBlockSize()) : null;
+        $eventCounter = $isPersistent ? new EventCounter($option->getBlockSize()) : null;
 
         $streamPositions = new StreamPosition($this->eventStreamProvider);
 
@@ -58,8 +58,8 @@ trait HasConstructableProjectorManager
     {
         return new RepositoryLock(
             $this->clock,
-            $option->lockTimeoutMs,
-            $option->updateLockThreshold
+            $option->timeout,
+            $option->lockout
         );
     }
 
@@ -77,7 +77,7 @@ trait HasConstructableProjectorManager
         return new DetectGap(
             $streamPosition,
             $this->clock,
-            $option->retriesMs,
+            $option->retries,
             $option->detectionWindows
         );
     }

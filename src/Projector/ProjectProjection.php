@@ -27,7 +27,7 @@ final readonly class ProjectProjection implements ProjectionProjector
                                 protected Chronicler $chronicler,
                                 protected string $streamName)
     {
-        $this->streamCache = new StreamCache($context->option->getStreamCacheSize());
+        $this->streamCache = new StreamCache($context->option->getCacheSize());
     }
 
     public function emit(DomainEvent $event): void

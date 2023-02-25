@@ -16,13 +16,13 @@ final class InMemoryProjectorOptionTest extends UnitTestCase
     {
         $options = new InMemoryProjectorOption();
 
-        $this->assertEquals(false, $options->getDispatchSignal());
-        $this->assertEquals(100, $options->getStreamCacheSize());
-        $this->assertEquals(1, $options->getPersistBlockSize());
-        $this->assertEquals(0, $options->getLockTimeoutMs());
-        $this->assertEquals(100, $options->getSleepBeforeUpdateLock());
-        $this->assertEquals(0, $options->getUpdateLockThreshold());
-        $this->assertEmpty($options->getRetriesMs());
+        $this->assertEquals(false, $options->getSignal());
+        $this->assertEquals(100, $options->getCacheSize());
+        $this->assertEquals(1, $options->getBlockSize());
+        $this->assertEquals(0, $options->getTimeout());
+        $this->assertEquals(100, $options->getSleep());
+        $this->assertEquals(0, $options->getLockout());
+        $this->assertEmpty($options->getRetries());
         $this->assertNull($options->getDetectionWindows());
     }
 
@@ -34,13 +34,13 @@ final class InMemoryProjectorOptionTest extends UnitTestCase
         $options = new InMemoryProjectorOption();
 
         $this->assertEquals([
-            'dispatchSignal' => false,
-            'streamCacheSize' => 100,
-            'persistBlockSize' => 1,
-            'lockTimeoutMs' => 0,
-            'sleepBeforeUpdateLock' => 100,
-            'updateLockThreshold' => 0,
-            'retriesMs' => [],
+            'signal' => false,
+            'cacheSize' => 100,
+            'blockSize' => 1,
+            'timeout' => 0,
+            'sleep' => 100,
+            'lockout' => 0,
+            'retries' => [],
             'detectionWindows' => null,
         ], $options->jsonSerialize());
     }

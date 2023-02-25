@@ -48,7 +48,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent([])->withHeader(Header::EVENT_TIME, 'some_datetime');
 
-        $this->option->getDispatchSignal()->willReturn(true)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
         $this->gap->detect('customer', 14, 'some_datetime')->willReturn(false)->shouldBeCalledOnce();
         $this->position->bind('customer', 14)->shouldBeCalledOnce();
         $this->counter->increment()->shouldBeCalledOnce();
@@ -75,7 +75,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getDispatchSignal()->willReturn(false)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
         $this->gap->detect('customer', 12, 'some_datetime')->willReturn(false)->shouldBeCalledOnce();
         $this->position->bind('customer', 12)->shouldBeCalledOnce();
         $this->counter->increment()->shouldBeCalledOnce();
@@ -101,7 +101,7 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getDispatchSignal()->willReturn(false)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
         $this->gap->detect('customer', 12, 'some_datetime')->willReturn(true)->shouldBeCalledOnce();
         $this->position->bind('customer', 12)->shouldNotBeCalled();
         $this->counter->increment()->shouldNotBeCalled();

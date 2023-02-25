@@ -39,7 +39,7 @@ final class QueryEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getDispatchSignal()->willReturn(false)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
         $this->gap->detect()->shouldNotBeCalled();
         $this->position->bind('customer', 125)->shouldBeCalledOnce();
 
@@ -70,7 +70,7 @@ final class QueryEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getDispatchSignal()->willReturn(true)->shouldBeCalledOnce();
+        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
         $this->gap->detect()->shouldNotBeCalled();
         $this->position->bind('customer', 125)->shouldBeCalledOnce();
 

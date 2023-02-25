@@ -21,7 +21,7 @@ abstract class EventProcessor
                                         int $position,
                                         ?ProjectorRepository $repository): bool
     {
-        if ($context->option->getDispatchSignal()) {
+        if ($context->option->getSignal()) {
             pcntl_signal_dispatch();
         }
 

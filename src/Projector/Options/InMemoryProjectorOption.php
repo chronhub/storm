@@ -12,13 +12,13 @@ final class InMemoryProjectorOption implements ProjectorOption
 
     public function __construct()
     {
-        $this->dispatchSignal = false;
-        $this->streamCacheSize = 100;
-        $this->persistBlockSize = 1;
-        $this->lockTimeoutMs = 0;
-        $this->sleepBeforeUpdateLock = 100;
-        $this->updateLockThreshold = 0;
-        $this->retriesMs = [];
+        $this->signal = false;
+        $this->cacheSize = 100;
+        $this->blockSize = 1;
+        $this->timeout = 0;
+        $this->sleep = 100;
+        $this->lockout = 0;
+        $this->retries = [];
         $this->detectionWindows = null;
     }
 }

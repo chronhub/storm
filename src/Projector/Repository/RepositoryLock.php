@@ -8,7 +8,6 @@ use DateInterval;
 use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use function floor;
-use function substr;
 use function sprintf;
 
 class RepositoryLock
@@ -25,7 +24,7 @@ class RepositoryLock
     {
         $this->lastLock = $this->clock->now();
 
-        return $this->currentLock();
+        return $this->update();
     }
 
     public function tryUpdate(): bool
@@ -43,32 +42,24 @@ class RepositoryLock
 
     public function refresh(): string
     {
-        return $this->createLockWithMillisecond($this->clock->now());
+        return $this->updateLockWithTimeout($this->clock->now());
     }
 
-    public function currentLock(): string
+    public function update(): string
     {
-        return $this->createLockWithMillisecond($this->lastLock);
+        return $this->updateLockWithTimeout($this->lastLock);
     }
 
-    public function lastLockUpdate(): ?string
+    public function current(): ?string
     {
         return $this->lastLock?->format($this->clock->getFormat());
     }
 
-    protected function createLockWithMillisecond(DateTimeImmutable $dateTime): string
+    protected function updateLockWithTimeout(DateTimeImmutable $dateTime): string
     {
-        $microSeconds = (string) ((int) $dateTime->format('u') + ($this->lockTimeoutMs * 1000));
-
-        $seconds = substr($microSeconds, 0, -6);
-
-        if ($seconds === '') {
-            $seconds = 0;
-        }
-
         return $dateTime
-            ->modify('+'.$seconds.' seconds')
-            ->format('Y-m-d\TH:i:s').'.'.substr($microSeconds, -6);
+            ->modify('+'.$this->lockTimeoutMs.' milliseconds')
+            ->format($this->clock->getFormat());
     }
 
     protected function shouldUpdateLock(DateTimeImmutable $dateTime): bool

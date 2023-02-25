@@ -32,7 +32,7 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
 
-        $this->assertNull($lock->lastLockUpdate());
+        $this->assertNull($lock->current());
     }
 
     /**
@@ -42,23 +42,24 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $datetime = $this->time->now();
 
+        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT);
         $this->clock->now()->willReturn($datetime)->shouldBeCalled();
 
         $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
 
-        $this->assertNull($lock->lastLockUpdate());
+        $this->assertNull($lock->current());
 
         $lockUntil = $lock->acquire();
         $updatedTime = $datetime->add(new DateInterval('PT1S'));
 
-        $this->assertEquals($updatedTime->format($this->time->getFormat()), $lock->currentLock());
+        $this->assertEquals($updatedTime->format($this->time->getFormat()), $lock->update());
         $this->assertEquals($updatedTime->format($this->time->getFormat()), $lockUntil);
     }
 
     /**
      * @test
      */
-    public function it_always_update_lock_when_last_lock_update_is_not_set(): void
+    public function it_always_update_lock_when_last_lock_update_is_not_fixed(): void
     {
         $datetime = $this->time->now();
 
@@ -67,13 +68,13 @@ final class RepositoryLockTest extends ProphecyTestCase
 
         $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
 
-        $this->assertNull($lock->lastLockUpdate());
+        $this->assertNull($lock->current());
 
         usleep(5);
 
         $this->assertTrue($lock->tryUpdate());
 
-        $this->assertEquals($datetime->format($this->time->getFormat()), $lock->lastLockUpdate());
+        $this->assertEquals($datetime->format($this->time->getFormat()), $lock->current());
     }
 
     /**
@@ -84,15 +85,15 @@ final class RepositoryLockTest extends ProphecyTestCase
         $datetime = $this->time->now();
 
         $this->clock->now()->willReturn($datetime)->shouldBeCalled();
-        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT);
+        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT)->shouldBeCalled();
 
         $lock = new RepositoryLock($this->clock->reveal(), 1000, 0);
 
-        $this->assertNull($lock->lastLockUpdate());
+        $this->assertNull($lock->current());
 
         $this->assertTrue($lock->tryUpdate());
 
-        $this->assertEquals($datetime->format($this->time->getFormat()), $lock->lastLockUpdate());
+        $this->assertEquals($datetime->format($this->time->getFormat()), $lock->current());
     }
 
     /**
@@ -103,6 +104,8 @@ final class RepositoryLockTest extends ProphecyTestCase
         $lock = new RepositoryLock($this->time, 1000, 1000);
 
         $lock->acquire();
+
+        $this->assertFalse($lock->tryUpdate());
 
         sleep(1);
 
@@ -129,6 +132,7 @@ final class RepositoryLockTest extends ProphecyTestCase
         $datetime = $this->time->now();
 
         $this->clock->now()->willReturn($datetime)->shouldBeCalled();
+        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT)->shouldBeCalled();
 
         $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
 

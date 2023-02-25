@@ -11,7 +11,7 @@ final class DispatchSignal
 {
     public function __invoke(Context $context, callable $next): callable|bool
     {
-        if ($context->option->getDispatchSignal()) {
+        if ($context->option->getSignal()) {
             pcntl_signal_dispatch();
         }
 

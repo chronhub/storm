@@ -8,53 +8,53 @@ use JsonSerializable;
 
 interface ProjectorOption extends JsonSerializable
 {
-    public const DISPATCH_SIGNAL = 'dispatchSignal';
+    public const SIGNAL = 'signal';
 
-    public const STREAM_CACHE_SIZE = 'streamCacheSize';
+    public const CACHE_SIZE = 'cacheSize';
 
-    public const LOCK_TIMEOUT_MS = 'lockTimeoutMs';
+    public const TIMEOUT = 'timeout';
 
-    public const SLEEP_BEFORE_UPDATE_LOCK = 'sleepBeforeUpdateLock';
+    public const SLEEP = 'sleep';
 
-    public const UPDATE_LOCK_THRESHOLD = 'updateLockThreshold';
+    public const LOCKOUT = 'lockout';
 
-    public const PERSIST_BLOCK_SIZE = 'persistBlockSize';
+    public const BLOCK_SIZE = 'blockSize';
 
-    public const RETRIES_MS = 'retriesMs';
+    public const RETRIES = 'retries';
 
     public const DETECTION_WINDOWS = 'detectionWindows';
 
-    public function getDispatchSignal(): bool;
+    public function getSignal(): bool;
 
     /**
      * @return positive-int
      */
-    public function getStreamCacheSize(): int;
+    public function getCacheSize(): int;
 
     /**
      * @return positive-int
      */
-    public function getPersistBlockSize(): int;
+    public function getBlockSize(): int;
 
     /**
      * @return int<0, max>
      */
-    public function getLockTimeoutMs(): int;
+    public function getTimeout(): int;
 
     /**
      * @return int<0, max>
      */
-    public function getSleepBeforeUpdateLock(): int;
+    public function getSleep(): int;
 
     /**
      * @return int<0, max>
      */
-    public function getUpdateLockThreshold(): int;
+    public function getLockout(): int;
 
     /**
      * @return array{int, int<0, max>}
      */
-    public function getRetriesMs(): array;
+    public function getRetries(): array;
 
     /**
      * @return null|string as date interval duration

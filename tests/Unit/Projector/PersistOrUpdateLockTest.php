@@ -40,7 +40,7 @@ final class PersistOrUpdateLockTest extends ProphecyTestCase
         $context = $this->newContext();
         $this->gap->hasGap()->willReturn(false)->shouldBeCalledOnce();
 
-        $this->option->getSleepBeforeUpdateLock()->willReturn(1000)->shouldBeCalledOnce();
+        $this->option->getSleep()->willReturn(1000)->shouldBeCalledOnce();
 
         $this->counter->isReset()->willReturn(true)->shouldBeCalledonce();
 

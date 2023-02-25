@@ -153,7 +153,7 @@ final readonly class StandaloneStore implements Store
             $this->streamName,
             $runningProjection->value,
             $this->repositoryLock->acquire(),
-            $this->repositoryLock->lastLockUpdate(),
+            $this->repositoryLock->current(),
         );
 
         if (! $acquired) {
@@ -170,7 +170,7 @@ final readonly class StandaloneStore implements Store
         if ($this->repositoryLock->tryUpdate()) {
             return $this->projectionProvider->updateProjection(
                 $this->streamName, [
-                    'locked_until' => $this->repositoryLock->currentLock(),
+                    'locked_until' => $this->repositoryLock->update(),
                     'position' => $this->jsonEncoder->encode($this->context->streamPosition->all(), $this->jsonEncoder::CONTEXT),
                 ]);
         }

@@ -22,7 +22,7 @@ final readonly class PersistOrUpdateLock
             $this->repository->store();
         } else {
             $context->eventCounter->isReset()
-                ? $this->sleepBeforeUpdateLock($context->option->getSleepBeforeUpdateLock())
+                ? $this->sleepBeforeUpdateLock($context->option->getSleep())
                 : $this->repository->store();
         }
 
