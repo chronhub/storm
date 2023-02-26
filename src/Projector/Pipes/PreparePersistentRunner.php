@@ -10,12 +10,12 @@ final class PreparePersistentRunner
 {
     use RetrieveRemoteStatus;
 
-    private bool $isInitiated = false;
+    private bool $isInitialized = false;
 
     public function __invoke(Context $context, callable $next): callable|bool
     {
-        if (! $this->isInitiated) {
-            $this->isInitiated = true;
+        if (! $this->isInitialized) {
+            $this->isInitialized = true;
 
             if ($this->stopOnLoadingRemoteStatus($context->runner->inBackground())) {
                 return true;

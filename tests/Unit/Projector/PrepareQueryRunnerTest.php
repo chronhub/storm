@@ -29,19 +29,19 @@ final class PrepareQueryRunnerTest extends ProphecyTestCase
 
         $pipe = new PrepareQueryRunner();
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
 
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
-    private function assertIsInitiated(PrepareQueryRunner $instance, bool $expect): void
+    private function assertIsInitialized(PrepareQueryRunner $instance, bool $expect): void
     {
         $closure = Closure::bind(
-            static fn ($instance) => $instance->isInitiated, null, PrepareQueryRunner::class
+            static fn ($instance) => $instance->isInitialized, null, PrepareQueryRunner::class
         );
 
         $this->assertEquals($expect, $closure($instance));

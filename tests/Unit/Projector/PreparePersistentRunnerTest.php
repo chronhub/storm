@@ -35,12 +35,12 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
 
         $pipe = new PreparePersistentRunner($this->repository->reveal());
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
     /**
@@ -65,13 +65,13 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
 
         $pipe = new PreparePersistentRunner($this->repository->reveal());
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
 
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
     /**
@@ -96,13 +96,13 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
 
         $pipe = new PreparePersistentRunner($this->repository->reveal());
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
 
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
     /**
@@ -128,13 +128,13 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
 
         $pipe = new PreparePersistentRunner($this->repository->reveal());
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
 
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
     /**
@@ -160,19 +160,19 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
 
         $pipe = new PreparePersistentRunner($this->repository->reveal());
 
-        $this->assertIsInitiated($pipe, false);
+        $this->assertIsInitialized($pipe, false);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
         $this->assertTrue($run);
 
-        $this->assertIsInitiated($pipe, true);
+        $this->assertIsInitialized($pipe, true);
     }
 
-    private function assertIsInitiated(PreparePersistentRunner $instance, bool $expect): void
+    private function assertIsInitialized(PreparePersistentRunner $instance, bool $expect): void
     {
         $closure = Closure::bind(
-            fn ($instance) => $instance->isInitiated, null, PreparePersistentRunner::class
+            fn ($instance) => $instance->isInitialized, null, PreparePersistentRunner::class
         );
 
         $this->assertEquals($expect, $closure($instance));
