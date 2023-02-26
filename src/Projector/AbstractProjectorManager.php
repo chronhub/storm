@@ -101,7 +101,9 @@ abstract class AbstractProjectorManager implements ProjectorManager
         return $this->queryScope;
     }
 
-    abstract protected function createProjectorRepository(Context $context, Store $store, ?ReadModel $readModel): ProjectorRepository;
+    abstract protected function createProjectorRepository(Context $context,
+                                                          Store $store,
+                                                          ?ReadModel $readModel): ProjectorRepository;
 
     /**
      * @throws ProjectionNotFound
