@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Projector\Pipes\HandleGap;
 use Chronhub\Storm\Projector\Pipes\DispatchSignal;
 use Chronhub\Storm\Projector\Pipes\HandleStreamEvent;
 use Chronhub\Storm\Projector\Pipes\ResetEventCounter;
@@ -57,6 +58,7 @@ trait ProvidePersistentProjector
         return [
             new PreparePersistentRunner($this->repository),
             new HandleStreamEvent($this->chronicler, $this->repository),
+            new HandleGap($this->repository),
             new PersistOrUpdateLock($this->repository),
             new ResetEventCounter(),
             new DispatchSignal(),

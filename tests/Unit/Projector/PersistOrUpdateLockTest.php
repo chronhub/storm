@@ -16,23 +16,6 @@ final class PersistOrUpdateLockTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_return_next_context_when_gap_is_detected(): void
-    {
-        $context = $this->newContext();
-
-        $this->gap->hasGap()->willReturn(true)->shouldBeCalledonce();
-        $this->gap->sleep()->shouldBeCalledonce();
-
-        $pipe = new PersistOrUpdateLock($this->repository->reveal());
-
-        $run = $pipe($context, fn (Context $context): bool => true);
-
-        $this->assertTrue($run);
-    }
-
-    /**
-     * @test
-     */
     public function it_sleep_before_updating_lock_if_event_counter_is_reset(): void
     {
         $this->repository->renew()->shouldBeCalledOnce();

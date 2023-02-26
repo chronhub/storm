@@ -16,11 +16,7 @@ final readonly class PersistOrUpdateLock
 
     public function __invoke(Context $context, callable $next): callable|bool
     {
-        if ($context->gap->hasGap()) {
-            $context->gap->sleep();
-
-            $this->repository->store();
-        } else {
+        if (!$context->gap->hasGap()) {
             $context->eventCounter->isReset()
                 ? $this->sleepBeforeUpdateLock($context->option->getSleep())
                 : $this->repository->store();
