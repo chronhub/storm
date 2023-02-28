@@ -14,8 +14,8 @@ use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 
 final readonly class MessagingSerializer implements MessageSerializer
 {
-    public function __construct(private readonly ContentSerializer $contentSerializer,
-                                private readonly Serializer $serializer)
+    public function __construct(private ContentSerializer $contentSerializer,
+                                private Serializer $serializer)
     {
     }
 

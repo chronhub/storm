@@ -16,8 +16,8 @@ use function is_string;
 
 final readonly class DomainEventSerializer implements StreamEventSerializer
 {
-    public function __construct(private readonly ContentSerializer $contentSerializer,
-                                private readonly Serializer $serializer)
+    public function __construct(private ContentSerializer $contentSerializer,
+                                private Serializer $serializer)
     {
     }
 
