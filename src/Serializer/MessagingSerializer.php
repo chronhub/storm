@@ -22,7 +22,7 @@ final class MessagingSerializer implements MessageSerializer
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {
         $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [(new JsonSerializer())->getEncoder()]);
+        $this->serializer = new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
     }
 
     public function serializeMessage(Message $message): array

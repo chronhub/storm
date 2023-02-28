@@ -19,6 +19,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Projector\InMemoryProjectorManager;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectorOption;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
@@ -120,7 +121,9 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     public function it_fetch_stream_positions_of_stream(): void
     {
         $model = $this->prophesize(ProjectionModel::class);
+
         $model->position()->willReturn('{"balance":5}')->shouldBeCalledOnce();
+        $this->jsonSerializer->decode('{"balance":5}')->willReturn(['balance' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
 
@@ -138,6 +141,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $model = $this->prophesize(ProjectionModel::class);
         $model->position()->willReturn('{}')->shouldBeCalledOnce();
+        $this->jsonSerializer->decode('{}')->willReturn([])->shouldBeCalledOnce();
 
         $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
 
@@ -169,6 +173,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $model = $this->prophesize(ProjectionModel::class);
         $model->state()->willReturn('{"count":10}')->shouldBeCalledOnce();
+        $this->jsonSerializer->decode('{"count":10}')->willReturn(['count' => 10])->shouldBeCalledOnce();
 
         $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
 
@@ -186,6 +191,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $model = $this->prophesize(ProjectionModel::class);
         $model->state()->willReturn('{}')->shouldBeCalledOnce();
+        $this->jsonSerializer->decode('{}')->willReturn([])->shouldBeCalledOnce();
 
         $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
 
@@ -485,6 +491,8 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
 
     private ProjectorOption|ObjectProphecy $projectorOption;
 
+    private ObjectProphecy|JsonSerializer $jsonSerializer;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -495,6 +503,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
         $this->queryScope = $this->prophesize(ProjectionQueryScope::class);
         $this->clock = $this->prophesize(SystemClock::class);
         $this->projectorOption = $this->prophesize(ProjectorOption::class);
+        $this->jsonSerializer = $this->prophesize(JsonSerializer::class);
     }
 
     private function newProjectorManager(array|ProjectorOption $projectorOption = null): InMemoryProjectorManager
@@ -505,6 +514,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
             $this->projectionProvider->reveal(),
             $this->queryScope->reveal(),
             $this->clock->reveal(),
+            $this->jsonSerializer->reveal(),
             $projectorOption ?? $this->projectorOption->reveal(),
         );
     }

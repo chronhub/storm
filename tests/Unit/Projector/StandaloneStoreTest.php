@@ -11,6 +11,7 @@ use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
 use Chronhub\Storm\Projector\Repository\StandaloneStore;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -27,6 +28,8 @@ final class StandaloneStoreTest extends ProphecyTestCase
 
     private RepositoryLock|ObjectProphecy $projectorLock;
 
+    private ObjectProphecy|JsonSerializer $jsonSerializer;
+
     private string $streamName;
 
     protected function setUp(): void
@@ -35,6 +38,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
 
         $this->projectionProvider = $this->prophesize(ProjectionProvider::class);
         $this->projectorLock = $this->prophesize(RepositoryLock::class);
+        $this->jsonSerializer = $this->prophesize(JsonSerializer::class);
         $this->streamName = 'customer';
     }
 
@@ -64,6 +68,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $model = $this->prophesize(ProjectionModel::class);
         $model->position()->willReturn('{"customer":5}')->shouldBeCalledOnce();
         $model->state()->willReturn('{"count":5}')->shouldBeCalledOnce();
+
+        $this->jsonSerializer->decode('{"customer":5}')->willReturn(['customer' => 5])->shouldBeCalledOnce();
+        $this->jsonSerializer->decode('{"count":5}')->willReturn(['count' => 5])->shouldBeCalledOnce();
 
         $this->projectionProvider
             ->retrieve($this->streamName)
@@ -157,6 +164,8 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $this->projectorLock->update()->willReturn('current_lock')->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
+        $this->jsonSerializer->encode(['customer' => 5])->willReturn('{"customer":5}')->shouldBeCalledOnce();
+
         $this->projectionProvider->updateProjection($this->streamName, [
             'locked_until' => 'current_lock',
             'position' => '{"customer":5}',
@@ -226,6 +235,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->state->put(['count' => 5]);
         $this->projectorLock->refresh()->willReturn('time_with_milliseconds')->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['customer' => 5])->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['count' => 5])->willReturn('{"count":5}')->shouldBeCalledOnce();
+
         $this->projectionProvider->updateProjection($this->streamName, Argument::type('array'));
 
         $this->projectionProvider->updateProjection($this->streamName, [
@@ -251,6 +263,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $context->state->put(['count' => 5]);
         $this->projectorLock->refresh()->willReturn('time_with_milliseconds')->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['customer' => 5])->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['count' => 5])->willReturn('{"count":5}')->shouldBeCalledOnce();
+
         $this->projectionProvider->updateProjection($this->streamName, Argument::type('array'));
 
         $this->projectionProvider->updateProjection($this->streamName, [
@@ -323,6 +338,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
         $this->position->reset()->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
 
+        $this->jsonSerializer->encode(['customer' => 5])->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['count' => 0])->willReturn('{"count":0}')->shouldBeCalledOnce();
+
         $this->projectionProvider->updateProjection($this->streamName, [
             'position' => '{"customer":5}',
             'state' => '{"count":0}',
@@ -347,6 +365,9 @@ final class StandaloneStoreTest extends ProphecyTestCase
 
         $this->position->reset()->shouldBeCalledOnce();
         $this->position->all()->willReturn(['customer' => 5])->shouldBeCalledOnce();
+
+        $this->jsonSerializer->encode(['customer' => 5])->willReturn('{"customer":5}')->shouldBeCalledOnce();
+        $this->jsonSerializer->encode(['count' => 0])->willReturn('{"count":0}')->shouldBeCalledOnce();
 
         $this->projectionProvider->updateProjection($this->streamName, [
             'position' => '{"customer":5}',
@@ -458,6 +479,7 @@ final class StandaloneStoreTest extends ProphecyTestCase
             $context,
             $this->projectionProvider->reveal(),
             $this->projectorLock->reveal(),
+            $this->jsonSerializer->reveal(),
             $this->streamName
         );
     }

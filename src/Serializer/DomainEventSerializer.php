@@ -24,7 +24,7 @@ final class DomainEventSerializer implements StreamEventSerializer
     public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
     {
         $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [(new JsonSerializer())->getEncoder()]);
+        $this->serializer = new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
     }
 
     public function serializeEvent(DomainEvent $event): array

@@ -15,14 +15,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use function json_decode;
 
 abstract class AbstractProjectorManager implements ProjectorManager
 {
     use HasConstructableProjectorManager;
-
-    //wip
-    final public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING;
 
     public function projectQuery(array $options = []): QueryProjector
     {
@@ -72,7 +68,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
             throw ProjectionNotFound::withName($name);
         }
 
-        return json_decode($projection->position(), true, 512, self::JSON_FLAGS);
+        return $this->jsonSerializer->decode($projection->position());
     }
 
     public function stateOf(string $name): array
@@ -83,7 +79,7 @@ abstract class AbstractProjectorManager implements ProjectorManager
             throw ProjectionNotFound::withName($name);
         }
 
-        return json_decode($projection->state(), true, 512, self::JSON_FLAGS);
+        return $this->jsonSerializer->decode($projection->state());
     }
 
     public function filterNamesByAscendantOrder(string ...$names): array

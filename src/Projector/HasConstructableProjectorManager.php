@@ -12,6 +12,7 @@ use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Contracts\Projector\ProjectorOption;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
 use Chronhub\Storm\Projector\Repository\StandaloneStore;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -27,6 +28,7 @@ trait HasConstructableProjectorManager
                                 protected readonly ProjectionProvider $projectionProvider,
                                 protected readonly ProjectionQueryScope $queryScope,
                                 protected readonly SystemClock $clock,
+                                protected readonly JsonSerializer $jsonSerializer,
                                 protected ProjectorOption|array $options = [])
     {
     }
@@ -37,6 +39,7 @@ trait HasConstructableProjectorManager
             $context,
             $this->projectionProvider,
             $this->createProjectorLock($context->option),
+            $this->jsonSerializer,
             $streamName
         );
     }
