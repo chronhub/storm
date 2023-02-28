@@ -24,7 +24,7 @@ class JsonSerializerFactory
     }
 
     public function createForStream(?ContentSerializer $contentSerializer = null,
-                                       NormalizerInterface|DenormalizerInterface ...$normalizers): StreamEventSerializer
+                                    NormalizerInterface|DenormalizerInterface ...$normalizers): StreamEventSerializer
     {
         $symfonySerializer = new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
 
