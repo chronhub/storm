@@ -12,7 +12,7 @@ use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
-use Chronhub\Storm\Serializer\MessagingSerializer;
+use Chronhub\Storm\Serializer\JsonSerializerFactory;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -31,7 +31,8 @@ final class MessagingSerializerTest extends ProphecyTestCase
 
         $message = new Message($command);
 
-        $serializer = new MessagingSerializer();
+        $factory = new JsonSerializerFactory();
+        $serializer = $factory->createForMessaging();
 
         $payload = $serializer->serializeMessage($message);
 
@@ -64,7 +65,8 @@ final class MessagingSerializerTest extends ProphecyTestCase
 
         $message = new Message($command);
 
-        $serializer = new MessagingSerializer($contentSerializer->reveal());
+        $factory = new JsonSerializerFactory();
+        $serializer = $factory->createForMessaging($contentSerializer->reveal());
 
         $payload = $serializer->serializeMessage($message);
 
@@ -98,7 +100,9 @@ final class MessagingSerializerTest extends ProphecyTestCase
             Header::EVENT_TIME => $now,
         ]);
 
-        $serializer = new MessagingSerializer(null,
+        $factory = new JsonSerializerFactory();
+
+        $serializer = $factory->createForMessaging(null,
             new DateTimeNormalizer([
                 DateTimeNormalizer::FORMAT_KEY => $datetime::DATE_TIME_FORMAT,
                 DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
@@ -131,7 +135,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
 
         $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Messaging to be serialized');
 
-        (new MessagingSerializer())->serializeMessage(new Message(new stdClass()));
+        (new JsonSerializerFactory())->createForMessaging()->serializeMessage(new Message(new stdClass()));
     }
 
     /**
@@ -148,7 +152,8 @@ final class MessagingSerializerTest extends ProphecyTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        $serializer = new MessagingSerializer();
+        $factory = new JsonSerializerFactory();
+        $serializer = $factory->createForMessaging();
 
         $event = $serializer->unserializeContent($payload)->current();
 
@@ -175,6 +180,6 @@ final class MessagingSerializerTest extends ProphecyTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        (new MessagingSerializer())->unserializeContent($payload)->current();
+        (new JsonSerializerFactory())->createForMessaging()->unserializeContent($payload)->current();
     }
 }

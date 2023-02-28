@@ -12,19 +12,13 @@ use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use function is_string;
 
-final class DomainEventSerializer implements StreamEventSerializer
+final readonly class DomainEventSerializer implements StreamEventSerializer
 {
-    private MessagingContentSerializer|ContentSerializer $contentSerializer;
-
-    private readonly Serializer $serializer;
-
-    public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
+    public function __construct(private readonly ContentSerializer $contentSerializer,
+                                private readonly Serializer $serializer)
     {
-        $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
     }
 
     public function serializeEvent(DomainEvent $event): array

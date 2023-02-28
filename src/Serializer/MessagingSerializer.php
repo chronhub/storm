@@ -11,18 +11,12 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-final class MessagingSerializer implements MessageSerializer
+final readonly class MessagingSerializer implements MessageSerializer
 {
-    private MessagingContentSerializer|ContentSerializer $contentSerializer;
-
-    private readonly Serializer $serializer;
-
-    public function __construct(?ContentSerializer $contentSerializer = null, NormalizerInterface ...$normalizers)
+    public function __construct(private readonly ContentSerializer $contentSerializer,
+                                private readonly Serializer $serializer)
     {
-        $this->contentSerializer = $contentSerializer ?? new MessagingContentSerializer();
-        $this->serializer = new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
     }
 
     public function serializeMessage(Message $message): array
