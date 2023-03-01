@@ -10,12 +10,17 @@ use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
+use Symfony\Component\Serializer\Serializer;
+use Chronhub\Storm\Serializer\SerializeToJson;
 use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
-use Chronhub\Storm\Serializer\JsonSerializerFactory;
+use Chronhub\Storm\Serializer\DomainEventSerializer;
+use Chronhub\Storm\Serializer\MessagingContentSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use function json_encode;
 
 final class DomainEventSerializerTest extends ProphecyTestCase
@@ -35,8 +40,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        $factory = new JsonSerializerFactory();
-        $serializer = $factory->createForStream();
+        $serializer = $this->domainEventSerializerInstance();
 
         $payload = $serializer->serializeEvent($event);
 
@@ -67,14 +71,13 @@ final class DomainEventSerializerTest extends ProphecyTestCase
                 EventHeader::AGGREGATE_TYPE => AggregateRootStub::class,
             ]);
 
-        $factory = new JsonSerializerFactory();
-
-        $serializer = $factory->createForStream(null,
+        $serializer = $this->domainEventSerializerInstance(
             new DateTimeNormalizer([
                 DateTimeNormalizer::FORMAT_KEY => $datetime::DATE_TIME_FORMAT,
                 DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
             ]),
-            new UidNormalizer());
+            new UidNormalizer()
+        );
 
         $payload = $serializer->serializeEvent($event);
 
@@ -94,7 +97,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $this->expectExceptionMessage('Missing aggregate id and/or aggregate id type headers');
 
-        (new JsonSerializerFactory())->createForStream()->serializeEvent(SomeEvent::fromContent([]));
+        $this->domainEventSerializerInstance()->serializeEvent(SomeEvent::fromContent([]));
     }
 
     /**
@@ -112,7 +115,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        (new JsonSerializerFactory())->createForStream()->serializeEvent($event);
+        $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
     /**
@@ -133,7 +136,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent(['name' => 'steph bug'])->withHeaders($headers);
 
-        (new JsonSerializerFactory())->createForStream()->serializeEvent($event);
+        $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
     /**
@@ -150,10 +153,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        $factory = new JsonSerializerFactory();
-        $serializer = $factory->createForStream();
-
-        $event = $serializer->unserializeContent($payload)->current();
+        $event = $this->domainEventSerializerInstance()->unserializeContent($payload)->current();
 
         $this->assertInstanceOf(SomeEvent::class, $event);
 
@@ -175,8 +175,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        $factory = new JsonSerializerFactory();
-        $serializer = $factory->createForStream();
+        $serializer = $this->domainEventSerializerInstance();
 
         $event = $serializer->unserializeContent(
             ['headers' => json_encode($payload['headers'], JSON_THROW_ON_ERROR), 'content' => json_encode($payload['content'])]
@@ -204,8 +203,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         ];
 
-        $factory = new JsonSerializerFactory();
-        $serializer = $factory->createForStream();
+        $serializer = $this->domainEventSerializerInstance();
 
         $event = $serializer->unserializeContent($payload)->current();
 
@@ -232,8 +230,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
 
         ];
 
-        $factory = new JsonSerializerFactory();
-        $serializer = $factory->createForStream();
+        $serializer = $this->domainEventSerializerInstance();
 
         $event = $serializer->unserializeContent($payload)->current();
 
@@ -260,6 +257,19 @@ final class DomainEventSerializerTest extends ProphecyTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        (new JsonSerializerFactory())->createForStream()->unserializeContent($payload)->current();
+        $serializer = $this->domainEventSerializerInstance();
+
+        $serializer->unserializeContent($payload)->current();
+    }
+
+    private function domainEventSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): DomainEventSerializer
+    {
+        return new DomainEventSerializer(
+            new MessagingContentSerializer(),
+            new Serializer(
+                $normalizers,
+                [(new SerializeToJson())->getEncoder()]
+            )
+        );
     }
 }
