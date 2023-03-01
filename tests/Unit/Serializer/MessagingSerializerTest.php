@@ -129,7 +129,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Messaging to be serialized');
+        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Reporting to be serialized');
 
         $serializer = $this->messageSerializerInstance();
 

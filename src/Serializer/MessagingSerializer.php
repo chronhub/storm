@@ -24,7 +24,7 @@ final readonly class MessagingSerializer implements MessageSerializer
         $event = $message->event();
 
         if (! $message->isMessaging()) {
-            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Messaging to be serialized');
+            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Reporting to be serialized');
         }
 
         $headers = $event->headers();
