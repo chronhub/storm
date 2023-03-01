@@ -12,29 +12,29 @@ use function class_exists;
 
 class Route implements JsonSerializable
 {
-    private ?array $queueOptions = null;
+    private ?array $queue = null;
 
-    private ?string $messageAlias = null;
+    private ?string $alias = null;
 
-    private array $messageHandlers = [];
+    private array $handlers = [];
 
-    public function __construct(private readonly string $messageName)
+    public function __construct(private readonly string $name)
     {
-        if (! class_exists($this->messageName)) {
-            throw new RoutingViolation("Message name must be a valid class name, got $this->messageName");
+        if (! class_exists($this->name)) {
+            throw new RoutingViolation("Message name must be a valid class name, got $this->name");
         }
     }
 
     public function alias(string $messageAlias): static
     {
-        $this->messageAlias = $messageAlias;
+        $this->alias = $messageAlias;
 
         return $this;
     }
 
     public function to(string|object ...$messageHandlers): static
     {
-        $this->messageHandlers = array_merge($this->messageHandlers, $messageHandlers);
+        $this->handlers = array_merge($this->handlers, $messageHandlers);
 
         return $this;
     }
@@ -45,7 +45,7 @@ class Route implements JsonSerializable
             return $this;
         }
 
-        $this->queueOptions = $queueOptions;
+        $this->queue = $queueOptions;
 
         return $this;
     }
@@ -53,36 +53,39 @@ class Route implements JsonSerializable
     /**
      * @return class-string|string
      */
-    public function getMessageName(): string
+    public function getName(): string
     {
-        return $this->messageAlias ?? $this->messageName;
+        return $this->alias ?? $this->name;
     }
 
     /**
      * @return class-string
      */
-    public function getOriginalMessageName(): string
+    public function getOriginalName(): string
     {
-        return $this->messageName;
+        return $this->name;
     }
 
-    public function getMessageHandlers(): array
+    /**
+     * @return array<int, string|object>
+     */
+    public function getHandlers(): array
     {
-        return $this->messageHandlers;
+        return $this->handlers;
     }
 
-    public function getQueueOptions(): ?array
+    public function getQueue(): ?array
     {
-        return $this->queueOptions;
+        return $this->queue;
     }
 
     public function jsonSerialize(): array
     {
         return [
-            'message_name' => $this->getMessageName(),
-            'original_message_name' => $this->getOriginalMessageName(),
-            'message_handlers' => $this->getMessageHandlers(),
-            'queue_options' => $this->getQueueOptions(),
+            'message_name' => $this->getName(),
+            'original_message_name' => $this->getOriginalName(),
+            'message_handlers' => $this->getHandlers(),
+            'queue_options' => $this->getQueue(),
         ];
     }
 }

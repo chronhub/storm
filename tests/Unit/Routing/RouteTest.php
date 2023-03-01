@@ -24,10 +24,10 @@ final class RouteTest extends UnitTestCase
     {
         $route = new Route($messageName);
 
-        $this->assertEquals($route->getOriginalMessageName(), $messageName);
-        $this->assertEquals($route->getMessageName(), $messageName);
-        $this->assertNull($route->getQueueOptions());
-        $this->assertEmpty($route->getMessageHandlers());
+        $this->assertEquals($route->getOriginalName(), $messageName);
+        $this->assertEquals($route->getName(), $messageName);
+        $this->assertNull($route->getQueue());
+        $this->assertEmpty($route->getHandlers());
     }
 
     /**
@@ -50,13 +50,13 @@ final class RouteTest extends UnitTestCase
     {
         $route = new Route($messageName);
 
-        $this->assertEquals($route->getOriginalMessageName(), $messageName);
-        $this->assertEquals($route->getMessageName(), $messageName);
+        $this->assertEquals($route->getOriginalName(), $messageName);
+        $this->assertEquals($route->getName(), $messageName);
 
         $route->alias('some-alias');
 
-        $this->assertEquals('some-alias', $route->getMessageName());
-        $this->assertEquals($route->getOriginalMessageName(), $messageName);
+        $this->assertEquals('some-alias', $route->getName());
+        $this->assertEquals($route->getOriginalName(), $messageName);
     }
 
     /**
@@ -69,7 +69,7 @@ final class RouteTest extends UnitTestCase
         $route = new Route(SomeCommand::class);
         $route->to($messageHandler);
 
-        $this->assertEquals([$messageHandler], $route->getMessageHandlers());
+        $this->assertEquals([$messageHandler], $route->getHandlers());
     }
 
     /**
@@ -84,7 +84,7 @@ final class RouteTest extends UnitTestCase
         $route->to('some_message_handler');
         $route->to('another_message_handler');
 
-        $this->assertEquals(['some_message_handler', 'another_message_handler'], $route->getMessageHandlers());
+        $this->assertEquals(['some_message_handler', 'another_message_handler'], $route->getHandlers());
     }
 
     /**
@@ -95,7 +95,7 @@ final class RouteTest extends UnitTestCase
         $route = new Route(SomeCommand::class);
         $route->onQueue(['connection' => 'redis', 'name' => 'default']);
 
-        $this->assertEquals(['connection' => 'redis', 'name' => 'default'], $route->getQueueOptions());
+        $this->assertEquals(['connection' => 'redis', 'name' => 'default'], $route->getQueue());
     }
 
     /**
@@ -106,7 +106,7 @@ final class RouteTest extends UnitTestCase
         $route = new Route(SomeCommand::class);
         $route->onQueue();
 
-        $this->assertNull($route->getQueueOptions());
+        $this->assertNull($route->getQueue());
     }
 
     /**

@@ -56,7 +56,7 @@ final readonly class FindRoute implements RouteLocator
             throw RouteNotFound::withMessageName($messageName);
         }
 
-        return $route->getQueueOptions();
+        return $route->getQueue();
     }
 
     /**
@@ -87,7 +87,7 @@ final readonly class FindRoute implements RouteLocator
         $route = $this->group->routes->match($messageName);
 
         if ($route instanceof Route) {
-            return new Collection($route->getMessageHandlers());
+            return new Collection($route->getHandlers());
         }
 
         throw RouteNotFound::withMessageName($messageName);

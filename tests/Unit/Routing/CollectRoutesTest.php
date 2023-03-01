@@ -50,8 +50,8 @@ final class CollectRoutesTest extends ProphecyTestCase
 
         $this->assertInstanceOf(Route::class, $route);
 
-        $this->assertEquals('some-command', $route->getMessageName());
-        $this->assertEquals(SomeCommand::class, $route->getOriginalMessageName());
+        $this->assertEquals('some-command', $route->getName());
+        $this->assertEquals(SomeCommand::class, $route->getOriginalName());
     }
 
     /**
@@ -68,7 +68,7 @@ final class CollectRoutesTest extends ProphecyTestCase
 
         $route = $routes->addRoute(SomeCommand::class);
 
-        $this->assertEquals('some-command', $route->getMessageName());
+        $this->assertEquals('some-command', $route->getName());
 
         $routes->addRoute(SomeCommand::class);
     }
@@ -87,8 +87,8 @@ final class CollectRoutesTest extends ProphecyTestCase
 
         $routes->addRouteInstance($route);
 
-        $this->assertEquals('some-command', $route->getMessageName());
-        $this->assertEquals(SomeCommand::class, $route->getOriginalMessageName());
+        $this->assertEquals('some-command', $route->getName());
+        $this->assertEquals(SomeCommand::class, $route->getOriginalName());
     }
 
     /**
@@ -123,8 +123,8 @@ final class CollectRoutesTest extends ProphecyTestCase
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
 
-        $this->assertEquals($someRoute->getMessageName(), $routes->match(SomeCommand::class)->getMessageName());
-        $this->assertEquals($anotherRoute->getMessageName(), $routes->match(AnotherCommand::class)->getMessageName());
+        $this->assertEquals($someRoute->getName(), $routes->match(SomeCommand::class)->getName());
+        $this->assertEquals($anotherRoute->getName(), $routes->match(AnotherCommand::class)->getName());
     }
 
     /**
@@ -140,8 +140,8 @@ final class CollectRoutesTest extends ProphecyTestCase
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
 
-        $this->assertEquals($someRoute->getMessageName(), $routes->match('some-command')->getMessageName());
-        $this->assertEquals($anotherRoute->getMessageName(), $routes->match('another-command')->getMessageName());
+        $this->assertEquals($someRoute->getName(), $routes->match('some-command')->getName());
+        $this->assertEquals($anotherRoute->getName(), $routes->match('another-command')->getName());
     }
 
     /**
@@ -157,8 +157,8 @@ final class CollectRoutesTest extends ProphecyTestCase
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
 
-        $this->assertEquals($someRoute->getMessageName(), $routes->matchOriginal(SomeCommand::class)->getMessageName());
-        $this->assertEquals($anotherRoute->getMessageName(), $routes->matchOriginal(AnotherCommand::class)->getMessageName());
+        $this->assertEquals($someRoute->getName(), $routes->matchOriginal(SomeCommand::class)->getName());
+        $this->assertEquals($anotherRoute->getName(), $routes->matchOriginal(AnotherCommand::class)->getName());
     }
 
     /**

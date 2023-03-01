@@ -21,7 +21,7 @@ class CollectRoutes implements RouteCollection
     public function addRoute(string $messageName): Route
     {
         $filteredRoutes = $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getOriginalMessageName())
+            fn (Route $route): bool => ($messageName === $route->getOriginalName())
         );
 
         if ($filteredRoutes->isNotEmpty()) {
@@ -41,11 +41,11 @@ class CollectRoutes implements RouteCollection
     {
         $filteredRoutes = $this->routes->filter(
             /** @phpstan-ignore-next-line  */
-            fn (Route $route): string => $route->getOriginalMessageName()
+            fn (Route $route): string => $route->getOriginalName()
         );
 
         if ($filteredRoutes->isNotEmpty()) {
-            throw new RoutingViolation('Message name already exists: '.$route->getOriginalMessageName());
+            throw new RoutingViolation('Message name already exists: '.$route->getOriginalName());
         }
 
         $this->routes->push($route);
@@ -56,14 +56,14 @@ class CollectRoutes implements RouteCollection
     public function match(string $messageName): ?Route
     {
         return $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getMessageName())
+            fn (Route $route): bool => ($messageName === $route->getName())
         )->first();
     }
 
     public function matchOriginal(string $messageName): ?Route
     {
         return $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getOriginalMessageName())
+            fn (Route $route): bool => ($messageName === $route->getOriginalName())
         )->first();
     }
 
