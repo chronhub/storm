@@ -63,7 +63,7 @@ final class JsonSerializerFactoryTest extends ProphecyTestCase
 
         $factory = new JsonSerializerFactory(fn () => $this->container->reveal());
 
-        $serializer = $factory->createMessageSerializer(null, UidNormalizer::class);
+        $factory->createMessageSerializer(null, UidNormalizer::class);
     }
 
     /**
