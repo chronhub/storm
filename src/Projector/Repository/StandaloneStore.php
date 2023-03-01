@@ -13,9 +13,8 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use function is_array;
 
-final readonly class StandaloneStore implements Store
+final class StandaloneStore implements Store
 {
-
     public function __construct(public Context $context,
                                 public ProjectionProvider $projectionProvider,
                                 public RepositoryLock $repositoryLock,
@@ -26,7 +25,10 @@ final readonly class StandaloneStore implements Store
 
     public function create(): bool
     {
-        return $this->projectionProvider->createProjection($this->streamName, $this->context->status->value);
+        return $this->projectionProvider->createProjection(
+            $this->streamName,
+            $this->context->status->value
+        );
     }
 
     public function loadState(): bool
@@ -41,7 +43,7 @@ final readonly class StandaloneStore implements Store
 
         $state = $this->jsonSerializer->decode($projection->state());
 
-        if (is_array($state) && !empty($state)) {
+        if (is_array($state) && ! empty($state)) {
             $this->context->state->put($state);
         }
 
@@ -56,10 +58,7 @@ final readonly class StandaloneStore implements Store
 
         $idleProjection = ProjectionStatus::IDLE;
 
-        $stopped = $this->projectionProvider->updateProjection(
-            $this->streamName,
-            ['status' => $idleProjection->value]
-        );
+        $stopped = $this->updateProjection(['status' => $idleProjection->value]);
 
         if (! $stopped) {
             return false;
@@ -76,11 +75,12 @@ final readonly class StandaloneStore implements Store
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $restarted = $this->projectionProvider->updateProjection(
-            $this->streamName, [
+        $restarted = $this->updateProjection(
+            [
                 'status' => $runningStatus->value,
                 'locked_until' => $this->repositoryLock->acquire(),
-            ]);
+            ]
+        );
 
         if (! $restarted) {
             return false;
@@ -93,12 +93,13 @@ final readonly class StandaloneStore implements Store
 
     public function persist(): bool
     {
-        return $this->projectionProvider->updateProjection(
-            $this->streamName, [
+        return $this->updateprojection(
+            [
                 'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
                 'state' => $this->jsonSerializer->encode($this->context->state->get()),
                 'locked_until' => $this->repositoryLock->refresh(),
-            ]);
+            ]
+        );
     }
 
     public function reset(): bool
@@ -107,12 +108,13 @@ final readonly class StandaloneStore implements Store
 
         $this->context->resetStateWithInitialize();
 
-        return $this->projectionProvider->updateProjection(
-            $this->streamName, [
+        return $this->updateProjection(
+            [
                 'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
                 'state' => $this->jsonSerializer->encode($this->context->state->get()),
                 'status' => $this->context->status->value,
-            ]);
+            ]
+        );
     }
 
     public function delete(bool $withEmittedEvents): bool
@@ -166,11 +168,12 @@ final readonly class StandaloneStore implements Store
     public function updateLock(): bool
     {
         if ($this->repositoryLock->tryUpdate()) {
-            return $this->projectionProvider->updateProjection(
-                $this->streamName, [
+            return $this->updateProjection(
+                [
                     'locked_until' => $this->repositoryLock->update(),
                     'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
-                ]);
+                ]
+            );
         }
 
         return true;
@@ -180,11 +183,12 @@ final readonly class StandaloneStore implements Store
     {
         $idleProjection = ProjectionStatus::IDLE;
 
-        $released = $this->projectionProvider->updateProjection(
-            $this->streamName, [
+        $released = $this->updateProjection(
+            [
                 'status' => $idleProjection->value,
                 'locked_until' => null,
-            ]);
+            ]
+        );
 
         if (! $released) {
             return false;
@@ -203,5 +207,10 @@ final readonly class StandaloneStore implements Store
     public function currentStreamName(): string
     {
         return $this->streamName;
+    }
+
+    private function updateProjection(array $data): bool
+    {
+        return $this->projectionProvider->updateProjection($this->streamName, $data);
     }
 }
