@@ -19,8 +19,6 @@ use function is_string;
 
 abstract class AbstractChroniclerProvider implements ChroniclerProvider
 {
-    // todo factory
-
     protected ContainerInterface $container;
 
     public function __construct(Closure $app)
@@ -28,7 +26,8 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
         $this->container = $app();
     }
 
-    protected function decorateChronicler(Chronicler $chronicler, ?StreamTracker $tracker): EventableChronicler|TransactionalEventableChronicler
+    protected function decorateChronicler(Chronicler $chronicler,
+                                          ?StreamTracker $tracker): EventableChronicler|TransactionalEventableChronicler
     {
         if ($chronicler instanceof EventableChronicler) {
             throw new InvalidArgumentException('Unable to decorate a chronicler which is already decorated');
@@ -48,7 +47,9 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
             return new EventChronicler($chronicler, $tracker);
         }
 
-        throw new InvalidArgumentException('Invalid configuration to decorate chronicler from chronicler provider: '.static::class);
+        throw new InvalidArgumentException(
+            'Invalid configuration to decorate chronicler from chronicler provider: '.static::class
+        );
     }
 
     protected function resolveStreamTracker(array $config): ?StreamTracker
@@ -62,6 +63,9 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
         return $streamTracker;
     }
 
+    /**
+     * @param  array{string|StreamSubscriber}  $streamSubscribers
+     */
     protected function attachStreamSubscribers(EventableChronicler $chronicler, array $streamSubscribers): void
     {
         foreach ($streamSubscribers as $streamSubscriber) {
