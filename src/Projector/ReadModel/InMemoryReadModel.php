@@ -40,17 +40,17 @@ final class InMemoryReadModel implements ReadModel
         return $this->container;
     }
 
-    private function insert(string $id, array $data): void
+    protected function insert(string $id, array $data): void
     {
         $this->container[$id] = $data;
     }
 
-    private function update(string $id, string $field, mixed $value): void
+    protected function update(string $id, string $field, mixed $value): void
     {
         $this->container[$id][$field] = $value;
     }
 
-    private function increment(string $id, string $field, int|float $value, array $extra = []): void
+    protected function increment(string $id, string $field, int|float $value, array $extra = []): void
     {
         $this->container[$id][$field] += abs($value);
 
@@ -59,7 +59,7 @@ final class InMemoryReadModel implements ReadModel
         }
     }
 
-    private function decrement(string $id, string $field, int|float $value, array $extra = []): void
+    protected function decrement(string $id, string $field, int|float $value, array $extra = []): void
     {
         $this->container[$id][$field] -= abs($value);
 
@@ -68,7 +68,7 @@ final class InMemoryReadModel implements ReadModel
         }
     }
 
-    private function delete(string $id): void
+    protected function delete(string $id): void
     {
         unset($this->container[$id]);
     }
