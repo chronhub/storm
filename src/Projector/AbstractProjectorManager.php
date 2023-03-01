@@ -22,29 +22,29 @@ abstract class AbstractProjectorManager implements ProjectorManager
 
     public function projectQuery(array $options = []): QueryProjector
     {
-        $context = $this->createProjectorContext($options, false);
+        $context = $this->createContext($options, false);
 
         return new ProjectQuery($context, $this->chronicler);
     }
 
     public function projectProjection(string $streamName, array $options = []): ProjectionProjector
     {
-        $context = $this->createProjectorContext($options, true);
+        $context = $this->createContext($options, true);
 
-        $provider = $this->createPersistentStore($context, $streamName);
+        $provider = $this->createStore($context, $streamName);
 
-        $repository = $this->createProjectorRepository($context, $provider, null);
+        $repository = $this->createRepository($context, $provider, null);
 
         return new ProjectProjection($context, $repository, $this->chronicler, $streamName);
     }
 
     public function projectReadModel(string $streamName, ReadModel $readModel, array $option = []): ReadModelProjector
     {
-        $context = $this->createProjectorContext($option, true);
+        $context = $this->createContext($option, true);
 
-        $provider = $this->createPersistentStore($context, $streamName);
+        $provider = $this->createStore($context, $streamName);
 
-        $repository = $this->createProjectorRepository($context, $provider, $readModel);
+        $repository = $this->createRepository($context, $provider, $readModel);
 
         return new ProjectReadModel($context, $repository, $this->chronicler, $streamName, $readModel);
     }
@@ -97,9 +97,9 @@ abstract class AbstractProjectorManager implements ProjectorManager
         return $this->queryScope;
     }
 
-    abstract protected function createProjectorRepository(Context $context,
-                                                          Store $store,
-                                                          ?ReadModel $readModel): ProjectorRepository;
+    abstract protected function createRepository(Context $context,
+                                                 Store $store,
+                                                 ?ReadModel $readModel): ProjectorRepository;
 
     /**
      * @throws ProjectionNotFound

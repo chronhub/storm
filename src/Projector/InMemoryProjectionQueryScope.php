@@ -35,7 +35,7 @@ final class InMemoryProjectionQueryScope implements ProjectionQueryScope
                         throw new InvalidArgumentException("Internal position header must return an integer, current is $internalPosition");
                     }
 
-                    return $internalPosition >= $position ? $event : null;
+                    return ($internalPosition >= $position) ? $event : null;
                 };
             }
 

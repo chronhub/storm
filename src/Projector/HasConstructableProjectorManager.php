@@ -33,20 +33,20 @@ trait HasConstructableProjectorManager
     {
     }
 
-    protected function createPersistentStore(Context $context, string $streamName): Store
+    protected function createStore(Context $context, string $streamName): Store
     {
         return new StandaloneStore(
             $context,
             $this->projectionProvider,
-            $this->createProjectorLock($context->option),
+            $this->createLock($context->option),
             $this->jsonSerializer,
             $streamName
         );
     }
 
-    protected function createProjectorContext(array $options, $isPersistent): Context
+    protected function createContext(array $options, $isPersistent): Context
     {
-        $option = $this->createProjectorOption($options);
+        $option = $this->createOption($options);
 
         $eventCounter = $isPersistent ? new EventCounter($option->getBlockSize()) : null;
 
@@ -57,16 +57,12 @@ trait HasConstructableProjectorManager
         return new Context($option, $streamPositions, $eventCounter, $gapDetector);
     }
 
-    protected function createProjectorLock(ProjectorOption $option): RepositoryLock
+    protected function createLock(ProjectorOption $option): RepositoryLock
     {
-        return new RepositoryLock(
-            $this->clock,
-            $option->timeout,
-            $option->lockout
-        );
+        return new RepositoryLock($this->clock, $option->timeout, $option->lockout);
     }
 
-    protected function createProjectorOption(array $option): ProjectorOption
+    protected function createOption(array $option): ProjectorOption
     {
         if ($this->options instanceof ProjectorOption) {
             return $this->options;

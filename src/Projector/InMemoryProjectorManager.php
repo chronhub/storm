@@ -17,7 +17,7 @@ use Chronhub\Storm\Projector\Repository\PersistentProjectorRepository;
 
 final class InMemoryProjectorManager extends AbstractProjectorManager
 {
-    protected function createProjectorRepository(Context $context, Store $store, ?ReadModel $readModel): ProjectorRepository
+    protected function createRepository(Context $context, Store $store, ?ReadModel $readModel): ProjectorRepository
     {
         $store = new InMemoryStore($store);
 
