@@ -75,10 +75,6 @@ abstract class EventProcessor
 
             $context->status = $repository->disclose();
 
-            // even with the projection lock, and a specific exception thrown (ProjectionAlreadyRunning),
-            // another projection can still acquire the lock,
-            // which will failed eventually and put the projection status idle
-            // so, we just assume the projection is still running
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
             if (! in_array($context->status, $keepProjectionRunning, true)) {

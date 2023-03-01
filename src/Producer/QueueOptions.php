@@ -14,8 +14,8 @@ class QueueOptions implements JsonSerializable
         public readonly ?int $tries = null,
         public readonly ?int $maxExceptions = null,
         public readonly null|int|string $delay = null,
-        public readonly null|int $timeout = null,
-        public readonly null|int $backoff = null,
+        public readonly ?int $timeout = null,
+        public readonly ?int $backoff = null,
         ) {
     }
 

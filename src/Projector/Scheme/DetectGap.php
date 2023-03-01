@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector\Scheme;
 use DateInterval;
 use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use function count;
 use function usleep;
 use function array_key_exists;
 
@@ -27,7 +26,7 @@ class DetectGap
     public function detect(string $streamName, int $eventPosition, string $eventTime): bool
     {
         // no retries setup
-        if (count($this->retriesInMs) === 0) {
+        if (empty($this->retriesInMs)) {
             return false;
         }
 
@@ -41,8 +40,8 @@ class DetectGap
         $gapDetected = array_key_exists($this->retries, $this->retriesInMs);
 
         // when the max attempts of retries has been reached, we just give up
-        // if most of the time, it just a fake gap causing by deadlock for ex
-        // this can be a real issue cause the projection miss an event
+        // if most of the time, it just a fake gap causing by deadlock/exceeded timeout ...
+        // this can be a real issue cause by the ES miss an event
         if (! $gapDetected) {
             $this->resetRetries();
 

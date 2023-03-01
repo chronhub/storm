@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Message;
 
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 
-final class ChainMessageDecorator implements MessageDecorator
+final readonly class ChainMessageDecorator implements MessageDecorator
 {
-    private readonly array $messageDecorators;
+    private array $messageDecorators;
 
     public function __construct(MessageDecorator ...$messageDecorators)
     {

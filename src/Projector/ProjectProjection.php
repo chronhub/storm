@@ -69,7 +69,7 @@ final readonly class ProjectProjection implements ProjectionProjector
     }
 
     /**
-     * Check if stream name already exists in cache and/or in the chronicler
+     * Check if stream name already exists in cache and/or in the event store
      */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {
