@@ -11,16 +11,22 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
 final class V4AggregateIdTest extends UnitTestCase
 {
+    private AggregateIdentity|V4AggregateId $aggregateId;
+
+    protected function setUp(): void
+    {
+        $this->aggregateId = V4AggregateId::create();
+    }
+
     /**
      * @test
      */
     public function it_can_be_created(): void
     {
-        $aggregateId = V4AggregateId::create();
+        $this->assertInstanceOf(AggregateIdentity::class, $this->aggregateId);
+        $this->assertInstanceOf(V4AggregateId::class, $this->aggregateId);
 
-        $this->assertInstanceOf(AggregateIdentity::class, $aggregateId);
-
-        $this->assertInstanceOf(Uuid::class, $aggregateId->identifier);
+        $this->assertInstanceOf(Uuid::class, $this->aggregateId->identifier);
     }
 
     /**
@@ -28,7 +34,7 @@ final class V4AggregateIdTest extends UnitTestCase
      */
     public function it_can_be_instantiated_from_string(): void
     {
-        $aggregateId = V4AggregateId::create();
+        $aggregateId = $this->aggregateId;
 
         $fromString = V4AggregateId::fromString((string) $aggregateId);
 
@@ -41,7 +47,7 @@ final class V4AggregateIdTest extends UnitTestCase
      */
     public function it_can_be_compared(): void
     {
-        $aggregateId = V4AggregateId::create();
+        $aggregateId = $this->aggregateId;
         $anotherAggregateId = V4AggregateId::create();
 
         $this->assertNotSame($aggregateId, $anotherAggregateId);

@@ -42,7 +42,7 @@ final class AggregateTypeTest extends UnitTestCase
     /**
      * @test
      */
-    public function it_raise_exception_when_children_are_not_subclass_of_aggregate_root(): void
+    public function it_raise_exception_when_lineage_are_not_subclass_of_aggregate_root(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Class '.stdClass::class.' must inherit from '.AnotherAggregateRootStub::class);

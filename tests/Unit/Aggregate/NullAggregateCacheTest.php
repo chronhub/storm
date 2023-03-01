@@ -14,6 +14,15 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
 final class NullAggregateCacheTest extends UnitTestCase
 {
+    private NullAggregateCache $aggregateCache;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->aggregateCache = new NullAggregateCache();
+    }
+
     /**
      * @test
      *
@@ -21,9 +30,7 @@ final class NullAggregateCacheTest extends UnitTestCase
      */
     public function it_always_return_null_to_get_aggregate(AggregateIdentity $aggregateId): void
     {
-        $aggregateCache = new NullAggregateCache();
-
-        $this->assertNull($aggregateCache->get($aggregateId));
+        $this->assertNull($this->aggregateCache->get($aggregateId));
     }
 
     /**
@@ -33,9 +40,7 @@ final class NullAggregateCacheTest extends UnitTestCase
      */
     public function it_always_return_null_to_check_if_aggregate_exists_in_cache(AggregateIdentity $aggregateId): void
     {
-        $aggregateCache = new NullAggregateCache();
-
-        $this->assertFalse($aggregateCache->has($aggregateId));
+        $this->assertFalse($this->aggregateCache->has($aggregateId));
     }
 
     /**
@@ -43,12 +48,10 @@ final class NullAggregateCacheTest extends UnitTestCase
      */
     public function it_always_return_zero_when_counting_aggregates_in_cache(): void
     {
-        $aggregateCache = new NullAggregateCache();
+        $this->aggregateCache->put(AggregateRootStub::create(V4AggregateId::create()));
+        $this->aggregateCache->put(AnotherAggregateRootStub::create(V4AggregateId::create()));
 
-        $aggregateCache->put(AggregateRootStub::create(V4AggregateId::create()));
-        $aggregateCache->put(AnotherAggregateRootStub::create(V4AggregateId::create()));
-
-        $this->assertEquals(0, $aggregateCache->count());
+        $this->assertEquals(0, $this->aggregateCache->count());
     }
 
     /**
@@ -56,7 +59,7 @@ final class NullAggregateCacheTest extends UnitTestCase
      */
     public function it_does_not_flush(): void
     {
-        $aggregateCache = new NullAggregateCache();
+        $aggregateCache = $this->aggregateCache;
 
         $cloneAggregateCache = clone $aggregateCache;
 
@@ -70,7 +73,7 @@ final class NullAggregateCacheTest extends UnitTestCase
      */
     public function it_does_not_forget(): void
     {
-        $aggregateCache = new NullAggregateCache();
+        $aggregateCache = $this->aggregateCache;
 
         $cloneAggregateCache = clone $aggregateCache;
 

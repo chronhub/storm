@@ -60,7 +60,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
     /**
      * @test
      */
-    public function it_filter_by_event_streams_with_string_or_instance_of_stream_name(): void
+    public function it_filter_by_event_streams_by_string_or_instance_of_stream_name(): void
     {
         $eventStream = new InMemoryEventStream();
 

@@ -10,6 +10,7 @@ use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
+use function iterator_to_array;
 
 final class HasAggregateBehaviorTest extends UnitTestCase
 {
@@ -33,11 +34,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
      */
     public function it_record_events(): void
     {
-        $events = [
-            SomeEvent::fromContent(['foo' => 'bar']),
-            SomeEvent::fromContent(['foo' => 'bar']),
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ];
+        $events = iterator_to_array($this->provideThreeDomainEvents());
 
         $aggregateId = V4AggregateId::create();
 
@@ -53,11 +50,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
      */
     public function it_release_events(): void
     {
-        $events = [
-            SomeEvent::fromContent(['foo' => 'bar']),
-            SomeEvent::fromContent(['foo' => 'bar']),
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ];
+        $events = iterator_to_array($this->provideThreeDomainEvents());
 
         $aggregateId = V4AggregateId::create();
 
@@ -78,7 +71,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
      */
     public function it_reconstitute_aggregate_from_events(): void
     {
-        $events = $this->provideDomainEvents();
+        $events = $this->provideThreeDomainEvents();
 
         $aggregateId = V4AggregateId::create();
 
@@ -115,7 +108,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertNull($aggregateRoot);
     }
 
-    public function provideDomainEvents(): Generator
+    public function provideThreeDomainEvents(): Generator
     {
         yield from [
             SomeEvent::fromContent(['foo' => 'bar']),

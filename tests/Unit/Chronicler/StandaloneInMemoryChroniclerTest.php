@@ -186,14 +186,14 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
      *
      * @dataProvider provideDirection
      */
-    public function it_retrieve_all_stream_events_with_direction(string $direction): void
+    public function it_retrieve_all_stream_events_with_sort_direction(string $sortDirection): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 5));
         $stream = new Stream($this->streamName, $events);
 
         $this->chronicler->firstCommit($stream);
 
-        $recordedEvents = $this->chronicler->retrieveAll($this->streamName, $this->aggregateId, $direction);
+        $recordedEvents = $this->chronicler->retrieveAll($this->streamName, $this->aggregateId, $sortDirection);
 
         $allEvents = [];
         foreach ($recordedEvents as $recordedEvent) {
@@ -205,7 +205,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 
         $range = range(1, 5);
 
-        if ('desc' === $direction) {
+        if ('desc' === $sortDirection) {
             $range = array_reverse($range);
         }
 
@@ -384,7 +384,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 5;
+                    return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::INTERNAL_POSITION) >= 5;
                 }
 
                 public function orderBy(): string
@@ -399,8 +399,11 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 3
-                        && $event->header(EventHeader::INTERNAL_POSITION) <= 5;
+                    return function (DomainEvent $event): bool {
+                        $internalPosition = (int) $event->header(EventHeader::INTERNAL_POSITION);
+
+                        return $internalPosition >= 3 && $internalPosition <= 5;
+                    };
                 }
 
                 public function orderBy(): string
@@ -415,8 +418,11 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
             {
                 public function apply(): callable
                 {
-                    return fn (DomainEvent $event): bool => $event->header(EventHeader::INTERNAL_POSITION) >= 1
-                        && $event->header(EventHeader::INTERNAL_POSITION) <= 4;
+                    return function (DomainEvent $event): bool {
+                        $internalPosition = (int) $event->header(EventHeader::INTERNAL_POSITION);
+
+                        return $internalPosition >= 1 && $internalPosition <= 4;
+                    };
                 }
 
                 public function orderBy(): string

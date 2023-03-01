@@ -24,7 +24,7 @@ final class EventDraftTest extends UnitTestCase
     /**
      * @test
      *
-     * @dataProvider provideValues
+     * @dataProvider provideDeferredValues
      */
     public function it_set_callback(mixed $value): void
     {
@@ -165,7 +165,7 @@ final class EventDraftTest extends UnitTestCase
         $draft->promise();
     }
 
-    public function provideValues(): Generator
+    public function provideDeferredValues(): Generator
     {
         yield [[]];
         yield [1];

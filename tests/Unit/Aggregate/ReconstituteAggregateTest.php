@@ -52,7 +52,7 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
      */
     public function it_reconstitute_aggregate_root_from_history(): void
     {
-        $events = iterator_to_array($this->provideDummyEvents());
+        $events = iterator_to_array($this->provideFourDummyEvents());
         $countEvents = count($events);
 
         $this->streamProducer
@@ -88,7 +88,7 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
      */
     public function it_reconstitute_aggregate_root_from_filtered_history(): void
     {
-        $events = iterator_to_array($this->provideDummyEvents());
+        $events = iterator_to_array($this->provideFourDummyEvents());
 
         $this->streamProducer
             ->toStreamName($this->someIdentity)
@@ -182,7 +182,7 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
         $this->assertNull($reconstituteAggregateRoot);
     }
 
-    private function provideDummyEvents(): Generator
+    private function provideFourDummyEvents(): Generator
     {
         yield from [
             SomeEvent::fromContent(['count' => 1]),

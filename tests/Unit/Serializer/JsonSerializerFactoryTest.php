@@ -15,6 +15,7 @@ use Chronhub\Storm\Serializer\JsonSerializerFactory;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Symfony\Component\Serializer\Normalizer\DateIntervalNormalizer;
 
 final class JsonSerializerFactoryTest extends ProphecyTestCase
 {
@@ -63,7 +64,7 @@ final class JsonSerializerFactoryTest extends ProphecyTestCase
 
         $factory = new JsonSerializerFactory(fn () => $this->container->reveal());
 
-        $factory->createMessageSerializer(null, UidNormalizer::class);
+        $factory->createMessageSerializer(null, UidNormalizer::class, new DateIntervalNormalizer());
     }
 
     /**
@@ -75,6 +76,6 @@ final class JsonSerializerFactoryTest extends ProphecyTestCase
 
         $factory = new JsonSerializerFactory(fn () => $this->container->reveal());
 
-        $factory->createStreamSerializer(null, UidNormalizer::class);
+        $factory->createStreamSerializer(null, UidNormalizer::class, new DateIntervalNormalizer());
     }
 }
