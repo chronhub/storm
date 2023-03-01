@@ -15,7 +15,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_serialize_event_content(): void
+    public function it_return_message_content(): void
     {
         $event = new SomeCommand(['name' => 'steph bug']);
 
@@ -33,7 +33,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Messaging to be serialized');
+        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Reporting to be serialized');
 
         (new MessagingContentSerializer())->serialize(new stdClass());
     }
@@ -41,11 +41,14 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_unserialize_event_content(): void
+    public function it_return_reporting_instance_from_array_content(): void
     {
         $contentSerializer = new MessagingContentSerializer();
 
-        $event = $contentSerializer->unserialize(SomeCommand::class, ['content' => ['name' => 'steph bug']]);
+        $event = $contentSerializer->unserialize(
+            SomeCommand::class,
+            ['content' => ['name' => 'steph bug']]
+        );
 
         $this->assertInstanceOf(SomeCommand::class, $event);
         $this->assertEquals(['name' => 'steph bug'], $event->toContent());
@@ -54,7 +57,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_raise_exception_with_invalid_source_during_unserialization(): void
+    public function it_raise_exception_with_invalid_source_during_unserialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

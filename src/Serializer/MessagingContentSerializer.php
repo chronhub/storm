@@ -14,7 +14,7 @@ final class MessagingContentSerializer implements ContentSerializer
     public function serialize(object $event): array
     {
         if (! $event instanceof Reporting) {
-            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Messaging to be serialized');
+            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Reporting to be serialized');
         }
 
         return $event->toContent();
