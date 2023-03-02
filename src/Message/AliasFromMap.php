@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Message;
 
 use InvalidArgumentException;
+use function class_exists;
 
 final readonly class AliasFromMap
 {
@@ -24,7 +25,7 @@ final readonly class AliasFromMap
 
     private function determineAlias(string $eventClass): string
     {
-        if ( ! class_exists($eventClass)) {
+        if (! class_exists($eventClass)) {
             throw new InvalidArgumentException("Event class $eventClass does not exists");
         }
 

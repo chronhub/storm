@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Tracker\Listener;
+use Generator;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Tracker\StreamTracker;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
-use Generator;
 
 readonly class EventChronicler implements EventableChronicler
 {

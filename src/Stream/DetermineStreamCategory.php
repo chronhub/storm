@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Chronhub\Storm\Stream;
 
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use function strpos;
+use function substr;
 
 final readonly class DetermineStreamCategory implements StreamCategory
 {

@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
+use InvalidArgumentException;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateType as Type;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Reporter\DomainEvent;
-use InvalidArgumentException;
+use function is_a;
+use function in_array;
+use function class_exists;
 
 final readonly class AggregateType implements Type
 {
     /**
-     * @param class-string $concrete
+     * @param  class-string  $concrete
      * @param array{class-string} $map
      */
     public function __construct(private string $concrete,
@@ -61,7 +64,6 @@ final readonly class AggregateType implements Type
     }
 
     /**
-     *
      * @throws InvalidArgumentException
      */
     private function assertAggregateIsSupported(string $aggregate): void
