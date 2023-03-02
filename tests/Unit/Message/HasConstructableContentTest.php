@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Message\HasConstructableContent;
 
 final class HasConstructableContentTest extends UnitTestCase
@@ -40,6 +41,22 @@ final class HasConstructableContentTest extends UnitTestCase
 
         $this->assertEquals(['name' => 'steph bug'], $someContent->toContent());
         $this->assertEquals(['name' => 'steph bug'], $someContent->content);
+    }
+
+    /**
+     * @test
+     */
+    public function it_return_new_instance_from_static_call(): void
+    {
+        $someDomain = (new SomeEvent(['name' => 'steph bug']))->withHeaders(['foo' => 'bar']);
+
+        $newDomain = $someDomain::fromContent(['name' => 'steph']);
+
+        $this->assertNotSame($someDomain, $newDomain);
+
+        $this->assertEquals(['name' => 'steph bug'], $someDomain->toContent());
+        $this->assertEquals(['foo' => 'bar'], $someDomain->headers());
+        $this->assertEquals([], $newDomain->headers());
     }
 
     public function newInstance(array $content = []): object
