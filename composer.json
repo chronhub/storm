@@ -22,7 +22,7 @@
   },
   "require-dev": {
     "rector/rector": "dev-main",
-    "laravel/pint": "^1.5",
+    "laravel/pint": "^1.6",
     "phpstan/phpstan":"^1.10",
     "jangregor/phpstan-prophecy": "^1.0",
     "nunomaduro/larastan": "^2.4",
