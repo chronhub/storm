@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Pipes;
 
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Closure;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;

@@ -17,7 +17,7 @@ final readonly class AggregateType implements Type
 {
     /**
      * @param  class-string  $concrete
-     * @param array<class-string> $map
+     * @param  array<class-string>  $map
      */
     public function __construct(private string $concrete,
                                 private array $map = [])
