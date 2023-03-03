@@ -8,7 +8,7 @@ use Chronhub\Storm\Projector\Scheme\Context;
 
 final class PreparePersistentRunner
 {
-    use RetrieveRemoteStatus;
+    use WhenRetrieveRemoteStatus;
 
     private bool $isInitialized = false;
 

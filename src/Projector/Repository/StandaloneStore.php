@@ -18,7 +18,7 @@ final class StandaloneStore implements Store
     public function __construct(public Context $context,
                                 public ProjectionProvider $projectionProvider,
                                 public RepositoryLock $repositoryLock,
-                                public JsonSerializer $jsonSerializer,
+                                public JsonSerializer $serializer,
                                 public string $streamName)
     {
     }
@@ -39,9 +39,9 @@ final class StandaloneStore implements Store
             throw ProjectionNotFound::withName($this->streamName);
         }
 
-        $this->context->streamPosition->discover($this->jsonSerializer->decode($projection->position()));
+        $this->context->streamPosition->discover($this->serializer->decode($projection->position()));
 
-        $state = $this->jsonSerializer->decode($projection->state());
+        $state = $this->serializer->decode($projection->state());
 
         if (is_array($state) && ! empty($state)) {
             $this->context->state->put($state);
@@ -95,8 +95,8 @@ final class StandaloneStore implements Store
     {
         return $this->updateprojection(
             [
-                'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
-                'state' => $this->jsonSerializer->encode($this->context->state->get()),
+                'position' => $this->serializer->encode($this->context->streamPosition->all()),
+                'state' => $this->serializer->encode($this->context->state->get()),
                 'locked_until' => $this->repositoryLock->refresh(),
             ]
         );
@@ -110,8 +110,8 @@ final class StandaloneStore implements Store
 
         return $this->updateProjection(
             [
-                'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
-                'state' => $this->jsonSerializer->encode($this->context->state->get()),
+                'position' => $this->serializer->encode($this->context->streamPosition->all()),
+                'state' => $this->serializer->encode($this->context->state->get()),
                 'status' => $this->context->status->value,
             ]
         );
@@ -171,7 +171,7 @@ final class StandaloneStore implements Store
             return $this->updateProjection(
                 [
                     'locked_until' => $this->repositoryLock->update(),
-                    'position' => $this->jsonSerializer->encode($this->context->streamPosition->all()),
+                    'position' => $this->serializer->encode($this->context->streamPosition->all()),
                 ]
             );
         }

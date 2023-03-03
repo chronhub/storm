@@ -8,7 +8,7 @@ use Chronhub\Storm\Projector\Scheme\Context;
 
 final class UpdateStatusAndPositions
 {
-    use RetrieveRemoteStatus;
+    use WhenRetrieveRemoteStatus;
 
     public function __invoke(Context $context, callable $next): callable|bool
     {

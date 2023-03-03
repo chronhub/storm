@@ -17,7 +17,7 @@ final readonly class AggregateType implements Type
 {
     /**
      * @param  class-string  $concrete
-     * @param array{class-string} $map
+     * @param array<class-string> $map
      */
     public function __construct(private string $concrete,
                                 private array $map = [])
@@ -63,6 +63,11 @@ final readonly class AggregateType implements Type
         return in_array($aggregateRoot, $this->map, true);
     }
 
+    public function current(): string
+    {
+        return $this->concrete;
+    }
+
     /**
      * @throws InvalidArgumentException
      */
@@ -71,10 +76,5 @@ final readonly class AggregateType implements Type
         if (! $this->isSupported($aggregate)) {
             throw new InvalidArgumentException("Aggregate root $aggregate class is not supported");
         }
-    }
-
-    public function current(): string
-    {
-        return $this->concrete;
     }
 }

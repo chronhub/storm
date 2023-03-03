@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Pipes;
 
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Closure;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Projector\Scheme\Context;
@@ -25,7 +26,7 @@ final readonly class HandleStreamEvent
 
     public function __invoke(Context $context, Closure $next): callable|bool
     {
-        $streams = $this->retrieveStreams($context);
+        $streams = $this->retrieveStreams($context->streamPosition->all(), $context->queryFilter());
 
         $eventHandlers = $context->eventHandlers();
 
@@ -42,13 +43,11 @@ final readonly class HandleStreamEvent
         return $next($context);
     }
 
-    private function retrieveStreams(Context $context): SortStreamIterator
+    private function retrieveStreams(array $streamPositions, QueryFilter $queryFilter): SortStreamIterator
     {
         $iterator = [];
 
-        $queryFilter = $context->queryFilter();
-
-        foreach ($context->streamPosition->all() as $streamName => $position) {
+        foreach ($streamPositions as $streamName => $position) {
             if ($queryFilter instanceof ProjectionQueryFilter) {
                 $queryFilter->setCurrentPosition($position + 1);
             }

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Pipes;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 
-trait RetrieveRemoteStatus
+trait WhenRetrieveRemoteStatus
 {
     public function __construct(protected readonly ProjectorRepository $repository)
     {
