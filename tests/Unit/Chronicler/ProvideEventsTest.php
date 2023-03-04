@@ -9,10 +9,10 @@ use Throwable;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Contracts\Tracker\StreamStory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -23,23 +23,24 @@ use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use function count;
 use function iterator_to_array;
 
-final class ProvideEventsTest extends ProphecyTestCase
+final class ProvideEventsTest extends UnitTestCase
 {
-    private Chronicler|ObjectProphecy $chronicler;
+    private Chronicler|MockObject $chronicler;
+
+    private AggregateIdentity|MockObject $aggregateId;
 
     private Stream $stream;
-
-    private AggregateIdentity $aggregateId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->stream = new Stream(new StreamName('account'), []);
-        $this->chronicler = $this->prophesize(Chronicler::class);
-        $this->aggregateId = $this->prophesize(AggregateIdentity::class)->reveal();
+        $this->chronicler = $this->createMock(Chronicler::class);
+        $this->aggregateId = $this->createMock(AggregateIdentity::class);
     }
 
     /**
@@ -47,7 +48,9 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_dispatch_first_commit_event(): void
     {
-        $this->chronicler->firstCommit($this->stream)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('firstCommit')
+            ->with($this->stream);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FIRST_COMMIT_EVENT,
@@ -69,7 +72,10 @@ final class ProvideEventsTest extends ProphecyTestCase
 
         $exception = StreamAlreadyExists::withStreamName(new StreamName('foo'));
 
-        $this->chronicler->firstCommit($this->stream)->willThrow($exception)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('firstCommit')
+            ->with($this->stream)
+            ->willThrowException($exception);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FIRST_COMMIT_EVENT,
@@ -88,7 +94,9 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_dispatch_persist_stream_event(): void
     {
-        $this->chronicler->amend($this->stream)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('amend')
+            ->with($this->stream);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::PERSIST_STREAM_EVENT,
@@ -110,7 +118,10 @@ final class ProvideEventsTest extends ProphecyTestCase
     {
         $this->expectException($exception::class);
 
-        $this->chronicler->amend($this->stream)->willThrow($exception)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('amend')
+            ->with($this->stream)
+            ->willThrowException($exception);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::PERSIST_STREAM_EVENT,
@@ -128,7 +139,9 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_dispatch_delete_stream_event(): void
     {
-        $this->chronicler->delete($this->stream->name())->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('delete')
+            ->with($this->stream->name());
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::DELETE_STREAM_EVENT,
@@ -154,9 +167,14 @@ final class ProvideEventsTest extends ProphecyTestCase
         ];
 
         $this->chronicler
-            ->retrieveAll($this->stream->name(), $this->aggregateId, $direction)
-            ->willYield($expectedEvents)
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('retrieveAll')
+            ->with($this->stream->name(), $this->aggregateId, $direction)
+            ->will($this->returnCallback(function () use ($expectedEvents): Generator {
+                yield from $expectedEvents;
+
+                return count($expectedEvents);
+            }));
 
         $eventChronicler = $this->eventChroniclerInstance(
             $eventName,
@@ -184,9 +202,10 @@ final class ProvideEventsTest extends ProphecyTestCase
         $exception = StreamNotFound::withStreamName($this->stream->name());
 
         $this->chronicler
-            ->retrieveAll($this->stream->name(), $this->aggregateId, $direction)
-            ->willThrow($exception)
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('retrieveAll')
+            ->with($this->stream->name(), $this->aggregateId, $direction)
+            ->willThrowException($exception);
 
         $eventChronicler = $this->eventChroniclerInstance(
             $eventName,
@@ -194,9 +213,7 @@ final class ProvideEventsTest extends ProphecyTestCase
                 $this->assertEquals($eventName, $story->currentEvent());
                 $this->assertTrue($story->hasStreamNotFound());
 
-                $this->assertEquals([
-                    $this->stream->name(), $this->aggregateId, $direction,
-                ], $story->promise());
+                $this->assertEquals([$this->stream->name(), $this->aggregateId, $direction], $story->promise());
             }
         );
 
@@ -212,7 +229,10 @@ final class ProvideEventsTest extends ProphecyTestCase
 
         $exception = StreamNotFound::withStreamName($this->stream->name());
 
-        $this->chronicler->delete($this->stream->name())->willThrow($exception)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('delete')
+            ->with($this->stream->name())
+            ->willThrowException($exception);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::DELETE_STREAM_EVENT,
@@ -231,7 +251,7 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_dispatch_retrieve_events_with_query_filter(): void
     {
-        $queryFilter = $this->prophesize(QueryFilter::class)->reveal();
+        $queryFilter = $this->createMock(QueryFilter::class);
 
         $expectedEvents = [
             new Message(SomeEvent::fromContent(['foo' => 'bar'])),
@@ -239,9 +259,14 @@ final class ProvideEventsTest extends ProphecyTestCase
         ];
 
         $this->chronicler
-            ->retrieveFiltered($this->stream->name(), $queryFilter)
-            ->willYield($expectedEvents)
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('retrieveFiltered')
+            ->with($this->stream->name(), $queryFilter)
+            ->will($this->returnCallback(function () use ($expectedEvents): Generator {
+                yield from $expectedEvents;
+
+                return count($expectedEvents);
+            }));
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FILTERED_STREAM_EVENT,
@@ -268,12 +293,13 @@ final class ProvideEventsTest extends ProphecyTestCase
 
         $exception = StreamNotFound::withStreamName($this->stream->name());
 
-        $queryFilter = $this->prophesize(QueryFilter::class)->reveal();
+        $queryFilter = $this->createMock(QueryFilter::class);
 
         $this->chronicler
-            ->retrieveFiltered($this->stream->name(), $queryFilter)
-            ->willThrow($exception)
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('retrieveFiltered')
+            ->with($this->stream->name(), $queryFilter)
+            ->willThrowException($exception);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FILTERED_STREAM_EVENT,
@@ -294,7 +320,10 @@ final class ProvideEventsTest extends ProphecyTestCase
      */
     public function it_dispatch_has_stream_event(bool $streamExists): void
     {
-        $this->chronicler->hasStream($this->stream->name())->willReturn($streamExists)->shouldBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('hasStream')
+            ->with($this->stream->name())
+            ->willReturn($streamExists);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::HAS_STREAM_EVENT,
@@ -317,9 +346,10 @@ final class ProvideEventsTest extends ProphecyTestCase
         $barStreamName = new StreamName('bar');
 
         $this->chronicler
-            ->filterStreamNames($fooStreamName, $barStreamName)
-            ->willReturn([$fooStreamName])
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('filterStreamNames')
+            ->with($fooStreamName, $barStreamName)
+            ->willReturn([$fooStreamName]);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FILTER_STREAM_NAMES,
@@ -341,9 +371,10 @@ final class ProvideEventsTest extends ProphecyTestCase
         $categories = ['user-123', 'user-124'];
 
         $this->chronicler
-            ->filterCategoryNames('user-123', 'user-124')
-            ->willReturn($categories)
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('filterCategoryNames')
+            ->with('user-123', 'user-124')
+            ->willReturn($categories);
 
         $eventChronicler = $this->eventChroniclerInstance(
             EventableChronicler::FILTER_CATEGORY_NAMES,
@@ -363,13 +394,14 @@ final class ProvideEventsTest extends ProphecyTestCase
     public function it_unsubscribe_listener_from_tracker(): void
     {
         $this->chronicler
-            ->filterCategoryNames('nope')
-            ->willReturn(['nope'])
-            ->shouldBeCalledTimes(3);
+            ->expects($this->exactly(3))
+            ->method('filterCategoryNames')
+            ->with('nope')
+            ->willReturn(['nope']);
 
         $tracker = new TrackStream();
 
-        $eventChronicler = new EventChronicler($this->chronicler->reveal(), $tracker);
+        $eventChronicler = new EventChronicler($this->chronicler, $tracker);
 
         $count = 0;
         $listener = $eventChronicler->subscribe(
@@ -396,9 +428,9 @@ final class ProvideEventsTest extends ProphecyTestCase
     {
         $tracker = new TrackStream();
 
-        $eventChronicler = new EventChronicler($this->chronicler->reveal(), $tracker);
+        $eventChronicler = new EventChronicler($this->chronicler, $tracker);
 
-        $this->assertEquals($this->chronicler->reveal(), $eventChronicler->innerChronicler());
+        $this->assertEquals($this->chronicler, $eventChronicler->innerChronicler());
     }
 
     /**
@@ -408,11 +440,14 @@ final class ProvideEventsTest extends ProphecyTestCase
     {
         $tracker = new TrackStream();
 
-        $eventStreamProvider = $this->prophesize(EventStreamProvider::class)->reveal();
+        $eventStreamProvider = $this->createMock(EventStreamProvider::class);
 
-        $this->chronicler->getEventStreamProvider()->willReturn($eventStreamProvider)->shouldBeCalledOnce();
+        $this->chronicler
+            ->expects($this->once())
+            ->method('getEventStreamProvider')
+            ->willReturn($eventStreamProvider);
 
-        $eventChronicler = new EventChronicler($this->chronicler->reveal(), $tracker);
+        $eventChronicler = new EventChronicler($this->chronicler, $tracker);
 
         $this->assertSame($eventStreamProvider, $eventChronicler->getEventStreamProvider());
     }
@@ -440,10 +475,7 @@ final class ProvideEventsTest extends ProphecyTestCase
 
     private function eventChroniclerInstance(string $event, callable $assert): EventChronicler
     {
-        $eventChronicler = new EventChronicler(
-            $this->chronicler->reveal(),
-            new TrackStream(),
-        );
+        $eventChronicler = new EventChronicler($this->chronicler, new TrackStream());
 
         $eventChronicler->subscribe($event, $assert);
 

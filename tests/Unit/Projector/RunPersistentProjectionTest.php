@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use RuntimeException;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
 
 /**
  * @coversDefaultClass \Chronhub\Storm\Projector\RunProjection
  */
-final class RunPersistentProjectionTest extends ProphecyTestCase
+final class RunPersistentProjectionTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -38,9 +38,9 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
             },
         ];
 
-        $this->repository->freed()->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('freed');
 
-        $runner = new RunProjection($pipes, $this->repository->reveal());
+        $runner = new RunProjection($pipes, $this->repository);
 
         $context = $this->newContext();
 
@@ -62,9 +62,9 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
             },
         ];
 
-        $this->repository->freed()->shouldNotBeCalled();
+        $this->repository->expects($this->never())->method('freed');
 
-        $runner = new RunProjection($pipes, $this->repository->reveal());
+        $runner = new RunProjection($pipes, $this->repository);
 
         $context = $this->newContext();
 
@@ -85,9 +85,9 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
             },
         ];
 
-        $this->repository->freed()->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('freed');
 
-        $runner = new RunProjection($pipes, $this->repository->reveal());
+        $runner = new RunProjection($pipes, $this->repository);
 
         $context = $this->newContext();
 
@@ -110,9 +110,9 @@ final class RunPersistentProjectionTest extends ProphecyTestCase
 
         $onReleaseLockException = new ProjectionFailed('something went wrong');
 
-        $this->repository->freed()->willThrow($onReleaseLockException)->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('freed')->willThrowException($onReleaseLockException);
 
-        $runner = new RunProjection($pipes, $this->repository->reveal());
+        $runner = new RunProjection($pipes, $this->repository);
 
         $context = $this->newContext();
 

@@ -7,16 +7,16 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 use stdClass;
 use Generator;
 use Chronhub\Storm\Message\Message;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Message\MessageFactory;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\Double\SomeQuery;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 
-final class MessageFactoryTest extends ProphecyTestCase
+final class MessageFactoryTest extends UnitTestCase
 {
     /**
      * @test
@@ -25,12 +25,14 @@ final class MessageFactoryTest extends ProphecyTestCase
     {
         $expectedMessage = new Message(new stdClass());
 
-        $this->messageSerializer
-            ->unserializeContent(['foo' => 'bar'])
-            ->willYield([$expectedMessage])
-            ->shouldBeCalled();
+        $this->messageSerializer->expects($this->once())
+            ->method('unserializeContent')
+            ->with(['foo' => 'bar'])
+            ->will($this->returnCallback(function () use ($expectedMessage): Generator {
+                yield $expectedMessage;
+            }));
 
-        $factory = new MessageFactory($this->messageSerializer->reveal());
+        $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory(['foo' => 'bar']);
 
@@ -44,7 +46,7 @@ final class MessageFactoryTest extends ProphecyTestCase
     {
         $expectedMessage = new Message(new stdClass());
 
-        $factory = new MessageFactory($this->messageSerializer->reveal());
+        $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory($expectedMessage);
 
@@ -58,7 +60,7 @@ final class MessageFactoryTest extends ProphecyTestCase
      */
     public function it_create_message_from_domain_instance(Reporting $domain): void
     {
-        $factory = new MessageFactory($this->messageSerializer->reveal());
+        $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory($domain);
 
@@ -74,7 +76,7 @@ final class MessageFactoryTest extends ProphecyTestCase
     {
         $expectedEvent = $domain->withHeader('some', 'header');
 
-        $factory = new MessageFactory($this->messageSerializer->reveal());
+        $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory($expectedEvent);
 
@@ -91,12 +93,12 @@ final class MessageFactoryTest extends ProphecyTestCase
         yield [SomeQuery::fromContent($content)];
     }
 
-    private readonly MessageSerializer|ObjectProphecy $messageSerializer;
+    private MessageSerializer|MockObject $messageSerializer;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->messageSerializer = $this->prophesize(MessageSerializer::class);
+        $this->messageSerializer = $this->createMock(MessageSerializer::class);
     }
 }

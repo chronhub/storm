@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\DispatchSignal;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;
 use function posix_getpid;
 use function extension_loaded;
 
-final class DispatchSignalTest extends ProphecyTestCase
+final class DispatchSignalTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -26,7 +26,9 @@ final class DispatchSignalTest extends ProphecyTestCase
             $this->markTestSkipped('Extension posix not available');
         }
 
-        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
+        $this->option->expects($this->once())
+            ->method('getSignal')
+            ->willReturn(true);
 
         $result = null;
 
@@ -52,7 +54,9 @@ final class DispatchSignalTest extends ProphecyTestCase
             $this->markTestSkipped('Extension posix not available');
         }
 
-        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
+        $this->option->expects($this->once())
+            ->method('getSignal')
+            ->willReturn(false);
 
         $result = null;
 

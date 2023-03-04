@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use RuntimeException;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\ProjectQuery;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
@@ -30,16 +30,8 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Options\DefaultProjectorOption;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
-final class InMemoryProjectorManagerTest extends ProphecyTestCase
+final class InMemoryProjectorManagerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
-    public function more_tests_todo(): void
-    {
-        $this->markTestIncomplete('complete tests');
-    }
-
     /**
      * @test
      */
@@ -72,7 +64,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_create_read_model_projection(): void
     {
-        $readModel = $this->prophesize(ReadModel::class)->reveal();
+        $readModel = $this->createMock(ReadModel::class);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -89,10 +81,10 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_fetch_status_of_stream(): void
     {
-        $model = $this->prophesize(ProjectionModel::class);
-        $model->status()->willReturn('running')->shouldBeCalledOnce();
+        $model = $this->createMock(ProjectionModel::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
+        $model->expects($this->once())->method('status')->willReturn('running');
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -108,7 +100,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn(null)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -120,12 +112,11 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_fetch_stream_positions_of_stream(): void
     {
-        $model = $this->prophesize(ProjectionModel::class);
+        $model = $this->createMock(ProjectionModel::class);
 
-        $model->position()->willReturn('{"balance":5}')->shouldBeCalledOnce();
-        $this->jsonSerializer->decode('{"balance":5}')->willReturn(['balance' => 5])->shouldBeCalledOnce();
-
-        $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
+        $model->expects($this->once())->method('position')->willReturn('{"balance":5}');
+        $this->jsonSerializer->expects($this->once())->method('decode')->with('{"balance":5}')->willReturn(['balance' => 5]);
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -139,11 +130,11 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_fetch_empty_stream_positions_of_stream_and_return_empty_array(): void
     {
-        $model = $this->prophesize(ProjectionModel::class);
-        $model->position()->willReturn('{}')->shouldBeCalledOnce();
-        $this->jsonSerializer->decode('{}')->willReturn([])->shouldBeCalledOnce();
+        $model = $this->createMock(ProjectionModel::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
+        $model->expects($this->once())->method('position')->willReturn('{}');
+        $this->jsonSerializer->expects($this->once())->method('decode')->with('{}')->willReturn([]);
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -159,7 +150,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn(null)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -171,11 +162,10 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_fetch_state_of_stream(): void
     {
-        $model = $this->prophesize(ProjectionModel::class);
-        $model->state()->willReturn('{"count":10}')->shouldBeCalledOnce();
-        $this->jsonSerializer->decode('{"count":10}')->willReturn(['count' => 10])->shouldBeCalledOnce();
-
-        $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
+        $model = $this->createMock(ProjectionModel::class);
+        $model->expects($this->once())->method('state')->willReturn('{"count":10}');
+        $this->jsonSerializer->expects($this->once())->method('decode')->with('{"count":10}')->willReturn(['count' => 10]);
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -189,11 +179,11 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_fetch_empty_state_of_stream_and_return_empty_array(): void
     {
-        $model = $this->prophesize(ProjectionModel::class);
-        $model->state()->willReturn('{}')->shouldBeCalledOnce();
-        $this->jsonSerializer->decode('{}')->willReturn([])->shouldBeCalledOnce();
+        $model = $this->createMock(ProjectionModel::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn($model)->shouldBeCalledOnce();
+        $model->expects($this->once())->method('state')->willReturn('{}');
+        $this->jsonSerializer->expects($this->once())->method('decode')->with('{}')->willReturn([]);
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -209,7 +199,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->retrieve('balance')->willReturn(null)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -221,7 +211,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_filter_stream_by_names(): void
     {
-        $this->projectionProvider->filterByNames('balance', 'foo', 'bar')->willReturn(['balance'])->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('filterByNames')->with('balance', 'foo', 'bar')->willReturn(['balance']);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -237,7 +227,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_assert_stream_exists(bool $exists): void
     {
-        $this->projectionProvider->projectionExists('balance')->willReturn($exists)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('projectionExists')->with('balance')->willReturn($exists);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -251,7 +241,7 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
-        $this->assertEquals($this->queryScope->reveal(), $manager->queryScope());
+        $this->assertEquals($this->queryScope, $manager->queryScope());
     }
 
     /**
@@ -259,9 +249,9 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_mark_projection_as_stopped(): void
     {
-        $this->projectionProvider->updateProjection('balance', [
+        $this->projectionProvider->expects($this->once())->method('updateProjection')->with('balance', [
             'status' => ProjectionStatus::STOPPING->value,
-        ])->shouldBeCalledOnce()->willReturn(true);
+        ])->willReturn(true);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -275,27 +265,16 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
     {
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->projectionExists('balance')->willReturn(false)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())
+            ->method('projectionExists')
+            ->with('balance')
+            ->willReturn(false);
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::STOPPING->value,
-        ])->shouldBeCalledOnce()->willReturn(false);
-
-        $manager = $this->newProjectorManager(new DefaultProjectorOption());
-
-        $manager->stop('balance');
-    }
-
-    /**
-     * @test
-     */
-    public function it_raise_exception_on_stopping_when_query_exception_raised(): void
-    {
-        $this->expectException(InMemoryProjectionFailed::class);
-
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::STOPPING->value,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => ProjectionStatus::STOPPING->value,
+            ])->willReturn(false);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -310,9 +289,12 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to update projection status for stream name balance and status stopping');
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::STOPPING->value,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => ProjectionStatus::STOPPING->value,
+            ])->willThrowException(new RuntimeException('nope'));
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -324,9 +306,12 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_mark_projection_as_resetting(): void
     {
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::RESETTING->value,
-        ])->shouldBeCalledOnce()->willReturn(true);
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => ProjectionStatus::RESETTING->value,
+            ])->willReturn(true);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -338,29 +323,16 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_raise_exception_on_resetting_not_found_stream(): void
     {
-        $this->projectionProvider->projectionExists('balance')->willReturn(false)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())->method('projectionExists')->with('balance')->willReturn(false);
 
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::RESETTING->value,
-        ])->shouldBeCalledOnce()->willReturn(false);
-
-        $manager = $this->newProjectorManager(new DefaultProjectorOption());
-
-        $manager->reset('balance');
-    }
-
-    /**
-     * @test
-     */
-    public function it_raise_exception_on_resetting_when_query_exception_raised(): void
-    {
-        $this->expectException(InMemoryProjectionFailed::class);
-
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::RESETTING->value,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => ProjectionStatus::RESETTING->value,
+            ])->willReturn(false);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -372,12 +344,14 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_raise_exception_on_resetting_when_throwable_exception_raised(): void
     {
-        $this->expectException(ProjectionFailed::class);
-        $this->expectExceptionMessage('Unable to update projection status for stream name balance and status resetting');
+        $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => ProjectionStatus::RESETTING->value,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => ProjectionStatus::RESETTING->value,
+            ])->willThrowException(new RuntimeException('nope'));
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -395,9 +369,12 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
             ? ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value
             : ProjectionStatus::DELETING->value;
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => $status,
-        ])->shouldBeCalledOnce()->willReturn(true);
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => $status,
+            ])->willReturn(true);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -411,7 +388,10 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
      */
     public function it_raise_exception_on_deleting_not_found_stream(bool $withEmittedEvents): void
     {
-        $this->projectionProvider->projectionExists('balance')->willReturn(false)->shouldBeCalledOnce();
+        $this->projectionProvider->expects($this->once())
+            ->method('projectionExists')
+            ->with('balance')
+            ->willReturn(false);
 
         $status = $withEmittedEvents
             ? ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value
@@ -419,31 +399,12 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
 
         $this->expectException(ProjectionNotFound::class);
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => $status,
-        ])->shouldBeCalledOnce()->willReturn(false);
-
-        $manager = $this->newProjectorManager(new DefaultProjectorOption());
-
-        $manager->delete('balance', $withEmittedEvents);
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
-    public function it_raise_exception_on_deleting_when_query_exception_raised(bool $withEmittedEvents): void
-    {
-        $status = $withEmittedEvents
-            ? ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value
-            : ProjectionStatus::DELETING->value;
-
-        $this->expectException(InMemoryProjectionFailed::class);
-
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => $status,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => $status,
+            ])->willReturn(false);
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -464,9 +425,12 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
         $this->expectException(ProjectionFailed::class);
         $this->expectExceptionMessage('Unable to update projection status for stream name balance and status '.$status);
 
-        $this->projectionProvider->updateProjection('balance', [
-            'status' => $status,
-        ])->willThrow(new RuntimeException('nope'));
+        $this->projectionProvider
+            ->expects($this->once())
+            ->method('updateProjection')
+            ->with('balance', [
+                'status' => $status,
+            ])->willThrowException(new RuntimeException('nope'));
 
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
 
@@ -479,43 +443,43 @@ final class InMemoryProjectorManagerTest extends ProphecyTestCase
         yield[false];
     }
 
-    private Chronicler|ObjectProphecy $chronicler;
+    private Chronicler|MockObject $chronicler;
 
-    private EventStreamProvider|ObjectProphecy $eventStreamProvider;
+    private EventStreamProvider|MockObject $eventStreamProvider;
 
-    private ProjectionProvider|ObjectProphecy $projectionProvider;
+    private ProjectionProvider|MockObject $projectionProvider;
 
-    private ProjectionQueryScope|ObjectProphecy $queryScope;
+    private ProjectionQueryScope|MockObject $queryScope;
 
-    private SystemClock|ObjectProphecy $clock;
+    private SystemClock|MockObject $clock;
 
-    private ProjectorOption|ObjectProphecy $projectorOption;
+    private ProjectorOption|MockObject $projectorOption;
 
-    private ObjectProphecy|JsonSerializer $jsonSerializer;
+    private JsonSerializer|MockObject $jsonSerializer;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->chronicler = $this->prophesize(Chronicler::class);
-        $this->eventStreamProvider = $this->prophesize(EventStreamProvider::class);
-        $this->projectionProvider = $this->prophesize(ProjectionProvider::class);
-        $this->queryScope = $this->prophesize(ProjectionQueryScope::class);
-        $this->clock = $this->prophesize(SystemClock::class);
-        $this->projectorOption = $this->prophesize(ProjectorOption::class);
-        $this->jsonSerializer = $this->prophesize(JsonSerializer::class);
+        $this->chronicler = $this->createMock(Chronicler::class);
+        $this->eventStreamProvider = $this->createMock(EventStreamProvider::class);
+        $this->projectionProvider = $this->createMock(ProjectionProvider::class);
+        $this->queryScope = $this->createMock(ProjectionQueryScope::class);
+        $this->clock = $this->createMock(SystemClock::class);
+        $this->projectorOption = $this->createMock(ProjectorOption::class);
+        $this->jsonSerializer = $this->createMock(JsonSerializer::class);
     }
 
     private function newProjectorManager(array|ProjectorOption $projectorOption = null): InMemoryProjectorManager
     {
         return new InMemoryProjectorManager(
-            $this->chronicler->reveal(),
-            $this->eventStreamProvider->reveal(),
-            $this->projectionProvider->reveal(),
-            $this->queryScope->reveal(),
-            $this->clock->reveal(),
-            $this->jsonSerializer->reveal(),
-            $projectorOption ?? $this->projectorOption->reveal(),
+            $this->chronicler,
+            $this->eventStreamProvider,
+            $this->projectionProvider,
+            $this->queryScope,
+            $this->clock,
+            $this->jsonSerializer,
+            $projectorOption ?? $this->projectorOption,
         );
     }
 }

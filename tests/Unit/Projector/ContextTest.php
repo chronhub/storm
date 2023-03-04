@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Tests\Stubs\ContextStub;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -21,32 +21,27 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
-final class ContextTest extends ProphecyTestCase
+final class ContextTest extends UnitTestCase
 {
-    private ProjectorOption|ObjectProphecy $option;
+    private ProjectorOption|MockObject $option;
 
-    private StreamPosition|ObjectProphecy $position;
+    private StreamPosition|MockObject $position;
 
-    private ObjectProphecy|EventCounter $counter;
+    private EventCounter|MockObject $counter;
 
-    private DetectGap|ObjectProphecy $gap;
+    private DetectGap|MockObject $gap;
 
     protected function setUp(): void
     {
-        $this->option = $this->prophesize(ProjectorOption::class);
-        $this->position = $this->prophesize(StreamPosition::class);
-        $this->counter = $this->prophesize(EventCounter::class);
-        $this->gap = $this->prophesize(DetectGap::class);
+        $this->option = $this->createMock(ProjectorOption::class);
+        $this->position = $this->createMock(StreamPosition::class);
+        $this->counter = $this->createMock(EventCounter::class);
+        $this->gap = $this->createMock(DetectGap::class);
     }
 
     private function newContext(): ContextStub
     {
-        return new ContextStub(
-            $this->option->reveal(),
-            $this->position->reveal(),
-            $this->counter->reveal(),
-            $this->gap->reveal()
-        );
+        return new ContextStub($this->option, $this->position, $this->counter, $this->gap);
     }
 
     /**
@@ -88,10 +83,6 @@ final class ContextTest extends ProphecyTestCase
      */
     public function it_test_compose(): void
     {
-        // checkMe incomplete test
-        // casting closure is not tested from inside
-        // to do in func testing
-
         $context = $this->newContext();
 
         $context
@@ -104,9 +95,9 @@ final class ContextTest extends ProphecyTestCase
         $this->assertFalse($context->runner->isStopped());
         $this->assertEmpty($context->state->get());
 
-        $projector = $this->prophesize(ProjectionProjector::class);
+        $projector = $this->createMock(ProjectionProjector::class);
 
-        $caster = new PersistentCaster($projector->reveal(), $context->currentStreamName);
+        $caster = new PersistentCaster($projector, $context->currentStreamName);
 
         $context->compose($caster, true);
 
@@ -120,10 +111,6 @@ final class ContextTest extends ProphecyTestCase
      */
     public function it_test_compose_without_init_callback_and_array_event_handlers(): void
     {
-        // checkMe incomplete test
-        // casting closure is not tested from inside
-        // to do in func testing
-
         $context = $this->newContext();
 
         $context
@@ -137,9 +124,9 @@ final class ContextTest extends ProphecyTestCase
         $this->assertFalse($context->runner->isStopped());
         $this->assertEmpty($context->state->get());
 
-        $projector = $this->prophesize(ProjectionProjector::class);
+        $projector = $this->createMock(ProjectionProjector::class);
 
-        $caster = new PersistentCaster($projector->reveal(), $context->currentStreamName);
+        $caster = new PersistentCaster($projector, $context->currentStreamName);
 
         $context->compose($caster, false);
 

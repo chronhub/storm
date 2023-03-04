@@ -6,22 +6,22 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use DateInterval;
 use Chronhub\Storm\Clock\PointInTime;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
 use function sleep;
 use function usleep;
 
-final class RepositoryLockTest extends ProphecyTestCase
+final class RepositoryLockTest extends UnitTestCase
 {
-    private SystemClock|ObjectProphecy $clock;
+    private SystemClock|MockObject $clock;
 
-    private SystemClock|PointInTime $time;
+    private PointInTime $time;
 
     protected function setUp(): void
     {
-        $this->clock = $this->prophesize(SystemClock::class);
+        $this->clock = $this->createMock(SystemClock::class);
         $this->time = new PointInTime();
     }
 
@@ -30,7 +30,7 @@ final class RepositoryLockTest extends ProphecyTestCase
      */
     public function it_can_be_instantiated(): void
     {
-        $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
+        $lock = new RepositoryLock($this->clock, 1000, 1000);
 
         $this->assertNull($lock->current());
     }
@@ -42,10 +42,15 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $datetime = $this->time->now();
 
-        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT);
-        $this->clock->now()->willReturn($datetime)->shouldBeCalled();
+        $this->clock->expects($this->once())
+            ->method('getFormat')
+            ->willReturn($this->time::DATE_TIME_FORMAT);
 
-        $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
+        $this->clock->expects($this->once())
+            ->method('now')
+            ->willReturn($datetime);
+
+        $lock = new RepositoryLock($this->clock, 1000, 1000);
 
         $this->assertNull($lock->current());
 
@@ -63,10 +68,15 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $datetime = $this->time->now();
 
-        $this->clock->now()->willReturn($datetime)->shouldBeCalled();
-        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT);
+        $this->clock->expects($this->once())
+            ->method('getFormat')
+            ->willReturn($this->time::DATE_TIME_FORMAT);
 
-        $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
+        $this->clock->expects($this->once())
+            ->method('now')
+            ->willReturn($datetime);
+
+        $lock = new RepositoryLock($this->clock, 1000, 1000);
 
         $this->assertNull($lock->current());
 
@@ -84,10 +94,15 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $datetime = $this->time->now();
 
-        $this->clock->now()->willReturn($datetime)->shouldBeCalled();
-        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT)->shouldBeCalled();
+        $this->clock->expects($this->once())
+            ->method('getFormat')
+            ->willReturn($this->time::DATE_TIME_FORMAT);
 
-        $lock = new RepositoryLock($this->clock->reveal(), 1000, 0);
+        $this->clock->expects($this->once())
+            ->method('now')
+            ->willReturn($datetime);
+
+        $lock = new RepositoryLock($this->clock, 1000, 0);
 
         $this->assertNull($lock->current());
 
@@ -131,10 +146,15 @@ final class RepositoryLockTest extends ProphecyTestCase
     {
         $datetime = $this->time->now();
 
-        $this->clock->now()->willReturn($datetime)->shouldBeCalled();
-        $this->clock->getFormat()->willReturn($this->time::DATE_TIME_FORMAT)->shouldBeCalled();
+        $this->clock->expects($this->once())
+            ->method('getFormat')
+            ->willReturn($this->time::DATE_TIME_FORMAT);
 
-        $lock = new RepositoryLock($this->clock->reveal(), 1000, 1000);
+        $this->clock->expects($this->once())
+            ->method('now')
+            ->willReturn($datetime);
+
+        $lock = new RepositoryLock($this->clock, 1000, 1000);
 
         $timeoutAdded = $datetime->add(new DateInterval('PT1S'));
 

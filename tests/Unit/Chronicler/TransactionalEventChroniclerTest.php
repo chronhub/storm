@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Generator;
 use TypeError;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
 use Chronhub\Storm\Chronicler\TransactionalEventChronicler;
@@ -18,9 +18,9 @@ use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
-final class TransactionalEventChroniclerTest extends ProphecyTestCase
+final class TransactionalEventChroniclerTest extends UnitTestCase
 {
-    private TransactionalChronicler|ObjectProphecy $chronicler;
+    private TransactionalChronicler|MockObject $chronicler;
 
     private TransactionalStreamTracker $tracker;
 
@@ -28,7 +28,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
     {
         parent::setUp();
 
-        $this->chronicler = $this->prophesize(TransactionalEventableChronicler::class);
+        $this->chronicler = $this->createMock(TransactionalEventableChronicler::class);
         $this->tracker = new TrackTransactionalStream();
     }
 
@@ -37,7 +37,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
      */
     public function it_dispatch_begin_transaction_event(): void
     {
-        $this->chronicler->beginTransaction()->shouldBeCalled();
+        $this->chronicler->expects($this->once())->method('beginTransaction');
 
         $instance = $this->chroniclerInstance();
 
@@ -57,9 +57,9 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
         $this->expectException(TransactionAlreadyStarted::class);
 
         $this->chronicler
-            ->beginTransaction()
-            ->willThrow(new TransactionAlreadyStarted('foo'))
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('beginTransaction')
+            ->willThrowException(new TransactionAlreadyStarted('foo'));
 
         $instance = $this->chroniclerInstance();
 
@@ -78,7 +78,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
      */
     public function it_dispatch_commit_transaction_event(): void
     {
-        $this->chronicler->commitTransaction()->shouldBeCalled();
+        $this->chronicler->expects($this->once())->method('commitTransaction');
 
         $instance = $this->chroniclerInstance();
 
@@ -98,9 +98,9 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
         $this->expectException(TransactionNotStarted::class);
 
         $this->chronicler
-            ->commitTransaction()
-            ->willThrow(new TransactionNotStarted())
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('commitTransaction')
+            ->willThrowException(new TransactionNotStarted());
 
         $instance = $this->chroniclerInstance();
 
@@ -119,7 +119,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
      */
     public function it_dispatch_rollback_transaction_event(): void
     {
-        $this->chronicler->rollbackTransaction()->shouldBeCalled();
+        $this->chronicler->expects($this->once())->method('rollbackTransaction');
 
         $instance = $this->chroniclerInstance();
 
@@ -139,9 +139,9 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
         $this->expectException(TransactionNotStarted::class);
 
         $this->chronicler
-            ->rollbackTransaction()
-            ->willThrow(new TransactionNotStarted())
-            ->shouldBeCalled();
+            ->expects($this->once())
+            ->method('rollbackTransaction')
+            ->willThrowException(new TransactionNotStarted());
 
         $instance = $this->chroniclerInstance();
 
@@ -162,10 +162,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
      */
     public function it_check_if_in_transaction(bool $inTransaction): void
     {
-        $this->chronicler
-            ->inTransaction()
-            ->willReturn($inTransaction)
-            ->shouldBeCalled();
+        $this->chronicler->expects($this->once())->method('inTransaction')->willReturn($inTransaction);
 
         $this->assertEquals($inTransaction, $this->chroniclerInstance()->inTransaction());
     }
@@ -179,10 +176,7 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
     {
         $callback = static fn (): bool => $bool;
 
-        $this->chronicler
-            ->transactional($callback)
-            ->willReturn($callback())
-            ->shouldBeCalled();
+        $this->chronicler->expects($this->once())->method('transactional')->with($callback)->willReturn($bool);
 
         $this->assertEquals($bool, $this->chroniclerInstance()->transactional($callback));
     }
@@ -194,17 +188,17 @@ final class TransactionalEventChroniclerTest extends ProphecyTestCase
     {
         $this->expectException(TypeError::class);
 
-        $chronicler = $this->prophesize(Chronicler::class);
+        $chronicler = $this->createMock(Chronicler::class);
 
         /** @phpstan-ignore-next-line  */
-        $transactionalEventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $this->tracker);
+        $transactionalEventChronicler = new TransactionalEventChronicler($chronicler, $this->tracker);
 
         $transactionalEventChronicler->transactional(fn (): string => 'nope');
     }
 
     private function chroniclerInstance(): TransactionalEventChronicler
     {
-        return new TransactionalEventChronicler($this->chronicler->reveal(), $this->tracker);
+        return new TransactionalEventChronicler($this->chronicler, $this->tracker);
     }
 
     public function provideBoolean(): Generator

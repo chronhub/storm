@@ -6,15 +6,15 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Closure;
 use Generator;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Pipes\PreparePersistentRunner;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-final class PreparePersistentRunnerTest extends ProphecyTestCase
+final class PreparePersistentRunnerTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -25,15 +25,14 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::RUNNING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->rise()->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('rise');
 
         $context = $this->newContext();
 
         $context->runner->runInBackground($runInBackground);
 
-        $pipe = new PreparePersistentRunner($this->repository->reveal());
+        $pipe = new PreparePersistentRunner($this->repository);
 
         $this->assertIsInitialized($pipe, false);
 
@@ -52,18 +51,15 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::STOPPING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->boundState()->shouldBeCalledOnce();
-
-        $this->repository->close()->shouldBeCalledOnce();
-
-        $this->repository->rise()->shouldNotBeCalled();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('boundState');
+        $this->repository->expects($this->once())->method('close');
+        $this->repository->expects($this->never())->method('rise');
 
         $context = $this->newContext();
         $context->runner->runInBackground($runInBackground);
 
-        $pipe = new PreparePersistentRunner($this->repository->reveal());
+        $pipe = new PreparePersistentRunner($this->repository);
 
         $this->assertIsInitialized($pipe, false);
 
@@ -83,18 +79,15 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::RESETTING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->revise()->shouldBeCalledOnce();
-
-        $this->repository->restart()->shouldNotBeCalled();
-
-        $this->repository->rise()->shouldBeCalled();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('revise');
+        $this->repository->expects($this->never())->method('restart');
+        $this->repository->expects($this->once())->method('rise');
 
         $context = $this->newContext();
         $context->runner->runInBackground($runInBackground);
 
-        $pipe = new PreparePersistentRunner($this->repository->reveal());
+        $pipe = new PreparePersistentRunner($this->repository);
 
         $this->assertIsInitialized($pipe, false);
 
@@ -114,19 +107,16 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::DELETING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->discard(false)->shouldBeCalledOnce();
-
-        $this->repository->restart()->shouldNotBeCalled();
-
-        $this->repository->rise()->shouldNotBeCalled();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('discard')->with(false);
+        $this->repository->expects($this->never())->method('restart');
+        $this->repository->expects($this->never())->method('rise');
 
         $context = $this->newContext();
 
         $context->runner->runInBackground($runInBackground);
 
-        $pipe = new PreparePersistentRunner($this->repository->reveal());
+        $pipe = new PreparePersistentRunner($this->repository);
 
         $this->assertIsInitialized($pipe, false);
 
@@ -146,19 +136,16 @@ final class PreparePersistentRunnerTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::DELETING_WITH_EMITTED_EVENTS;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->discard(true)->shouldBeCalledOnce();
-
-        $this->repository->restart()->shouldNotBeCalled();
-
-        $this->repository->rise()->shouldNotBeCalled();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('discard')->with(true);
+        $this->repository->expects($this->never())->method('restart');
+        $this->repository->expects($this->never())->method('rise');
 
         $context = $this->newContext();
 
         $context->runner->runInBackground($runInBackground);
 
-        $pipe = new PreparePersistentRunner($this->repository->reveal());
+        $pipe = new PreparePersistentRunner($this->repository);
 
         $this->assertIsInitialized($pipe, false);
 

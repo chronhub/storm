@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Prophecy\Prophecy\ObjectProphecy;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 
 final class PersistentCasterTest extends ProphecyTestCase
 {
-    private ObjectProphecy|ProjectionProjector $projector;
+    private MockObject|ProjectionProjector $projector;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projector = $this->prophesize(ProjectionProjector::class);
+        $this->projector = $this->createMock(ProjectionProjector::class);
     }
 
     /**
@@ -27,7 +27,7 @@ final class PersistentCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new PersistentCaster($this->projector->reveal(), $streamName);
+        $caster = new PersistentCaster($this->projector, $streamName);
 
         $this->assertNull($caster->streamName());
     }
@@ -39,7 +39,7 @@ final class PersistentCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new PersistentCaster($this->projector->reveal(), $streamName);
+        $caster = new PersistentCaster($this->projector, $streamName);
 
         $keep = true;
         while ($keep) {
@@ -62,9 +62,11 @@ final class PersistentCasterTest extends ProphecyTestCase
     {
         $streamName = 'foo';
 
-        $this->projector->stop()->shouldBeCalledOnce();
+        $this->projector
+            ->expects($this->once())
+            ->method('stop');
 
-        $caster = new PersistentCaster($this->projector->reveal(), $streamName);
+        $caster = new PersistentCaster($this->projector, $streamName);
 
         $this->assertEquals('foo', $caster->streamName());
 
@@ -79,9 +81,11 @@ final class PersistentCasterTest extends ProphecyTestCase
         $streamName = 'foo';
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 
-        $this->projector->linkTo('foo', $event)->shouldBeCalledOnce();
+        $this->projector->expects($this->once())
+            ->method('linkTo')
+            ->with('foo', $event);
 
-        $caster = new PersistentCaster($this->projector->reveal(), $streamName);
+        $caster = new PersistentCaster($this->projector, $streamName);
 
         $this->assertEquals('foo', $caster->streamName());
 
@@ -96,9 +100,11 @@ final class PersistentCasterTest extends ProphecyTestCase
         $streamName = 'foo';
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 
-        $this->projector->emit($event)->shouldBeCalledOnce();
+        $this->projector->expects($this->once())
+            ->method('emit')
+            ->with($event);
 
-        $caster = new PersistentCaster($this->projector->reveal(), $streamName);
+        $caster = new PersistentCaster($this->projector, $streamName);
 
         $this->assertEquals('foo', $caster->streamName());
 

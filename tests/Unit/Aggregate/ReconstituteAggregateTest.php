@@ -6,11 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Chronhub\Storm\Stream\StreamName;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Stream\StreamProducer;
@@ -22,15 +21,15 @@ use Chronhub\Storm\Tests\Stubs\ReconstituteAggregateRootStub;
 use function count;
 use function iterator_to_array;
 
-final class ReconstituteAggregateTest extends ProphecyTestCase
+final class ReconstituteAggregateTest extends UnitTestCase
 {
-    private Chronicler|ObjectProphecy $chronicler;
+    private Chronicler|MockObject $chronicler;
 
-    private StreamProducer|ObjectProphecy $streamProducer;
+    private StreamProducer|MockObject $streamProducer;
 
-    private AggregateType|ObjectProphecy $aggregateType;
+    private AggregateType|MockObject $aggregateType;
 
-    private AggregateIdentity|ObjectProphecy $someIdentity;
+    private AggregateIdentity|MockObject $someIdentity;
 
     private StreamName $streamName;
 
@@ -40,9 +39,9 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
     {
         parent::setUp();
 
-        $this->chronicler = $this->prophesize(Chronicler::class);
-        $this->streamProducer = $this->prophesize(StreamProducer::class);
-        $this->aggregateType = $this->prophesize(AggregateType::class);
+        $this->chronicler = $this->createMock(Chronicler::class);
+        $this->streamProducer = $this->createMock(StreamProducer::class);
+        $this->aggregateType = $this->createMock(AggregateType::class);
         $this->someIdentity = V4AggregateId::fromString($this->identityString);
         $this->streamName = new StreamName('balance');
     }
@@ -55,26 +54,26 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
         $events = iterator_to_array($this->provideFourDummyEvents());
         $countEvents = count($events);
 
-        $this->streamProducer
-            ->toStreamName($this->someIdentity)
-            ->willReturn($this->streamName)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('toStreamName')
+            ->with($this->someIdentity)
+            ->willReturn($this->streamName);
 
-        $this->aggregateType
-            ->from($events[0])
-            ->willReturn(AggregateRootStub::class)
-            ->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())
+            ->method('from')
+            ->with($events[0])
+            ->willReturn(AggregateRootStub::class);
 
-        $this->chronicler
-            ->retrieveAll($this->streamName, $this->someIdentity)
-            ->willYield($events, $countEvents)
-            ->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())
+            ->method('retrieveAll')
+            ->with($this->streamName, $this->someIdentity)
+            ->will($this->returnCallback(function () use ($events, $countEvents) {
+                yield from $events;
 
-        $stub = new ReconstituteAggregateRootStub(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateType->reveal()
-        );
+                return $countEvents;
+            }));
+
+        $stub = new ReconstituteAggregateRootStub($this->chronicler, $this->streamProducer, $this->aggregateType);
 
         $reconstituteAggregateRoot = $stub->reconstitute($this->someIdentity);
 
@@ -90,28 +89,29 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
     {
         $events = iterator_to_array($this->provideFourDummyEvents());
 
-        $this->streamProducer
-            ->toStreamName($this->someIdentity)
-            ->willReturn($this->streamName)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('toStreamName')
+            ->with($this->someIdentity)
+            ->willReturn($this->streamName);
 
-        $this->aggregateType
-            ->from($events[0])
-            ->willReturn(AggregateRootStub::class)
-            ->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())
+            ->method('from')
+            ->with($events[0])
+            ->willReturn(AggregateRootStub::class);
 
-        $queryFilter = $this->prophesize(QueryFilter::class)->reveal();
+        $queryFilter = $this->createMock(QueryFilter::class);
 
-        $this->chronicler
-            ->retrieveFiltered($this->streamName, $queryFilter)
-            ->willYield([$events[0], $events[1]], 2)
-            ->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())
+            ->method('retrieveFiltered')
+            ->with($this->streamName, $queryFilter)
+            ->will($this->returnCallback(function () use ($events) {
+                yield $events[0];
+                yield $events[1];
 
-        $stub = new ReconstituteAggregateRootStub(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateType->reveal()
-        );
+                return 2;
+            }));
+
+        $stub = new ReconstituteAggregateRootStub($this->chronicler, $this->streamProducer, $this->aggregateType);
 
         $reconstituteAggregateRoot = $stub->reconstitute($this->someIdentity, $queryFilter);
 
@@ -125,27 +125,23 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
      */
     public function it_return_null_aggregate_root_from_empty_history(): void
     {
-        $events = [];
+        $this->streamProducer->expects($this->once())
+            ->method('toStreamName')
+            ->with($this->someIdentity)
+            ->willReturn($this->streamName);
 
-        $this->streamProducer
-            ->toStreamName($this->someIdentity)
-            ->willReturn($this->streamName)
-            ->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->never())->method('from');
 
-        $this->aggregateType
-            ->from(AggregateRootStub::class)
-            ->shouldNotBeCalled();
+        $this->chronicler->expects($this->once())
+            ->method('retrieveAll')
+            ->with($this->streamName, $this->someIdentity)
+            ->will($this->returnCallback(function () {
+                yield from [];
 
-        $this->chronicler
-            ->retrieveAll($this->streamName, $this->someIdentity)
-            ->willYield($events, 0)
-            ->shouldBeCalledOnce();
+                return 0;
+            }));
 
-        $stub = new ReconstituteAggregateRootStub(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateType->reveal()
-        );
+        $stub = new ReconstituteAggregateRootStub($this->chronicler, $this->streamProducer, $this->aggregateType);
 
         $reconstituteAggregateRoot = $stub->reconstitute($this->someIdentity);
 
@@ -155,27 +151,21 @@ final class ReconstituteAggregateTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_return_null_aggregate_root_when_stream_not_found_exception_is_raised_from_chronicler(): void
+    public function it_return_null_aggregate_root_when_stream_not_found_exception_is_raised(): void
     {
-        $this->streamProducer
-            ->toStreamName($this->someIdentity)
-            ->willReturn($this->streamName)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('toStreamName')
+            ->with($this->someIdentity)
+            ->willReturn($this->streamName);
 
-        $this->aggregateType
-            ->from($this->prophesize(DomainEvent::class)->reveal())
-            ->shouldNotBeCalled();
+        $this->aggregateType->expects($this->never())->method('from');
 
-        $this->chronicler
-            ->retrieveAll($this->streamName, $this->someIdentity)
-            ->willThrow(StreamNotFound::withStreamName($this->streamName))
-            ->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())
+            ->method('retrieveAll')
+            ->with($this->streamName, $this->someIdentity)
+            ->will($this->throwException(StreamNotFound::withStreamName($this->streamName)));
 
-        $stub = new ReconstituteAggregateRootStub(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateType->reveal()
-        );
+        $stub = new ReconstituteAggregateRootStub($this->chronicler, $this->streamProducer, $this->aggregateType);
 
         $reconstituteAggregateRoot = $stub->reconstitute($this->someIdentity);
 

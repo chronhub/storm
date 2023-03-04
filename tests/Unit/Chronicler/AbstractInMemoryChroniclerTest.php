@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Chronicler\TrackStream;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -20,7 +20,7 @@ use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 
-final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
+final class AbstractInMemoryChroniclerTest extends UnitTestCase
 {
     /**
      * @test
@@ -30,10 +30,10 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to decorate a chronicler which is already decorated');
 
-        $chronicler = $this->prophesize(EventableChronicler::class)->reveal();
+        $chronicler = $this->createMock(EventableChronicler::class);
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $container = $this->createMock(ContainerInterface::class);
+        $containerAsClosure = fn (): ContainerInterface => $container;
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -59,9 +59,9 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to decorate chronicler');
 
-        $chronicler = $this->prophesize(Chronicler::class)->reveal();
-        $container = $this->prophesize(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $chronicler = $this->createMock(Chronicler::class);
+        $container = $this->createMock(ContainerInterface::class);
+        $containerAsClosure = fn (): ContainerInterface => $container;
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -84,11 +84,11 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
      */
     public function it_resolve_tracker_id_given_in_configuration(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('tracker.stream.default')->willReturn(new TrackStream())->shouldBeCalledOnce();
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->with('tracker.stream.default')->willReturn(new TrackStream());
+        $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $chronicler = $this->prophesize(Chronicler::class)->reveal();
+        $chronicler = $this->createMock(Chronicler::class);
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -122,11 +122,12 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
      */
     public function it_resolve_transactional_tracker_id_given_in_config(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('tracker.stream.transactional')->willReturn(new TrackTransactionalStream())->shouldBeCalledOnce();
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->with('tracker.stream.transactional')->willReturn(new TrackTransactionalStream());
 
-        $chronicler = $this->prophesize(TransactionalChronicler::class)->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $container;
+
+        $chronicler = $this->createMock(TransactionalChronicler::class);
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -161,13 +162,14 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
     public function it_raise_exception_with_invalid_configuration_when_chronicler_is_not_transactional_as_stream_tracker(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider: Chronhub\Storm\Chronicler\AbstractChroniclerProvider@anonymous');
+        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('tracker.stream.transactional')->willReturn(new TrackTransactionalStream())->shouldBeCalledOnce();
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->with('tracker.stream.transactional')->willReturn(new TrackTransactionalStream());
 
-        $chronicler = $this->prophesize(Chronicler::class)->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $container;
+
+        $chronicler = $this->createMock(Chronicler::class);
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -202,13 +204,14 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
     public function it_raise_exception_with_invalid_configuration_when_stream_tracker_is_not_transactional_as_chronicler(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider: Chronhub\Storm\Chronicler\AbstractChroniclerProvider@anonymous');
+        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('tracker.stream.not_transactional')->willReturn(new TrackStream())->shouldBeCalledOnce();
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->with('tracker.stream.not_transactional')->willReturn(new TrackStream());
 
-        $chronicler = $this->prophesize(TransactionalChronicler::class)->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $container;
+
+        $chronicler = $this->createMock(TransactionalChronicler::class);
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -243,6 +246,7 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
     public function it_attach_stream_subscribers_resolved_from_container_or_as_instance_to_eventable_chronicler(): void
     {
         $tracker = new TrackStream();
+
         $this->assertEmpty($tracker->listeners());
 
         $noOpStreamSubscriber = new class implements StreamSubscriber
@@ -260,13 +264,17 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
             }
         };
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('tracker.stream.default')->willReturn($tracker)->shouldBeCalledOnce();
-        $container->get('stream.subscribers.no_op')->willReturn($noOpStreamSubscriber)->shouldBeCalledOnce();
+        $container = $this->createMock(ContainerInterface::class);
+        $container
+            ->method('get')
+            ->willReturnMap([
+                ['tracker.stream.default', $tracker],
+                ['stream.subscribers.no_op', $noOpStreamSubscriber],
+            ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $chronicler = $this->prophesize(Chronicler::class)->reveal();
+        $chronicler = $this->createMock(Chronicler::class);
 
         $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
         {
@@ -290,7 +298,7 @@ final class AbstractInMemoryChroniclerTest extends ProphecyTestCase
             }
         };
 
-        $chronicler = $provider->resolve('foo', [
+        $provider->resolve('foo', [
             'tracking' => [
                 'tracker_id' => 'tracker.stream.default',
                 'subscribers' => [

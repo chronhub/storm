@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Psr\Container\ContainerInterface;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Chronicler\TrackStream;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
@@ -17,17 +18,29 @@ use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
-final class InMemoryChroniclerProviderTest extends ProphecyTestCase
+final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
+    private MockObject|ContainerInterface $container;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->container = $this->createMock(ContainerInterface::class);
+    }
+
     /**
      * @test
      */
     public function it_create_standalone_in_memory_chronicler_instance(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
+        $this->container
+            ->expects($this->any())
+            ->method('get')
+            ->with(StreamCategory::class)
+            ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -44,10 +57,13 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
      */
     public function it_create_transactional_in_memory_chronicler_instance(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
+        $this->container
+            ->expects($this->any())
+            ->method('get')
+            ->with(StreamCategory::class)
+            ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -64,11 +80,14 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
      */
     public function it_create_eventable_in_memory_chronicler_instance(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
-        $container->get(TrackStream::class)->willReturn(new TrackStream())->shouldBeCalled();
+        $this->container
+            ->method('get')
+            ->willReturnMap([
+                [StreamCategory::class, new DetermineStreamCategory()],
+                [TrackStream::class, new TrackStream()],
+            ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -92,11 +111,14 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
      */
     public function it_create_transactional_eventable_in_memory_chronicler_instance(): void
     {
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
-        $container->get(TrackTransactionalStream::class)->willReturn(new TrackTransactionalStream())->shouldBeCalled();
+        $this->container
+            ->method('get')
+            ->willReturnMap([
+                [StreamCategory::class, new DetermineStreamCategory()],
+                [TrackTransactionalStream::class, new TrackTransactionalStream()],
+            ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -124,12 +146,10 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('In memory chronicler provider foo is not defined');
 
-        $config = [
-            'tracking' => [],
-        ];
+        $config = ['tracking' => []];
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $this->container = $this->createMock(ContainerInterface::class);
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -141,17 +161,21 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
      */
     public function it_raise_exception_when_eventable_chronicler_has_not_tracker(): void
     {
+        $expectedClass = StandaloneInMemoryChronicler::class;
+
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to decorate chronicler Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler, stream tracker is not defined or invalid');
+        $this->expectExceptionMessage('Unable to decorate chronicler '.$expectedClass.', stream tracker is not defined or invalid');
 
-        $config = [
-            'tracking' => [],
-        ];
+        $config = ['tracking' => []];
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
+        $this->container = $this->createMock(ContainerInterface::class);
+        $this->container
+            ->expects($this->any())
+            ->method('get')
+            ->with(StreamCategory::class)
+            ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 
@@ -163,17 +187,21 @@ final class InMemoryChroniclerProviderTest extends ProphecyTestCase
      */
     public function it_raise_exception_when_transactional_eventable_chronicler_has_not_tracker(): void
     {
+        $expectedClass = TransactionalInMemoryChronicler::class;
+
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to decorate chronicler Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler, stream tracker is not defined or invalid');
+        $this->expectExceptionMessage('Unable to decorate chronicler '.$expectedClass.', stream tracker is not defined or invalid');
 
-        $config = [
-            'tracking' => [],
-        ];
+        $config = ['tracking' => []];
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get(StreamCategory::class)->willReturn(new DetermineStreamCategory())->shouldBeCalled();
+        $this->container = $this->createMock(ContainerInterface::class);
+        $this->container
+            ->expects($this->any())
+            ->method('get')
+            ->with(StreamCategory::class)
+            ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $container->reveal();
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
 
         $provider = new InMemoryChroniclerProvider($containerAsClosure);
 

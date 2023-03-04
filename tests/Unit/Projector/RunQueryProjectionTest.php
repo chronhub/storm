@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
 /**
  * @coversDefaultClass \Chronhub\Storm\Projector\RunProjection
  */
-final class RunQueryProjectionTest extends ProphecyTestCase
+final class RunQueryProjectionTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test

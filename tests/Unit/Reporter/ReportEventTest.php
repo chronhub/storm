@@ -8,13 +8,13 @@ use Generator;
 use RuntimeException;
 use PHPUnit\Framework\TestCase;
 use Chronhub\Storm\Message\Message;
-use Prophecy\Prophecy\ObjectProphecy;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Contracts\Message\Header;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -26,13 +26,13 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 
 final class ReportEventTest extends ProphecyTestCase
 {
-    private MessageFactory|ObjectProphecy $messageFactory;
+    private MessageFactory|MockObject $messageFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->messageFactory = $this->prophesize(MessageFactory::class);
+        $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
     /**
@@ -41,7 +41,11 @@ final class ReportEventTest extends ProphecyTestCase
     public function it_relay_event(): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($event)
+            ->willReturn(new Message($event));
 
         $tracker = new TrackMessage();
 
@@ -57,7 +61,7 @@ final class ReportEventTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeEvent(),
         ];
@@ -77,7 +81,10 @@ final class ReportEventTest extends ProphecyTestCase
         $eventAsArray = ['some' => 'event'];
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->__invoke($eventAsArray)->willReturn(new Message($event))->shouldBeCalledOnce();
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($eventAsArray)
+            ->willReturn(new Message($event));
 
         $tracker = new TrackMessage();
 
@@ -93,7 +100,7 @@ final class ReportEventTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeEvent(),
         ];
@@ -113,7 +120,11 @@ final class ReportEventTest extends ProphecyTestCase
     public function it_always_considered_domain_event_acked_regardless_of_consumers(iterable $consumers): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($event)
+            ->willReturn(new Message($event));
 
         $tracker = new TrackMessage();
         $reporter = new ReportEvent($tracker);
@@ -138,7 +149,7 @@ final class ReportEventTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             new ConsumeEvent(),
             $this->provideRouter($consumers),
             $assertMessageIsAcked,
@@ -160,7 +171,11 @@ final class ReportEventTest extends ProphecyTestCase
         $this->expectExceptionMessage('some exception');
 
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($event)
+            ->willReturn(new Message($event));
 
         $tracker = new TrackMessage();
         $reporter = new ReportEvent($tracker);
@@ -172,7 +187,7 @@ final class ReportEventTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeEvent(),
         ];

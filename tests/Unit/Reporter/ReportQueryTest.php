@@ -11,13 +11,13 @@ use React\Promise\Deferred;
 use PHPUnit\Framework\TestCase;
 use Chronhub\Storm\Message\Message;
 use React\Promise\PromiseInterface;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainQuery;
 use Chronhub\Storm\Reporter\ReportQuery;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeQuery;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Contracts\Message\Header;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -29,15 +29,15 @@ use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 
-final class ReportQueryTest extends ProphecyTestCase
+final class ReportQueryTest extends UnitTestCase
 {
-    private MessageFactory|ObjectProphecy $messageFactory;
+    private MessageFactory|MockObject $messageFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->messageFactory = $this->prophesize(MessageFactory::class);
+        $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
     /**
@@ -46,7 +46,10 @@ final class ReportQueryTest extends ProphecyTestCase
     public function it_relay_query(): void
     {
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($query)->willReturn(new Message($query))->shouldBeCalledOnce();
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($query)
+            ->willReturn(new Message($query));
 
         $tracker = new TrackMessage();
 
@@ -64,7 +67,7 @@ final class ReportQueryTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeQuery(),
         ];
@@ -86,7 +89,10 @@ final class ReportQueryTest extends ProphecyTestCase
         $queryAsArray = ['some' => 'query'];
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->__invoke($queryAsArray)->willReturn(new Message($query))->shouldBeCalledOnce();
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($queryAsArray)
+            ->willReturn(new Message($query));
 
         $tracker = new TrackMessage();
 
@@ -104,7 +110,7 @@ final class ReportQueryTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeQuery(),
         ];
@@ -126,7 +132,11 @@ final class ReportQueryTest extends ProphecyTestCase
         $this->expectException(MessageNotHandled::class);
 
         $event = SomeQuery::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($event)->willReturn(new Message($event))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($event)
+            ->willReturn(new Message($event));
 
         $tracker = new TrackMessage();
         $reporter = new ReportQuery($tracker);
@@ -151,7 +161,7 @@ final class ReportQueryTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             new ConsumeQuery(),
             $this->provideRouter([]),
             $assertMessageIsNotAcked,
@@ -173,7 +183,11 @@ final class ReportQueryTest extends ProphecyTestCase
         $this->expectExceptionMessage('some exception');
 
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($query)->willReturn(new Message($query))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($query)
+            ->willReturn(new Message($query));
 
         $tracker = new TrackMessage();
         $reporter = new ReportQuery($tracker);
@@ -185,7 +199,7 @@ final class ReportQueryTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeEvent(),
         ];

@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;
 use function posix_getpid;
 
-final class PersistentEventProcessorTest extends ProphecyTestCase
+final class PersistentEventProcessorTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -48,12 +48,12 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
 
         $event = SomeEvent::fromContent([])->withHeader(Header::EVENT_TIME, 'some_datetime');
 
-        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
-        $this->gap->detect('customer', 14, 'some_datetime')->willReturn(false)->shouldBeCalledOnce();
-        $this->position->bind('customer', 14)->shouldBeCalledOnce();
-        $this->counter->increment()->shouldBeCalledOnce();
+        $this->option->expects($this->once())->method('getSignal')->willReturn(true);
+        $this->gap->expects($this->once())->method('detect')->with('customer', 14, 'some_datetime')->willReturn(false);
+        $this->position->expects($this->once())->method('bind')->with('customer', 14);
+        $this->counter->expects($this->once())->method('increment');
 
-        $this->assertTrue($processEvent($context, $event, 14, $this->repository->reveal()));
+        $this->assertTrue($processEvent($context, $event, 14, $this->repository));
         $this->assertEquals('signal handler dispatched', $result);
     }
 
@@ -75,12 +75,12 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
-        $this->gap->detect('customer', 12, 'some_datetime')->willReturn(false)->shouldBeCalledOnce();
-        $this->position->bind('customer', 12)->shouldBeCalledOnce();
-        $this->counter->increment()->shouldBeCalledOnce();
+        $this->option->expects($this->once())->method('getSignal')->willReturn(false);
+        $this->gap->expects($this->once())->method('detect')->with('customer', 12, 'some_datetime')->willReturn(false);
+        $this->position->expects($this->once())->method('bind')->with('customer', 12);
+        $this->counter->expects($this->once())->method('increment');
 
-        $this->assertTrue($processEvent($context, $event, 12, $this->repository->reveal()));
+        $this->assertTrue($processEvent($context, $event, 12, $this->repository));
     }
 
     /**
@@ -101,12 +101,12 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
-        $this->gap->detect('customer', 12, 'some_datetime')->willReturn(true)->shouldBeCalledOnce();
-        $this->position->bind('customer', 12)->shouldNotBeCalled();
-        $this->counter->increment()->shouldNotBeCalled();
+        $this->option->expects($this->once())->method('getSignal')->willReturn(false);
+        $this->gap->expects($this->once())->method('detect')->with('customer', 14, 'some_datetime')->willReturn(true);
+        $this->position->expects($this->never())->method('bind');
+        $this->counter->expects($this->never())->method('increment');
 
-        $this->assertFalse($processEvent($context, $event, 12, $this->repository->reveal()));
+        $this->assertFalse($processEvent($context, $event, 14, $this->repository));
     }
 
     /**
@@ -128,11 +128,11 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->counter->isReached()->willReturn(false)->shouldBeCalledOnce();
+        $this->counter->expects($this->once())->method('isReached')->willReturn(false);
 
         $context->runner->stop($stopProcess);
 
-        $this->assertNotEquals($stopProcess, $processEvent($context, SomeEvent::fromContent([]), 125, $this->repository->reveal()));
+        $this->assertNotEquals($stopProcess, $processEvent($context, SomeEvent::fromContent([]), 125, $this->repository));
         $this->assertEquals(['foo' => 'bar'], $context->state->get());
     }
 
@@ -155,14 +155,12 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->counter->isReached()->willReturn(true)->shouldBeCalledOnce();
+        $this->counter->expects($this->once())->method('isReached')->willReturn(true);
+        $this->repository->expects($this->once())->method('store');
+        $this->counter->expects($this->once())->method('reset');
+        $this->repository->expects($this->once())->method('disclose')->willReturn($projectionStatus);
 
-        $this->repository->store()->shouldBeCalledOnce();
-        $this->counter->reset()->shouldBeCalledOnce();
-
-        $this->repository->disclose()->willReturn($projectionStatus)->shouldBeCalledOnce();
-
-        $this->assertFalse($processEvent($context, SomeEvent::fromContent([]), 125, $this->repository->reveal()));
+        $this->assertFalse($processEvent($context, SomeEvent::fromContent([]), 125, $this->repository));
         $this->assertEquals(['foo' => 'bar'], $context->state->get());
         $this->assertEquals($projectionStatus, $context->status);
     }
@@ -186,14 +184,12 @@ final class PersistentEventProcessorTest extends ProphecyTestCase
         $context->currentStreamName = 'customer';
         $this->assertEmpty($context->state->get());
 
-        $this->counter->isReached()->willReturn(true)->shouldBeCalledOnce();
+        $this->counter->expects($this->once())->method('isReached')->willReturn(true);
+        $this->repository->expects($this->once())->method('store');
+        $this->counter->expects($this->once())->method('reset');
+        $this->repository->expects($this->once())->method('disclose')->willReturn($projectionStatus);
 
-        $this->repository->store()->shouldBeCalledOnce();
-        $this->counter->reset()->shouldBeCalledOnce();
-
-        $this->repository->disclose()->willReturn($projectionStatus)->shouldBeCalledOnce();
-
-        $this->assertTrue($processEvent($context, SomeEvent::fromContent([]), 125, $this->repository->reveal()));
+        $this->assertTrue($processEvent($context, SomeEvent::fromContent([]), 125, $this->repository));
         $this->assertEmpty($context->state->get());
         $this->assertEquals($projectionStatus, $context->status);
     }

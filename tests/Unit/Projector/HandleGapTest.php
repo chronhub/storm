@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\HandleGap;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-final class HandleGapTest extends ProphecyTestCase
+final class HandleGapTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -20,12 +20,11 @@ final class HandleGapTest extends ProphecyTestCase
     {
         $context = $this->newContext();
 
-        $this->gap->hasGap()->willReturn(true)->shouldBeCalledonce();
-        $this->gap->sleep()->shouldBeCalledonce();
+        $this->gap->method('hasGap')->willReturn(true);
+        $this->gap->expects($this->once())->method('sleep');
+        $this->repository->expects($this->once())->method('store');
 
-        $this->repository->store()->shouldBeCalledonce();
-
-        $pipe = new HandleGap($this->repository->reveal());
+        $pipe = new HandleGap($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 

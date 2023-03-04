@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\StopWhenRunningOnce;
 use Chronhub\Storm\Contracts\Projector\PersistentProjector;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-final class StopWhenRunningOnceTest extends ProphecyTestCase
+final class StopWhenRunningOnceTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -22,11 +22,11 @@ final class StopWhenRunningOnceTest extends ProphecyTestCase
      */
     public function it_stop_projection(bool $runInBackground, bool $isStopped, bool $expectResult): void
     {
-        $projector = $this->prophesize(PersistentProjector::class);
+        $projector = $this->createMock(PersistentProjector::class);
 
         $expectResult
-            ? $projector->stop()->shouldBeCalledOnce()
-            : $projector->stop()->shouldNotBeCalled();
+            ? $projector->expects(self::once())->method('stop')
+            : $projector->expects(self::never())->method('stop');
 
         $context = $this->newContext();
 
@@ -36,7 +36,7 @@ final class StopWhenRunningOnceTest extends ProphecyTestCase
             $this->assertEquals($isStopped, $context->runner->isStopped());
         }
 
-        $pipe = new StopWhenRunningOnce($projector->reveal());
+        $pipe = new StopWhenRunningOnce($projector);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 

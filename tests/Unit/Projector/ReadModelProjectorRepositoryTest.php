@@ -5,31 +5,47 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
 
-final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
+final class ReadModelProjectorRepositoryTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy {
+    use ProvideMockContext {
         setUp as contextSetup;
     }
 
-    private Store|ObjectProphecy $store;
+    private Store|MockObject $store;
 
-    private ReadModel|ObjectProphecy $readModel;
+    private ReadModel|MockObject $readModel;
 
     protected function setUp(): void
     {
         $this->contextSetup();
 
-        $this->store = $this->prophesize(Store::class);
-        $this->readModel = $this->prophesize(ReadModel::class);
+        $this->store = $this->createMock(Store::class);
+        $this->readModel = $this->createMock(ReadModel::class);
+    }
+
+    private function provideRiseExpectations(bool $exists, bool $initialized): void
+    {
+        $this->store->expects($this->once())->method('exists')->willReturn($exists);
+
+        $exists
+            ? $this->store->expects($this->never())->method('create')
+            : $this->store->expects($this->once())->method('create')->willReturn(true);
+
+        $this->store->expects($this->once())->method('acquireLock')->willReturn(true);
+        $this->readModel->expects($this->once())->method('isInitialized')->willReturn($initialized);
+
+        $initialized
+            ? $this->readModel->expects($this->never())->method('initialize')
+            : $this->readModel->expects($this->once())->method('initialize');
     }
 
     /**
@@ -39,23 +55,10 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_rise_projection_from_streams(bool $exists, bool $initialized): void
     {
-        $this->store->exists()->willReturn($exists)->shouldBeCalledOnce();
+        $this->provideRiseExpectations($exists, $initialized);
 
-        $exists
-            ? $this->store->create()->shouldNotBeCalled()
-            : $this->store->create()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->store->acquireLock()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->readModel->isInitialized()->willReturn($initialized)->shouldBeCalledOnce();
-
-        $initialized
-            ? $this->readModel->initialize()->shouldNotBeCalled()
-            : $this->readModel->initialize()->shouldBeCalledOnce();
-
-        $this->position->watch(['names' => ['some_stream_name']])->shouldBeCalledOnce();
-
-        $this->store->loadState()->willReturn(true)->shouldBeCalledOnce();
+        $this->position->expects($this->once())->method('watch')->with(['names' => ['some_stream_name']]);
+        $this->store->expects($this->once())->method('loadState')->willReturn(true);
 
         $context = $this->newContext();
         $repository = $this->readModelRepositoryInstance($context->fromStreams('some_stream_name'));
@@ -70,23 +73,10 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_rise_projection_from_all_streams(bool $exists, bool $initialized): void
     {
-        $this->store->exists()->willReturn($exists)->shouldBeCalledOnce();
+        $this->provideRiseExpectations($exists, $initialized);
 
-        $exists
-            ? $this->store->create()->shouldNotBeCalled()
-            : $this->store->create()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->store->acquireLock()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->readModel->isInitialized()->willReturn($initialized)->shouldBeCalledOnce();
-
-        $initialized
-            ? $this->readModel->initialize()->shouldNotBeCalled()
-            : $this->readModel->initialize()->shouldBeCalledOnce();
-
-        $this->position->watch(['all' => true])->shouldBeCalledOnce();
-
-        $this->store->loadState()->willReturn(true)->shouldBeCalledOnce();
+        $this->position->expects($this->once())->method('watch')->with(['all' => true]);
+        $this->store->expects($this->once())->method('loadState')->willReturn(true);
 
         $context = $this->newContext();
         $repository = $this->readModelRepositoryInstance($context->fromAll());
@@ -101,23 +91,11 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_rise_projection_from_categories(bool $exists, bool $initialized): void
     {
-        $this->store->exists()->willReturn($exists)->shouldBeCalledOnce();
+        $this->provideRiseExpectations($exists, $initialized);
 
-        $exists
-            ? $this->store->create()->shouldNotBeCalled()
-            : $this->store->create()->willReturn(true)->shouldBeCalledOnce();
+        $this->position->expects($this->once())->method('watch')->with(['categories' => ['some_category']]);
 
-        $this->store->acquireLock()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->readModel->isInitialized()->willReturn($initialized)->shouldBeCalledOnce();
-
-        $initialized
-            ? $this->readModel->initialize()->shouldNotBeCalled()
-            : $this->readModel->initialize()->shouldBeCalledOnce();
-
-        $this->position->watch(['categories' => ['some_category']])->shouldBeCalledOnce();
-
-        $this->store->loadState()->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('loadState')->willReturn(true);
 
         $context = $this->newContext();
         $repository = $this->readModelRepositoryInstance($context->fromCategories('some_category'));
@@ -130,8 +108,8 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_store_projection(): void
     {
-        $this->store->persist()->willReturn(true)->shouldBeCalledOnce();
-        $this->readModel->persist()->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('persist')->willReturn(true);
+        $this->readModel->expects($this->once())->method('persist');
 
         $context = $this->newContext();
 
@@ -145,8 +123,8 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_revise_projection(): void
     {
-        $this->store->reset()->willReturn(true)->shouldBeCalledOnce();
-        $this->readModel->reset()->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('reset')->willReturn(true);
+        $this->readModel->expects($this->once())->method('reset');
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -160,11 +138,11 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_discard_projection(bool $withEmittedEvents): void
     {
-        $this->store->delete($withEmittedEvents)->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('delete')->with($withEmittedEvents)->willReturn(true);
 
         $withEmittedEvents
-            ? $this->readModel->down()->shouldBeCalledOnce()
-            : $this->readModel->down()->shouldNotBeCalled();
+            ? $this->readModel->expects($this->once())->method('down')
+            : $this->readModel->expects($this->never())->method('down');
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -178,7 +156,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_bound_state($loaded): void
     {
-        $this->store->loadState()->willReturn($loaded)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('loadState')->willReturn($loaded);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -192,7 +170,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_close_projection($closed): void
     {
-        $this->store->stop()->willReturn($closed)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('stop')->willReturn($closed);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -206,7 +184,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_restart_projection($restarted): void
     {
-        $this->store->startAgain()->willReturn($restarted)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('startAgain')->willReturn($restarted);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -218,7 +196,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_disclose_status_projection(): void
     {
-        $this->store->loadStatus()->willReturn(ProjectionStatus::RUNNING)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('loadStatus')->willReturn(ProjectionStatus::RUNNING);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -232,7 +210,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_renew_projection_lock($updated): void
     {
-        $this->store->updateLock()->willReturn($updated)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('updateLock')->willReturn($updated);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -246,7 +224,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_freed_projection_lock(bool $unlock): void
     {
-        $this->store->releaseLock()->willReturn($unlock)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('releaseLock')->willReturn($unlock);
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -258,7 +236,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_return_stream_name(): void
     {
-        $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
 
         $repository = $this->readModelRepositoryInstance($this->newContext());
 
@@ -267,9 +245,7 @@ final class ReadModelProjectorRepositoryTest extends ProphecyTestCase
 
     private function readModelRepositoryInstance(Context $context): ReadModelProjectorRepository
     {
-        return new ReadModelProjectorRepository(
-            $context, $this->store->reveal(), $this->readModel->reveal()
-        );
+        return new ReadModelProjectorRepository($context, $this->store, $this->readModel);
     }
 
     public function provideBooleanForRise(): Generator

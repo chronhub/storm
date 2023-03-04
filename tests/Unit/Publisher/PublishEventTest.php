@@ -4,28 +4,25 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Publisher;
 
-use Prophecy\Argument;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Publisher\PublishEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
 use function iterator_count;
 
-// todo iterable test as contract
-final class PublishEventTest extends ProphecyTestCase
+final class PublishEventTest extends UnitTestCase
 {
-    private ReportEvent|ObjectProphecy $reporter;
+    private ReportEvent|MockObject $reporter;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->reporter = $this->prophesize(ReportEvent::class);
+        $this->reporter = $this->createMock(ReportEvent::class);
     }
 
     /**
@@ -33,7 +30,7 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_can_be_instantiated(): void
     {
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
     }
@@ -43,9 +40,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_record_events(): void
     {
-        $this->reporter->relay(Argument::type(DomainEvent::class))->shouldNotBeCalled();
+        $this->reporter->expects($this->never())->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 
@@ -64,9 +61,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_record_many_events(): void
     {
-        $this->reporter->relay(Argument::type(DomainEvent::class))->shouldNotBeCalled();
+        $this->reporter->expects($this->never())->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 
@@ -87,9 +84,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_record_events_in_order_they_arrived(): void
     {
-        $this->reporter->relay(Argument::type(DomainEvent::class))->shouldNotBeCalled();
+        $this->reporter->expects($this->never())->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 
@@ -116,9 +113,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_pull_and_flush_pending_events(): void
     {
-        $this->reporter->relay(Argument::type(DomainEvent::class))->shouldNotBeCalled();
+        $this->reporter->expects($this->never())->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 
@@ -143,9 +140,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_publish_events(): void
     {
-        $this->reporter->relay(Argument::type(SomeEvent::class))->shouldBeCalledTimes(10);
+        $this->reporter->expects($this->exactly(10))->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 
@@ -166,9 +163,9 @@ final class PublishEventTest extends ProphecyTestCase
      */
     public function it_flush_pending_events(): void
     {
-        $this->reporter->relay(Argument::type(DomainEvent::class))->shouldNotBeCalled();
+        $this->reporter->expects($this->never())->method('relay');
 
-        $publisher = new PublishEvent($this->reporter->reveal());
+        $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
 

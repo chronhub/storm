@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Pipes\UpdateStatusAndPositions;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-final class UpdateStatusAndPositionsTest extends ProphecyTestCase
+// todo rename test method
+final class UpdateStatusAndPositionsTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -24,15 +25,19 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::IDLE;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
+        $this->repository->expects($this->once())
+            ->method('disclose')
+            ->willReturn($status);
 
         $context = $this->newContext();
         $context->fromStreams('add');
         $context->runner->runInBackground($runInBackground);
 
-        $this->position->watch(['names' => ['add']])->shouldBeCalledOnce();
+        $this->position->expects($this->once())
+            ->method('watch')
+            ->with(['names' => ['add']]);
 
-        $pipe = new UpdateStatusAndPositions($this->repository->reveal());
+        $pipe = new UpdateStatusAndPositions($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
@@ -48,11 +53,13 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::STOPPING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalled();
+        $this->repository->expects($this->once())
+            ->method('disclose')
+            ->willReturn($status);
 
-        $this->repository->boundState()->shouldNotBeCalled();
+        $this->repository->expects($this->never())->method('boundState');
 
-        $this->repository->close()->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('close');
 
         $context = $this->newContext();
 
@@ -60,9 +67,11 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
 
         $context->runner->runInBackground($runInBackground);
 
-        $this->position->watch(['names' => ['add']])->shouldBeCalled();
+        $this->position->expects($this->once())
+            ->method('watch')
+            ->with(['names' => ['add']]);
 
-        $pipe = new UpdateStatusAndPositions($this->repository->reveal());
+        $pipe = new UpdateStatusAndPositions($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
@@ -78,22 +87,23 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::RESETTING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalled();
-
-        $this->repository->revise()->shouldBeCalled();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('revise');
 
         $runInBackground
-            ? $this->repository->restart()->shouldBeCalledOnce()
-            : $this->repository->restart()->shouldNotBeCalled();
+            ? $this->repository->expects($this->once())->method('restart')
+            : $this->repository->expects($this->never())->method('restart');
 
         $context = $this->newContext();
 
         $context->fromStreams('add');
         $context->runner->runInBackground($runInBackground);
 
-        $this->position->watch(['names' => ['add']])->shouldBeCalled();
+        $this->position->expects($this->once())
+            ->method('watch')
+            ->with(['names' => ['add']]);
 
-        $pipe = new UpdateStatusAndPositions($this->repository->reveal());
+        $pipe = new UpdateStatusAndPositions($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
@@ -109,17 +119,20 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::DELETING;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->discard(false)->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('discard');
 
         $context = $this->newContext();
 
+        $context->runner->runInBackground($runInBackground);
+
         $context->fromStreams('add');
 
-        $this->position->watch(['names' => ['add']])->shouldBeCalled();
+        $this->position->expects($this->once())
+            ->method('watch')
+            ->with(['names' => ['add']]);
 
-        $pipe = new UpdateStatusAndPositions($this->repository->reveal());
+        $pipe = new UpdateStatusAndPositions($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 
@@ -135,9 +148,8 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
     {
         $status = ProjectionStatus::DELETING_WITH_EMITTED_EVENTS;
 
-        $this->repository->disclose()->willReturn($status)->shouldBeCalledOnce();
-
-        $this->repository->discard(true)->shouldBeCalledOnce();
+        $this->repository->expects($this->once())->method('disclose')->willReturn($status);
+        $this->repository->expects($this->once())->method('discard');
 
         $context = $this->newContext();
 
@@ -145,9 +157,9 @@ final class UpdateStatusAndPositionsTest extends ProphecyTestCase
 
         $context->runner->runInBackground($runInBackground);
 
-        $this->position->watch(['names' => ['add']])->shouldBeCalled();
+        $this->position->expects($this->once())->method('watch')->with(['names' => ['add']]);
 
-        $pipe = new UpdateStatusAndPositions($this->repository->reveal());
+        $pipe = new UpdateStatusAndPositions($this->repository);
 
         $run = $pipe($context, fn (Context $context): bool => true);
 

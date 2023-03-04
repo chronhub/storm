@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;
 use function posix_getpid;
@@ -19,9 +19,9 @@ use function posix_getpid;
 /**
  * @coversDefaultClass \Chronhub\Storm\Projector\Scheme\EventProcessor
  */
-final class QueryEventProcessorTest extends ProphecyTestCase
+final class QueryEventProcessorTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
@@ -39,9 +39,9 @@ final class QueryEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getSignal()->willReturn(false)->shouldBeCalledOnce();
-        $this->gap->detect()->shouldNotBeCalled();
-        $this->position->bind('customer', 125)->shouldBeCalledOnce();
+        $this->option->expects($this->once())->method('getSignal')->willReturn(false);
+        $this->gap->expects($this->never())->method('detect');
+        $this->position->expects($this->once())->method('bind')->with('customer', 125);
 
         $this->assertTrue($processEvent($context, SomeEvent::fromContent([]), 125, null));
     }
@@ -70,9 +70,9 @@ final class QueryEventProcessorTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->currentStreamName = 'customer';
 
-        $this->option->getSignal()->willReturn(true)->shouldBeCalledOnce();
-        $this->gap->detect()->shouldNotBeCalled();
-        $this->position->bind('customer', 125)->shouldBeCalledOnce();
+        $this->option->expects($this->once())->method('getSignal')->willReturn(true);
+        $this->gap->expects($this->never())->method('detect');
+        $this->position->expects($this->once())->method('bind')->with('customer', 125);
 
         $this->assertTrue($processEvent($context, SomeEvent::fromContent([]), 125, null));
         $this->assertEquals('signal handler dispatched', $result);

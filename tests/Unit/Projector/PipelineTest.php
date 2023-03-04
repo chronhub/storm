@@ -6,18 +6,18 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Closure;
 use Generator;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\Pipeline;
 
-final class PipelineTest extends ProphecyTestCase
+final class PipelineTest extends UnitTestCase
 {
-    private ObjectProphecy|Context $context;
+    private MockObject|Context $context;
 
     protected function setUp(): void
     {
-        $this->context = $this->prophesize(Context::class);
+        $this->context = $this->createMock(Context::class);
     }
 
     /**
@@ -32,7 +32,7 @@ final class PipelineTest extends ProphecyTestCase
         $pipeline = new Pipeline();
 
         $result = $pipeline
-            ->send($this->context->reveal())
+            ->send($this->context)
             ->through([$this->providePipe($count), $this->providePipe($count), $this->providePipe($count)])
             ->then(fn (): bool => $return);
 
@@ -52,7 +52,7 @@ final class PipelineTest extends ProphecyTestCase
         $pipeline = new Pipeline();
 
         $result = $pipeline
-            ->send($this->context->reveal())
+            ->send($this->context)
             ->through([
                 $this->providePipe($count),
                 fn (): false => false,
@@ -66,7 +66,7 @@ final class PipelineTest extends ProphecyTestCase
     private function providePipe(int &$count): Closure
     {
         return function (Context $context, Closure $next) use (&$count): callable|bool {
-            $this->assertSame($context, $this->context->reveal());
+            $this->assertSame($context, $this->context);
             $count++;
 
             return $next($context);

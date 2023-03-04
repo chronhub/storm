@@ -4,31 +4,42 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Producer;
 
-use Prophecy\Argument;
 use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Producer\ProduceMessage;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Producer\MessageQueue;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
 
-final class ProduceMessageTest extends ProphecyTestCase
+final class ProduceMessageTest extends UnitTestCase
 {
+    private MockObject|ProducerUnity $unity;
+
+    private MockObject|MessageQueue $queue;
+
+    protected function setup(): void
+    {
+        $this->unity = $this->createMock(ProducerUnity::class);
+        $this->queue = $this->createMock(MessageQueue::class);
+    }
+
     /**
      * @test
      */
     public function it_produce_message_sync(): void
     {
-        $unity = $this->prophesize(ProducerUnity::class);
-        $queue = $this->prophesize(MessageQueue::class);
-
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
 
-        $unity->isSync($message)->willReturn(true)->shouldBeCalledOnce();
-        $queue->toQueue($message)->shouldNotBeCalled();
+        $this->unity->expects($this->once())
+            ->method('isSync')
+            ->with($message)
+            ->willReturn(true);
 
-        $producer = new ProduceMessage($unity->reveal(), $queue->reveal());
+        $this->queue->expects($this->never())->method('toQueue');
+
+        $producer = new ProduceMessage($this->unity, $this->queue);
 
         $dispatchedMessage = $producer->produce($message);
 
@@ -40,20 +51,22 @@ final class ProduceMessageTest extends ProphecyTestCase
      */
     public function it_produce_message_async(): void
     {
-        $unity = $this->prophesize(ProducerUnity::class);
-        $queue = $this->prophesize(MessageQueue::class);
-
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
 
-        $unity->isSync($message)->willReturn(false)->shouldBeCalledOnce();
+        $this->unity->expects($this->once())
+            ->method('isSync')
+            ->with($message)
+            ->willReturn(false);
 
-        $queue->toQueue(Argument::that(function (Message $message): Message {
-            $this->assertTrue($message->header(Header::EVENT_DISPATCHED));
+        $this->queue->expects($this->once())
+            ->method('toQueue')
+            ->with($this->callback(function (Message $message): bool {
+                $this->assertTrue($message->header(Header::EVENT_DISPATCHED));
 
-            return $message;
-        }))->shouldBeCalledOnce();
+                return true;
+            }));
 
-        $producer = new ProduceMessage($unity->reveal(), $queue->reveal());
+        $producer = new ProduceMessage($this->unity, $this->queue);
 
         $dispatchedMessage = $producer->produce($message);
 

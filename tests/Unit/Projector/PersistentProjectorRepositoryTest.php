@@ -6,32 +6,32 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Stream\StreamName;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\PersistentProjectorRepository;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
 
-final class PersistentProjectorRepositoryTest extends ProphecyTestCase
+final class PersistentProjectorRepositoryTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy {
+    use ProvideMockContext {
         setUp as contextSetup;
     }
 
-    private Store|ObjectProphecy $store;
+    private Store|MockObject $store;
 
-    private Chronicler|ObjectProphecy $chronicler;
+    private Chronicler|MockObject $chronicler;
 
     protected function setUp(): void
     {
         $this->contextSetup();
 
-        $this->store = $this->prophesize(Store::class);
-        $this->chronicler = $this->prophesize(Chronicler::class);
+        $this->store = $this->createMock(Store::class);
+        $this->chronicler = $this->createMock(Chronicler::class);
     }
 
     /**
@@ -41,17 +41,15 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_rise_projection(bool $exists): void
     {
-        $this->store->exists()->willReturn($exists)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('exists')->willReturn($exists);
 
         $exists
-            ? $this->store->create()->shouldNotBeCalled()
-            : $this->store->create()->willReturn(true)->shouldBeCalledOnce();
+            ? $this->store->expects($this->never())->method('create')
+            : $this->store->expects($this->once())->method('create')->willReturn(true);
 
-        $this->store->acquireLock()->willReturn(true)->shouldBeCalledOnce();
-
-        $this->position->watch(['names' => ['some_stream_name']])->shouldBeCalledOnce();
-
-        $this->store->loadState()->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('acquireLock')->willReturn(true);
+        $this->position->expects($this->once())->method('watch')->with(['names' => ['some_stream_name']]);
+        $this->store->expects($this->once())->method('loadState')->willReturn(true);
 
         $context = $this->newContext();
         $repository = $this->persistentRepositoryInstance($context->fromStreams('some_stream_name'));
@@ -64,7 +62,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_store_projection(): void
     {
-        $this->store->persist()->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('persist')->willReturn(true);
 
         $context = $this->newContext();
 
@@ -81,9 +79,10 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->isStreamCreated = true;
 
-        $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce();
-        $this->store->reset()->willReturn(true)->shouldBeCalledOnce();
-        $this->chronicler->delete(new StreamName('foo'))->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
+        $this->store->expects($this->once())->method('reset')->willReturn(true);
+
+        $this->chronicler->expects($this->once())->method('delete')->with(new StreamName('foo'));
 
         $repository = $this->persistentRepositoryInstance($context);
 
@@ -100,11 +99,12 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
         $context = $this->newContext();
         $context->isStreamCreated = true;
 
-        $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce();
-        $this->store->reset()->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
+        $this->store->expects($this->once())->method('reset')->willReturn(true);
 
         $streamNotFound = StreamNotFound::withStreamName(new StreamName('foo'));
-        $this->chronicler->delete(new StreamName('foo'))->willThrow($streamNotFound)->shouldBeCalledOnce();
+
+        $this->chronicler->expects($this->once())->method('delete')->with(new StreamName('foo'))->willThrowException($streamNotFound);
 
         $repository = $this->persistentRepositoryInstance($context);
 
@@ -124,16 +124,16 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
         $context->isStreamCreated = true;
 
         $withEmittedEvents
-            ? $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce()
-            : $this->store->currentStreamName()->shouldNotBeCalled();
+            ? $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo')
+            : $this->store->expects($this->never())->method('currentStreamName');
 
-        $this->store->delete($withEmittedEvents)->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('delete')->with($withEmittedEvents)->willReturn(true);
 
         $streamNotFound = StreamNotFound::withStreamName(new StreamName('foo'));
 
         $withEmittedEvents
-            ? $this->chronicler->delete(new StreamName('foo'))->willThrow($streamNotFound)->shouldBeCalledOnce()
-            : $this->chronicler->delete(new StreamName('foo'))->shouldNotBeCalled();
+            ? $this->chronicler->expects($this->once())->method('delete')->with(new StreamName('foo'))->willThrowException($streamNotFound)
+            : $this->chronicler->expects($this->never())->method('delete');
 
         $repository = $this->persistentRepositoryInstance($context);
 
@@ -149,10 +149,10 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_discard_projection_and_delete_stream_with_emitted_event(): void
     {
-        $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce();
-        $this->store->delete(true)->willReturn(true)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
+        $this->store->expects($this->once())->method('delete')->with(true)->willReturn(true);
 
-        $this->chronicler->delete(new StreamName('foo'))->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())->method('delete')->with(new StreamName('foo'));
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -164,10 +164,9 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_discard_projection_and_does_not_delete_stream(): void
     {
-        $this->store->currentStreamName()->shouldNotBeCalled();
-        $this->store->delete(false)->willReturn(true)->shouldBeCalledOnce();
-
-        $this->chronicler->delete(new StreamName('foo'))->shouldNotBeCalled();
+        $this->store->expects($this->never())->method('currentStreamName');
+        $this->store->expects($this->once())->method('delete')->with(false)->willReturn(true);
+        $this->chronicler->expects($this->never())->method('delete');
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -181,7 +180,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_bound_state($loaded): void
     {
-        $this->store->loadState()->willReturn($loaded)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('loadState')->willReturn($loaded);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -195,7 +194,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_close_projection($closed): void
     {
-        $this->store->stop()->willReturn($closed)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('stop')->willReturn($closed);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -209,7 +208,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_restart_projection($restarted): void
     {
-        $this->store->startAgain()->willReturn($restarted)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('startAgain')->willReturn($restarted);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -221,7 +220,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_disclose_status_projection(): void
     {
-        $this->store->loadStatus()->willReturn(ProjectionStatus::RUNNING)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('loadStatus')->willReturn(ProjectionStatus::RUNNING);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -235,7 +234,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_renew_projection_lock($updated): void
     {
-        $this->store->updateLock()->willReturn($updated)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('updateLock')->willReturn($updated);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -247,9 +246,9 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      *
      * @dataProvider provideBoolean
      */
-    public function it_freed_projection_lock(bool $unlock): void
+    public function it_freed_projection_lock(bool $unlocked): void
     {
-        $this->store->releaseLock()->willReturn($unlock)->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('releaseLock')->willReturn($unlocked);
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -261,7 +260,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
      */
     public function it_return_stream_name(): void
     {
-        $this->store->currentStreamName()->willReturn('foo')->shouldBeCalledOnce();
+        $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
 
         $repository = $this->persistentRepositoryInstance($this->newContext());
 
@@ -270,9 +269,7 @@ final class PersistentProjectorRepositoryTest extends ProphecyTestCase
 
     private function persistentRepositoryInstance(Context $context): PersistentProjectorRepository
     {
-        return new PersistentProjectorRepository(
-            $context, $this->store->reveal(), $this->chronicler->reveal()
-        );
+        return new PersistentProjectorRepository($context, $this->store, $this->chronicler);
     }
 
     public function provideBoolean(): Generator

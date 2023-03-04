@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Closure;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\PrepareQueryRunner;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideContextWithProphecy;
+use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-final class PrepareQueryRunnerTest extends ProphecyTestCase
+final class PrepareQueryRunnerTest extends UnitTestCase
 {
-    use ProvideContextWithProphecy;
+    use ProvideMockContext;
 
     /**
      * @test
      */
     public function it_initiate_by_loading_streams(): void
     {
-        $this->position->watch(['names' => ['add', 'subtract']])->shouldBeCalledOnce();
+        $this->position->expects($this->once())->method('watch')->with(['names' => ['add', 'subtract']]);
 
         $context = $this->newContext();
 

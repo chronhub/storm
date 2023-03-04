@@ -36,6 +36,7 @@ final class AggregateTypeTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Aggregate root must be a valid class name');
 
+        /** @phpstan-ignore-next-line  */
         new AggregateType('invalid_class');
     }
 

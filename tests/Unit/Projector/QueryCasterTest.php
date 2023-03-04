@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\QueryCaster;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 
-final class QueryCasterTest extends ProphecyTestCase
+final class QueryCasterTest extends UnitTestCase
 {
-    private ObjectProphecy|QueryProjector $projector;
+    private MockObject|QueryProjector $projector;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projector = $this->prophesize(QueryProjector::class);
+        $this->projector = $this->createMock(QueryProjector::class);
     }
 
     /**
@@ -26,7 +26,7 @@ final class QueryCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new QueryCaster($this->projector->reveal(), $streamName);
+        $caster = new QueryCaster($this->projector, $streamName);
 
         $this->assertNull($caster->streamName());
     }
@@ -38,7 +38,7 @@ final class QueryCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new QueryCaster($this->projector->reveal(), $streamName);
+        $caster = new QueryCaster($this->projector, $streamName);
 
         $keep = true;
         while ($keep) {
@@ -61,9 +61,9 @@ final class QueryCasterTest extends ProphecyTestCase
     {
         $streamName = 'foo';
 
-        $this->projector->stop()->shouldBeCalledOnce();
+        $this->projector->expects($this->once())->method('stop');
 
-        $caster = new QueryCaster($this->projector->reveal(), $streamName);
+        $caster = new QueryCaster($this->projector, $streamName);
 
         $this->assertEquals('foo', $caster->streamName());
 

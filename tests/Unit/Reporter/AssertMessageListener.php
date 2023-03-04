@@ -12,8 +12,8 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 final class AssertMessageListener
 {
     public static function isTrackedAndCanBeUntracked(MessageSubscriber $subscriber,
-                                     string $eventName,
-                                     int $priority): void
+                                                      string $eventName,
+                                                      int $priority): void
     {
         $tracker = new TrackMessage();
 

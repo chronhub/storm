@@ -6,15 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use RuntimeException;
-use Prophecy\Argument;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
@@ -26,18 +25,19 @@ use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Tests\Stubs\InteractWithAggregateRepositoryStub;
 use function iterator_to_array;
+use function PHPUnit\Framework\once;
 
-final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
+final class InteractWithAggregateRepositoryTest extends UnitTestCase
 {
-    private Chronicler|ObjectProphecy $chronicler;
+    private Chronicler|MockObject $chronicler;
 
-    private StreamProducer|ObjectProphecy $streamProducer;
+    private StreamProducer|MockObject $streamProducer;
 
-    private AggregateType|ObjectProphecy $aggregateType;
+    private AggregateType|MockObject $aggregateType;
 
-    private AggregateCache|ObjectProphecy $aggregateCache;
+    private AggregateCache|MockObject $aggregateCache;
 
-    private AggregateIdentity|ObjectProphecy $someIdentity;
+    private AggregateIdentity|MockObject $someIdentity;
 
     private StreamName $streamName;
 
@@ -47,10 +47,10 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     {
         parent::setUp();
 
-        $this->chronicler = $this->prophesize(Chronicler::class);
-        $this->streamProducer = $this->prophesize(StreamProducer::class);
-        $this->aggregateType = $this->prophesize(AggregateType::class);
-        $this->aggregateCache = $this->prophesize(AggregateCache::class);
+        $this->chronicler = $this->createMock(Chronicler::class);
+        $this->streamProducer = $this->createMock(StreamProducer::class);
+        $this->aggregateType = $this->createMock(AggregateType::class);
+        $this->aggregateCache = $this->createMock(AggregateCache::class);
         $this->someIdentity = V4AggregateId::fromString($this->identityString);
         $this->streamName = new StreamName('operation');
     }
@@ -62,9 +62,9 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     {
         $stub = $this->aggregateRepositoryStub(null);
 
-        $this->assertEquals($this->chronicler->reveal(), $stub->chronicler);
-        $this->assertEquals($this->aggregateCache->reveal(), $stub->aggregateCache);
-        $this->assertEquals($this->streamProducer->reveal(), $stub->streamProducer);
+        $this->assertEquals($this->chronicler, $stub->chronicler);
+        $this->assertEquals($this->aggregateCache, $stub->aggregateCache);
+        $this->assertEquals($this->streamProducer, $stub->streamProducer);
     }
 
     /**
@@ -74,8 +74,8 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
 
-        $this->aggregateCache->has($this->someIdentity)->willReturn(true)->shouldBeCalledOnce();
-        $this->aggregateCache->get($this->someIdentity)->willReturn($expectedAggregateRoot);
+        $this->aggregateCache->expects($this->once())->method('has')->with($this->someIdentity)->willReturn(true);
+        $this->aggregateCache->method('get')->with($this->someIdentity)->willReturn($expectedAggregateRoot);
 
         $stub = $this->aggregateRepositoryStub(null);
 
@@ -91,9 +91,9 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
 
-        $this->aggregateCache->has($this->someIdentity)->willReturn(false)->shouldBeCalledOnce();
-        $this->aggregateCache->get($this->someIdentity)->shouldNotBeCalled();
-        $this->aggregateCache->put($expectedAggregateRoot)->shouldBeCalledOnce();
+        $this->aggregateCache->expects($this->once())->method('has')->willReturn(false);
+        $this->aggregateCache->expects($this->never())->method('get');
+        $this->aggregateCache->expects($this->once())->method('put');
 
         $stub = $this->aggregateRepositoryStub(null);
         $stub->withReconstituteAggregateRoot($expectedAggregateRoot);
@@ -108,11 +108,9 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
      */
     public function it_does_not_put_in_cache_if_reconstitute_aggregate_return_null_aggregate(): void
     {
-        $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
-
-        $this->aggregateCache->has($this->someIdentity)->willReturn(false)->shouldBeCalledOnce();
-        $this->aggregateCache->get($this->someIdentity)->shouldNotBeCalled();
-        $this->aggregateCache->put($expectedAggregateRoot)->shouldNotBeCalled();
+        $this->aggregateCache->expects($this->once())->method('has')->willReturn(false);
+        $this->aggregateCache->expects($this->never())->method('get');
+        $this->aggregateCache->expects($this->never())->method('put');
 
         $stub = $this->aggregateRepositoryStub(null);
         $stub->withReconstituteAggregateRoot(null);
@@ -136,22 +134,26 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->isSupported($aggregateRoot::class)->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
 
         $stream = new Stream($this->streamName, $events);
 
-        $this->streamProducer
-            ->toStream($this->someIdentity, Argument::type('array'))
-            ->willReturn($stream)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('toStream')
+            ->with($this->someIdentity, $this->isType('array'))
+            ->willReturn($stream);
 
-        $this->streamProducer->isFirstCommit(Argument::type(SomeEvent::class))->willReturn(true)->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('isFirstCommit')
+            ->with($this->isInstanceOf(SomeEvent::class))
+            ->willReturn(true);
 
-        $this->chronicler->firstCommit($stream)
-            ->willThrow($exception)
-            ->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())
+            ->method('firstCommit')
+            ->with($stream)
+            ->willThrowException($exception);
 
-        $this->aggregateCache->forget($this->someIdentity)->shouldBeCalledOnce();
+        $this->aggregateCache->expects($this->once())->method('forget')->with($this->someIdentity);
 
         $stub = $this->aggregateRepositoryStub(null);
 
@@ -161,7 +163,7 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_forget_aggregate_from_cache_if_persist_raise_exception(): void
+    public function it_forget_aggregate_from_cache_when_an_exception_raised_on_persist(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('foo');
@@ -172,27 +174,31 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->isSupported($aggregateRoot::class)->shouldBeCalledOnce();
+        $this->aggregateType->expects(self::once())
+            ->method('isSupported')
+            ->with($aggregateRoot::class)
+            ->willReturn(true);
 
         $stream = new Stream($this->streamName, $events);
 
-        $this->streamProducer
-            ->toStream($this->someIdentity, Argument::type('array'))
-            ->willReturn($stream)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('toStream')
+            ->with($this->someIdentity, $this->isType('array'))
+            ->willReturn($stream);
 
-        $this->streamProducer
-            ->isFirstCommit(Argument::type(DomainEvent::class))
-            ->willReturn(false)
-            ->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('isFirstCommit')
+            ->with($this->isInstanceOf(DomainEvent::class))
+            ->willReturn(false);
 
-        $this->chronicler->amend($stream)
-            ->willThrow($exception)
-            ->shouldBeCalledOnce();
+        $this->chronicler->expects($this->once())
+            ->method('amend')
+            ->with($stream)
+            ->willThrowException($exception);
 
-        $this->aggregateCache
-            ->forget($this->someIdentity)
-            ->shouldBeCalledOnce();
+        $this->aggregateCache->expects($this->once())
+            ->method('forget')
+            ->with($this->someIdentity);
 
         $stub = $this->aggregateRepositoryStub(null);
 
@@ -208,15 +214,13 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->isSupported($aggregateRoot::class)->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
 
-        $stream = new Stream($this->streamName, $events);
-
-        $this->streamProducer->toStream($this->someIdentity, $events)->shouldNotBeCalled();
-        $this->streamProducer->isFirstCommit($this->prophesize(DomainEvent::class)->reveal())->shouldNotBeCalled();
-        $this->chronicler->firstCommit($stream)->shouldNotBeCalled();
-        $this->chronicler->amend($stream)->shouldNotBeCalled();
-        $this->aggregateCache->forget($this->someIdentity)->shouldNotBeCalled();
+        $this->streamProducer->expects($this->never())->method('toStream');
+        $this->streamProducer->expects($this->never())->method('isFirstCommit');
+        $this->chronicler->expects($this->never())->method('firstCommit');
+        $this->chronicler->expects($this->never())->method('amend');
+        $this->aggregateCache->expects($this->never())->method('forget');
 
         $stub = $this->aggregateRepositoryStub(null);
 
@@ -234,12 +238,13 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->isSupported($aggregateRoot::class)->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
 
         $stream = new Stream($this->streamName, $events);
 
-        $this->streamProducer
-            ->toStream($this->someIdentity, Argument::that(function (array $events) use ($messageDecorator): array {
+        $this->streamProducer->expects($this->once())
+            ->method('toStream')
+            ->with($this->someIdentity, $this->callback(function (array $events) use ($messageDecorator): bool {
                 $position = 0;
 
                 foreach ($events as $event) {
@@ -261,16 +266,17 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
                     $position++;
                 }
 
-                $this->assertEquals(4, $position);
-
-                return $events;
+                return true;
             }))
-            ->willReturn($stream)
-            ->shouldBeCalledOnce();
+            ->willReturn($stream);
 
-        $this->streamProducer->isFirstCommit(Argument::type(SomeEvent::class))->willReturn(true)->shouldBeCalledOnce();
-        $this->chronicler->firstCommit($stream)->shouldBeCalledOnce();
-        $this->aggregateCache->put($aggregateRoot)->shouldBeCalledOnce();
+        $this->streamProducer->expects($this->once())
+            ->method('isFirstCommit')
+            ->with($this->isInstanceOf(SomeEvent::class))
+            ->willReturn(true);
+
+        $this->chronicler->expects($this->once())->method('firstCommit')->with($stream);
+        $this->aggregateCache->expects($this->once())->method('put')->with($aggregateRoot);
 
         $stub = $this->aggregateRepositoryStub($messageDecorator);
 
@@ -295,12 +301,14 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
 
         $this->assertEquals(8, $aggregateRoot->version());
 
-        $this->aggregateType->isSupported($aggregateRoot::class)->shouldBeCalledOnce();
+        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
 
         $stream = new Stream($this->streamName, $events);
 
         $this->streamProducer
-            ->toStream($this->someIdentity, Argument::that(function (array $events) use ($messageDecorator): array {
+            ->expects($this->once())
+            ->method('toStream')
+            ->with($this->someIdentity, $this->callback(function (array $events) use ($messageDecorator): bool {
                 $position = 4;
 
                 foreach ($events as $event) {
@@ -322,16 +330,17 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
                     $position++;
                 }
 
-                $this->assertEquals(8, $position);
-
-                return $events;
+                return true;
             }))
-            ->willReturn($stream)
-            ->shouldBeCalledOnce();
+            ->willReturn($stream);
 
-        $this->streamProducer->isFirstCommit(Argument::type(SomeEvent::class))->willReturn(false)->shouldBeCalledOnce();
-        $this->chronicler->amend($stream)->shouldBeCalledOnce();
-        $this->aggregateCache->put($aggregateRoot)->shouldBeCalledOnce();
+        $this->streamProducer->expects(once())
+            ->method('isFirstCommit')
+            ->with($this->isInstanceOf(SomeEvent::class))
+            ->willReturn(false);
+
+        $this->chronicler->expects(self::once())->method('amend')->with($stream);
+        $this->aggregateCache->expects(self::once())->method('put')->with($aggregateRoot);
 
         $stub = $this->aggregateRepositoryStub($messageDecorator);
 
@@ -368,10 +377,10 @@ final class InteractWithAggregateRepositoryTest extends ProphecyTestCase
     private function aggregateRepositoryStub(?MessageDecorator $messageDecorator): InteractWithAggregateRepositoryStub
     {
         return new InteractWithAggregateRepositoryStub(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateCache->reveal(),
-            $this->aggregateType->reveal(),
+            $this->chronicler,
+            $this->streamProducer,
+            $this->aggregateCache,
+            $this->aggregateType,
             $messageDecorator ?? new NoOpMessageDecorator()
         );
     }

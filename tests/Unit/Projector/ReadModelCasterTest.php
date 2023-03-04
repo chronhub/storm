@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
-use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 
-final class ReadModelCasterTest extends ProphecyTestCase
+final class ReadModelCasterTest extends UnitTestCase
 {
-    private ObjectProphecy|QueryProjector $projector;
+    private MockObject|ReadModelProjector $projector;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projector = $this->prophesize(ReadModelProjector::class);
+        $this->projector = $this->createMock(ReadModelProjector::class);
     }
 
     /**
@@ -28,7 +27,7 @@ final class ReadModelCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new ReadModelCaster($this->projector->reveal(), $streamName);
+        $caster = new ReadModelCaster($this->projector, $streamName);
 
         $this->assertNull($caster->streamName());
     }
@@ -40,7 +39,7 @@ final class ReadModelCasterTest extends ProphecyTestCase
     {
         $streamName = null;
 
-        $caster = new ReadModelCaster($this->projector->reveal(), $streamName);
+        $caster = new ReadModelCaster($this->projector, $streamName);
 
         $keep = true;
         while ($keep) {
@@ -63,9 +62,9 @@ final class ReadModelCasterTest extends ProphecyTestCase
     {
         $streamName = 'foo';
 
-        $this->projector->stop()->shouldBeCalledOnce();
+        $this->projector->expects($this->once())->method('stop');
 
-        $caster = new ReadModelCaster($this->projector->reveal(), $streamName);
+        $caster = new ReadModelCaster($this->projector, $streamName);
 
         $this->assertEquals('foo', $caster->streamName());
 
@@ -77,13 +76,13 @@ final class ReadModelCasterTest extends ProphecyTestCase
      */
     public function it_access_read_model(): void
     {
-        $readModel = $this->prophesize(ReadModel::class)->reveal();
+        $readModel = $this->createMock(ReadModel::class);
 
         $streamName = 'foo';
 
-        $this->projector->readModel()->willReturn($readModel)->shouldBeCalledOnce();
+        $this->projector->expects($this->once())->method('readModel')->willReturn($readModel);
 
-        $caster = new ReadModelCaster($this->projector->reveal(), $streamName);
+        $caster = new ReadModelCaster($this->projector, $streamName);
 
         $this->assertEquals($readModel, $caster->readModel());
     }

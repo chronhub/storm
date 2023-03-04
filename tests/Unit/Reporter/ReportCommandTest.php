@@ -7,13 +7,13 @@ namespace Chronhub\Storm\Tests\Unit\Reporter;
 use Generator;
 use RuntimeException;
 use Chronhub\Storm\Message\Message;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Reporter\ReportCommand;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -24,15 +24,15 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeCommand;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 
-final class ReportCommandTest extends ProphecyTestCase
+final class ReportCommandTest extends UnitTestCase
 {
-    private MessageFactory|ObjectProphecy $messageFactory;
+    private MessageFactory|MockObject $messageFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->messageFactory = $this->prophesize(MessageFactory::class);
+        $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
     /**
@@ -41,7 +41,11 @@ final class ReportCommandTest extends ProphecyTestCase
     public function it_relay_command(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($command)
+            ->willReturn(new Message($command));
 
         $tracker = new TrackMessage();
 
@@ -58,7 +62,7 @@ final class ReportCommandTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeCommand(),
         ];
@@ -78,7 +82,10 @@ final class ReportCommandTest extends ProphecyTestCase
         $commandAsArray = ['some' => 'command'];
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->__invoke($commandAsArray)->willReturn(new Message($command))->shouldBeCalledOnce();
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($commandAsArray)
+            ->willReturn(new Message($command));
 
         $tracker = new TrackMessage();
 
@@ -95,7 +102,7 @@ final class ReportCommandTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeCommand(),
         ];
@@ -117,13 +124,16 @@ final class ReportCommandTest extends ProphecyTestCase
         $this->expectException(MessageNotHandled::class);
         $this->expectExceptionMessage("Message with name $messageName was not handled");
 
-        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($command)
+            ->willReturn(new Message($command));
 
         $tracker = new TrackMessage();
         $reporter = new ReportCommand($tracker);
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             new ConsumeCommand(),
         ];
 
@@ -143,7 +153,11 @@ final class ReportCommandTest extends ProphecyTestCase
         $this->expectExceptionMessage('some exception');
 
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->__invoke($command)->willReturn(new Message($command))->shouldBeCalledOnce();
+
+        $this->messageFactory->expects($this->once())
+            ->method('__invoke')
+            ->with($command)
+            ->willReturn(new Message($command));
 
         $tracker = new TrackMessage();
         $reporter = new ReportCommand($tracker);
@@ -155,7 +169,7 @@ final class ReportCommandTest extends ProphecyTestCase
         };
 
         $subscribers = [
-            new MakeMessage($this->messageFactory->reveal()),
+            new MakeMessage($this->messageFactory),
             $this->provideRouter([$consumer]),
             new ConsumeCommand(),
         ];

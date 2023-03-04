@@ -6,23 +6,21 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Closure;
 use DateInterval;
-use Prophecy\Argument;
 use Chronhub\Storm\Clock\PointInTime;
-use Prophecy\Prophecy\ObjectProphecy;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
-final class DetectGapTest extends ProphecyTestCase
+final class DetectGapTest extends UnitTestCase
 {
-    private StreamPosition|ObjectProphecy $streamPosition;
+    private StreamPosition|MockObject $streamPosition;
 
-    private SystemClock|PointInTime $clock;
+    private PointInTime $clock;
 
     protected function setUp(): void
     {
-        $this->streamPosition = $this->prophesize(StreamPosition::class);
+        $this->streamPosition = $this->createMock(StreamPosition::class);
         $this->clock = new PointInTime();
     }
 
@@ -32,7 +30,7 @@ final class DetectGapTest extends ProphecyTestCase
     public function it_can_be_constructed(): void
     {
         $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
+            $this->streamPosition,
             $this->clock,
             [0, 5, 10],
             'PT60S'
@@ -45,18 +43,11 @@ final class DetectGapTest extends ProphecyTestCase
     /**
      * @test
      */
-    public function it_does_not_detect_gap_when_retries_in_milliseconds_is_an_empty_array(): void
+    public function it_does_not_detect_gap_when_retries_is_an_empty_array(): void
     {
-        $this->streamPosition
-            ->hasNextPosition(Argument::type('string'), Argument::type('integer'))
-            ->shouldNotBeCalled();
+        $this->streamPosition->expects($this->never())->method('hasNextPosition');
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [],
-            'PT60S'
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [], 'PT60S');
 
         $eventTime = $this->clock->now()->format($this->clock::DATE_TIME_FORMAT);
 
@@ -74,14 +65,12 @@ final class DetectGapTest extends ProphecyTestCase
             ->sub(new DateInterval('PT1S'))
             ->format($this->clock::DATE_TIME_FORMAT);
 
-        $this->streamPosition->hasNextPosition('customer', 3)->willReturn(true)->shouldBeCalled();
+        $this->streamPosition->expects($this->once())
+            ->method('hasNextPosition')
+            ->with('customer', 3)
+            ->willReturn(true);
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            'PT60S'
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], 'PT60S');
 
         $this->assertFalse($gapDetector->detect('customer', 3, $eventTime));
         $this->assertFalse($gapDetector->hasGap());
@@ -97,14 +86,12 @@ final class DetectGapTest extends ProphecyTestCase
             ->sub(new DateInterval('PT1S'))
             ->format($this->clock::DATE_TIME_FORMAT);
 
-        $this->streamPosition->hasNextPosition('customer', 2)->willReturn(false)->shouldBeCalled();
+        $this->streamPosition->expects($this->any())
+            ->method('hasNextPosition')
+            ->with('customer', 2)
+            ->willReturn(false);
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            null
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], null);
 
         $this->assertRetries($gapDetector, 0);
         $this->assertTrue($gapDetector->detect('customer', 2, $eventTime));
@@ -128,14 +115,12 @@ final class DetectGapTest extends ProphecyTestCase
      */
     public function it_does_not_detect_gap_when_event_time_is_greater_than_detection_window_from_now(): void
     {
-        $this->streamPosition->hasNextPosition('customer', 4)->willReturn(false)->shouldBeCalled();
+        $this->streamPosition
+            ->expects($this->once())
+            ->method('hasNextPosition')
+            ->with('customer', 4);
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            ['5'],
-            'PT60S'
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, ['5'], 'PT60S');
 
         $gapDetector->detect('customer', 4, $this->clock->now()->format($this->clock::DATE_TIME_FORMAT));
 
@@ -152,14 +137,12 @@ final class DetectGapTest extends ProphecyTestCase
             ->sub(new DateInterval('PT1S'))
             ->format($this->clock::DATE_TIME_FORMAT);
 
-        $this->streamPosition->hasNextPosition('customer', 3)->willReturn(false)->shouldBeCalled();
+        $this->streamPosition->expects($this->any())
+            ->method('hasNextPosition')
+            ->with('customer', 3)
+            ->willReturn(false);
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            null
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], null);
 
         $this->assertTrue($gapDetector->detect('customer', 3, $eventTime));
         $this->assertTrue($gapDetector->hasGap());
@@ -170,12 +153,7 @@ final class DetectGapTest extends ProphecyTestCase
      */
     public function it_reset_retries_and_return_silently_when_no_more_retries_available(): void
     {
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            'PT60S'
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], 'PT60S');
 
         $gapDetector->sleep();
         $gapDetector->sleep();
@@ -190,14 +168,12 @@ final class DetectGapTest extends ProphecyTestCase
      */
     public function it_reset_gap_detected(): void
     {
-        $this->streamPosition->hasNextPosition('customer', 3)->willReturn(false)->shouldBeCalled();
+        $this->streamPosition->expects($this->any())
+            ->method('hasNextPosition')
+            ->with('customer', 3)
+            ->willReturn(false);
 
-        $gapDetector = new DetectGap(
-            $this->streamPosition->reveal(),
-            $this->clock,
-            [5, 10, 20],
-            null
-        );
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], null);
 
         $eventTime = $this->clock->now()->format($this->clock->getFormat());
 

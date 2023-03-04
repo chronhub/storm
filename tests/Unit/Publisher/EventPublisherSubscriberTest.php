@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Publisher;
 
-use Prophecy\Argument;
 use Chronhub\Storm\Stream\Stream;
 use Illuminate\Support\Collection;
 use Chronhub\Storm\Stream\StreamName;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -28,15 +27,15 @@ use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use function count;
 use function is_countable;
 
-final class EventPublisherSubscriberTest extends ProphecyTestCase
+final class EventPublisherSubscriberTest extends UnitTestCase
 {
-    private EventPublisher|ObjectProphecy $eventPublisher;
+    private EventPublisher|MockObject $eventPublisher;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->eventPublisher = $this->prophesize(EventPublisher::class);
+        $this->eventPublisher = $this->createMock(EventPublisher::class);
     }
 
     /**
@@ -51,13 +50,16 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(Chronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(Chronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('record');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $this->eventPublisher->expects($this->once())
+            ->method('publish')
+            ->with($this->equalTo(new Collection([$event])));
+
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -75,13 +77,15 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(EventableChronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(EventableChronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->once())
+            ->method('publish')
+            ->with($this->equalTo(new Collection([$event])));
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -100,13 +104,13 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory->deferred(fn (): Stream => $stream);
         $streamStory->withRaisedException(new StreamAlreadyExists('stream already exists'));
 
-        $chronicler = $this->prophesize(EventableChronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(EventableChronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldNotBeCalled();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->never())->method('publish');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -124,13 +128,15 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(EventableChronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(EventableChronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->once())
+            ->method('publish')
+            ->with($this->equalTo(new Collection([$event])));
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -149,13 +155,13 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory->deferred(fn (): Stream => $stream);
         $streamStory->withRaisedException(new StreamNotFound('stream not found'));
 
-        $chronicler = $this->prophesize(EventableChronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(EventableChronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldNotBeCalled();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->never())->method('publish');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -174,13 +180,13 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory->deferred(fn (): Stream => $stream);
         $streamStory->withRaisedException(new ConcurrencyException('concurrency exception'));
 
-        $chronicler = $this->prophesize(EventableChronicler::class);
-        $eventChronicler = new EventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(EventableChronicler::class);
+        $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(Collection::class))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new Collection([$event]))->shouldNotBeCalled();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->never())->method('publish');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -198,19 +204,20 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $chronicler->amend($stream)->shouldBeCalledOnce();
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
 
-        $chronicler->inTransaction()->willReturn(false)->shouldBeCalledOnce();
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler->expects($this->once())->method('amend')->with($stream);
+        $chronicler->expects($this->once())->method('inTransaction')->willReturn(false);
+
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
         $pendingEvents = new Collection([$event]);
 
-        $this->eventPublisher->pull()->willReturn($pendingEvents)->shouldNotBeCalled();
-        $this->eventPublisher->publish($pendingEvents)->shouldBeCalledOnce();
-        $this->eventPublisher->flush()->shouldNotBeCalled();
+        $this->eventPublisher->expects($this->never())->method('pull');
+        $this->eventPublisher->expects($this->once())->method('publish')->with($pendingEvents);
+        $this->eventPublisher->expects($this->never())->method('flush');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -228,19 +235,19 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $chronicler->firstCommit($stream)->shouldBeCalledOnce();
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
+        $chronicler->expects($this->once())->method('firstCommit')->with($stream);
 
-        $chronicler->inTransaction()->willReturn(true)->shouldBeCalledOnce();
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler->expects($this->once())->method('inTransaction')->willReturn(true);
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
         $pendingEvents = new Collection([$event]);
 
-        $this->eventPublisher->pull()->willReturn($pendingEvents)->shouldNotBeCalled();
-        $this->eventPublisher->publish($pendingEvents)->shouldNotBeCalled();
-        $this->eventPublisher->record($pendingEvents)->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('pull');
+        $this->eventPublisher->expects($this->never())->method('publish');
+        $this->eventPublisher->expects($this->once())->method('record')->with($pendingEvents);
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -258,19 +265,20 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $chronicler->amend($stream)->shouldBeCalledOnce();
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
+        $chronicler->expects($this->once())->method('amend')->with($stream);
 
-        $chronicler->inTransaction()->willReturn(true)->shouldBeCalledOnce();
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler->expects($this->once())->method('inTransaction')->willReturn(true);
+
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
         $pendingEvents = new Collection([$event]);
 
-        $this->eventPublisher->pull()->willReturn($pendingEvents)->shouldNotBeCalled();
-        $this->eventPublisher->publish($pendingEvents)->shouldNotBeCalled();
-        $this->eventPublisher->record($pendingEvents)->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('pull');
+        $this->eventPublisher->expects($this->never())->method('publish');
+        $this->eventPublisher->expects($this->once())->method('record')->with($pendingEvents);
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -288,16 +296,16 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
         $pendingEvents = new LazyCollection([$event]);
 
-        $this->eventPublisher->pull()->willReturn($pendingEvents)->shouldBeCalledOnce();
-        $this->eventPublisher->publish($pendingEvents)->shouldBeCalledOnce();
-        $this->eventPublisher->flush()->shouldNotBeCalled();
+        $this->eventPublisher->expects($this->once())->method('pull')->willReturn($pendingEvents);
+        $this->eventPublisher->expects($this->once())->method('publish')->with($pendingEvents);
+        $this->eventPublisher->expects($this->never())->method('flush');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -315,15 +323,16 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamStory = $streamTracker->newStory(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT);
         $streamStory->deferred(fn (): Stream => $stream);
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
-        $this->eventPublisher->record(Argument::type(LazyCollection::class))->shouldNotBeCalled();
-        $this->eventPublisher->pull()->willReturn(new LazyCollection([$event]))->shouldNotBeCalled();
-        $this->eventPublisher->publish(new LazyCollection([$event]))->shouldNotBeCalled();
-        $this->eventPublisher->flush()->shouldBeCalledOnce();
+        $this->eventPublisher->expects($this->never())->method('record');
+        $this->eventPublisher->expects($this->never())->method('pull');
+        $this->eventPublisher->expects($this->never())->method('publish');
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $this->eventPublisher->expects($this->once())->method('flush');
+
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
         $streamTracker->disclose($streamStory);
@@ -337,15 +346,18 @@ final class EventPublisherSubscriberTest extends ProphecyTestCase
         $streamTracker = new TrackTransactionalStream();
         $this->assertCount(0, $streamTracker->listeners());
 
-        $chronicler = $this->prophesize(TransactionalEventableChronicler::class);
-        $eventChronicler = new TransactionalEventChronicler($chronicler->reveal(), $streamTracker);
+        $chronicler = $this->createMock(TransactionalEventableChronicler::class);
+        $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
 
         $countProvidedSubscribers = count($streamTracker->listeners());
 
-        $subscriber = new EventPublisherSubscriber($this->eventPublisher->reveal());
+        $subscriber = new EventPublisherSubscriber($this->eventPublisher);
         $subscriber->attachToChronicler($eventChronicler);
 
-        $countFromPublisher = is_countable(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) ? count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers')) : 0;
+        $countFromPublisher = is_countable(ReflectionProperty::getProperty($subscriber, 'streamSubscribers'))
+            ? count(ReflectionProperty::getProperty($subscriber, 'streamSubscribers'))
+            : 0;
+
         $this->assertEquals(4, $countFromPublisher);
 
         $subscriber->detachFromChronicler($eventChronicler);

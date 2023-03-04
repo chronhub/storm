@@ -27,10 +27,10 @@ final class AggregateRepositoryTest extends ProphecyTestCase
     {
         parent::setUp();
 
-        $this->chronicler = $this->prophesize(Chronicler::class);
-        $this->streamProducer = $this->prophesize(StreamProducer::class);
-        $this->aggregateType = $this->prophesize(AggregateType::class);
-        $this->aggregateCache = $this->prophesize(AggregateCache::class);
+        $this->chronicler = $this->createStub(Chronicler::class);
+        $this->streamProducer = $this->createStub(StreamProducer::class);
+        $this->aggregateType = $this->createStub(AggregateType::class);
+        $this->aggregateCache = $this->createStub(AggregateCache::class);
     }
 
     /**
@@ -39,15 +39,15 @@ final class AggregateRepositoryTest extends ProphecyTestCase
     public function it_can_be_instantiated(): void
     {
         $repository = new AggregateRepository(
-            $this->chronicler->reveal(),
-            $this->streamProducer->reveal(),
-            $this->aggregateCache->reveal(),
-            $this->aggregateType->reveal(),
+            $this->chronicler,
+            $this->streamProducer,
+            $this->aggregateCache,
+            $this->aggregateType,
             new NoOpMessageDecorator()
         );
 
-        $this->assertSame($this->chronicler->reveal(), $repository->chronicler);
-        $this->assertSame($this->streamProducer->reveal(), $repository->streamProducer);
-        $this->assertSame($this->aggregateCache->reveal(), $repository->aggregateCache);
+        $this->assertSame($this->chronicler, $repository->chronicler);
+        $this->assertSame($this->streamProducer, $repository->streamProducer);
+        $this->assertSame($this->aggregateCache, $repository->aggregateCache);
     }
 }
