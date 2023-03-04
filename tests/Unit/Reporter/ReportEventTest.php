@@ -8,13 +8,16 @@ use Generator;
 use RuntimeException;
 use PHPUnit\Framework\TestCase;
 use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -24,10 +27,13 @@ use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 
-final class ReportEventTest extends ProphecyTestCase
+final class ReportEventTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,9 +41,7 @@ final class ReportEventTest extends ProphecyTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_event(): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
@@ -73,9 +77,7 @@ final class ReportEventTest extends ProphecyTestCase
         $this->assertTrue($messageHandled);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_command_as_array(): void
     {
         $eventAsArray = ['some' => 'event'];
@@ -112,11 +114,8 @@ final class ReportEventTest extends ProphecyTestCase
         $this->assertTrue($messageHandled);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideConsumers
-     */
+    #[DataProvider('provideConsumers')]
+    #[Test]
     public function it_always_considered_domain_event_acked_regardless_of_consumers(iterable $consumers): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
@@ -160,9 +159,7 @@ final class ReportEventTest extends ProphecyTestCase
         $reporter->relay($event);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_caught_during_dispatch_of_event(): void
     {
         $exception = new RuntimeException('some exception');
@@ -206,12 +203,12 @@ final class ReportEventTest extends ProphecyTestCase
         ];
     }
 
-    public function provideConsumers(): Generator
+    public static function provideConsumers(): Generator
     {
         yield [[]];
 
         $consumer = function (DomainEvent $dispatchedEvent): void {
-            $this->assertInstanceOf(SomeEvent::class, $dispatchedEvent);
+            self::assertInstanceOf(SomeEvent::class, $dispatchedEvent);
         };
 
         yield[[$consumer]];

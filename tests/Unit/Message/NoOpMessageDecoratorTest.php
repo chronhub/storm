@@ -8,17 +8,16 @@ use stdClass;
 use Generator;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 
 final class NoOpMessageDecoratorTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideEvent
-     */
+    #[DataProvider('provideEvent')]
+    #[Test]
     public function it_return_same_message(object $event): void
     {
         $message = new Message($event);
@@ -28,7 +27,7 @@ final class NoOpMessageDecoratorTest extends UnitTestCase
         $this->assertSame($message, $messageDecorator->decorate($message));
     }
 
-    public function provideEvent(): Generator
+    public static function provideEvent(): Generator
     {
         yield [new stdClass()];
         yield [new SomeCommand(['foo' => 'bar'])];

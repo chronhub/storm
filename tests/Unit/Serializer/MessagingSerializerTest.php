@@ -8,10 +8,12 @@ use stdClass;
 use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Symfony\Component\Serializer\Serializer;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
 use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Serializer\MessagingSerializer;
@@ -21,11 +23,10 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-final class MessagingSerializerTest extends ProphecyTestCase
+#[CoversClass(MessagingSerializer::class)]
+final class MessagingSerializerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_message_with_scalar_headers(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug'])->withHeaders([
@@ -53,9 +54,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_content_message(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug'])->withHeaders([
@@ -83,9 +82,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_normalize_and_serialize_headers(): void
     {
         $datetime = new PointInTime();
@@ -122,9 +119,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_message_event_is_not_an_instance_of_reporting_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -136,9 +131,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
         $serializer->serializeMessage(new Message(new stdClass()));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_unserialize_payload(): void
     {
         $payload = [
@@ -160,9 +153,7 @@ final class MessagingSerializerTest extends ProphecyTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_message_event_type_missing_during_unserialize_content(): void
     {
         $this->expectException(InvalidArgumentException::class);

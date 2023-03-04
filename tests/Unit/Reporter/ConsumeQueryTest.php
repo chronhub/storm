@@ -10,6 +10,7 @@ use React\Promise\Deferred;
 use Chronhub\Storm\Message\Message;
 use React\Promise\PromiseInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeQuery;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
@@ -18,9 +19,7 @@ use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
 
 final class ConsumeQueryTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_subscriber(): void
     {
         $subscriber = new ConsumeQuery();
@@ -32,9 +31,7 @@ final class ConsumeQueryTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_mark_message_handled_when_query_consumer_is_null(): void
     {
         $tracker = new TrackMessage();
@@ -56,9 +53,7 @@ final class ConsumeQueryTest extends UnitTestCase
         $this->assertFalse($story->isHandled());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_consume_query_and_mark_message_handled(): void
     {
         $tracker = new TrackMessage();
@@ -91,9 +86,7 @@ final class ConsumeQueryTest extends UnitTestCase
         $this->assertEquals(42, $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_hold_exception_on_promise_when_query_is_handled_and_mark_message_handled(): void
     {
         $tracker = new TrackMessage();

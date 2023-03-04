@@ -6,13 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 
 final class InMemoryEventStreamTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_new_event_stream(): void
     {
         $eventStream = new InMemoryEventStream();
@@ -25,9 +24,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertTrue($eventStream->hasRealStreamName('balance'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_false_when_event_stream_already_exists_on_create(): void
     {
         $eventStream = new InMemoryEventStream();
@@ -42,9 +39,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertFalse($eventStream->createStream('balance', null, 'operation'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_new_event_stream_with_category(): void
     {
         $eventStream = new InMemoryEventStream();
@@ -57,9 +52,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertEquals(['add'], $eventStream->filterByCategories(['operation']));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_filter_by_event_streams_by_string_or_instance_of_stream_name(): void
     {
         $eventStream = new InMemoryEventStream();
@@ -78,9 +71,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_filter_all_streams_without_internal(): void
     {
         $eventStream = new InMemoryEventStream();
@@ -95,9 +86,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertEquals(['subtract', 'add'], $eventStream->allWithoutInternal());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_delete_event_stream(): void
     {
         $eventStream = new InMemoryEventStream();

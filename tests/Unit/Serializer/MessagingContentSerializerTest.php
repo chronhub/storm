@@ -6,15 +6,16 @@ namespace Chronhub\Storm\Tests\Unit\Serializer;
 
 use stdClass;
 use InvalidArgumentException;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\MessagingContentSerializer;
 
-final class MessagingContentSerializerTest extends ProphecyTestCase
+#[CoversClass(MessagingContentSerializer::class)]
+final class MessagingContentSerializerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_message_content(): void
     {
         $event = new SomeCommand(['name' => 'steph bug']);
@@ -26,9 +27,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $content);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_event_is_not_an_instance_of_reporting_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -38,9 +37,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
         (new MessagingContentSerializer())->serialize(new stdClass());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_reporting_instance_from_array_content(): void
     {
         $contentSerializer = new MessagingContentSerializer();
@@ -54,9 +51,7 @@ final class MessagingContentSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $event->toContent());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_with_invalid_source_during_unserialize(): void
     {
         $this->expectException(InvalidArgumentException::class);

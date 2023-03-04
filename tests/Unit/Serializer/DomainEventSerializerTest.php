@@ -6,11 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Serializer;
 
 use InvalidArgumentException;
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
 use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
@@ -23,11 +25,10 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use function json_encode;
 
-final class DomainEventSerializerTest extends ProphecyTestCase
+#[CoversClass(DomainEventSerializer::class)]
+final class DomainEventSerializerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_message_with_scalar_headers(): void
     {
         $aggregateId = V4AggregateId::create();
@@ -52,9 +53,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_normalize_and_serialize_headers(): void
     {
         $aggregateId = V4AggregateId::create();
@@ -88,9 +87,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_event_header_aggregate_id_is_missing_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -100,9 +97,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->domainEventSerializerInstance()->serializeEvent(SomeEvent::fromContent([]));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_event_header_aggregate_id_type_is_missing_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -118,9 +113,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_event_header_aggregate_type_is_missing_during_serialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -139,9 +132,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_unserialize_payload(): void
     {
         $payload = [
@@ -161,9 +152,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decode_and_unserialize_payload(): void
     {
         $payload = [
@@ -187,9 +176,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertIsArray($payload['content']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_unserialize_payload_and_add_version_to_payload_as_no(): void
     {
         $payload = [
@@ -213,9 +200,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_add_version_to_payload_when_internal_position_header_already_exists(): void
     {
         $payload = [
@@ -240,9 +225,7 @@ final class DomainEventSerializerTest extends ProphecyTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_message_event_type_missing_during_unserialize_content(): void
     {
         $this->expectException(InvalidArgumentException::class);

@@ -6,9 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
@@ -31,6 +34,9 @@ final class StandaloneStoreTest extends UnitTestCase
 
     private string $streamName;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->contextSetUp();
@@ -41,9 +47,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->streamName = 'customer';
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_projection(): void
     {
         $this->projectionProvider->expects($this->once())
@@ -57,9 +61,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $store->create();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_load_projection_state(): void
     {
         $this->position->expects($this->once())
@@ -90,9 +92,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(['count' => 5], $context->state->get());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_projection_name_not_found_on_load_projection_state(): void
     {
         $this->expectException(ProjectionNotFound::class);
@@ -112,11 +112,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $store->loadState();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_acquire_lock(bool $acquireLock): void
     {
         $this->projectorLock->expects($this->once())
@@ -147,9 +144,7 @@ final class StandaloneStoreTest extends UnitTestCase
             : $this->assertEquals(ProjectionStatus::IDLE, $context->status);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_update_lock(): void
     {
         $this->projectorLock->expects($this->once())
@@ -163,11 +158,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertTrue($store->updateLock());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_update_lock_if_succeeded(bool $updated): void
     {
         $this->projectorLock->expects($this->once())
@@ -202,11 +194,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals($updated, $store->updateLock());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_release_lock(bool $released): void
     {
         $this->projectionProvider->expects($this->once())
@@ -232,11 +221,8 @@ final class StandaloneStoreTest extends UnitTestCase
             : $this->assertEquals(ProjectionStatus::RUNNING, $context->status);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_assert_projection_exists(bool $exists): void
     {
         $this->projectionProvider->expects($this->once())
@@ -251,10 +237,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals($exists, $store->exists());
     }
 
-    /**
-     * @test
-     */
-    public function it_stop_projection(): void
+    #[Test]
+    public function it_stop_projection(): never
     {
         $this->markTestSkipped('TODO: fix this test');
 
@@ -309,10 +293,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::IDLE, $context->status);
     }
 
-    /**
-     * @test
-     */
-    public function it_fails_stop_projection(): void
+    #[Test]
+    public function it_fails_stop_projection(): never
     {
         $this->markTestSkipped('TODO: fix this test');
 
@@ -361,9 +343,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::RUNNING, $context->status);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_start_again_projection(): void
     {
         $context = $this->newContext();
@@ -389,9 +369,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::RUNNING, $context->status);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fails_start_again_projection(): void
     {
         $context = $this->newContext();
@@ -417,10 +395,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::STOPPING, $context->status);
     }
 
-    /**
-     * @test
-     */
-    public function it_reset_projection(): void
+    #[Test]
+    public function it_reset_projection(): never
     {
         $this->markTestSkipped('TODO: fix this test');
 
@@ -454,10 +430,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(['count' => 0], $context->state->get());
     }
 
-    /**
-     * @test
-     */
-    public function it_fails_reset_projection(): void
+    #[Test]
+    public function it_fails_reset_projection(): never
     {
         $this->markTestSkipped('TODO: fix this test');
 
@@ -492,11 +466,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(['count' => 0], $context->state->get());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_delete_projection(bool $withEmittedEvent): void
     {
         $context = $this->newContext();
@@ -520,11 +491,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertTrue($context->runner->isStopped());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_fails_delete_projection(bool $withEmittedEvent): void
     {
         $context = $this->newContext();
@@ -545,9 +513,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(['foo' => 'bar'], $context->state->get());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_load_projection_status_and_return_running_status_when_projection_model_not_found(): void
     {
         $context = $this->newContext();
@@ -562,11 +528,8 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::RUNNING, $store->loadStatus());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideProjectionStatus
-     */
+    #[DataProvider('provideProjectionStatus')]
+    #[Test]
     public function it_load_projection_status_and_return_status_from_projection_model(ProjectionStatus $projectionStatus): void
     {
         $projectionModel = $this->createMock(ProjectionModel::class);
@@ -586,9 +549,7 @@ final class StandaloneStoreTest extends UnitTestCase
         $this->assertEquals($projectionStatus, $store->loadStatus());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_current_stream_name(): void
     {
         $context = $this->newContext();
@@ -609,13 +570,13 @@ final class StandaloneStoreTest extends UnitTestCase
         );
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];
     }
 
-    public function provideProjectionStatus(): Generator
+    public static function provideProjectionStatus(): Generator
     {
         yield [ProjectionStatus::RUNNING];
         yield [ProjectionStatus::IDLE];

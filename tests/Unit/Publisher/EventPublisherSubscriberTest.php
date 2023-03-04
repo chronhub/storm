@@ -9,8 +9,10 @@ use Illuminate\Support\Collection;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
@@ -31,6 +33,9 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 {
     private EventPublisher|MockObject $eventPublisher;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -38,9 +43,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $this->eventPublisher = $this->createMock(EventPublisher::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_publish_events_on_first_commit_with_no_transactional_chronicler(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -65,9 +68,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_publish_events_on_first_commit_with_eventable_chronicler(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -91,9 +92,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_publish_events_on_first_commit_with_eventable_chronicler_on_stream_already_exists(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -116,9 +115,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_publish_events_on_amend_with_eventable_chronicler(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -142,9 +139,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_publish_events_on_amend_with_eventable_chronicler_on_stream_not_found(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -167,9 +162,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_publish_events_on_amend_with_eventable_chronicler_on_concurrency(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -192,9 +185,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_publish_events_on_persist_not_in_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -223,9 +214,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_record_events_on_first_commit_in_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -253,9 +242,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_record_events_on_persist_in_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -284,9 +271,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_publish_events_on_commit_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -311,9 +296,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_flush_pending_events_on_rollback_transaction(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -338,9 +321,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_detach_stream_subscribers(): void
     {
         $streamTracker = new TrackTransactionalStream();

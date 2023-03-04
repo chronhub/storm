@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 use function abs;
 
 final class InMemoryReadModelTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_initialized(): void
     {
         $readModel = new InMemoryReadModel();
@@ -25,9 +25,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEquals([], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_insert_data(): void
     {
         $readModel = new InMemoryReadModel();
@@ -41,9 +39,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEquals(['123-' => ['foo' => 'bar']], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_update_data(): void
     {
         $readModel = new InMemoryReadModel();
@@ -63,11 +59,8 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEquals(['123-' => ['foo' => 'bar123']], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideIncrementAbsoluteValue
-     */
+    #[DataProvider('provideIncrementAbsoluteValue')]
+    #[Test]
     public function it_can_increment_field_by_absolute_value(int|float $value): void
     {
         $readModel = new InMemoryReadModel();
@@ -87,11 +80,8 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEquals(['123-' => ['foo' => 5 + abs($value), 'extra' => 1]], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideIncrementAbsoluteValue
-     */
+    #[DataProvider('provideIncrementAbsoluteValue')]
+    #[Test]
     public function it_can_decrement_field_by_absolute_value(int|float $value): void
     {
         $readModel = new InMemoryReadModel();
@@ -111,9 +101,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEquals(['123-' => ['foo' => 5 - abs($value), 'extra' => 1]], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_delete(): void
     {
         $readModel = new InMemoryReadModel();
@@ -134,9 +122,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         ], $readModel->getContainer());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_down_container(): void
     {
         $readModel = new InMemoryReadModel();
@@ -154,9 +140,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEmpty($readModel->getContainer());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_reset_container(): void
     {
         $readModel = new InMemoryReadModel();
@@ -174,7 +158,7 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEmpty($readModel->getContainer());
     }
 
-    public function provideIncrementAbsoluteValue(): Generator
+    public static function provideIncrementAbsoluteValue(): Generator
     {
         yield [5];
         yield [-5];

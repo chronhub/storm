@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
@@ -14,15 +16,16 @@ final class ReadModelCasterTest extends UnitTestCase
 {
     private MockObject|ReadModelProjector $projector;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
         $this->projector = $this->createMock(ReadModelProjector::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $streamName = null;
@@ -32,9 +35,7 @@ final class ReadModelCasterTest extends UnitTestCase
         $this->assertNull($caster->streamName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_stream_name_by_reference(): void
     {
         $streamName = null;
@@ -55,9 +56,7 @@ final class ReadModelCasterTest extends UnitTestCase
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_stop_projection(): void
     {
         $streamName = 'foo';
@@ -71,9 +70,7 @@ final class ReadModelCasterTest extends UnitTestCase
         $caster->stop();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_read_model(): void
     {
         $readModel = $this->createMock(ReadModel::class);

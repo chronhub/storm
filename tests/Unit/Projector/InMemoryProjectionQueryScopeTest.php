@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Generator;
 use Illuminate\Support\Collection;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Projector\InMemoryProjectionQueryScope;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
@@ -20,11 +22,8 @@ use function iterator_to_array;
 
 final class InMemoryProjectionQueryScopeTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideCurrentPosition
-     */
+    #[DataProvider('provideCurrentPosition')]
+    #[Test]
     public function it_filter_domain_event_from_included_position(int $fromIncludedPosition, int $expectedCount): void
     {
         $queryScope = new InMemoryProjectionQueryScope();
@@ -43,11 +42,8 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         $this->assertEquals(count($filteredEvents), $expectedCount);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideInvalidStreamPosition
-     */
+    #[DataProvider('provideInvalidStreamPosition')]
+    #[Test]
     public function it_raise_exception_if_current_set_position_is_less_or_equal_than_zero(int $invalidPosition): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -62,11 +58,8 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         $queryFilter->apply()();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideInvalidInternalPositionHeader
-     */
+    #[DataProvider('provideInvalidInternalPositionHeader')]
+    #[Test]
     public function it_raise_exception_if_internal_position_header_of_event_is_invalid(null|string $invalidInternalPosition): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -95,7 +88,7 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         return $i;
     }
 
-    public function provideCurrentPosition(): Generator
+    public static function provideCurrentPosition(): Generator
     {
         $i = 1;
 
@@ -107,13 +100,13 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         return $i;
     }
 
-    public function provideInvalidStreamPosition(): Generator
+    public static function provideInvalidStreamPosition(): Generator
     {
         yield [0];
         yield [-1];
     }
 
-    public function provideInvalidInternalPositionHeader(): Generator
+    public static function provideInvalidInternalPositionHeader(): Generator
     {
         yield [null];
         yield ['nope'];

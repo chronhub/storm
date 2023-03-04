@@ -10,10 +10,13 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
@@ -43,6 +46,9 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
     private string $identityString = '9ef864f7-43e2-48c8-9944-639a2d927a06';
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -55,9 +61,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->streamName = new StreamName('operation');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_stub_accessor(): void
     {
         $stub = $this->aggregateRepositoryStub(null);
@@ -67,9 +71,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertEquals($this->streamProducer, $stub->streamProducer);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_retrieve_aggregate_from_cache(): void
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
@@ -84,9 +86,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertEquals($expectedAggregateRoot, $aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reconstitute_aggregate_if_aggregate_does_not_exist_already_in_cache_and_put_in_cache_(): void
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
@@ -103,9 +103,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertEquals($expectedAggregateRoot, $aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_put_in_cache_if_reconstitute_aggregate_return_null_aggregate(): void
     {
         $this->aggregateCache->expects($this->once())->method('has')->willReturn(false);
@@ -120,9 +118,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertNull($aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_forget_aggregate_from_cache_if_persist_first_commit_raise_exception(): void
     {
         $this->expectException(RuntimeException::class);
@@ -160,9 +156,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_forget_aggregate_from_cache_when_an_exception_raised_on_persist(): void
     {
         $this->expectException(RuntimeException::class);
@@ -205,9 +199,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_persist_aggregate_with_no_event_to_release(): void
     {
         $events = [];
@@ -227,11 +219,8 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageDecoratorOrNull
-     */
+    #[DataProvider('provideMessageDecoratorOrNull')]
+    #[Test]
     public function it_persists_aggregate_root_with_first_commit_and_decorate_domain_events(?MessageDecorator $messageDecorator): void
     {
         $events = iterator_to_array($this->provideFourDomainEvents());
@@ -283,11 +272,8 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageDecoratorOrNull
-     */
+    #[DataProvider('provideMessageDecoratorOrNull')]
+    #[Test]
     public function it_persists_aggregate_root_and_decorate_domain_events(?MessageDecorator $messageDecorator): void
     {
         /** @var AggregateRootStub $aggregateRoot */
@@ -347,7 +333,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    public function provideMessageDecoratorOrNull(): Generator
+    public static function provideMessageDecoratorOrNull(): Generator
     {
         yield[null];
 

@@ -8,12 +8,15 @@ use Generator;
 use RuntimeException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Reporter\ReportCommand;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -28,6 +31,9 @@ final class ReportCommandTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,9 +41,7 @@ final class ReportCommandTest extends UnitTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_command(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
@@ -74,9 +78,7 @@ final class ReportCommandTest extends UnitTestCase
         $this->assertTrue($messageHandled);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_command_as_array(): void
     {
         $commandAsArray = ['some' => 'command'];
@@ -114,11 +116,8 @@ final class ReportCommandTest extends UnitTestCase
         $this->assertTrue($messageHandled);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideCommand
-     */
+    #[DataProvider('provideCommand')]
+    #[Test]
     public function it_raise_exception_when_message_has_not_been_handled(DomainCommand $command, string $messageName): void
     {
         $this->expectException(MessageNotHandled::class);
@@ -142,9 +141,7 @@ final class ReportCommandTest extends UnitTestCase
         $reporter->relay($command);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_caught_during_dispatch_of_command(): void
     {
         $exception = new RuntimeException('some exception');
@@ -179,7 +176,7 @@ final class ReportCommandTest extends UnitTestCase
         $reporter->relay($command);
     }
 
-    public function provideCommand(): Generator
+    public static function provideCommand(): Generator
     {
         yield [SomeCommand::fromContent(['name' => 'steph bug']), SomeCommand::class];
 

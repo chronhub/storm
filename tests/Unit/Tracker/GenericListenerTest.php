@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\GenericListener;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 
 final class GenericListenerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_listener(): void
     {
         $story = fn (): bool => false;

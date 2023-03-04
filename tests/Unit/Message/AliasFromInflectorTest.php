@@ -6,14 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Message\AliasFromInflector;
 
 final class AliasFromInflectorTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_event_class_from_event_string(): void
     {
         $event = SomeCommand::fromContent(['name' => 'steph']);
@@ -23,9 +22,7 @@ final class AliasFromInflectorTest extends UnitTestCase
         $this->assertEquals('some-command', $messageAlias->classToAlias($event::class));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_event_class_string_does_not_exists(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -36,9 +33,7 @@ final class AliasFromInflectorTest extends UnitTestCase
         $messageAlias->classToAlias('invalid_event');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_alias_from_event_object(): void
     {
         $event = SomeCommand::fromContent(['name' => 'steph']);

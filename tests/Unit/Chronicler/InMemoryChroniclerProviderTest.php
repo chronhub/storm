@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Psr\Container\ContainerInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
@@ -22,6 +24,9 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -29,9 +34,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->container = $this->createMock(ContainerInterface::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_standalone_in_memory_chronicler_instance(): void
     {
         $this->container
@@ -52,9 +55,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->resolve('standalone', $config));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_transactional_in_memory_chronicler_instance(): void
     {
         $this->container
@@ -75,9 +76,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->resolve('transactional', $config));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_eventable_in_memory_chronicler_instance(): void
     {
         $this->container
@@ -106,9 +105,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->resolve('eventable', $config));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_transactional_eventable_in_memory_chronicler_instance(): void
     {
         $this->container
@@ -138,9 +135,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->resolve('transactional_eventable', $config));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_in_memory_driver_is_not_found(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -156,9 +151,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $provider->resolve('foo', $config);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_eventable_chronicler_has_not_tracker(): void
     {
         $expectedClass = StandaloneInMemoryChronicler::class;
@@ -182,9 +175,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $provider->resolve('eventable', $config);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_transactional_eventable_chronicler_has_not_tracker(): void
     {
         $expectedClass = TransactionalInMemoryChronicler::class;

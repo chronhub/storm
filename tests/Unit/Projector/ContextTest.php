@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\ContextStub;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
@@ -31,6 +33,9 @@ final class ContextTest extends UnitTestCase
 
     private DetectGap|MockObject $gap;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->option = $this->createMock(ProjectorOption::class);
@@ -44,9 +49,7 @@ final class ContextTest extends UnitTestCase
         return new ContextStub($this->option, $this->position, $this->counter, $this->gap);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_instantiated(): void
     {
         $context = $this->newContext();
@@ -64,9 +67,7 @@ final class ContextTest extends UnitTestCase
         $this->assertInstanceOf(DetectGap::class, $context->gap);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_initialize(): void
     {
         $context = $this->newContext();
@@ -78,9 +79,7 @@ final class ContextTest extends UnitTestCase
         $this->assertSame($init, $context->initCallback);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_compose(): void
     {
         $context = $this->newContext();
@@ -106,9 +105,7 @@ final class ContextTest extends UnitTestCase
         $this->assertInstanceOf(ProcessClosureEvent::class, $context->eventHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_compose_without_init_callback_and_array_event_handlers(): void
     {
         $context = $this->newContext();
@@ -135,9 +132,7 @@ final class ContextTest extends UnitTestCase
         $this->assertInstanceOf(ProcessArrayEvent::class, $context->eventHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_is_already_initialized(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -149,9 +144,7 @@ final class ContextTest extends UnitTestCase
         $context->initialize(fn (): string => 'ok');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_query_filter(): void
     {
         $context = $this->newContext();
@@ -167,9 +160,7 @@ final class ContextTest extends UnitTestCase
         $this->assertEquals(10, $queryFilter->position);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_query_filter_already_exists(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -181,9 +172,7 @@ final class ContextTest extends UnitTestCase
         $context->withQueryFilter($this->provideProjectionQueryFilter());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_from_streams(): void
     {
         $context = $this->newContext();
@@ -195,9 +184,7 @@ final class ContextTest extends UnitTestCase
         $this->assertEquals(['names' => ['foo', 'bar']], $context->queries());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_from_streams_is_already_set(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -212,9 +199,7 @@ final class ContextTest extends UnitTestCase
         $context->fromStreams('foo', 'bar');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_all_is_already_set(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -229,9 +214,7 @@ final class ContextTest extends UnitTestCase
         $context->fromStreams('foo', 'bar');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_category_is_already_set(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -246,9 +229,7 @@ final class ContextTest extends UnitTestCase
         $context->fromStreams('foo', 'bar');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_from_categories(): void
     {
         $context = $this->newContext();
@@ -260,9 +241,7 @@ final class ContextTest extends UnitTestCase
         $this->assertEquals(['categories' => ['foo-bar', 'foo-baz']], $context->queries());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_from_all(): void
     {
         $context = $this->newContext();
@@ -274,9 +253,7 @@ final class ContextTest extends UnitTestCase
         $this->assertEquals(['all' => true], $context->queries());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_event_handlers_as_closure(): void
     {
         $context = $this->newContext();
@@ -286,9 +263,7 @@ final class ContextTest extends UnitTestCase
         $this->assertInstanceOf(ProcessClosureEvent::class, $context->eventHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_event_handlers_as_array(): void
     {
         $context = $this->newContext();
@@ -298,9 +273,7 @@ final class ContextTest extends UnitTestCase
         $this->assertInstanceOf(ProcessArrayEvent::class, $context->eventHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_event_handlers_is_already_set(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -312,9 +285,7 @@ final class ContextTest extends UnitTestCase
         $context->whenAny(fn (): int => 1);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_event_handlers_is_already_set_2(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -326,9 +297,7 @@ final class ContextTest extends UnitTestCase
         $context->when([]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_validate_globally(): void
     {
         $this->expectExceptionMessage('Projection streams all|names|categories not set');
@@ -338,9 +307,7 @@ final class ContextTest extends UnitTestCase
         $context->validateStub();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_validate_globally_2(): void
     {
         $this->expectExceptionMessage('Projection event handlers not set');
@@ -352,9 +319,7 @@ final class ContextTest extends UnitTestCase
         $context->validateStub();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_validate_globally_3(): void
     {
         $this->expectExceptionMessage('Projection query filter not set');
@@ -368,9 +333,7 @@ final class ContextTest extends UnitTestCase
         $context->validateStub();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_query_filter_is_not_an_instance_of_projection_query_filter_if_context_is_persistent(): void
     {
         $this->expectExceptionMessage('Persistent projector require a projection query filter');
@@ -396,9 +359,7 @@ final class ContextTest extends UnitTestCase
         $context->validateStub();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reset_projection_state(): void
     {
         $context = $this->newContext();
@@ -420,9 +381,7 @@ final class ContextTest extends UnitTestCase
         $this->assertEquals(['counter' => 4], $context->state->get());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reset_projection_state_when_init_callback_not_set(): void
     {
         $context = $this->newContext();

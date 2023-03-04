@@ -6,13 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Runner;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class RunnerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $controller = new Runner();
@@ -21,11 +21,8 @@ final class RunnerTest extends UnitTestCase
         $this->assertFalse($controller->inBackground());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_assert_stop_running(bool $stop): void
     {
         $controller = new Runner();
@@ -37,11 +34,8 @@ final class RunnerTest extends UnitTestCase
         $this->assertEquals($stop, $controller->isStopped());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_assert_running_in_background(bool $inBackground): void
     {
         $controller = new Runner();
@@ -53,7 +47,7 @@ final class RunnerTest extends UnitTestCase
         $this->assertEquals($inBackground, $controller->inBackground());
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];

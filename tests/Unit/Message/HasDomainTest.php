@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\DomainQuery;
@@ -13,15 +14,13 @@ use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\Double\SomeQuery;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 
 final class HasDomainTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_test_domain_content(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
@@ -41,11 +40,8 @@ final class HasDomainTest extends UnitTestCase
         }
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_add_header_and_return_new_instance_of_domain(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
@@ -64,11 +60,8 @@ final class HasDomainTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $cloned->toContent());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_add_headers_and_return_new_domain_instance(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
@@ -87,7 +80,7 @@ final class HasDomainTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $cloned->toContent());
     }
 
-    public function provideDomain(): Generator
+    public static function provideDomain(): Generator
     {
         $content = ['name' => 'steph bug'];
 

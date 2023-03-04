@@ -6,9 +6,11 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -23,9 +25,7 @@ final class QueryEventProcessorTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_pre_process_event(): void
     {
         $processEvent = new class extends EventProcessor
@@ -46,9 +46,7 @@ final class QueryEventProcessorTest extends UnitTestCase
         $this->assertTrue($processEvent($context, SomeEvent::fromContent([]), 125, null));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_pre_process_event_with_signal_dispatch(): void
     {
         $processEvent = new class extends EventProcessor
@@ -78,11 +76,8 @@ final class QueryEventProcessorTest extends UnitTestCase
         $this->assertEquals('signal handler dispatched', $result);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_test_after_process_event(bool $stopProcess): void
     {
         $processEvent = new class extends EventProcessor
@@ -102,11 +97,8 @@ final class QueryEventProcessorTest extends UnitTestCase
         $this->assertNotEquals($stopProcess, $processEvent($context, SomeEvent::fromContent([]), 125, null));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_test_after_process_event_with_null_state(bool $stopProcess): void
     {
         $processEvent = new class extends EventProcessor
@@ -127,7 +119,7 @@ final class QueryEventProcessorTest extends UnitTestCase
         $this->assertEquals(['foo' => 'bar'], $context->state->get());
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];

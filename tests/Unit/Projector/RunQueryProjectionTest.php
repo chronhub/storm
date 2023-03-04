@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -16,9 +17,7 @@ final class RunQueryProjectionTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_run_query_projection(): void
     {
         $called = 0;
@@ -46,9 +45,7 @@ final class RunQueryProjectionTest extends UnitTestCase
         $this->assertEquals(2, $called);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_keep_process_pipes_even_one_pipe_stop_process(): void
     {
         $called = 0;

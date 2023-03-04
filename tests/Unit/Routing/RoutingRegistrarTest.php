@@ -7,12 +7,15 @@ namespace Chronhub\Storm\Tests\Unit\Routing;
 use Chronhub\Storm\Routing\EventGroup;
 use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\RoutingRegistrar;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
+#[CoversClass(RoutingRegistrar::class)]
 final class RoutingRegistrarTest extends UnitTestCase
 {
     private RoutingRegistrar $registrar;
@@ -22,9 +25,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->registrar = new RoutingRegistrar(new AliasFromClassName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_empty_groups(): void
     {
         $this->assertTrue($this->registrar->all()->isEmpty());
@@ -32,9 +33,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->assertNotSame($this->registrar->all(), $this->registrar->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_new_instance_of_group(): void
     {
         $commandGroup = $this->registrar->make(DomainType::COMMAND, 'default');
@@ -50,9 +49,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->assertCount(3, $this->registrar->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_new_instance_of_group_2(): void
     {
         $commandGroup = $this->registrar->makeCommand('default');
@@ -68,9 +65,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->assertCount(3, $this->registrar->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_add_sub_group(): void
     {
         $defaultGroup = $this->registrar->make(DomainType::COMMAND, 'default');
@@ -81,9 +76,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->assertCount(1, $this->registrar->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_group_with_type_and_name(): void
     {
         $this->assertNull($this->registrar->get(DomainType::COMMAND, 'default'));
@@ -93,9 +86,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->assertEquals($group, $this->registrar->get(DomainType::COMMAND, 'default'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_name_already_exists_in_group(): void
     {
         $this->expectException(RoutingViolation::class);
@@ -105,9 +96,7 @@ final class RoutingRegistrarTest extends UnitTestCase
         $this->registrar->make(DomainType::COMMAND, 'default');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_all_groups(): void
     {
         $this->registrar->make(DomainType::COMMAND, 'default_command_group');

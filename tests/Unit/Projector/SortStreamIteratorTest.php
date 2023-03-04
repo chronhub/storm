@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\EventHeader;
@@ -16,9 +17,7 @@ use function array_values;
 
 final class SortStreamIteratorTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_instance(): void
     {
         $streams = $this->provideStreams();
@@ -32,9 +31,7 @@ final class SortStreamIteratorTest extends UnitTestCase
         $this->assertEquals('stream_3', $iterator->originalIteratorOrder[2][1]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_valid(): void
     {
         $streams = $this->provideStreams();
@@ -44,9 +41,7 @@ final class SortStreamIteratorTest extends UnitTestCase
         $this->assertTrue($iterator->valid());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_prioritize_stream_by_event_time(): void
     {
         $streams = $this->provideStreams();

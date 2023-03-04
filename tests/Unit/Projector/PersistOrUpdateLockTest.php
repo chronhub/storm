@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\PersistOrUpdateLock;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -13,9 +14,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_sleep_before_updating_lock_if_event_counter_is_reset(): void
     {
         $this->repository->expects($this->once())->method('renew');
@@ -33,9 +32,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_persist_if_event_counter_is_not_reset(): void
     {
         $this->repository->expects($this->once())->method('store');

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Options\DefaultProjectorOption;
 
 final class DefaultProjectorOptionTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_default_projector_option(): void
     {
         $options = new DefaultProjectorOption();
@@ -26,9 +25,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
         $this->assertNull($options->getDetectionWindows());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_promote_parameters(): void
     {
         $options = new DefaultProjectorOption(signal: true, lockout: 100, detectionWindows: 'PT1H');
@@ -43,9 +40,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
         $this->assertEquals('PT1H', $options->getDetectionWindows());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_retries_ms_as_string(): void
     {
         $options = new DefaultProjectorOption(retries: '5,50,10');
@@ -55,9 +50,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
         $this->assertEquals($options->jsonSerialize()[$options::RETRIES], $options->retries);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_serialized(): void
     {
         $options = new DefaultProjectorOption();

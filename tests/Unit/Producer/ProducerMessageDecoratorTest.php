@@ -7,18 +7,17 @@ namespace Chronhub\Storm\Tests\Unit\Producer;
 use Generator;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Producer\ProducerStrategy;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Producer\ProducerMessageDecorator;
 
 final class ProducerMessageDecoratorTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideProducerStrategy
-     */
+    #[DataProvider('provideProducerStrategy')]
+    #[Test]
     public function it_decorate_message_with_event_strategy_and_dispatched_headers(ProducerStrategy $producerStrategy): void
     {
         $message = new Message(SomeCommand::fromContent(['name' => 'steph bug']));
@@ -35,7 +34,7 @@ final class ProducerMessageDecoratorTest extends UnitTestCase
         ], $decoratedMessage->headers());
     }
 
-    public function provideProducerStrategy(): Generator
+    public static function provideProducerStrategy(): Generator
     {
         yield [ProducerStrategy::SYNC];
         yield [ProducerStrategy::ASYNC];

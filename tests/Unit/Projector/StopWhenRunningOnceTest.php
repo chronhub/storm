@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Pipes\StopWhenRunningOnce;
 use Chronhub\Storm\Contracts\Projector\PersistentProjector;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -15,11 +17,8 @@ final class StopWhenRunningOnceTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_stop_projection(bool $runInBackground, bool $isStopped, bool $expectResult): void
     {
         $projector = $this->createMock(PersistentProjector::class);
@@ -43,7 +42,7 @@ final class StopWhenRunningOnceTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true, true, false];
         yield [true, false, false];

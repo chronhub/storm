@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
@@ -14,9 +15,7 @@ use function iterator_to_array;
 
 final class HasAggregateBehaviorTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_instantiated(): void
     {
         $aggregateId = V4AggregateId::create();
@@ -29,9 +28,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals($aggregateId, $aggregateRoot->aggregateId());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_record_events(): void
     {
         $events = iterator_to_array($this->provideThreeDomainEvents());
@@ -45,9 +42,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals(3, $aggregateRoot->getAppliedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_release_events(): void
     {
         $events = iterator_to_array($this->provideThreeDomainEvents());
@@ -66,9 +61,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals($events, $releasedEvents);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reconstitute_aggregate_from_events(): void
     {
         $events = $this->provideThreeDomainEvents();
@@ -84,9 +77,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals(3, $aggregateRoot->getAppliedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_null_aggregate_when_reconstitute_with_empty_events(): void
     {
         $aggregateId = V4AggregateId::create();
@@ -96,9 +87,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertNull($aggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_null_aggregate_when_reconstitute_with_no_get_return_from_generator(): void
     {
         $aggregateId = V4AggregateId::create();

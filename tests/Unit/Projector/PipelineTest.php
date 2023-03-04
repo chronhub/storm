@@ -7,24 +7,27 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Closure;
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\Pipeline;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class PipelineTest extends UnitTestCase
 {
     private MockObject|Context $context;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->context = $this->createMock(Context::class);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_send_context_to_all_pipes(bool $return): void
     {
         $count = 0;
@@ -40,11 +43,8 @@ final class PipelineTest extends UnitTestCase
         $this->assertEquals($result, $return);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_return_early_and_does_not_reached_destination(bool $return): void
     {
         $count = 0;
@@ -73,7 +73,7 @@ final class PipelineTest extends UnitTestCase
         };
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
@@ -31,9 +32,7 @@ final class StreamEventIteratorTest extends UnitTestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_events_generator(): void
     {
         $iterator = new StreamEventIterator($this->provideEvents());
@@ -54,9 +53,7 @@ final class StreamEventIteratorTest extends UnitTestCase
         $this->assertNull($iterator->current());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_catch_stream_not_found_exception_with_empty_iterator(): void
     {
         $this->expectException(StreamNotFound::class);

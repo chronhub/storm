@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\ResetEventCounter;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -13,9 +14,7 @@ final class ResetEventCounterTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reset_event_counter(): void
     {
         $this->counter->expects($this->once())->method('reset');

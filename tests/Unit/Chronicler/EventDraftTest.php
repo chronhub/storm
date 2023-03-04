@@ -10,8 +10,10 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
@@ -21,11 +23,8 @@ use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 
 final class EventDraftTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideDeferredValues
-     */
+    #[DataProvider('provideDeferredValues')]
+    #[Test]
     public function it_set_callback(mixed $value): void
     {
         $draft = new EventDraft(null);
@@ -35,9 +34,7 @@ final class EventDraftTest extends UnitTestCase
         $this->assertSame($value, $draft->promise());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_null_exceptions(): void
     {
         $draft = new EventDraft(null);
@@ -49,9 +46,7 @@ final class EventDraftTest extends UnitTestCase
         $this->assertNull($draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_stream_not_found_exception(): void
     {
         $draft = new EventDraft(null);
@@ -67,9 +62,7 @@ final class EventDraftTest extends UnitTestCase
         $this->assertSame($exception, $draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_stream_already_exists_exception(): void
     {
         $draft = new EventDraft(null);
@@ -85,9 +78,7 @@ final class EventDraftTest extends UnitTestCase
         $this->assertSame($exception, $draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_concurrency_exception(): void
     {
         $draft = new EventDraft(null);
@@ -103,9 +94,7 @@ final class EventDraftTest extends UnitTestCase
         $this->assertSame($exception, $draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decorate_stream_events(): void
     {
         $draft = new EventDraft(null);
@@ -137,9 +126,7 @@ final class EventDraftTest extends UnitTestCase
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_no_stream_has_been_set_as_callback_when_decorate(): void
     {
         $this->expectException(UnexpectedCallback::class);
@@ -152,9 +139,7 @@ final class EventDraftTest extends UnitTestCase
         $draft->decorate(new NoOpMessageDecorator());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_calling_null_promise(): void
     {
         $this->expectException(UnexpectedCallback::class);
@@ -165,7 +150,7 @@ final class EventDraftTest extends UnitTestCase
         $draft->promise();
     }
 
-    public function provideDeferredValues(): Generator
+    public static function provideDeferredValues(): Generator
     {
         yield [[]];
         yield [1];

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use RuntimeException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
@@ -23,9 +24,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->streamName = 'transaction';
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_format_exception(): void
     {
         $exceptionRaised = new RuntimeException('foo');
@@ -37,9 +36,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals($exception->getCode(), $exceptionRaised->getCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_format_exception_with_message_name(): void
     {
         $exceptionRaised = new RuntimeException('foo');
@@ -51,9 +48,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals($exception->getCode(), $exceptionRaised->getCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_create(): void
     {
         $exception = ProjectionFailed::failedOnCreate($this->streamName);
@@ -61,9 +56,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to create projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_stop(): void
     {
         $exception = ProjectionFailed::failedOnStop($this->streamName);
@@ -71,9 +64,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to stop projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_start_again(): void
     {
         $exception = ProjectionFailed::failedOnStartAgain($this->streamName);
@@ -81,9 +72,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to restart projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_persist(): void
     {
         $exception = ProjectionFailed::failedOnPersist($this->streamName);
@@ -91,9 +80,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to persist projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_reset(): void
     {
         $exception = ProjectionFailed::failedOnReset($this->streamName);
@@ -101,9 +88,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to reset projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_delete(): void
     {
         $exception = ProjectionFailed::failedOnDelete($this->streamName);
@@ -111,9 +96,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to delete projection for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_projection_already_running(): void
     {
         $exception = ProjectionFailed::failedOnAcquireLock($this->streamName);
@@ -127,9 +110,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_update_lock(): void
     {
         $exception = ProjectionFailed::failedOnUpdateLock($this->streamName);
@@ -137,9 +118,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to update projection lock for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_release_lock(): void
     {
         $exception = ProjectionFailed::failedOnReleaseLock($this->streamName);
@@ -147,9 +126,7 @@ final class ProjectionFailedTest extends UnitTestCase
         $this->assertEquals("Unable to release projection lock for stream name: $this->streamName", $exception->getMessage());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_update_projection_status(): void
     {
         $raiseException = new RuntimeException('foo');

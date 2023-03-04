@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TransactionalEventDraft;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 
 final class TransactionalEventDraftTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_null_exceptions(): void
     {
         $draft = new TransactionalEventDraft(null);
@@ -24,9 +23,7 @@ final class TransactionalEventDraftTest extends UnitTestCase
         $this->assertNull($draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_transaction_not_started_exception(): void
     {
         $draft = new TransactionalEventDraft(null);
@@ -42,9 +39,7 @@ final class TransactionalEventDraftTest extends UnitTestCase
         $this->assertSame($exception, $draft->exception());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_transaction_already_started_exception(): void
     {
         $draft = new TransactionalEventDraft(null);

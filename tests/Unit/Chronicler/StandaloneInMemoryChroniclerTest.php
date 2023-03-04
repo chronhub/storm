@@ -8,9 +8,11 @@ use Generator;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
@@ -49,18 +51,14 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
         $this->assertEmpty($this->chronicler->getStreams());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_persist_first_commit(): void
     {
         $stream = new Stream($this->streamName);
@@ -70,9 +68,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertTrue($this->chronicler->hasStream($this->streamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raises_exception_when_stream_name_already_exists(): void
     {
         $this->expectException(StreamAlreadyExists::class);
@@ -83,9 +79,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit($stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_persist_events_on_first_commit(): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 10));
@@ -98,9 +92,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertCount(10, $this->chronicler->getStreams()->toArray()['operation']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_persist_events_on_first_commit_with_one_stream_strategy(): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 10));
@@ -112,9 +104,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(['operation' => $events], $this->chronicler->getStreams()->toArray());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decorate_internal_position_header_with_aggregate_version(): void
     {
         $headers = [
@@ -133,9 +123,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(12, $pastEvent->header(EventHeader::INTERNAL_POSITION));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_not_found_exception_when_persisting_events_with_unknown_stream_name(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -145,9 +133,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->amend($stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_delete_stream_with_events(): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 10));
@@ -171,9 +157,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertTrue($this->chronicler->getStreams()->isEmpty());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_not_found_exception_when_deleting_unknown_stream_name(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -181,11 +165,8 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->delete($this->streamName);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDirection
-     */
+    #[DataProvider('provideDirection')]
+    #[Test]
     public function it_retrieve_all_stream_events_with_sort_direction(string $sortDirection): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 5));
@@ -215,9 +196,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_retrieve_all_events_from_aggregate_id_instance_in_header(): void
     {
         $headers = [
@@ -240,11 +219,8 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals($event, $recordedEvent);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideInMemoryFilter
-     */
+    #[DataProvider('provideInMemoryFilter')]
+    #[Test]
     public function it_retrieve_filtered_stream_events(InMemoryQueryFilter $filter, array $range): void
     {
         $events = iterator_to_array($this->providePastEvent($this->aggregateId, 10));
@@ -265,9 +241,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals($range, array_map(fn (DomainEvent $event): int => $event->header(EventHeader::INTERNAL_POSITION), $allEvents));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_query_filter_is_not_an_instance_of_in_memory_query_filter(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -284,9 +258,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_stream_names(): void
     {
         $balanceStream = new StreamName('balance');
@@ -311,9 +283,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(['balance', 'order'], $this->chronicler->filterStreamNames(...$wanted));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_categories(): void
     {
         $balanceAddStream = new StreamName('balance-add');
@@ -339,9 +309,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_not_found_exception_when_stream_does_not_exist(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -351,9 +319,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->retrieveAll($this->streamName, $this->aggregateId)->current();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_not_found_exception_when_stream_exists_but_stream_events_are_empty(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -363,21 +329,19 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->retrieveAll($this->streamName, $this->aggregateId)->current();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_event_stream_provider(): void
     {
         $this->assertInstanceOf(InMemoryEventStream::class, $this->chronicler->getEventStreamProvider());
     }
 
-    public function provideDirection(): Generator
+    public static function provideDirection(): Generator
     {
         yield ['asc'];
         yield ['desc'];
     }
 
-    public function provideInMemoryFilter(): Generator
+    public static function provideInMemoryFilter(): Generator
     {
         yield [
             new class() implements InMemoryQueryFilter

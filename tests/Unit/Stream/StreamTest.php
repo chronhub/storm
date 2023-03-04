@@ -10,8 +10,12 @@ use Illuminate\Support\Collection;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
+#[CoversClass(Stream::class)]
 final class StreamTest extends UnitTestCase
 {
     private StreamName $streamName;
@@ -22,11 +26,8 @@ final class StreamTest extends UnitTestCase
         $this->streamName = new StreamName('some_stream_name');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideIterableEvents
-     */
+    #[DataProvider('provideIterableEvents')]
+    #[Test]
     public function it_instantiate_stream(iterable $events): void
     {
         $stream = new Stream($this->streamName, $events);
@@ -38,12 +39,11 @@ final class StreamTest extends UnitTestCase
         $this->assertCount(1, $events);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_instantiate_stream_with_generator(): void
     {
         $events = $this->provideGenerator();
+
         $stream = new Stream($this->streamName, $events);
 
         $this->assertSame($this->streamName, $stream->name());
@@ -55,13 +55,15 @@ final class StreamTest extends UnitTestCase
         $this->assertEquals(1, $events->getReturn());
     }
 
-    public function provideIterableEvents(): Generator
+    public static function provideIterableEvents(): Generator
     {
-        yield[$this->dummyEvent()];
+        $event = SomeEvent::fromContent(['foo' => 'bar']);
 
-        yield [new Collection($this->dummyEvent())];
+        yield[[$event]];
 
-        yield [new LazyCollection($this->dummyEvent())];
+        yield [new Collection([$event])];
+
+        yield [new LazyCollection([$event])];
     }
 
     private function provideGenerator(): Generator
@@ -71,7 +73,7 @@ final class StreamTest extends UnitTestCase
         return 1;
     }
 
-    private function dummyEvent(): array
+    private static function dummyEvent(): array
     {
         return [SomeEvent::fromContent(['foo' => 'bar'])];
     }

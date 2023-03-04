@@ -12,10 +12,12 @@ use PHPUnit\Framework\TestCase;
 use Chronhub\Storm\Message\Message;
 use React\Promise\PromiseInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainQuery;
 use Chronhub\Storm\Reporter\ReportQuery;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeQuery;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
@@ -33,6 +35,9 @@ final class ReportQueryTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -40,9 +45,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_query(): void
     {
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
@@ -81,9 +84,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->assertEquals('steph bug', $this->handlePromise($promise));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_relay_query_as_array(): void
     {
         $queryAsArray = ['some' => 'query'];
@@ -124,9 +125,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->assertEquals('steph bug', $this->handlePromise($promise));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_message_not_handled(): void
     {
         $this->expectException(MessageNotHandled::class);
@@ -172,9 +171,7 @@ final class ReportQueryTest extends UnitTestCase
         $reporter->relay($event);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_caught_during_dispatch_of_query(): void
     {
         $exception = new RuntimeException('some exception');

@@ -7,7 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 use Generator;
 use TypeError;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
 use Chronhub\Storm\Chronicler\TransactionalEventChronicler;
@@ -24,6 +27,9 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
 
     private TransactionalStreamTracker $tracker;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,9 +38,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $this->tracker = new TrackTransactionalStream();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_begin_transaction_event(): void
     {
         $this->chronicler->expects($this->once())->method('beginTransaction');
@@ -49,9 +53,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->beginTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_begin_transaction_event_and_raised_exception_if_transaction_already_started(): void
     {
         $this->expectException(TransactionAlreadyStarted::class);
@@ -73,9 +75,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->beginTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_commit_transaction_event(): void
     {
         $this->chronicler->expects($this->once())->method('commitTransaction');
@@ -90,9 +90,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->commitTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_commit_transaction_event_and_raise_exception_if_exception_not_started(): void
     {
         $this->expectException(TransactionNotStarted::class);
@@ -114,9 +112,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->commitTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_rollback_transaction_event(): void
     {
         $this->chronicler->expects($this->once())->method('rollbackTransaction');
@@ -131,9 +127,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->rollbackTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_rollback_transaction_event_and_raise_exception_if_exception_not_started(): void
     {
         $this->expectException(TransactionNotStarted::class);
@@ -155,11 +149,8 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->rollbackTransaction();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_check_if_in_transaction(bool $inTransaction): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn($inTransaction);
@@ -167,11 +158,8 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $this->assertEquals($inTransaction, $this->chroniclerInstance()->inTransaction());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_handle_full_transaction(bool $bool): void
     {
         $callback = static fn (): bool => $bool;
@@ -181,9 +169,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $this->assertEquals($bool, $this->chroniclerInstance()->transactional($callback));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_inner_chronicler_is_not_transactional(): void
     {
         $this->expectException(TypeError::class);
@@ -201,7 +187,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         return new TransactionalEventChronicler($this->chronicler, $this->tracker);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];

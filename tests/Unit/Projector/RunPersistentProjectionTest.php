@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use RuntimeException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
@@ -19,9 +20,7 @@ final class RunPersistentProjectionTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_run_persistent_projection(): void
     {
         $called = 0;
@@ -49,9 +48,7 @@ final class RunPersistentProjectionTest extends UnitTestCase
         $this->assertEquals(2, $called);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_release_projection_lock_on_projection_already_running_exception(): void
     {
         $this->expectException(ProjectionAlreadyRunning::class);
@@ -71,9 +68,7 @@ final class RunPersistentProjectionTest extends UnitTestCase
         $runner($context);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_try_release_lock_on_exception(): void
     {
         $this->expectException(RuntimeException::class);
@@ -94,9 +89,7 @@ final class RunPersistentProjectionTest extends UnitTestCase
         $runner($context);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_try_release_lock_on_exception_and_keep_exception_on_releasing_lock_silent(): void
     {
         $this->expectException(RuntimeException::class);

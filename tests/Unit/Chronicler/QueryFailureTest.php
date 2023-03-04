@@ -9,15 +9,14 @@ use Generator;
 use RuntimeException;
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Chronicler\Exceptions\QueryFailure;
 
 final class QueryFailureTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideException
-     */
+    #[DataProvider('provideException')]
+    #[Test]
     public function it_wrap_exception_given(Exception $exception): never
     {
         $this->expectException(QueryFailure::class);
@@ -27,7 +26,7 @@ final class QueryFailureTest extends UnitTestCase
         throw QueryFailure::fromThrowable($exception);
     }
 
-    public function provideException(): Generator
+    public static function provideException(): Generator
     {
         yield [new RuntimeException('foo'), 00000];
         yield [new InvalidArgumentException('foo'), 00000];

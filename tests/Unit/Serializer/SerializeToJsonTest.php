@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
+#[CoversClass(SerializeToJson::class)]
 final class SerializeToJsonTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_encode_data(): void
     {
         $serializer = new SerializeToJson();
@@ -20,9 +21,7 @@ final class SerializeToJsonTest extends UnitTestCase
         $this->assertEquals('{"foo":"bar"}', $serializer->encode(['foo' => 'bar']));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decode_data(): void
     {
         $serializer = new SerializeToJson();
@@ -30,9 +29,7 @@ final class SerializeToJsonTest extends UnitTestCase
         $this->assertEquals(['foo' => 'bar'], $serializer->decode('{"foo":"bar"}'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_empty_array_and_does_not_force_object_array(): void
     {
         $serializer = new SerializeToJson();
@@ -40,9 +37,7 @@ final class SerializeToJsonTest extends UnitTestCase
         $this->assertEquals('[]', $serializer->encode([]));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_deserialize_string_as_array_to_empty_array(): void
     {
         $serializer = new SerializeToJson();
@@ -50,9 +45,7 @@ final class SerializeToJsonTest extends UnitTestCase
         $this->assertEquals([], $serializer->decode('[]'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_inner_json_encoder(): void
     {
         $serializer = new SerializeToJson();

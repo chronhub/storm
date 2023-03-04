@@ -6,13 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use stdClass;
 use Generator;
-use Prophecy\Argument;
 use Illuminate\Support\Collection;
 use Chronhub\Storm\Message\Message;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Routing\HandleRoute;
 use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Routing\RouteLocator;
@@ -20,24 +21,25 @@ use Chronhub\Storm\Contracts\Producer\ProducerUnity;
 use Chronhub\Storm\Contracts\Producer\MessageProducer;
 use Chronhub\Storm\Tests\Unit\Reporter\AssertMessageListener;
 
-final class HandleRouteTest extends ProphecyTestCase
+final class HandleRouteTest extends UnitTestCase
 {
-    private RouteLocator|ObjectProphecy $routeLocator;
+    private RouteLocator|MockObject $routeLocator;
 
-    private MessageProducer|ObjectProphecy $messageProducer;
+    private MessageProducer|MockObject $messageProducer;
 
-    private ObjectProphecy|ProducerUnity $producerUnity;
-
-    protected function setUp(): void
-    {
-        $this->routeLocator = $this->prophesize(RouteLocator::class);
-        $this->messageProducer = $this->prophesize(MessageProducer::class);
-        $this->producerUnity = $this->prophesize(ProducerUnity::class);
-    }
+    private ProducerUnity|MockObject $producerUnity;
 
     /**
-     * @test
+     * @throws Exception
      */
+    protected function setUp(): void
+    {
+        $this->routeLocator = $this->createMock(RouteLocator::class);
+        $this->messageProducer = $this->createMock(MessageProducer::class);
+        $this->producerUnity = $this->createMock(ProducerUnity::class);
+    }
+
+    #[Test]
     public function it_handle_route_sync(): void
     {
         $tracker = new TrackMessage();
@@ -45,11 +47,22 @@ final class HandleRouteTest extends ProphecyTestCase
         $message = new Message(new stdClass());
         $dispatchedMessage = new Message(new stdClass(), ['dispatched']);
 
-        $this->producerUnity->isSync($message)->willReturn(true)->shouldBeCalledOnce();
-        $this->routeLocator->onQueue($message)->shouldNotBeCalled();
-        $this->messageProducer->produce($message)->willReturn($dispatchedMessage)->shouldBeCalledOnce();
+        $this->producerUnity->expects($this->once())
+            ->method('isSync')
+            ->with($message)
+            ->willReturn(true);
 
-        $this->routeLocator->route($dispatchedMessage)->willReturn(new Collection(['some_message_handler']))->shouldBeCalledOnce();
+        $this->routeLocator->expects($this->never())->method('onQueue');
+
+        $this->messageProducer->expects($this->once())
+            ->method('produce')
+            ->with($message)
+            ->willReturn($dispatchedMessage);
+
+        $this->routeLocator->expects($this->once())
+            ->method('route')
+            ->with($dispatchedMessage)
+            ->willReturn(new Collection(['some_message_handler']));
 
         $subscriber = $this->handleRouteInstance();
         $subscriber->attachToReporter($tracker);
@@ -60,26 +73,33 @@ final class HandleRouteTest extends ProphecyTestCase
         $tracker->disclose($story);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_handle_route_async(): void
     {
         $tracker = new TrackMessage();
 
         $message = new Message(new stdClass());
-        $dispatchedMessage = new Message(new stdClass(), ['dispatched']);
 
-        $this->producerUnity->isSync($message)->willReturn(false)->shouldBeCalledOnce();
-        $this->routeLocator->onQueue($message)->willReturn(['connection' => 'redis'])->shouldBeCalledOnce();
-        $this->messageProducer->produce(Argument::that(function (Message $message): Message {
-            $this->assertArrayHasKey('queue', $message->headers());
-            $this->assertEquals(['connection' => 'redis'], $message->header('queue'));
+        $this->producerUnity->expects($this->once())
+            ->method('isSync')
+            ->with($message)
+            ->willReturn(false);
 
-            return $message;
-        }))->willReturn($dispatchedMessage)->shouldBeCalledOnce();
+        $this->routeLocator->expects($this->once())
+            ->method('onQueue')
+            ->with($message)
+            ->willReturn(['connection' => 'redis']);
 
-        $this->routeLocator->route($dispatchedMessage)->shouldNotBeCalled();
+        $this->messageProducer->expects($this->once())
+            ->method('produce')
+            ->with($this->isInstanceOf(Message::class))
+            ->will($this->returnCallback(function (Message $message): Message {
+                $this->assertEquals(['connection' => 'redis'], $message->header('queue'));
+
+                return $message;
+            }));
+
+        $this->routeLocator->expects($this->never())->method('route');
 
         $subscriber = $this->handleRouteInstance();
         $subscriber->attachToReporter($tracker);
@@ -90,24 +110,34 @@ final class HandleRouteTest extends ProphecyTestCase
         $tracker->disclose($story);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideNullAndEmptyArray
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideNullAndEmptyArray')]
+    #[Test]
     public function it_handle_route_async_with_no_queue_options(?array $noQueue): void
     {
         $tracker = new TrackMessage();
 
         $message = new Message(new stdClass());
-        $dispatchedMessage = new Message(new stdClass(), ['dispatched']);
 
-        $this->producerUnity->isSync($message)->willReturn(false)->shouldBeCalledOnce();
-        $this->routeLocator->onQueue($message)->willReturn($noQueue)->shouldBeCalledOnce();
+        $this->producerUnity->expects($this->once())
+            ->method('isSync')
+            ->with($message)
+            ->willReturn(false);
 
-        $this->messageProducer->produce($message)->willReturn($dispatchedMessage)->shouldBeCalledOnce();
+        $this->routeLocator->expects($this->once())
+            ->method('onQueue')
+            ->with($message)
+            ->willReturn($noQueue);
 
-        $this->routeLocator->route($dispatchedMessage)->shouldNotBeCalled();
+        $this->messageProducer->expects($this->once())
+            ->method('produce')
+            ->with($this->isInstanceOf(Message::class))
+            ->will($this->returnCallback(function (Message $message): Message {
+                $this->assertNull($message->header('queue'));
+
+                return $message;
+            }));
+
+        $this->routeLocator->expects($this->never())->method('route');
 
         $subscriber = $this->handleRouteInstance();
         $subscriber->attachToReporter($tracker);
@@ -118,17 +148,15 @@ final class HandleRouteTest extends ProphecyTestCase
         $tracker->disclose($story);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_subscriber_can_be_untracked(): void
     {
-        $subscriber = new HandleRoute($this->routeLocator->reveal(), $this->messageProducer->reveal(), $this->producerUnity->reveal());
+        $subscriber = new HandleRoute($this->routeLocator, $this->messageProducer, $this->producerUnity);
 
         AssertMessageListener::isTrackedAndCanBeUntracked($subscriber, Reporter::DISPATCH_EVENT, OnDispatchPriority::ROUTE->value);
     }
 
-    public function provideNullAndEmptyArray(): Generator
+    public static function provideNullAndEmptyArray(): Generator
     {
         yield [null];
         yield [[]];
@@ -136,6 +164,6 @@ final class HandleRouteTest extends ProphecyTestCase
 
     private function handleRouteInstance(): HandleRoute
     {
-        return new HandleRoute($this->routeLocator->reveal(), $this->messageProducer->reveal(), $this->producerUnity->reveal());
+        return new HandleRoute($this->routeLocator, $this->messageProducer, $this->producerUnity);
     }
 }

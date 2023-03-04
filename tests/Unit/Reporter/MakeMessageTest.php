@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Reporter;
 
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
@@ -18,14 +20,15 @@ final class MakeMessageTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_subscriber(): void
     {
         $subscriber = new MakeMessage($this->messageFactory);
@@ -37,9 +40,7 @@ final class MakeMessageTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_message_instance(): void
     {
         $message = new Message(new SomeCommand(['name' => 'steph bug']));
@@ -63,9 +64,7 @@ final class MakeMessageTest extends UnitTestCase
         $this->assertEquals($message, $story->message());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_message_instance_from_array(): void
     {
         $message = new Message(new SomeCommand(['some' => 'content']));

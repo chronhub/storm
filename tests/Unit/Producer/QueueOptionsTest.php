@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Producer;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Producer\QueueOptions;
 
 final class QueueOptionsTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_assert_default_properties(): void
     {
         $queueFactory = new QueueOptions();
@@ -25,9 +24,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertNull($queueFactory->backoff);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_override_some_arguments_by_passing_associative_array(): void
     {
         $queueFactory = new QueueOptions(...[
@@ -49,9 +46,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertEquals(5, $queueFactory->backoff);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_override_some_arguments_with_promoted_arguments(): void
     {
         $queueFactory = new QueueOptions(name: 'default', tries: 2, maxExceptions: 4);
@@ -66,9 +61,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertNull($queueFactory->backoff);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_associative_array(): void
     {
         $queueFactory = new QueueOptions(...[

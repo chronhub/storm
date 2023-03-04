@@ -8,18 +8,19 @@ use stdClass;
 use Generator;
 use Chronhub\Storm\Routing\Route;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\Double\SomeQuery;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
+#[CoversClass(Route::class)]
 final class RouteTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageClassName
-     */
+    #[DataProvider('provideMessageClassName')]
+    #[Test]
     public function it_can_be_constructed_with_message_class_name(string $messageName): void
     {
         $route = new Route($messageName);
@@ -30,9 +31,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEmpty($route->getHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_message_name_is_not_a_valid_class_name(): void
     {
         $this->expectException(RoutingViolation::class);
@@ -41,11 +40,8 @@ final class RouteTest extends UnitTestCase
         new Route('foo');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageClassName
-     */
+    #[DataProvider('provideMessageClassName')]
+    #[Test]
     public function it_set_message_alias(string $messageName): void
     {
         $route = new Route($messageName);
@@ -59,11 +55,8 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals($route->getOriginalName(), $messageName);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageHandler
-     */
+    #[DataProvider('provideMessageHandler')]
+    #[Test]
     public function it_add_message_handler(string|object $messageHandler): void
     {
         $route = new Route(SomeCommand::class);
@@ -72,11 +65,8 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals([$messageHandler], $route->getHandlers());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideMessageHandler
-     */
+    #[DataProvider('provideMessageHandler')]
+    #[Test]
     public function it_merge_message_handlers(): void
     {
         $route = new Route(SomeCommand::class);
@@ -87,9 +77,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals(['some_message_handler', 'another_message_handler'], $route->getHandlers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_queue_options(): void
     {
         $route = new Route(SomeCommand::class);
@@ -98,9 +86,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals(['connection' => 'redis', 'name' => 'default'], $route->getQueue());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_null_queue_options_when_argument_is_empty(): void
     {
         $route = new Route(SomeCommand::class);
@@ -109,9 +95,7 @@ final class RouteTest extends UnitTestCase
         $this->assertNull($route->getQueue());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_route(): void
     {
         $route = new Route(SomeCommand::class);
@@ -124,9 +108,7 @@ final class RouteTest extends UnitTestCase
         ], $route->jsonSerialize());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_full_route(): void
     {
         $route = new Route(SomeCommand::class);
@@ -143,7 +125,7 @@ final class RouteTest extends UnitTestCase
         ], $route->jsonSerialize());
     }
 
-    public function provideMessageClassName(): Generator
+    public static function provideMessageClassName(): Generator
     {
         yield [SomeCommand::class];
         yield [SomeEvent::class];
@@ -151,7 +133,7 @@ final class RouteTest extends UnitTestCase
         yield [stdClass::class];
     }
 
-    public function provideMessageHandler(): Generator
+    public static function provideMessageHandler(): Generator
     {
         yield ['foo'];
 

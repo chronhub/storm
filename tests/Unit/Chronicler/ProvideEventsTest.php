@@ -10,10 +10,13 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Chronicler\EventChronicler;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Tracker\StreamStory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
@@ -34,6 +37,9 @@ final class ProvideEventsTest extends UnitTestCase
 
     private Stream $stream;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -43,9 +49,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->aggregateId = $this->createMock(AggregateIdentity::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_first_commit_event(): void
     {
         $this->chronicler->expects($this->once())
@@ -63,9 +67,7 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->firstCommit($this->stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_already_exits_on_first_commit(): void
     {
         $this->expectException(StreamAlreadyExists::class);
@@ -89,9 +91,7 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->firstCommit($this->stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_persist_stream_event(): void
     {
         $this->chronicler->expects($this->once())
@@ -109,11 +109,8 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->amend($this->stream);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideExceptionOnPersistStreamEvents
-     */
+    #[DataProvider('provideExceptionOnPersistStreamEvents')]
+    #[Test]
     public function it_raise_exception_on_persist_stream_events(Throwable $exception): void
     {
         $this->expectException($exception::class);
@@ -134,9 +131,7 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->amend($this->stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_delete_stream_event(): void
     {
         $this->chronicler->expects($this->once())
@@ -154,11 +149,8 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->delete($this->stream->name());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideEventWithDirection
-     */
+    #[DataProvider('provideEventWithDirection')]
+    #[Test]
     public function it_dispatch_retrieve_all_events_with_direction(string $eventName, string $direction): void
     {
         $expectedEvents = [
@@ -190,11 +182,8 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals($expectedEvents, $messages);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideEventWithDirection
-     */
+    #[DataProvider('provideEventWithDirection')]
+    #[Test]
     public function it_raise_stream_not_found_exception_on_retrieve_all_events(string $eventName, string $direction): void
     {
         $this->expectException(StreamNotFound::class);
@@ -246,9 +235,7 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->delete($this->stream->name());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_retrieve_events_with_query_filter(): void
     {
         $queryFilter = $this->createMock(QueryFilter::class);
@@ -284,9 +271,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals($expectedEvents, $messages);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_stream_not_found_exception_on_retrieve_events_with_query_filter(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -313,11 +298,8 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->retrieveFiltered($this->stream->name(), $queryFilter)->current();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBool
-     */
+    #[DataProvider('provideBool')]
+    #[Test]
     public function it_dispatch_has_stream_event(bool $streamExists): void
     {
         $this->chronicler->expects($this->once())
@@ -337,9 +319,7 @@ final class ProvideEventsTest extends UnitTestCase
         $eventChronicler->hasStream($this->stream->name());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_fetch_stream_names_and_return_stream_names_if_exists(): void
     {
         $fooStreamName = new StreamName('foo');
@@ -363,9 +343,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals([$fooStreamName], $eventChronicler->filterStreamNames($fooStreamName, $barStreamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_fetch_category_names_and_return_category_names_if_exists(): void
     {
         $categories = ['user-123', 'user-124'];
@@ -388,9 +366,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals($categories, $eventChronicler->filterCategoryNames('user-123', 'user-124'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_unsubscribe_listener_from_tracker(): void
     {
         $this->chronicler
@@ -421,9 +397,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals(2, $count);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_inner_chronicler(): void
     {
         $tracker = new TrackStream();
@@ -433,9 +407,7 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertEquals($this->chronicler, $eventChronicler->innerChronicler());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_event_stream_provider(): void
     {
         $tracker = new TrackStream();
@@ -452,21 +424,21 @@ final class ProvideEventsTest extends UnitTestCase
         $this->assertSame($eventStreamProvider, $eventChronicler->getEventStreamProvider());
     }
 
-    public function provideExceptionOnPersistStreamEvents(): Generator
+    public static function provideExceptionOnPersistStreamEvents(): Generator
     {
         yield [StreamNotFound::withStreamName(new StreamName('some_stream'))];
 
         yield [new ConcurrencyException('failed')];
     }
 
-    public function provideEventWithDirection(): Generator
+    public static function provideEventWithDirection(): Generator
     {
         yield [EventableChronicler::ALL_STREAM_EVENT, 'asc'];
 
         yield [EventableChronicler::ALL_REVERSED_STREAM_EVENT, 'desc'];
     }
 
-    public function provideBool(): Generator
+    public static function provideBool(): Generator
     {
         yield [true];
 

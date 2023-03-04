@@ -6,13 +6,15 @@ namespace Chronhub\Storm\Tests\Unit\Stream;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 
+#[CoversClass(DetermineStreamCategory::class)]
 final class DetermineStreamCategoryTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_instantiated_with_default_dash_separator(): void
     {
         $detectCategory = new DetermineStreamCategory();
@@ -20,11 +22,8 @@ final class DetermineStreamCategoryTest extends UnitTestCase
         $this->assertEquals('-', $detectCategory->separator);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideStreamCategory
-     */
+    #[DataProvider('provideStreamCategory')]
+    #[Test]
     public function it_detect_category_from_stream_name(string $streamName): void
     {
         $detectCategory = new DetermineStreamCategory();
@@ -32,9 +31,7 @@ final class DetermineStreamCategoryTest extends UnitTestCase
         $this->assertEquals('transaction', $detectCategory($streamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_only_detect_first_separator_to_determine_category_from_stream_name(): void
     {
         $detectCategory = new DetermineStreamCategory();
@@ -42,11 +39,8 @@ final class DetermineStreamCategoryTest extends UnitTestCase
         $this->assertEquals('transaction', $detectCategory('transaction-add-absolute'));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideStreamWithoutCategory
-     */
+    #[DataProvider('provideStreamWithoutCategory')]
+    #[Test]
     public function it_return_null_when_category_from_stream_name_can_not_be_detected(string $streamName): void
     {
         $detectCategory = new DetermineStreamCategory();
@@ -54,14 +48,14 @@ final class DetermineStreamCategoryTest extends UnitTestCase
         $this->assertNull($detectCategory($streamName));
     }
 
-    public function provideStreamCategory(): Generator
+    public static function provideStreamCategory(): Generator
     {
         yield ['transaction-add'];
         yield ['transaction-subtract'];
         yield ['transaction-divide'];
     }
 
-    public function provideStreamWithoutCategory(): Generator
+    public static function provideStreamWithoutCategory(): Generator
     {
         yield ['transaction'];
         yield ['transaction_subtract'];

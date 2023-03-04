@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 
-final class PersistentCasterTest extends ProphecyTestCase
+final class PersistentCasterTest extends UnitTestCase
 {
     private MockObject|ProjectionProjector $projector;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
         $this->projector = $this->createMock(ProjectionProjector::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $streamName = null;
@@ -32,9 +35,7 @@ final class PersistentCasterTest extends ProphecyTestCase
         $this->assertNull($caster->streamName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_stream_name_by_reference(): void
     {
         $streamName = null;
@@ -55,9 +56,7 @@ final class PersistentCasterTest extends ProphecyTestCase
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_stop_projection(): void
     {
         $streamName = 'foo';
@@ -73,9 +72,7 @@ final class PersistentCasterTest extends ProphecyTestCase
         $caster->stop();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_link_event_to_new_stream(): void
     {
         $streamName = 'foo';
@@ -92,9 +89,7 @@ final class PersistentCasterTest extends ProphecyTestCase
         $caster->linkTo('foo', $event);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_emit_event(): void
     {
         $streamName = 'foo';

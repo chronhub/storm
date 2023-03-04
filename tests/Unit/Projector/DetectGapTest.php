@@ -8,6 +8,8 @@ use Closure;
 use DateInterval;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
@@ -18,15 +20,16 @@ final class DetectGapTest extends UnitTestCase
 
     private PointInTime $clock;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->streamPosition = $this->createMock(StreamPosition::class);
         $this->clock = new PointInTime();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $gapDetector = new DetectGap(
@@ -40,9 +43,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertRetries($gapDetector, 0);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_detect_gap_when_retries_is_an_empty_array(): void
     {
         $this->streamPosition->expects($this->never())->method('hasNextPosition');
@@ -55,9 +56,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->hasGap());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_detect_gap_when_next_position_is_not_available_with_detection_window(): void
     {
         $eventTime = $this->clock
@@ -76,9 +75,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->hasGap());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_detect_gap_when_no_more_retries(): void
     {
         $eventTime = $this->clock
@@ -110,9 +107,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->detect('customer', 2, $eventTime));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_detect_gap_when_event_time_is_greater_than_detection_window_from_now(): void
     {
         $this->streamPosition
@@ -127,9 +122,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->hasGap());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_detect_gap(): void
     {
         $eventTime = $this->clock
@@ -148,9 +141,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertTrue($gapDetector->hasGap());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reset_retries_and_return_silently_when_no_more_retries_available(): void
     {
         $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], 'PT60S');
@@ -163,9 +154,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertRetries($gapDetector, 3);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reset_gap_detected(): void
     {
         $this->streamPosition->expects($this->any())

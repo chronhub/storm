@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\QueryCaster;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
@@ -13,15 +15,16 @@ final class QueryCasterTest extends UnitTestCase
 {
     private MockObject|QueryProjector $projector;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
         $this->projector = $this->createMock(QueryProjector::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $streamName = null;
@@ -31,9 +34,7 @@ final class QueryCasterTest extends UnitTestCase
         $this->assertNull($caster->streamName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_stream_name_by_reference(): void
     {
         $streamName = null;
@@ -54,9 +55,7 @@ final class QueryCasterTest extends UnitTestCase
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_stop_projection(): void
     {
         $streamName = 'foo';

@@ -6,15 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Message\ChainMessageDecorator;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 
 final class ChainMessageDecoratorTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decorate_message(): void
     {
         $decorator = new class implements MessageDecorator
@@ -37,9 +36,7 @@ final class ChainMessageDecoratorTest extends UnitTestCase
         $this->assertEquals(['some' => 'header'], $decoratedMessage->headers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_decorate_message_with_many_decorators(): void
     {
         $decorator1 = new class implements MessageDecorator

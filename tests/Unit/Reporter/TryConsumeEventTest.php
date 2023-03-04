@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Reporter;
 use RuntimeException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeEvent;
@@ -17,9 +18,7 @@ use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
 
 final class TryConsumeEventTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_subscriber(): void
     {
         $subscriber = new TryConsumeEvent();
@@ -31,9 +30,7 @@ final class TryConsumeEventTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_collect_exceptions_raised_by_some_consumers_and_keep_consuming(): void
     {
         $tracker = new TrackMessage();

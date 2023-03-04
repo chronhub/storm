@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use DateInterval;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\Provider\InMemoryProjection;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
@@ -14,9 +15,7 @@ use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
 
 final class InMemoryProjectionProviderTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_projection(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -30,9 +29,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertInstanceOf(InMemoryProjection::class, $projection);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_false_when_creating_projection_if_already_exists(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -48,9 +45,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertFalse($provider->createProjection('account', 'running'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_update_projection(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -85,9 +80,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals('datetime', $projection->lockedUntil());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_updating_projection_with_unknown_field(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -100,9 +93,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $provider->updateProjection('account', ['invalid_field' => '{"count" => 10}']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_delete_projection(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -118,9 +109,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertNull($provider->retrieve('customer'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_false_deleting_not_found_projection(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -130,9 +119,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertFalse($provider->deleteProjection('customer'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_find_projection_by_names_and_order_ascendant(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -149,9 +136,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals(['customer', 'account'], $found);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_acquire_lock_with_null_projection_lock(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -172,9 +157,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals('running', $projection->status());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_false_acquiring_lock_with_not_found_projection(): void
     {
         $provider = new InMemoryProjectionProvider();
@@ -186,9 +169,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertFalse($acquired);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_acquire_lock_when_now_is_greater_than_lock_projection(): void
     {
         $clock = new PointInTime();
@@ -211,9 +192,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals($nowString, $provider->retrieve('customer')->lockedUntil());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_acquire_lock_when_now_is_less_than_lock_projection(): void
     {
         $provider = new InMemoryProjectionProvider();

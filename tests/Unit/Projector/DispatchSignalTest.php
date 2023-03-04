@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\DispatchSignal;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -17,9 +18,7 @@ final class DispatchSignalTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_signal(): void
     {
         if (! extension_loaded('posix')) {
@@ -45,9 +44,7 @@ final class DispatchSignalTest extends UnitTestCase
         $this->assertEquals('signal handler dispatched', $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_dispatch_signal(): void
     {
         if (! extension_loaded('posix')) {

@@ -7,15 +7,14 @@ namespace Chronhub\Storm\Tests\Unit\Clock;
 use DateTimeZone;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use function usleep;
 use function microtime;
 use function date_default_timezone_get;
 
 final class PointInTimeTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_string_timezone(): void
     {
         $clock = new PointInTime('UTC');
@@ -23,9 +22,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame('UTC', $clock->now()->getTimezone()->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_timezone_instance(): void
     {
         $clock = new PointInTime(new DateTimeZone('UTC'));
@@ -33,9 +30,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame('UTC', $clock->now()->getTimezone()->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $clock = new PointInTime();
@@ -46,9 +41,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame($timezone, $clock->now()->getTimezone()->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_change_timezone(): void
     {
         $clock = new PointInTime();
@@ -64,9 +57,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame('Europe/Paris', $newClock->now()->getTimezone()->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_now(): void
     {
         $clock = new PointInTime();
@@ -85,9 +76,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertLessThan($after, (float) $now->format('U.u'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_sleep(): void
     {
         $clock = new PointInTime();
@@ -108,9 +97,7 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame($timezone, $clock->now()->getTimezone()->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_serialized_from_format(): void
     {
         $clock = new PointInTime();

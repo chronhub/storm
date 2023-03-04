@@ -6,16 +6,15 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Chronicler\TrackStream;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class TrackStreamTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideEventName
-     */
+    #[DataProvider('provideEventName')]
+    #[Test]
     public function it_create_new_story(?string $eventName = null): void
     {
         $tracker = new TrackStream();
@@ -27,7 +26,7 @@ final class TrackStreamTest extends UnitTestCase
         $this->assertTrue($tracker->listeners()->isEmpty());
     }
 
-    public function provideEventName(): Generator
+    public static function provideEventName(): Generator
     {
         yield ['dispatch'];
         yield ['finalize'];

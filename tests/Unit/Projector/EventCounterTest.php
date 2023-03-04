@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
 final class EventCounterTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $counter = new EventCounter(10);
@@ -21,9 +20,7 @@ final class EventCounterTest extends UnitTestCase
         $this->assertTrue($counter->isReset());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_incremented(): void
     {
         $counter = new EventCounter(5);
@@ -43,9 +40,7 @@ final class EventCounterTest extends UnitTestCase
         $this->assertTrue($counter->isReached());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_reset(): void
     {
         $counter = new EventCounter(10);

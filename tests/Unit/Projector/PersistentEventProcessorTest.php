@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\Header;
@@ -22,9 +23,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_preprocess_event_with_signal_dispatch(): void
     {
         $processEvent = new class extends EventProcessor
@@ -57,9 +56,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertEquals('signal handler dispatched', $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_preprocess_event_for_persistent_projection_with_no_gap_detected(): void
     {
         $processEvent = new class extends EventProcessor
@@ -83,9 +80,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertTrue($processEvent($context, $event, 12, $this->repository));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_preprocess_event_for_persistent_projection_with_gap_detected(): void
     {
         $processEvent = new class extends EventProcessor
@@ -109,11 +104,8 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertFalse($processEvent($context, $event, 14, $this->repository));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideBoolean')]
+    #[Test]
     public function it_test_after_process_event_with_persist_block_size_not_reached(bool $stopProcess): void
     {
         $processEvent = new class extends EventProcessor
@@ -136,11 +128,8 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertEquals(['foo' => 'bar'], $context->state->get());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideProjectionStatusWhichStopProjection
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideProjectionStatusWhichStopProjection')]
+    #[Test]
     public function it_test_after_process_event_with_persist_block_size_reached_and_stop_projection(ProjectionStatus $projectionStatus): void
     {
         $processEvent = new class extends EventProcessor
@@ -165,11 +154,8 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertEquals($projectionStatus, $context->status);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideProjectionStatusWhichKeepProjectionRunning
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideProjectionStatusWhichKeepProjectionRunning')]
+    #[Test]
     public function it_test_after_process_event_with_persist_block_size_reached_and_keep_projection_running(ProjectionStatus $projectionStatus): void
     {
         $processEvent = new class extends EventProcessor
@@ -194,13 +180,13 @@ final class PersistentEventProcessorTest extends UnitTestCase
         $this->assertEquals($projectionStatus, $context->status);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];
     }
 
-    public function provideProjectionStatusWhichStopProjection(): Generator
+    public static function provideProjectionStatusWhichStopProjection(): Generator
     {
         yield [ProjectionStatus::STOPPING];
         yield [ProjectionStatus::RESETTING];
@@ -208,7 +194,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
         yield [ProjectionStatus::DELETING_WITH_EMITTED_EVENTS];
     }
 
-    public function provideProjectionStatusWhichKeepProjectionRunning(): Generator
+    public static function provideProjectionStatusWhichKeepProjectionRunning(): Generator
     {
         yield [ProjectionStatus::IDLE];
         yield [ProjectionStatus::RUNNING];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Tests\Stubs\GroupStub;
@@ -25,9 +26,7 @@ final class GroupTest extends UnitTestCase
         $this->group = new GroupStub('default', new CollectRoutes(new AliasFromClassName()));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_default_group(): void
     {
         $group = $this->group;
@@ -42,9 +41,7 @@ final class GroupTest extends UnitTestCase
         $this->assertEmpty($group->messageSubscribers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_set_group_properties(): void
     {
         $group = $this->group;
@@ -74,9 +71,7 @@ final class GroupTest extends UnitTestCase
         $this->assertCount(2, $group->messageSubscribers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_reporter_class_is_not_a_valid_class_name(): void
     {
         $this->expectException(RoutingViolation::class);
@@ -87,9 +82,7 @@ final class GroupTest extends UnitTestCase
         $group->withReporterConcreteClass('reporter.command.default');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_producer_strategy_is_unknown_on_set(): void
     {
         $this->expectException(RoutingViolation::class);
@@ -100,9 +93,7 @@ final class GroupTest extends UnitTestCase
         $group->withProducerStrategy('unknown_strategy');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_producer_strategy_is_null_on_get(): void
     {
         $this->expectException(RoutingViolation::class);
@@ -113,9 +104,7 @@ final class GroupTest extends UnitTestCase
         $group->producerStrategy();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_serialized(): void
     {
         $group = $this->group;

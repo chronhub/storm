@@ -8,6 +8,7 @@ use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Contracts\Tracker\Listener;
@@ -22,9 +23,7 @@ use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 
 final class AbstractInMemoryChroniclerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_chronicler_is_already_eventable(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -51,9 +50,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $provider->resolve('foo', []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_stream_tracker_missing_to_decorate_chronicler(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -79,9 +76,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $provider->resolve('foo', []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_resolve_tracker_id_given_in_configuration(): void
     {
         $container = $this->createMock(ContainerInterface::class);
@@ -117,9 +112,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(EventChronicler::class, $chronicler::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_resolve_transactional_tracker_id_given_in_config(): void
     {
         $container = $this->createMock(ContainerInterface::class);
@@ -156,16 +149,18 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_with_invalid_configuration_when_chronicler_is_not_transactional_as_stream_tracker(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
         $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())->method('get')->with('tracker.stream.transactional')->willReturn(new TrackTransactionalStream());
+
+        $container->expects($this->once())
+            ->method('get')
+            ->with('tracker.stream.transactional')
+            ->willReturn(new TrackTransactionalStream());
 
         $containerAsClosure = fn (): ContainerInterface => $container;
 
@@ -198,16 +193,17 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_with_invalid_configuration_when_stream_tracker_is_not_transactional_as_chronicler(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
         $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())->method('get')->with('tracker.stream.not_transactional')->willReturn(new TrackStream());
+        $container->expects($this->once())
+            ->method('get')
+            ->with('tracker.stream.not_transactional')
+            ->willReturn(new TrackStream());
 
         $containerAsClosure = fn (): ContainerInterface => $container;
 
@@ -240,9 +236,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_attach_stream_subscribers_resolved_from_container_or_as_instance_to_eventable_chronicler(): void
     {
         $tracker = new TrackStream();

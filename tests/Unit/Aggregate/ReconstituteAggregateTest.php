@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 use Generator;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -35,6 +37,9 @@ final class ReconstituteAggregateTest extends UnitTestCase
 
     private string $identityString = '9ef864f7-43e2-48c8-9944-639a2d927a06';
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -46,9 +51,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->streamName = new StreamName('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reconstitute_aggregate_root_from_history(): void
     {
         $events = iterator_to_array($this->provideFourDummyEvents());
@@ -82,9 +85,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->assertEquals($countEvents, $reconstituteAggregateRoot->getAppliedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_reconstitute_aggregate_root_from_filtered_history(): void
     {
         $events = iterator_to_array($this->provideFourDummyEvents());
@@ -120,9 +121,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->assertEquals(2, $reconstituteAggregateRoot->getAppliedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_null_aggregate_root_from_empty_history(): void
     {
         $this->streamProducer->expects($this->once())
@@ -148,9 +147,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->assertNull($reconstituteAggregateRoot);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_null_aggregate_root_when_stream_not_found_exception_is_raised(): void
     {
         $this->streamProducer->expects($this->once())

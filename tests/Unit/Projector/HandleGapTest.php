@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\HandleGap;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -13,9 +14,7 @@ final class HandleGapTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_sleep_and_store_events_when_gap_is_detected(): void
     {
         $context = $this->newContext();

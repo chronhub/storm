@@ -6,10 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
@@ -24,6 +27,9 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
 
     private ReadModel|MockObject $readModel;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->contextSetup();
@@ -48,11 +54,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
             : $this->readModel->expects($this->once())->method('initialize');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBooleanForRise
-     */
+    #[DataProvider('provideBooleanForRise')]
+    #[Test]
     public function it_rise_projection_from_streams(bool $exists, bool $initialized): void
     {
         $this->provideRiseExpectations($exists, $initialized);
@@ -66,11 +69,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->rise();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBooleanForRise
-     */
+    #[DataProvider('provideBooleanForRise')]
+    #[Test]
     public function it_rise_projection_from_all_streams(bool $exists, bool $initialized): void
     {
         $this->provideRiseExpectations($exists, $initialized);
@@ -84,11 +84,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->rise();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBooleanForRise
-     */
+    #[DataProvider('provideBooleanForRise')]
+    #[Test]
     public function it_rise_projection_from_categories(bool $exists, bool $initialized): void
     {
         $this->provideRiseExpectations($exists, $initialized);
@@ -103,9 +100,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->rise();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_store_projection(): void
     {
         $this->store->expects($this->once())->method('persist')->willReturn(true);
@@ -118,9 +113,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->store();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_revise_projection(): void
     {
         $this->store->expects($this->once())->method('reset')->willReturn(true);
@@ -131,11 +124,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->revise();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_discard_projection(bool $withEmittedEvents): void
     {
         $this->store->expects($this->once())->method('delete')->with($withEmittedEvents)->willReturn(true);
@@ -149,11 +139,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->discard($withEmittedEvents);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_bound_state($loaded): void
     {
         $this->store->expects($this->once())->method('loadState')->willReturn($loaded);
@@ -163,11 +150,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->boundState();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_close_projection($closed): void
     {
         $this->store->expects($this->once())->method('stop')->willReturn($closed);
@@ -177,11 +161,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->close();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_restart_projection($restarted): void
     {
         $this->store->expects($this->once())->method('startAgain')->willReturn($restarted);
@@ -191,9 +172,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->restart();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_disclose_status_projection(): void
     {
         $this->store->expects($this->once())->method('loadStatus')->willReturn(ProjectionStatus::RUNNING);
@@ -203,11 +182,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::RUNNING, $repository->disclose());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_renew_projection_lock($updated): void
     {
         $this->store->expects($this->once())->method('updateLock')->willReturn($updated);
@@ -217,11 +193,8 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->renew();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_freed_projection_lock(bool $unlock): void
     {
         $this->store->expects($this->once())->method('releaseLock')->willReturn($unlock);
@@ -231,9 +204,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $repository->freed();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_stream_name(): void
     {
         $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
@@ -248,7 +219,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         return new ReadModelProjectorRepository($context, $this->store, $this->readModel);
     }
 
-    public function provideBooleanForRise(): Generator
+    public static function provideBooleanForRise(): Generator
     {
         yield [false, false];
         yield [true, true];
@@ -256,7 +227,7 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         yield [false, true];
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [false];
         yield [true];

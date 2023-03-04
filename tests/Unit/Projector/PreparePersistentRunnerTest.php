@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Closure;
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Pipes\PreparePersistentRunner;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
@@ -16,11 +18,8 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_initiate_projection_when_loading_status_from_remote(bool $runInBackground): void
     {
         $status = ProjectionStatus::RUNNING;
@@ -42,11 +41,8 @@ final class PreparePersistentRunnerTest extends UnitTestCase
         $this->assertIsInitialized($pipe, true);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_stop_projection_when_remote_status_is_stopping(bool $runInBackground): void
     {
         $status = ProjectionStatus::STOPPING;
@@ -70,11 +66,8 @@ final class PreparePersistentRunnerTest extends UnitTestCase
         $this->assertIsInitialized($pipe, true);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_stop_projection_when_remote_status_is_resetting(bool $runInBackground): void
     {
         $status = ProjectionStatus::RESETTING;
@@ -98,11 +91,8 @@ final class PreparePersistentRunnerTest extends UnitTestCase
         $this->assertIsInitialized($pipe, true);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_initiate_projection_when_remote_status_is_deleting(bool $runInBackground): void
     {
         $status = ProjectionStatus::DELETING;
@@ -127,11 +117,8 @@ final class PreparePersistentRunnerTest extends UnitTestCase
         $this->assertIsInitialized($pipe, true);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_initiate_projection_when_remote_status_is_deleting_with_emitted_events(bool $runInBackground): void
     {
         $status = ProjectionStatus::DELETING_WITH_EMITTED_EVENTS;
@@ -165,7 +152,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
         $this->assertEquals($expect, $closure($instance));
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
         yield [false];

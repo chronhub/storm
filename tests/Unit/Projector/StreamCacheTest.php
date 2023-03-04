@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 final class StreamCacheTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_cache_size(): void
     {
         $cache = new StreamCache(5);
@@ -21,11 +21,8 @@ final class StreamCacheTest extends UnitTestCase
         $this->assertCount(5, $cache->all());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideInvalidCacheSize
-     */
+    #[DataProvider('provideInvalidCacheSize')]
+    #[Test]
     public function it_raise_exception_with_cache_size_less_or_equals_than_zero(int $cacheSize): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -34,9 +31,7 @@ final class StreamCacheTest extends UnitTestCase
         new StreamCache($cacheSize);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fill_cache_to_the_next_position(): void
     {
         $cache = new StreamCache(2);
@@ -48,9 +43,7 @@ final class StreamCacheTest extends UnitTestCase
         $this->assertEquals(['foo', null], $cache->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_override_first_position_if_cache_size_is_full(): void
     {
         $cache = new StreamCache(2);
@@ -74,9 +67,7 @@ final class StreamCacheTest extends UnitTestCase
         $this->assertEquals('bar', $cache->all()[1]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_check_if_cache_has_stream_in_any_positions(): void
     {
         $cache = new StreamCache(2);
@@ -90,7 +81,7 @@ final class StreamCacheTest extends UnitTestCase
         $this->assertTrue($cache->has($firstStream));
     }
 
-    public function provideInvalidCacheSize(): Generator
+    public static function provideInvalidCacheSize(): Generator
     {
         yield [0];
         yield [-1];

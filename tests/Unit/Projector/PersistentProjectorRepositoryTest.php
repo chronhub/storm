@@ -7,10 +7,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Generator;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
@@ -26,6 +29,9 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
 
     private Chronicler|MockObject $chronicler;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->contextSetup();
@@ -34,11 +40,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $this->chronicler = $this->createMock(Chronicler::class);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_rise_projection(bool $exists): void
     {
         $this->store->expects($this->once())->method('exists')->willReturn($exists);
@@ -57,9 +60,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->rise();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_store_projection(): void
     {
         $this->store->expects($this->once())->method('persist')->willReturn(true);
@@ -71,9 +72,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->store();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_revise_projection(): void
     {
         $context = $this->newContext();
@@ -91,9 +90,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $this->assertFalse($context->isStreamCreated);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_revise_projection_and_hold_stream_not_found_exception(): void
     {
         $context = $this->newContext();
@@ -113,11 +110,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $this->assertFalse($context->isStreamCreated);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_discard_projection_and_hold_stream_not_found_exception(bool $withEmittedEvents): void
     {
         $context = $this->newContext();
@@ -144,9 +138,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
             : $this->assertTrue($context->isStreamCreated);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_discard_projection_and_delete_stream_with_emitted_event(): void
     {
         $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
@@ -159,9 +151,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->discard(true);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_discard_projection_and_does_not_delete_stream(): void
     {
         $this->store->expects($this->never())->method('currentStreamName');
@@ -173,11 +163,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->discard(false);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_bound_state($loaded): void
     {
         $this->store->expects($this->once())->method('loadState')->willReturn($loaded);
@@ -187,11 +174,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->boundState();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_close_projection($closed): void
     {
         $this->store->expects($this->once())->method('stop')->willReturn($closed);
@@ -201,11 +185,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->close();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_restart_projection($restarted): void
     {
         $this->store->expects($this->once())->method('startAgain')->willReturn($restarted);
@@ -215,9 +196,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->restart();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_disclose_status_projection(): void
     {
         $this->store->expects($this->once())->method('loadStatus')->willReturn(ProjectionStatus::RUNNING);
@@ -227,11 +206,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $this->assertEquals(ProjectionStatus::RUNNING, $repository->disclose());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_renew_projection_lock($updated): void
     {
         $this->store->expects($this->once())->method('updateLock')->willReturn($updated);
@@ -241,11 +217,8 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->renew();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_freed_projection_lock(bool $unlocked): void
     {
         $this->store->expects($this->once())->method('releaseLock')->willReturn($unlocked);
@@ -255,9 +228,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $repository->freed();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_stream_name(): void
     {
         $this->store->expects($this->once())->method('currentStreamName')->willReturn('foo');
@@ -272,7 +243,7 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         return new PersistentProjectorRepository($context, $this->store, $this->chronicler);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [false];
         yield [true];

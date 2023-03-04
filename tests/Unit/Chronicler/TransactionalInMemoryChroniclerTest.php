@@ -8,6 +8,7 @@ use RuntimeException;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\EventHeader;
@@ -39,9 +40,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed(): void
     {
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
@@ -50,9 +49,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_first_commit_in_transaction(): void
     {
         $this->assertEmpty($this->chronicler->getStreams());
@@ -89,9 +86,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_stream_already_exists(): void
     {
         $this->expectException(StreamAlreadyExists::class);
@@ -105,9 +100,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream($this->streamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_first_commit_when_transaction_not_started(): void
     {
         $this->expectException(TransactionNotStarted::class);
@@ -115,9 +108,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream($this->streamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_persist_in_transaction(): void
     {
         $this->assertEmpty($this->chronicler->getStreams());
@@ -160,9 +151,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(array_merge($events, $amendEvents), $this->chronicler->unpublishedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_stream_not_found_on_persist_when_stream_not_in_event_stream_provider_and_not_in_cache(): void
     {
         $this->expectException(StreamNotFound::class);
@@ -177,9 +166,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->commitTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_if_transaction_not_started_on_persist(): void
     {
         $this->expectException(TransactionNotStarted::class);
@@ -191,9 +178,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->amend(new Stream($this->streamName));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_pull_events_to_be_published(): void
     {
         $events = $this->generateEvent(10, 0);
@@ -215,9 +200,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertCount(0, $this->chronicler->unpublishedEvents());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_handle_job_fully_transactional(): void
     {
         $result = $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): int {
@@ -241,9 +224,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(42, $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_handle_job_fully_transactional_and_rollback_transaction_on_exception(): void
     {
         $this->expectException(RuntimeException::class);
@@ -267,9 +248,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_transaction_already_started_when_begin(): void
     {
         $this->expectException(TransactionAlreadyStarted::class);
@@ -278,9 +257,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->beginTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_transaction_not_started_when_commit(): void
     {
         $this->expectException(TransactionNotStarted::class);
@@ -288,9 +265,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->commitTransaction();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_transaction_not_started_when_rollback(): void
     {
         $this->expectException(TransactionNotStarted::class);

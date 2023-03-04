@@ -7,10 +7,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Generator;
 use RuntimeException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\ProjectQuery;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectReadModel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectProjection;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
@@ -32,9 +35,7 @@ use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
 final class InMemoryProjectorManagerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_query_projection(): void
     {
         $manager = $this->newProjectorManager();
@@ -45,9 +46,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals(ProjectQuery::class, $projector::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_persistent_projection(): void
     {
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
@@ -59,9 +58,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals('balance', $projector->getStreamName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_create_read_model_projection(): void
     {
         $readModel = $this->createMock(ReadModel::class);
@@ -76,9 +73,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertSame($readModel, $projector->readModel());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_status_of_stream(): void
     {
         $model = $this->createMock(ProjectionModel::class);
@@ -93,9 +88,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals('running', $status);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_stream_on_status_not_found(): void
     {
         $this->expectException(ProjectionNotFound::class);
@@ -107,9 +100,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->statusOf('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_stream_positions_of_stream(): void
     {
         $model = $this->createMock(ProjectionModel::class);
@@ -125,9 +116,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals(['balance' => 5], $position);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_empty_stream_positions_of_stream_and_return_empty_array(): void
     {
         $model = $this->createMock(ProjectionModel::class);
@@ -143,9 +132,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals([], $position);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_stream_on_stream_positions_not_found(): void
     {
         $this->expectException(ProjectionNotFound::class);
@@ -157,9 +144,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->streamPositionsOf('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_state_of_stream(): void
     {
         $model = $this->createMock(ProjectionModel::class);
@@ -174,9 +159,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals(['count' => 10], $position);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_fetch_empty_state_of_stream_and_return_empty_array(): void
     {
         $model = $this->createMock(ProjectionModel::class);
@@ -192,9 +175,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals([], $position);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_stream_on_state_not_found(): void
     {
         $this->expectException(ProjectionNotFound::class);
@@ -206,9 +187,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->stateOf('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_filter_stream_by_names(): void
     {
         $this->projectionProvider->expects($this->once())->method('filterByNames')->with('balance', 'foo', 'bar')->willReturn(['balance']);
@@ -220,11 +199,8 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals(['balance'], $streamNames);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_assert_stream_exists(bool $exists): void
     {
         $this->projectionProvider->expects($this->once())->method('projectionExists')->with('balance')->willReturn($exists);
@@ -234,9 +210,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals($exists, $manager->exists('balance'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_query_scope(): void
     {
         $manager = $this->newProjectorManager(new DefaultProjectorOption());
@@ -244,9 +218,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->assertEquals($this->queryScope, $manager->queryScope());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_mark_projection_as_stopped(): void
     {
         $this->projectionProvider->expects($this->once())->method('updateProjection')->with('balance', [
@@ -258,9 +230,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->stop('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_stopping_not_found_stream(): void
     {
         $this->expectException(ProjectionNotFound::class);
@@ -281,9 +251,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->stop('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_stopping_when_throwable_exception_raised(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
@@ -301,9 +269,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->stop('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_mark_projection_as_resetting(): void
     {
         $this->projectionProvider
@@ -318,9 +284,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->reset('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_resetting_not_found_stream(): void
     {
         $this->projectionProvider->expects($this->once())->method('projectionExists')->with('balance')->willReturn(false);
@@ -339,9 +303,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->reset('balance');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_on_resetting_when_throwable_exception_raised(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
@@ -358,11 +320,8 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->reset('balance');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_mark_projection_as_deleting(bool $withEmittedEvents): void
     {
         $status = $withEmittedEvents
@@ -381,11 +340,8 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->delete('balance', $withEmittedEvents);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_raise_exception_on_deleting_not_found_stream(bool $withEmittedEvents): void
     {
         $this->projectionProvider->expects($this->once())
@@ -411,11 +367,8 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->delete('balance', $withEmittedEvents);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_raise_exception_on_deleting_when_throwable_exception_raised(bool $withEmittedEvents): void
     {
         $status = $withEmittedEvents
@@ -437,7 +390,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $manager->delete('balance', $withEmittedEvents);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield[true];
         yield[false];
@@ -457,6 +410,9 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
 
     private JsonSerializer|MockObject $jsonSerializer;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();

@@ -8,6 +8,7 @@ use Throwable;
 use RuntimeException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeEvent;
@@ -17,9 +18,7 @@ use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
 
 final class ConsumeEventTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_test_subscriber(): void
     {
         $subscriber = new ConsumeEvent();
@@ -31,9 +30,7 @@ final class ConsumeEventTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_consume_event_with_many_consumers(): void
     {
         $tracker = new TrackMessage();
@@ -76,9 +73,7 @@ final class ConsumeEventTest extends UnitTestCase
         $this->assertTrue($story->isHandled());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_stop_consume_at_first_exception_and_does_not_mark_message_handled_even_if_one_has_been_consumed(): void
     {
         $tracker = new TrackMessage();
@@ -129,9 +124,7 @@ final class ConsumeEventTest extends UnitTestCase
         $this->assertFalse($story->isHandled());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_mark_message_handled_even_when_consumers_are_empty(): void
     {
         $tracker = new TrackMessage();

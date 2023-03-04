@@ -6,8 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Pipes\UpdateStatusAndPositions;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
@@ -16,11 +18,8 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
 {
     use ProvideMockContext;
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_reload_remote_status(bool $runInBackground): void
     {
         $status = ProjectionStatus::IDLE;
@@ -44,11 +43,8 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_stop_on_stop_status_loaded(bool $runInBackground): void
     {
         $status = ProjectionStatus::STOPPING;
@@ -78,11 +74,8 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_reset_on_resetting_status_loaded(bool $runInBackground): void
     {
         $status = ProjectionStatus::RESETTING;
@@ -110,11 +103,8 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_delete_on_deleting_status_loaded(bool $runInBackground): void
     {
         $status = ProjectionStatus::DELETING;
@@ -139,11 +129,8 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideBoolean
-     */
+    #[DataProvider('provideBoolean')]
+    #[Test]
     public function it_delete_with_events_on_deleting_with_emitted_events_status_loaded(bool $runInBackground): void
     {
         $status = ProjectionStatus::DELETING_WITH_EMITTED_EVENTS;
@@ -166,7 +153,7 @@ final class UpdateStatusAndPositionsTest extends UnitTestCase
         $this->assertTrue($run);
     }
 
-    public function provideBoolean(): Generator
+    public static function provideBoolean(): Generator
     {
         yield [true];
 

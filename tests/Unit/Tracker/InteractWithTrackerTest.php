@@ -7,23 +7,20 @@ namespace Chronhub\Storm\Tests\Unit\Tracker;
 use Chronhub\Storm\Tracker\Draft;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Tracker\InteractWithTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 
 final class InteractWithTrackerTest extends UnitTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_instantiate_with_empty_listeners(): void
     {
         $this->assertEmpty($this->newInstance()->listeners());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_order_by_descendant_priorities_when_dispatching_context(): void
     {
         $story = new Draft('dispatch');
@@ -71,9 +68,7 @@ final class InteractWithTrackerTest extends UnitTestCase
         $this->assertEquals(['init' => 1], $story->message()->event()->content);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_spy_on_event_and_dispatch_context(): void
     {
         $story = new Draft('dispatch');
@@ -93,9 +88,7 @@ final class InteractWithTrackerTest extends UnitTestCase
         $this->assertCount(1, $tracker->listeners());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_dispatch_context_till_a_truthy_result_callback(): void
     {
         $story = new Draft('dispatch');
@@ -140,9 +133,7 @@ final class InteractWithTrackerTest extends UnitTestCase
         $this->assertEquals(['init' => 3], $story->message()->event()->content);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_stop_propagation_of_event(): void
     {
         $story = new Draft('dispatch');

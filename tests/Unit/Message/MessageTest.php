@@ -10,18 +10,17 @@ use RuntimeException;
 use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Tests\Double\SomeQuery;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 
 final class MessageTest extends UnitTestCase
 {
-    /**
-     * @test
-     *
-     * @dataProvider provideObject
-     */
+    #[DataProvider('provideObject')]
+    #[Test]
     public function it_instantiate_message_with_object(object $event): void
     {
         $message = new Message($event);
@@ -30,11 +29,8 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals($event::class, $message->event()::class);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_instantiate_message_with_domain_instance(Reporting $domain): void
     {
         $message = new Message($domain);
@@ -48,9 +44,7 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals('header', $message->header('some'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_add_header_to_message_with_an_event_without_header(): void
     {
         $message = new Message(SomeCommand::fromContent([]), ['some' => 'header']);
@@ -58,9 +52,7 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals(['some' => 'header'], $message->headers());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_add_header_to_message_with_an_event_when_headers_matched(): void
     {
         $message = new Message(
@@ -71,11 +63,8 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals(['some' => 'header'], $message->headers());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_raise_exception_when_event_headers_differ_from_headers_on_instantiation(Reporting $domain): void
     {
         $this->expectException(RuntimeException::class);
@@ -84,9 +73,7 @@ final class MessageTest extends UnitTestCase
         new Message($domain, ['another' => 'header']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_event_is_an_instance_of_message(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -95,11 +82,8 @@ final class MessageTest extends UnitTestCase
         new Message(new Message(new stdClass()));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_add_header_to_message(Reporting $domain): void
     {
         $message = new Message($domain);
@@ -112,11 +96,8 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals(['some' => 'header', 'another' => 'header'], $cloned->headers());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_override_headers_to_message(Reporting $domain): void
     {
         $message = new Message($domain);
@@ -129,11 +110,8 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals(['another' => 'header'], $cloned->headers());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideDomain
-     */
+    #[DataProvider('provideDomain')]
+    #[Test]
     public function it_access_event_from_message_with_headers(Reporting $domain): void
     {
         $message = new Message($domain);
@@ -142,7 +120,7 @@ final class MessageTest extends UnitTestCase
         $this->assertNotSame($domain, $message->event());
     }
 
-    public function provideDomain(): Generator
+    public static function provideDomain(): Generator
     {
         $headers = ['some' => 'header'];
         $content = ['name' => 'steph bug'];
@@ -152,7 +130,7 @@ final class MessageTest extends UnitTestCase
         yield [SomeQuery::fromContent($content)->withHeaders($headers)];
     }
 
-    public function provideObject(): Generator
+    public static function provideObject(): Generator
     {
         yield [new stdClass()];
         yield [new class()

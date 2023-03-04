@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Aggregate\NullAggregateCache;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
@@ -23,29 +25,21 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->aggregateCache = new NullAggregateCache();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideAggregateId
-     */
+    #[DataProvider('provideAggregateId')]
+    #[Test]
     public function it_always_return_null_to_get_aggregate(AggregateIdentity $aggregateId): void
     {
         $this->assertNull($this->aggregateCache->get($aggregateId));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider provideAggregateId
-     */
+    #[DataProvider('provideAggregateId')]
+    #[Test]
     public function it_always_return_null_to_check_if_aggregate_exists_in_cache(AggregateIdentity $aggregateId): void
     {
         $this->assertFalse($this->aggregateCache->has($aggregateId));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_always_return_zero_when_counting_aggregates_in_cache(): void
     {
         $this->aggregateCache->put(AggregateRootStub::create(V4AggregateId::create()));
@@ -54,9 +48,7 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->assertEquals(0, $this->aggregateCache->count());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_flush(): void
     {
         $aggregateCache = $this->aggregateCache;
@@ -68,9 +60,7 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->assertEquals($aggregateCache, $cloneAggregateCache);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_does_not_forget(): void
     {
         $aggregateCache = $this->aggregateCache;
@@ -82,7 +72,7 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->assertEquals($aggregateCache, $cloneAggregateCache);
     }
 
-    public function provideAggregateId(): Generator
+    public static function provideAggregateId(): Generator
     {
         yield [V4AggregateId::create()];
         yield [V4AggregateId::create()];

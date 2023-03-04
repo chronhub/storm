@@ -6,45 +6,49 @@ namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use Chronhub\Storm\Routing\Route;
 use Illuminate\Support\Collection;
-use Prophecy\Prophecy\ObjectProphecy;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Routing\CollectRoutes;
-use Chronhub\Storm\Tests\ProphecyTestCase;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Tests\Double\AnotherCommand;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
-final class CollectRoutesTest extends ProphecyTestCase
+final class CollectRoutesTest extends UnitTestCase
 {
-    private ObjectProphecy|MessageAlias $messageAlias;
+    private MockObject|MessageAlias $messageAlias;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->messageAlias = $this->prophesize(MessageAlias::class);
+        $this->messageAlias = $this->createMock(MessageAlias::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed_with_empty_routes(): void
     {
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $this->assertTrue($routes->getRoutes()->isEmpty());
         $this->assertNotSame($routes->getRoutes(), $routes->getRoutes());
         $this->assertNull($routes->match('foo'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_add_route_to_collection(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->once())
+            ->method('classToAlias')
+            ->with(SomeCommand::class)
+            ->willReturn('some-command');
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $route = $routes->addRoute(SomeCommand::class);
 
@@ -54,17 +58,18 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertEquals(SomeCommand::class, $route->getOriginalName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_message_name_is_duplicate(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Message name already exists: '.SomeCommand::class);
 
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->once())
+            ->method('classToAlias')
+            ->with(SomeCommand::class)
+            ->willReturn('some-command');
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $route = $routes->addRoute(SomeCommand::class);
 
@@ -73,14 +78,12 @@ final class CollectRoutesTest extends ProphecyTestCase
         $routes->addRoute(SomeCommand::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_add_route_instance_to_collection(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->shouldNotBeCalled();
+        $this->messageAlias->expects($this->never())->method('classToAlias');
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $route = new Route(SomeCommand::class);
         $route->alias('some-command');
@@ -91,17 +94,15 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertEquals(SomeCommand::class, $route->getOriginalName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_raise_exception_when_message_instance_is_duplicate(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Message name already exists: '.SomeCommand::class);
 
-        $this->messageAlias->classToAlias(SomeCommand::class)->shouldNotBeCalled();
+        $this->messageAlias->expects($this->never())->method('classToAlias');
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $route = new Route(SomeCommand::class);
         $route->alias('some-command');
@@ -110,15 +111,14 @@ final class CollectRoutesTest extends ProphecyTestCase
         $routes->addRouteInstance($route);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_find_routes_in_collection_with_message_class_name(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn(SomeCommand::class)->shouldBeCalledOnce();
-        $this->messageAlias->classToAlias(AnotherCommand::class)->willReturn(AnotherCommand::class)->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->any())
+            ->method('classToAlias')
+            ->willReturnMap([[SomeCommand::class, SomeCommand::class], [AnotherCommand::class, AnotherCommand::class]]);
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
@@ -127,15 +127,14 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->match(AnotherCommand::class)->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_find_routes_in_collection_with_message_alias(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
-        $this->messageAlias->classToAlias(AnotherCommand::class)->willReturn('another-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->any())
+            ->method('classToAlias')
+            ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
@@ -144,15 +143,14 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->match('another-command')->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_find_routes_in_collection_with_original_message_class_name(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
-        $this->messageAlias->classToAlias(AnotherCommand::class)->willReturn('another-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->any())
+            ->method('classToAlias')
+            ->willReturnMap([[SomeCommand::class, SomeCommand::class], [AnotherCommand::class, AnotherCommand::class]]);
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
@@ -161,15 +159,14 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->matchOriginal(AnotherCommand::class)->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_access_a_clone_routes_collection(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
-        $this->messageAlias->classToAlias(AnotherCommand::class)->willReturn('another-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->any())
+            ->method('classToAlias')
+            ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $someRoute = $routes->addRoute(SomeCommand::class);
         $anotherRoute = $routes->addRoute(AnotherCommand::class);
@@ -178,15 +175,14 @@ final class CollectRoutesTest extends ProphecyTestCase
         $this->assertNotSame($routes->getRoutes(), $routes->getRoutes());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_serialize_routes(): void
     {
-        $this->messageAlias->classToAlias(SomeCommand::class)->willReturn('some-command')->shouldBeCalledOnce();
-        $this->messageAlias->classToAlias(AnotherCommand::class)->willReturn('another-command')->shouldBeCalledOnce();
+        $this->messageAlias->expects($this->any())
+            ->method('classToAlias')
+            ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 
-        $routes = new CollectRoutes($this->messageAlias->reveal());
+        $routes = new CollectRoutes($this->messageAlias);
 
         $routes->addRoute(SomeCommand::class);
         $routes->addRoute(AnotherCommand::class);

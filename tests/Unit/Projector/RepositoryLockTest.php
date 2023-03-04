@@ -7,6 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use DateInterval;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
@@ -19,15 +21,16 @@ final class RepositoryLockTest extends UnitTestCase
 
     private PointInTime $time;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->clock = $this->createMock(SystemClock::class);
         $this->time = new PointInTime();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_instantiated(): void
     {
         $lock = new RepositoryLock($this->clock, 1000, 1000);
@@ -35,14 +38,12 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertNull($lock->current());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_acquire_lock(): void
     {
         $datetime = $this->time->now();
 
-        $this->clock->expects($this->once())
+        $this->clock->expects($this->exactly(2))
             ->method('getFormat')
             ->willReturn($this->time::DATE_TIME_FORMAT);
 
@@ -61,9 +62,7 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertEquals($updatedTime->format($this->time->getFormat()), $lockUntil);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_always_update_lock_when_last_lock_update_is_not_fixed(): void
     {
         $datetime = $this->time->now();
@@ -87,9 +86,7 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertEquals($datetime->format($this->time->getFormat()), $lock->current());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_always_update_lock_when_lock_threshold_is_zero(): void
     {
         $datetime = $this->time->now();
@@ -111,9 +108,7 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertEquals($datetime->format($this->time->getFormat()), $lock->current());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_update_lock_when_incremented_last_lock_is_less_than_last_lock_updated(): void
     {
         $lock = new RepositoryLock($this->time, 1000, 1000);
@@ -127,9 +122,7 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertTrue($lock->tryUpdate());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_update_lock_when_incremented_last_lock_is_greater_than_last_lock_updated(): void
     {
         $lock = new RepositoryLock($this->time, 1000, 1000);
@@ -139,9 +132,7 @@ final class RepositoryLockTest extends UnitTestCase
         $this->assertFalse($lock->tryUpdate());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_return_refresh_last_lock_update_with_lock_timeout_ms(): void
     {
         $datetime = $this->time->now();

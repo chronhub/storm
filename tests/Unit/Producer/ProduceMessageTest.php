@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Producer;
 
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Producer\ProduceMessage;
+use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -19,15 +21,16 @@ final class ProduceMessageTest extends UnitTestCase
 
     private MockObject|MessageQueue $queue;
 
+    /**
+     * @throws Exception
+     */
     protected function setup(): void
     {
         $this->unity = $this->createMock(ProducerUnity::class);
         $this->queue = $this->createMock(MessageQueue::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_produce_message_sync(): void
     {
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
@@ -46,9 +49,7 @@ final class ProduceMessageTest extends UnitTestCase
         $this->assertTrue($dispatchedMessage->header(Header::EVENT_DISPATCHED));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_produce_message_async(): void
     {
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
