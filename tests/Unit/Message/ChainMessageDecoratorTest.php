@@ -8,9 +8,11 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\ChainMessageDecorator;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 
+#[CoversClass(ChainMessageDecorator::class)]
 final class ChainMessageDecoratorTest extends UnitTestCase
 {
     #[Test]

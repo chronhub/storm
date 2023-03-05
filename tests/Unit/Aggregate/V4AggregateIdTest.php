@@ -8,8 +8,10 @@ use Symfony\Component\Uid\Uuid;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
+#[CoversClass(V4AggregateId::class)]
 final class V4AggregateIdTest extends UnitTestCase
 {
     private AggregateIdentity|V4AggregateId $aggregateId;

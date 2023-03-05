@@ -10,9 +10,11 @@ use RuntimeException;
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Chronicler\Exceptions\QueryFailure;
 
+#[CoversClass(QueryFailure::class)]
 final class QueryFailureTest extends UnitTestCase
 {
     #[DataProvider('provideException')]

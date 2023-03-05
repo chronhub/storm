@@ -8,8 +8,10 @@ use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromInflector;
 
+#[CoversClass(AliasFromInflector::class)]
 final class AliasFromInflectorTest extends UnitTestCase
 {
     #[Test]

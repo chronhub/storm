@@ -9,8 +9,10 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Chronicler\TrackStream;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
+#[CoversClass(TrackStream::class)]
 final class TrackStreamTest extends UnitTestCase
 {
     #[DataProvider('provideEventName')]

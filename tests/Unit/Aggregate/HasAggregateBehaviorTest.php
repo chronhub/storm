@@ -9,10 +9,13 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
+use Chronhub\Storm\Aggregate\HasAggregateBehaviour;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use function iterator_to_array;
 
+#[CoversClass(HasAggregateBehaviour::class)]
 final class HasAggregateBehaviorTest extends UnitTestCase
 {
     #[Test]

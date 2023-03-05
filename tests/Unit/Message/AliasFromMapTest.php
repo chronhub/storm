@@ -9,7 +9,9 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Message\AliasFromMap;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(AliasFromMap::class)]
 final class AliasFromMapTest extends UnitTestCase
 {
     #[Test]

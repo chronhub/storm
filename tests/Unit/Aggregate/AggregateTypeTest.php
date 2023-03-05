@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
+use Chronhub\Storm\Aggregate\AggregateRepository;
+use PHPUnit\Framework\Attributes\CoversClass;
 use stdClass;
 use Generator;
 use InvalidArgumentException;
@@ -18,6 +20,7 @@ use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Tests\Stubs\AggregateRootChildStub;
 use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
 
+#[CoversClass(AggregateType::class)]
 final class AggregateTypeTest extends UnitTestCase
 {
     #[Test]

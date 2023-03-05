@@ -14,7 +14,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\MockObject\Exception;
+use Chronhub\Storm\Chronicler\ProvideEvents;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Tracker\StreamStory;
@@ -29,6 +31,7 @@ use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 use function count;
 use function iterator_to_array;
 
+#[CoversClass(ProvideEvents::class)]
 final class ProvideEventsTest extends UnitTestCase
 {
     private Chronicler|MockObject $chronicler;

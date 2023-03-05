@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
@@ -20,6 +21,7 @@ use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
+#[CoversClass(InMemoryChroniclerProvider::class)]
 final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;

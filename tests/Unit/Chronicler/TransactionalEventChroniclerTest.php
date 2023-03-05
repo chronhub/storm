@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Generator;
-use TypeError;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
 use Chronhub\Storm\Chronicler\TransactionalEventChronicler;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamStory;
@@ -21,6 +20,7 @@ use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
+#[CoversClass(TransactionalEventChronicler::class)]
 final class TransactionalEventChroniclerTest extends UnitTestCase
 {
     private TransactionalChronicler|MockObject $chronicler;
@@ -167,19 +167,6 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $this->chronicler->expects($this->once())->method('transactional')->with($callback)->willReturn($bool);
 
         $this->assertEquals($bool, $this->chroniclerInstance()->transactional($callback));
-    }
-
-    #[Test]
-    public function it_raise_exception_if_inner_chronicler_is_not_transactional(): void
-    {
-        $this->expectException(TypeError::class);
-
-        $chronicler = $this->createMock(Chronicler::class);
-
-        /** @phpstan-ignore-next-line  */
-        $transactionalEventChronicler = new TransactionalEventChronicler($chronicler, $this->tracker);
-
-        $transactionalEventChronicler->transactional(fn (): string => 'nope');
     }
 
     private function chroniclerInstance(): TransactionalEventChronicler

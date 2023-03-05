@@ -8,10 +8,12 @@ use DateTimeZone;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use function usleep;
 use function microtime;
 use function date_default_timezone_get;
 
+#[CoversClass(PointInTime::class)]
 final class PointInTimeTest extends UnitTestCase
 {
     #[Test]

@@ -12,6 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
@@ -30,6 +31,7 @@ use function random_bytes;
 use function array_reverse;
 use function iterator_to_array;
 
+#[CoversClass(StandaloneInMemoryChronicler::class)]
 final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 {
     private StandaloneInMemoryChronicler $chronicler;

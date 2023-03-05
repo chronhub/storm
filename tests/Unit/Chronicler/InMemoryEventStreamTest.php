@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 
+#[CoversClass(InMemoryEventStream::class)]
 final class InMemoryEventStreamTest extends UnitTestCase
 {
     #[Test]

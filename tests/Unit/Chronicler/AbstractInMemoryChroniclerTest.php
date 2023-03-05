@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -20,7 +21,9 @@ use Chronhub\Storm\Chronicler\TransactionalEventChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
 
+#[CoversClass(AbstractInMemoryChronicler::class)]
 final class AbstractInMemoryChroniclerTest extends UnitTestCase
 {
     #[Test]

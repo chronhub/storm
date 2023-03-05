@@ -13,6 +13,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
@@ -21,6 +22,7 @@ use Chronhub\Storm\Chronicler\Exceptions\UnexpectedCallback;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 
+#[CoversClass(EventDraft::class)]
 final class EventDraftTest extends UnitTestCase
 {
     #[DataProvider('provideDeferredValues')]

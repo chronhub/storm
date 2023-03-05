@@ -8,12 +8,14 @@ use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Aggregate\NullAggregateCache;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 
+#[CoversClass(NullAggregateCache::class)]
 final class NullAggregateCacheTest extends UnitTestCase
 {
     private NullAggregateCache $aggregateCache;

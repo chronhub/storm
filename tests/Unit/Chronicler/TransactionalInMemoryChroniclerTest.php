@@ -11,6 +11,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
@@ -22,6 +23,7 @@ use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use function array_merge;
 use function random_bytes;
 
+#[CoversClass(TransactionalInMemoryChronicler::class)]
 final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 {
     private TransactionalInMemoryChronicler $chronicler;

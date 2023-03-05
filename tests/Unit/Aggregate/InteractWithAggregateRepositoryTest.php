@@ -16,6 +16,7 @@ use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Contracts\Message\EventHeader;
@@ -26,10 +27,12 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Aggregate\InteractWithAggregateRepository;
 use Chronhub\Storm\Tests\Stubs\InteractWithAggregateRepositoryStub;
 use function iterator_to_array;
 use function PHPUnit\Framework\once;
 
+#[CoversClass(InteractWithAggregateRepository::class)]
 final class InteractWithAggregateRepositoryTest extends UnitTestCase
 {
     private Chronicler|MockObject $chronicler;

@@ -12,7 +12,9 @@ use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
+use Chronhub\Storm\Aggregate\ReconstituteAggregate;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Stream\StreamProducer;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
@@ -23,6 +25,7 @@ use Chronhub\Storm\Tests\Stubs\ReconstituteAggregateRootStub;
 use function count;
 use function iterator_to_array;
 
+#[CoversClass(ReconstituteAggregate::class)]
 final class ReconstituteAggregateTest extends UnitTestCase
 {
     private Chronicler|MockObject $chronicler;

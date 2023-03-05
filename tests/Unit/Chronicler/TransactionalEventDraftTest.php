@@ -6,10 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\TransactionalEventDraft;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 
+#[CoversClass(TransactionalEventDraft::class)]
 final class TransactionalEventDraftTest extends UnitTestCase
 {
     #[Test]
