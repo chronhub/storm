@@ -11,7 +11,7 @@ final readonly class AsHandler
 {
     public array $arguments;
 
-    public function __construct(public ?string $method = null, string ...$arguments)
+    public function __construct(public ?string $method = null, object ...$arguments)
     {
         $this->arguments = $arguments;
     }
