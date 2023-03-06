@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Chronicler;
 
 use Chronhub\Storm\Contracts\Tracker\Listener;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
 
 interface EventableChronicler extends ChroniclerDecorator
 {
@@ -27,9 +26,6 @@ interface EventableChronicler extends ChroniclerDecorator
 
     public const HAS_STREAM_EVENT = 'has_stream';
 
-    /**
-     * @param callable{StreamStory} $eventContext
-     */
     public function subscribe(string $eventName, callable $eventContext, int $priority = 0): Listener;
 
     public function unsubscribe(Listener ...$eventSubscribers): void;

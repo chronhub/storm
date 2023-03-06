@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Contracts\Chronicler;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 
+// todo move to collection, it's a dependency
 interface EventPublisher
 {
     /**

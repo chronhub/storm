@@ -8,11 +8,17 @@ interface EventStreamProvider
 {
     /**
      * Create new stream
+     *
+     * @param  non-empty-string  $streamName
+     * @param  non-empty-string|null  $tableName
+     * @param  non-empty-string|null  $category
      */
     public function createStream(string $streamName, ?string $tableName, ?string $category = null): bool;
 
     /**
      * Delete stream by name
+     *
+     * @param  non-empty-string  $streamName
      */
     public function deleteStream(string $streamName): bool;
 
@@ -36,5 +42,10 @@ interface EventStreamProvider
      */
     public function allWithoutInternal(): array;
 
+    /**
+     * Check if real stream name exists
+     *
+     * @param  non-empty-string  $streamName
+     */
     public function hasRealStreamName(string $streamName): bool;
 }
