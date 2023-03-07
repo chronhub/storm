@@ -25,7 +25,7 @@ class AsDomainEvent
             throw new InvalidArgumentException('At least one handler must be provided');
         }
 
-        $this->method = $targetMethod;
+        $this->method = $targetMethod ?? '__invoke';
         $this->handlers = $handlers;
         $this->allowEmpty = $allowEmpty;
         $this->content = $content;

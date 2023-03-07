@@ -9,10 +9,13 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final readonly class AsHandler
 {
-    public array $arguments;
+    public string $domain;
 
-    public function __construct(public ?string $method = null, object ...$arguments)
+    public string $method;
+
+    public function __construct(string $domain, ?string $method = null)
     {
-        $this->arguments = $arguments;
+        $this->domain = $domain;
+        $this->method = $method ?? '__invoke';
     }
 }

@@ -23,7 +23,7 @@ class AsDomainQuery
             throw new InvalidArgumentException('One handler only must be provided');
         }
 
-        $this->method = $targetMethod;
+        $this->method = $targetMethod ?? '__invoke';
         $this->handlers = $handlers;
         $this->content = $content;
     }

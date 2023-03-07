@@ -17,7 +17,7 @@ use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 
-readonly class EventChronicler implements EventableChronicler
+class EventChronicler implements EventableChronicler
 {
     public function __construct(
         protected Chronicler|TransactionalChronicler $chronicler,
