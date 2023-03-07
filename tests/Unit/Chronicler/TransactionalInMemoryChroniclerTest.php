@@ -18,12 +18,14 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
+use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use function array_merge;
 use function random_bytes;
 
 #[CoversClass(TransactionalInMemoryChronicler::class)]
+#[CoversClass(AbstractInMemoryChronicler::class)]
 final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 {
     private TransactionalInMemoryChronicler $chronicler;

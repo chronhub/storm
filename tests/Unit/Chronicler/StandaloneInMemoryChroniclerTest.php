@@ -23,6 +23,7 @@ use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 use function count;
 use function range;
@@ -32,6 +33,7 @@ use function array_reverse;
 use function iterator_to_array;
 
 #[CoversClass(StandaloneInMemoryChronicler::class)]
+#[CoversClass(AbstractInMemoryChronicler::class)]
 final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 {
     private StandaloneInMemoryChronicler $chronicler;

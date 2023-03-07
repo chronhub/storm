@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
+use Chronhub\Storm\Chronicler\AbstractChroniclerProvider;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryChroniclerProvider;
@@ -22,6 +23,7 @@ use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
 #[CoversClass(InMemoryChroniclerProvider::class)]
+#[CoversClass(AbstractChroniclerProvider::class)]
 final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;

@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Chronhub\Storm\Routing\Route;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Aggregate\AggregateRepository;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Stream\StreamProducer;
 use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
+use Chronhub\Storm\Aggregate\AbstractAggregateRepository;
 
 #[CoversClass(AggregateRepository::class)]
+#[CoversClass(AbstractAggregateRepository::class)]
 final class AggregateRepositoryTest extends UnitTestCase
 {
     private Chronicler|MockObject $chronicler;

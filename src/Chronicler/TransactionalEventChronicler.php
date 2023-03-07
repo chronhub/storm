@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
-final readonly class TransactionalEventChronicler extends EventChronicler implements TransactionalEventableChronicler
+final class TransactionalEventChronicler extends EventChronicler implements TransactionalEventableChronicler
 {
     public function __construct(TransactionalChronicler $chronicler, TransactionalStreamTracker $tracker)
     {
