@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Aggregate;
 
 use Psr\Container\ContainerInterface;
-use Chronhub\Storm\Aggregate\AggregateRepository;
 
 interface AggregateRepositoryManager
 {
