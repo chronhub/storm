@@ -6,6 +6,8 @@ namespace Chronhub\Storm\Chronicler;
 
 use Closure;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Container\ContainerExceptionInterface;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Tracker\StreamTracker;
 use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
@@ -64,7 +66,10 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
     }
 
     /**
-     * @param  array{string|StreamSubscriber}  $streamSubscribers
+     * @param array{string|StreamSubscriber} $streamSubscribers
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function attachStreamSubscribers(EventableChronicler $chronicler, array $streamSubscribers): void
     {

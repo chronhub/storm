@@ -31,7 +31,6 @@ final class Message
         $expectedHeaders = match (true) {
             count($event->headers()) === 0, $event->headers() === $headers => $headers,
             count($headers) === 0 => $event->headers(),
-
             default => throw new RuntimeException('Invalid headers consistency for event class '.$event::class)
         };
 
