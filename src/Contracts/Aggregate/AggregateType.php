@@ -22,6 +22,13 @@ interface AggregateType
     public function isSupported(string $aggregateRoot): bool;
 
     /**
+     * @param  class-string  $aggregate
+     *
+     * @throws InvalidArgumentException
+     */
+    public function assertAggregateIsSupported(string $aggregate): void;
+
+    /**
      * @return class-string
      */
     public function current(): string;

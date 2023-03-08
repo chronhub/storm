@@ -33,7 +33,7 @@ trait InteractWithAggregateRepository
 
     public function store(AggregateRoot $aggregateRoot): void
     {
-        $this->aggregateType->isSupported($aggregateRoot::class);
+        $this->aggregateType->assertAggregateIsSupported($aggregateRoot::class);
 
         $events = $this->releaseDecoratedEvents($aggregateRoot);
 

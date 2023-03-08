@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Chronhub\Storm\Aggregate\AggregateRepository;
-use PHPUnit\Framework\Attributes\CoversClass;
 use stdClass;
 use Generator;
 use InvalidArgumentException;
@@ -14,6 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Aggregate\AggregateType;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;

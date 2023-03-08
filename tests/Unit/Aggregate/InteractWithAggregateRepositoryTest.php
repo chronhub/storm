@@ -133,7 +133,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
+        $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
 
         $stream = new Stream($this->streamName, $events);
 
@@ -172,9 +172,8 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
         $this->aggregateType->expects(self::once())
-            ->method('isSupported')
-            ->with($aggregateRoot::class)
-            ->willReturn(true);
+            ->method('assertAggregateIsSupported')
+            ->with($aggregateRoot::class);
 
         $stream = new Stream($this->streamName, $events);
 
@@ -209,7 +208,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
+        $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
 
         $this->streamProducer->expects($this->never())->method('toStream');
         $this->streamProducer->expects($this->never())->method('isFirstCommit');
@@ -230,7 +229,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
+        $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
 
         $stream = new Stream($this->streamName, $events);
 
@@ -290,7 +289,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
         $this->assertEquals(8, $aggregateRoot->version());
 
-        $this->aggregateType->expects($this->once())->method('isSupported')->with($aggregateRoot::class)->willReturn(true);
+        $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
 
         $stream = new Stream($this->streamName, $events);
 
