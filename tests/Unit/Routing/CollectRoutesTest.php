@@ -79,39 +79,6 @@ final class CollectRoutesTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_add_route_instance_to_collection(): void
-    {
-        $this->messageAlias->expects($this->never())->method('classToAlias');
-
-        $routes = new CollectRoutes($this->messageAlias);
-
-        $route = new Route(SomeCommand::class);
-        $route->alias('some-command');
-
-        $routes->addRouteInstance($route);
-
-        $this->assertEquals('some-command', $route->getName());
-        $this->assertEquals(SomeCommand::class, $route->getOriginalName());
-    }
-
-    #[Test]
-    public function it_raise_exception_when_message_instance_is_duplicate(): void
-    {
-        $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage('Message name already exists: '.SomeCommand::class);
-
-        $this->messageAlias->expects($this->never())->method('classToAlias');
-
-        $routes = new CollectRoutes($this->messageAlias);
-
-        $route = new Route(SomeCommand::class);
-        $route->alias('some-command');
-
-        $routes->addRouteInstance($route);
-        $routes->addRouteInstance($route);
-    }
-
-    #[Test]
     public function it_find_routes_in_collection_with_message_class_name(): void
     {
         $this->messageAlias->expects($this->any())

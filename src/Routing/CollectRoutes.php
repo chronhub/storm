@@ -9,11 +9,11 @@ use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
-class CollectRoutes implements RouteCollection
+final readonly class CollectRoutes implements RouteCollection
 {
-    private readonly Collection $routes;
+    private Collection $routes;
 
-    public function __construct(private readonly MessageAlias $messageAlias)
+    public function __construct(private MessageAlias $messageAlias)
     {
         $this->routes = new Collection();
     }
@@ -35,22 +35,6 @@ class CollectRoutes implements RouteCollection
         $this->routes->push($route);
 
         return $route;
-    }
-
-    public function addRouteInstance(Route $route): static
-    {
-        $filteredRoutes = $this->routes->filter(
-            /** @phpstan-ignore-next-line  */
-            fn (Route $route): string => $route->getOriginalName()
-        );
-
-        if ($filteredRoutes->isNotEmpty()) {
-            throw new RoutingViolation('Message name already exists: '.$route->getOriginalName());
-        }
-
-        $this->routes->push($route);
-
-        return $this;
     }
 
     public function match(string $messageName): ?Route

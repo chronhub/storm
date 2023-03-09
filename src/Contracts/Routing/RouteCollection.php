@@ -15,8 +15,6 @@ interface RouteCollection extends JsonSerializable
      */
     public function addRoute(string $messageName): Route;
 
-    public function addRouteInstance(Route $route): static;
-
     /**
      * @param  string|class-string  $messageName
      */
