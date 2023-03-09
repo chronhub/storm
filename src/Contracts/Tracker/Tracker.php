@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Tracker;
 
+use Illuminate\Support\Collection;
+
 interface Tracker
 {
     public function watch(string $eventName, callable $story, int $priority = 0): Listener;
@@ -21,7 +23,7 @@ interface Tracker
     public function forget(Listener $eventListener): void;
 
     /**
-     * @return iterable<Listener> a clone instance of listeners
+     * @return Collection<Listener> a clone instance of listeners
      */
-    public function listeners(): iterable;
+    public function listeners(): Collection;
 }
