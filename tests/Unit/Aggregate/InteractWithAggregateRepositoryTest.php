@@ -30,7 +30,6 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Aggregate\InteractWithAggregateRepository;
 use Chronhub\Storm\Tests\Stubs\InteractWithAggregateRepositoryStub;
 use function iterator_to_array;
-use function PHPUnit\Framework\once;
 
 #[CoversClass(InteractWithAggregateRepository::class)]
 final class InteractWithAggregateRepositoryTest extends UnitTestCase
@@ -171,7 +170,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
-        $this->aggregateType->expects(self::once())
+        $this->aggregateType->expects($this->once())
             ->method('assertAggregateIsSupported')
             ->with($aggregateRoot::class);
 
@@ -322,13 +321,13 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
             }))
             ->willReturn($stream);
 
-        $this->streamProducer->expects(once())
+        $this->streamProducer->expects($this->once())
             ->method('isFirstCommit')
             ->with($this->isInstanceOf(SomeEvent::class))
             ->willReturn(false);
 
-        $this->chronicler->expects(self::once())->method('amend')->with($stream);
-        $this->aggregateCache->expects(self::once())->method('put')->with($aggregateRoot);
+        $this->chronicler->expects($this->once())->method('amend')->with($stream);
+        $this->aggregateCache->expects($this->once())->method('put')->with($aggregateRoot);
 
         $stub = $this->aggregateRepositoryStub($messageDecorator);
 
