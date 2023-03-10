@@ -10,7 +10,7 @@ use Attribute;
 final readonly class AsAggregateChanged
 {
     public function __construct(public string $aggregateRoot,
-                                public string $aggregateId = 'aggregate_id',
+                                public string $aggregateId,
                                 public array $content = [])
     {
     }
