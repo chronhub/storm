@@ -10,11 +10,13 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
 use function sleep;
 use function usleep;
 
+#[CoversClass(RepositoryLock::class)]
 final class RepositoryLockTest extends UnitTestCase
 {
     private SystemClock|MockObject $clock;

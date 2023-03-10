@@ -8,12 +8,13 @@ use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Pipes\UpdateStatusAndPositions;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
-// todo rename test method
+#[CoversClass(UpdateStatusAndPositions::class)]
 final class UpdateStatusAndPositionsTest extends UnitTestCase
 {
     use ProvideMockContext;

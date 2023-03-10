@@ -11,9 +11,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
+#[CoversClass(DetectGap::class)]
 final class DetectGapTest extends UnitTestCase
 {
     private StreamPosition|MockObject $streamPosition;

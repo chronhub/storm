@@ -14,12 +14,15 @@ use Chronhub\Storm\Routing\HandleRoute;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Routing\RouteLocator;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
 use Chronhub\Storm\Contracts\Producer\MessageProducer;
 use Chronhub\Storm\Tests\Unit\Reporter\AssertMessageListener;
+
+#[CoversClass(HandleRoute::class)]
 
 final class HandleRouteTest extends UnitTestCase
 {

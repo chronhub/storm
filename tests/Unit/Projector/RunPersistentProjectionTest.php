@@ -9,13 +9,12 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
-/**
- * @coversDefaultClass \Chronhub\Storm\Projector\RunProjection
- */
+#[CoversClass(RunProjection::class)]
 final class RunPersistentProjectionTest extends UnitTestCase
 {
     use ProvideMockContext;

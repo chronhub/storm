@@ -9,9 +9,11 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 
+#[CoversClass(PersistentCaster::class)]
 final class PersistentCasterTest extends UnitTestCase
 {
     private MockObject|ProjectionProjector $projector;

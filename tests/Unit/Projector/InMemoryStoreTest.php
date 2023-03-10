@@ -12,12 +12,14 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Repository\InMemoryStore;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
+#[CoversClass(InMemoryStore::class)]
 final class InMemoryStoreTest extends UnitTestCase
 {
     private Store|MockObject $store;

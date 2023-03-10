@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
@@ -21,6 +22,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
 // todo fix test willReturnMap
+#[CoversClass(StandaloneStore::class)]
 final class StandaloneStoreTest extends UnitTestCase
 {
     use ProvideMockContext {

@@ -14,11 +14,13 @@ use Chronhub\Storm\Reporter\ReportQuery;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Reporter\ReportCommand;
 use Chronhub\Storm\Contracts\Message\Header;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\Subscribers\NameReporterService;
 
+#[CoversClass(NameReporterService::class)]
 final class NameReporterServiceTest extends UnitTestCase
 {
     #[Test]

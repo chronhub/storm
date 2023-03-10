@@ -12,8 +12,10 @@ use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Projector\Scheme\Pipeline;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
+#[CoversClass(Pipeline::class)]
 final class PipelineTest extends UnitTestCase
 {
     private MockObject|Context $context;

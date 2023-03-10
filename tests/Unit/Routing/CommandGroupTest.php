@@ -9,8 +9,10 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\CollectRoutes;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromClassName;
 
+#[CoversClass(CommandGroup::class)]
 final class CommandGroupTest extends UnitTestCase
 {
     #[Test]

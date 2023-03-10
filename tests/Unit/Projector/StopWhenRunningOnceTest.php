@@ -8,10 +8,13 @@ use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Pipes\StopWhenRunningOnce;
 use Chronhub\Storm\Contracts\Projector\PersistentProjector;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
+
+#[CoversClass(StopWhenRunningOnce::class)]
 
 final class StopWhenRunningOnceTest extends UnitTestCase
 {

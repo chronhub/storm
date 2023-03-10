@@ -12,10 +12,12 @@ use Chronhub\Storm\Routing\CollectRoutes;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Double\AnotherCommand;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
+#[CoversClass(CollectRoutes::class)]
 final class CollectRoutesTest extends UnitTestCase
 {
     private MockObject|MessageAlias $messageAlias;

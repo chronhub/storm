@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\ProjectQuery;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -33,6 +34,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Options\DefaultProjectorOption;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
+#[CoversClass(InMemoryProjectorManager::class)]
 final class InMemoryProjectorManagerTest extends UnitTestCase
 {
     #[Test]

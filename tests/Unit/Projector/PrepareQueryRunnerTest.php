@@ -8,9 +8,11 @@ use Closure;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Pipes\PrepareQueryRunner;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
+#[CoversClass(PrepareQueryRunner::class)]
 final class PrepareQueryRunnerTest extends UnitTestCase
 {
     use ProvideMockContext;

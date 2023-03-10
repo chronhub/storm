@@ -8,8 +8,10 @@ use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Runner;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
+#[CoversClass(Runner::class)]
 final class RunnerTest extends UnitTestCase
 {
     #[Test]

@@ -8,10 +8,12 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 
+#[CoversClass(ReadModelCaster::class)]
 final class ReadModelCasterTest extends UnitTestCase
 {
     private MockObject|ReadModelProjector $projector;

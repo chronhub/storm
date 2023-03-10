@@ -8,11 +8,13 @@ use DateInterval;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\Provider\InMemoryProjection;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
 
+#[CoversClass(InMemoryProjectionProvider::class)]
 final class InMemoryProjectionProviderTest extends UnitTestCase
 {
     #[Test]

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Pipes\DispatchSignal;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use function posix_kill;
@@ -14,6 +15,7 @@ use function pcntl_signal;
 use function posix_getpid;
 use function extension_loaded;
 
+#[CoversClass(DispatchSignal::class)]
 final class DispatchSignalTest extends UnitTestCase
 {
     use ProvideMockContext;

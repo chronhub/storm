@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
+use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
@@ -11,12 +12,14 @@ use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Tests\Stubs\GroupStub;
 use Chronhub\Storm\Reporter\ReportCommand;
 use Chronhub\Storm\Producer\ProducerStrategy;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Tests\Double\NoOpMessageSubscriber;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
+#[CoversClass(Group::class)]
 final class GroupTest extends UnitTestCase
 {
     private GroupStub $group;

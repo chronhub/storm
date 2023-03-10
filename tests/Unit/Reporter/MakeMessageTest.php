@@ -11,11 +11,13 @@ use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Message\MessageFactory;
 use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
 
+#[CoversClass(MakeMessage::class)]
 final class MakeMessageTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;

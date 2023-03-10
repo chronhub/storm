@@ -20,6 +20,7 @@ use Chronhub\Storm\Tests\Double\SomeQuery;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
@@ -31,6 +32,7 @@ use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 
+#[CoversClass(ReportQuery::class)]
 final class ReportQueryTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;

@@ -7,10 +7,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 use function abs;
 
+#[CoversClass(InMemoryReadModel::class)]
 final class InMemoryReadModelTest extends UnitTestCase
 {
     #[Test]

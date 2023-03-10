@@ -14,6 +14,7 @@ use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -29,6 +30,7 @@ use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use function count;
 use function is_countable;
 
+#[CoversClass(EventPublisherSubscriber::class)]
 final class EventPublisherSubscriberTest extends UnitTestCase
 {
     private EventPublisher|MockObject $eventPublisher;

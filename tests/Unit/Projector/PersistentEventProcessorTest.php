@@ -11,6 +11,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
@@ -19,6 +20,7 @@ use function posix_kill;
 use function pcntl_signal;
 use function posix_getpid;
 
+#[CoversClass(EventProcessor::class)]
 final class PersistentEventProcessorTest extends UnitTestCase
 {
     use ProvideMockContext;

@@ -9,7 +9,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\ContextStub;
 use PHPUnit\Framework\MockObject\Exception;
+use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -23,6 +25,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
+#[CoversClass(Context::class)]
 final class ContextTest extends UnitTestCase
 {
     private ProjectorOption|MockObject $option;

@@ -7,13 +7,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use RuntimeException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
-/**
- * @property string $streamName
- */
+#[CoversClass(ProjectionFailed::class)]
 final class ProjectionFailedTest extends UnitTestCase
 {
     private string $streamName;

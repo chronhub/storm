@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Tracker;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\GenericListener;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 
+#[CoversClass(GenericListener::class)]
 final class GenericListenerTest extends UnitTestCase
 {
     #[Test]

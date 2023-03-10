@@ -6,8 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
+#[CoversClass(EventCounter::class)]
 final class EventCounterTest extends UnitTestCase
 {
     #[Test]

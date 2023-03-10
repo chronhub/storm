@@ -6,8 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Options\DefaultProjectorOption;
 
+#[CoversClass(DefaultProjectorOption::class)]
 final class DefaultProjectorOptionTest extends UnitTestCase
 {
     #[Test]

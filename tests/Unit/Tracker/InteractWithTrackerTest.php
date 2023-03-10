@@ -9,9 +9,11 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tracker\InteractWithTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 
+#[CoversClass(InteractWithTracker::class)]
 final class InteractWithTrackerTest extends UnitTestCase
 {
     #[Test]

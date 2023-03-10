@@ -18,12 +18,14 @@ use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Routing\Exceptions\RouteNotFound;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
 
+#[CoversClass(FindRoute::class)]
 final class FindRouteTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;

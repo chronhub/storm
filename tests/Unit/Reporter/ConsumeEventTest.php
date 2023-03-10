@@ -12,10 +12,12 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
 
+#[CoversClass(ConsumeEvent::class)]
 final class ConsumeEventTest extends UnitTestCase
 {
     #[Test]

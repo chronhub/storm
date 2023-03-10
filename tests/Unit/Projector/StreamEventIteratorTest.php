@@ -9,10 +9,12 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 
+#[CoversClass(StreamEventIterator::class)]
 final class StreamEventIteratorTest extends UnitTestCase
 {
     private array $events = [];

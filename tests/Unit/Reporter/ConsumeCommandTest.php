@@ -11,10 +11,12 @@ use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeCommand;
 
+#[CoversClass(ConsumeCommand::class)]
 final class ConsumeCommandTest extends UnitTestCase
 {
     #[Test]

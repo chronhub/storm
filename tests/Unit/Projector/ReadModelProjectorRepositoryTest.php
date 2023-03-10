@@ -11,12 +11,14 @@ use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use Chronhub\Storm\Contracts\Projector\Store;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
 
+#[CoversClass(ReadModelProjectorRepository::class)]
 final class ReadModelProjectorRepositoryTest extends UnitTestCase
 {
     use ProvideMockContext {

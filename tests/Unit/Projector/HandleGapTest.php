@@ -8,8 +8,10 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Pipes\HandleGap;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
 
+#[CoversClass(HandleGap::class)]
 final class HandleGapTest extends UnitTestCase
 {
     use ProvideMockContext;

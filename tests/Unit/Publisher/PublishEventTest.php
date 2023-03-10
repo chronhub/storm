@@ -12,10 +12,12 @@ use Chronhub\Storm\Publisher\PublishEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
 use function iterator_count;
 
+#[CoversClass(PublishEvent::class)]
 final class PublishEventTest extends UnitTestCase
 {
     private ReportEvent|MockObject $reporter;

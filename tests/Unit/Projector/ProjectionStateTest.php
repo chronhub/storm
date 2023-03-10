@@ -6,8 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 
+#[CoversClass(ProjectionState::class)]
 final class ProjectionStateTest extends UnitTestCase
 {
     #[Test]

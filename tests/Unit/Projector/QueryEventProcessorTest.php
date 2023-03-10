@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Projector\Scheme\Context;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
@@ -18,9 +19,7 @@ use function posix_kill;
 use function pcntl_signal;
 use function posix_getpid;
 
-/**
- * @coversDefaultClass \Chronhub\Storm\Projector\Scheme\EventProcessor
- */
+#[CoversClass(EventProcessor::class)]
 final class QueryEventProcessorTest extends UnitTestCase
 {
     use ProvideMockContext;

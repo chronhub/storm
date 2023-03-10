@@ -16,6 +16,7 @@ use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
@@ -27,6 +28,7 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeCommand;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 
+#[CoversClass(ReportCommand::class)]
 final class ReportCommandTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;

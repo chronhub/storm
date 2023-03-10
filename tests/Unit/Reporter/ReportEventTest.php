@@ -17,6 +17,7 @@ use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
@@ -27,6 +28,7 @@ use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 
+#[CoversClass(ReportEvent::class)]
 final class ReportEventTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;

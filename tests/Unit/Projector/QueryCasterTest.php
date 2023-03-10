@@ -8,9 +8,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Scheme\QueryCaster;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 
+#[CoversClass(QueryCaster::class)]
 final class QueryCasterTest extends UnitTestCase
 {
     private MockObject|QueryProjector $projector;
