@@ -10,9 +10,10 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\InMemoryProjectionQueryScope;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
@@ -20,13 +21,14 @@ use function count;
 use function array_filter;
 use function iterator_to_array;
 
-final class InMemoryProjectionQueryScopeTest extends UnitTestCase
+#[CoversClass(InMemoryQueryScope::class)]
+final class InMemoryQueryScopeTest extends UnitTestCase
 {
     #[DataProvider('provideCurrentPosition')]
     #[Test]
     public function it_filter_domain_event_from_included_position(int $fromIncludedPosition, int $expectedCount): void
     {
-        $queryScope = new InMemoryProjectionQueryScope();
+        $queryScope = new InMemoryQueryScope();
 
         $events = new Collection(iterator_to_array($this->provideDomainEvents()));
         $this->assertCount(10, $events);
@@ -49,7 +51,7 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Position must be greater than 0, current is $invalidPosition");
 
-        $queryScope = new InMemoryProjectionQueryScope();
+        $queryScope = new InMemoryQueryScope();
 
         $queryFilter = $queryScope->fromIncludedPosition();
 
@@ -65,7 +67,7 @@ final class InMemoryProjectionQueryScopeTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Internal position header must return an integer, current is $invalidInternalPosition");
 
-        $queryScope = new InMemoryProjectionQueryScope();
+        $queryScope = new InMemoryQueryScope();
 
         $queryFilter = $queryScope->fromIncludedPosition();
         $queryFilter->setCurrentPosition(1);

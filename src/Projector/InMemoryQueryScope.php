@@ -12,7 +12,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function is_int;
 
-final class InMemoryProjectionQueryScope implements ProjectionQueryScope
+final class InMemoryQueryScope implements ProjectionQueryScope
 {
     public function fromIncludedPosition(): ProjectionQueryFilter
     {
