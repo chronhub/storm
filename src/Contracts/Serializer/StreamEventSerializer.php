@@ -20,7 +20,7 @@ interface StreamEventSerializer
     public function unserializeContent(array $payload): Generator;
 
     /**
-     * @return array{headers: array, content: array}
+     * @return array{headers: array, content: array, no: int}
      */
     public function normalizeContent(array $payload): array;
 
