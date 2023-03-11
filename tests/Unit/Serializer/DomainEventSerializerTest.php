@@ -266,11 +266,13 @@ final class DomainEventSerializerTest extends UnitTestCase
 
         $payload['headers'] = $serializer->getSerializer()->serialize($payload['headers'], 'json');
         $payload['content'] = $serializer->getSerializer()->serialize($payload['content'], 'json');
+        $payload['no'] = 25;
 
         $normalized = $serializer->normalizeContent($payload);
 
         $this->assertEquals($headers, $normalized['headers']);
         $this->assertEquals($content, $normalized['content']);
+        $this->assertEquals(25, $normalized['no']);
     }
 
     private function domainEventSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): DomainEventSerializer
