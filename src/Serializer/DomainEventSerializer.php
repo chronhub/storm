@@ -70,11 +70,12 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
 
     public function normalizeContent(array $payload): array
     {
-        if (! isset($payload['headers'], $payload['content'])) {
-            throw new InvalidArgumentException('Missing headers and/or content key(s) to normalize payload');
+        if (! isset($payload['headers'], $payload['content'], $payload['no'])) {
+            throw new InvalidArgumentException('Missing headers, content and/or no key(s) to normalize payload');
         }
 
         return [
+            'no' => $payload['no'],
             'headers' => $this->serializer->decode($payload['headers'], 'json'),
             'content' => $this->serializer->decode($payload['content'], 'json'),
         ];
