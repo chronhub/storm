@@ -245,6 +245,34 @@ final class DomainEventSerializerTest extends UnitTestCase
         $serializer->unserializeContent($payload)->current();
     }
 
+    #[Test]
+    public function it_normalize_content(): void
+    {
+        $aggregateId = V4AggregateId::create();
+
+        $headers = [
+            EventHeader::AGGREGATE_ID => $aggregateId->toString(),
+            EventHeader::AGGREGATE_ID_TYPE => $aggregateId::class,
+            EventHeader::AGGREGATE_TYPE => AggregateRootStub::class,
+        ];
+
+        $content = ['name' => 'steph bug'];
+
+        $event = SomeEvent::fromContent($content)->withHeaders($headers);
+
+        $serializer = $this->domainEventSerializerInstance();
+
+        $payload = $serializer->serializeEvent($event);
+
+        $payload['headers'] = $serializer->getSerializer()->serialize($payload['headers'], 'json');
+        $payload['content'] = $serializer->getSerializer()->serialize($payload['content'], 'json');
+
+        $normalized = $serializer->normalizeContent($payload);
+
+        $this->assertEquals($headers, $normalized['headers']);
+        $this->assertEquals($content, $normalized['content']);
+    }
+
     private function domainEventSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): DomainEventSerializer
     {
         return new DomainEventSerializer(
