@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Serializer;
 
-use Generator;
 use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Contracts\Reporter\Reporting;
 
 interface MessageSerializer
 {
@@ -14,8 +14,5 @@ interface MessageSerializer
      */
     public function serializeMessage(Message $message): array;
 
-    /**
-     * @return Generator{object}
-     */
-    public function unserializeContent(array $payload): Generator;
+    public function deserializePayload(array $payload): Reporting;
 }

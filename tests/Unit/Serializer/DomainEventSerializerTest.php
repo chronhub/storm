@@ -144,7 +144,7 @@ final class DomainEventSerializerTest extends UnitTestCase
             'content' => ['name' => 'steph bug'],
         ];
 
-        $event = $this->domainEventSerializerInstance()->unserializeContent($payload)->current();
+        $event = $this->domainEventSerializerInstance()->deserializePayload($payload);
 
         $this->assertInstanceOf(SomeEvent::class, $event);
 
@@ -166,9 +166,9 @@ final class DomainEventSerializerTest extends UnitTestCase
 
         $serializer = $this->domainEventSerializerInstance();
 
-        $event = $serializer->unserializeContent(
+        $event = $serializer->deserializePayload(
             ['headers' => json_encode($payload['headers'], JSON_THROW_ON_ERROR), 'content' => json_encode($payload['content'])]
-        )->current();
+        );
 
         $this->assertInstanceOf(SomeEvent::class, $event);
 
@@ -192,7 +192,7 @@ final class DomainEventSerializerTest extends UnitTestCase
 
         $serializer = $this->domainEventSerializerInstance();
 
-        $event = $serializer->unserializeContent($payload)->current();
+        $event = $serializer->deserializePayload($payload);
 
         $this->assertInstanceOf(SomeEvent::class, $event);
 
@@ -217,7 +217,7 @@ final class DomainEventSerializerTest extends UnitTestCase
 
         $serializer = $this->domainEventSerializerInstance();
 
-        $event = $serializer->unserializeContent($payload)->current();
+        $event = $serializer->deserializePayload($payload);
 
         $this->assertInstanceOf(SomeEvent::class, $event);
 
@@ -242,7 +242,7 @@ final class DomainEventSerializerTest extends UnitTestCase
 
         $serializer = $this->domainEventSerializerInstance();
 
-        $serializer->unserializeContent($payload)->current();
+        $serializer->deserializePayload($payload);
     }
 
     #[Test]
@@ -268,7 +268,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $payload['content'] = $serializer->getSerializer()->serialize($payload['content'], 'json');
         $payload['no'] = 25;
 
-        $normalized = $serializer->normalizeContent($payload);
+        $normalized = $serializer->decodePayload($payload);
 
         $this->assertEquals($headers, $normalized['headers']);
         $this->assertEquals($content, $normalized['content']);

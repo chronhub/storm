@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
-use Generator;
 use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
+use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 
@@ -23,7 +23,7 @@ final readonly class MessagingSerializer implements MessageSerializer
     {
         $event = $message->event();
 
-        if (! $message->isMessaging()) {
+        if (! $event instanceof Reporting) {
             throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Reporting to be serialized');
         }
 
@@ -35,7 +35,7 @@ final readonly class MessagingSerializer implements MessageSerializer
         ];
     }
 
-    public function unserializeContent(array $payload): Generator
+    public function deserializePayload(array $payload): Reporting
     {
         $headers = $payload['headers'] ?? [];
 
@@ -45,8 +45,8 @@ final readonly class MessagingSerializer implements MessageSerializer
             throw new InvalidArgumentException('Missing event type header to unserialize payload');
         }
 
-        $event = $this->contentSerializer->unserialize($source, $payload);
+        $event = $this->contentSerializer->deserialize($source, $payload);
 
-        yield $event->withHeaders($headers);
+        return $event->withHeaders($headers);
     }
 }

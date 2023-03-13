@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Serializer;
 
-use Generator;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Contracts\Reporter\Reporting;
 
 interface StreamEventSerializer
 {
@@ -14,15 +14,12 @@ interface StreamEventSerializer
      */
     public function serializeEvent(DomainEvent $event): array;
 
-    /**
-     * @return Generator{iterable|object}
-     */
-    public function unserializeContent(array $payload): Generator;
+    public function deserializePayload(array $payload): Reporting;
 
     /**
      * @return array{headers: array, content: array, no: int}
      */
-    public function normalizeContent(array $payload): array;
+    public function decodePayload(array $payload): array;
 
     public function encodePayload(mixed $data): string;
 }

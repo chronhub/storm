@@ -23,14 +23,12 @@ final class MessageFactoryTest extends UnitTestCase
     #[Test]
     public function it_create_message_from_array(): void
     {
-        $expectedMessage = new Message(new stdClass());
+        $expectedMessage = new Message(SomeCommand::fromContent(['foo' => 'bar']));
 
         $this->messageSerializer->expects($this->once())
-            ->method('unserializeContent')
+            ->method('deserializePayload')
             ->with(['foo' => 'bar'])
-            ->will($this->returnCallback(function () use ($expectedMessage): Generator {
-                yield $expectedMessage;
-            }));
+            ->willReturn($expectedMessage->event());
 
         $factory = new MessageFactory($this->messageSerializer);
 
@@ -44,6 +42,7 @@ final class MessageFactoryTest extends UnitTestCase
     {
         $expectedMessage = new Message(new stdClass());
 
+        $this->messageSerializer->expects($this->never())->method('deserializePayload');
         $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory($expectedMessage);

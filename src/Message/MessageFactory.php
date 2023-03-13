@@ -17,7 +17,7 @@ final readonly class MessageFactory implements Factory
     public function __invoke(object|array $message): Message
     {
         if (is_array($message)) {
-            $message = $this->serializer->unserializeContent($message)->current();
+            $message = $this->serializer->deserializePayload($message);
         }
 
         if ($message instanceof Message) {

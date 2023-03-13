@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
-use Generator;
 use InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
+use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
@@ -39,7 +39,7 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
         ];
     }
 
-    public function unserializeContent(array $payload): Generator
+    public function deserializePayload(array $payload): Reporting
     {
         $headers = $payload['headers'] ?? [];
 
@@ -59,19 +59,19 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
             $content = $this->serializer->decode($content, 'json');
         }
 
-        $event = $this->contentSerializer->unserialize($source, ['headers' => $headers, 'content' => $content]);
+        $event = $this->contentSerializer->deserialize($source, ['headers' => $headers, 'content' => $content]);
 
         if (! isset($headers[EventHeader::INTERNAL_POSITION]) && isset($payload['no'])) {
             $headers[EventHeader::INTERNAL_POSITION] = $payload['no'];
         }
 
-        yield $event->withHeaders($headers);
+        return $event->withHeaders($headers);
     }
 
-    public function normalizeContent(array $payload): array
+    public function decodePayload(array $payload): array
     {
         if (! isset($payload['headers'], $payload['content'], $payload['no'])) {
-            throw new InvalidArgumentException('Missing headers, content and/or no key(s) to normalize payload');
+            throw new InvalidArgumentException('Missing headers, content and/or no key(s) to decode payload');
         }
 
         return [

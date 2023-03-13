@@ -11,21 +11,17 @@ use function is_a;
 
 final class MessagingContentSerializer implements ContentSerializer
 {
-    public function serialize(object $event): array
+    public function serialize(Reporting $event): array
     {
-        if (! $event instanceof Reporting) {
-            throw new InvalidArgumentException('Message event '.$event::class.' must be an instance of Reporting to be serialized');
-        }
-
         return $event->toContent();
     }
 
-    public function unserialize(string $source, array $payload): object
+    public function deserialize(string $source, array $payload): object
     {
         if (is_a($source, Reporting::class, true)) {
             return $source::fromContent($payload['content']);
         }
 
-        throw new InvalidArgumentException('Invalid source to unserialize');
+        throw new InvalidArgumentException('Invalid source to deserialize');
     }
 }

@@ -28,21 +28,11 @@ final class MessagingContentSerializerTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_raise_exception_if_event_is_not_an_instance_of_reporting_during_serialization(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Reporting to be serialized');
-
-        (new MessagingContentSerializer())->serialize(new stdClass());
-    }
-
-    #[Test]
     public function it_return_reporting_instance_from_array_content(): void
     {
         $contentSerializer = new MessagingContentSerializer();
 
-        $event = $contentSerializer->unserialize(
+        $event = $contentSerializer->deserialize(
             SomeCommand::class,
             ['content' => ['name' => 'steph bug']]
         );
@@ -52,12 +42,12 @@ final class MessagingContentSerializerTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_raise_exception_with_invalid_source_during_unserialize(): void
+    public function it_raise_exception_with_invalid_source_during_deserialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->expectExceptionMessage('Invalid source to unserialize');
+        $this->expectExceptionMessage('Invalid source to deserialize');
 
-        (new MessagingContentSerializer())->unserialize(stdClass::class, []);
+        (new MessagingContentSerializer())->deserialize(stdClass::class, []);
     }
 }

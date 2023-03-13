@@ -145,7 +145,7 @@ final class MessagingSerializerTest extends UnitTestCase
 
         $serializer = $this->messageSerializerInstance();
 
-        $event = $serializer->unserializeContent($payload)->current();
+        $event = $serializer->deserializePayload($payload);
 
         $this->assertInstanceOf(SomeCommand::class, $event);
 
@@ -169,7 +169,7 @@ final class MessagingSerializerTest extends UnitTestCase
         ];
 
         $serializer = $this->messageSerializerInstance();
-        $serializer->unserializeContent($payload)->current();
+        $serializer->deserializePayload($payload);
     }
 
     private function messageSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): MessagingSerializer
