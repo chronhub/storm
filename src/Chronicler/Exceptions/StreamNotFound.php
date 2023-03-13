@@ -10,6 +10,6 @@ class StreamNotFound extends RuntimeException
 {
     public static function withStreamName(StreamName $streamName): self
     {
-        return new self("Stream $streamName not found");
+        return new static("Stream $streamName not found");
     }
 }
