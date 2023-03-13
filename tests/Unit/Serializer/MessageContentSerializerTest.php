@@ -10,17 +10,17 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Serializer\MessagingContentSerializer;
+use Chronhub\Storm\Serializer\MessageContentSerializer;
 
-#[CoversClass(MessagingContentSerializer::class)]
-final class MessagingContentSerializerTest extends UnitTestCase
+#[CoversClass(MessageContentSerializer::class)]
+final class MessageContentSerializerTest extends UnitTestCase
 {
     #[Test]
     public function it_return_message_content(): void
     {
         $event = new SomeCommand(['name' => 'steph bug']);
 
-        $contentSerializer = new MessagingContentSerializer();
+        $contentSerializer = new MessageContentSerializer();
 
         $content = $contentSerializer->serialize($event);
 
@@ -30,7 +30,7 @@ final class MessagingContentSerializerTest extends UnitTestCase
     #[Test]
     public function it_return_reporting_instance_from_array_content(): void
     {
-        $contentSerializer = new MessagingContentSerializer();
+        $contentSerializer = new MessageContentSerializer();
 
         $event = $contentSerializer->deserialize(
             SomeCommand::class,
@@ -48,6 +48,6 @@ final class MessagingContentSerializerTest extends UnitTestCase
 
         $this->expectExceptionMessage('Invalid source to deserialize');
 
-        (new MessagingContentSerializer())->deserialize(stdClass::class, []);
+        (new MessageContentSerializer())->deserialize(stdClass::class, []);
     }
 }

@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use function is_string;
 
 #[CoversClass(SerializeToJson::class)]
 final class SerializeToJsonTest extends UnitTestCase
@@ -43,6 +44,16 @@ final class SerializeToJsonTest extends UnitTestCase
         $serializer = new SerializeToJson();
 
         $this->assertEquals([], $serializer->decode('[]'));
+    }
+
+    #[Test]
+    public function it_deserialize_big_int_as_string(): void
+    {
+        $serializer = new SerializeToJson();
+
+        $integer = $serializer->decode('{"foo":9999999999999999999999}');
+
+        $this->assertTrue(is_string($integer['foo']));
     }
 
     #[Test]

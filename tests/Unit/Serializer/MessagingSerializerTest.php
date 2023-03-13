@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
 use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Serializer\MessagingSerializer;
-use Chronhub\Storm\Serializer\MessagingContentSerializer;
+use Chronhub\Storm\Serializer\MessageContentSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -175,7 +175,7 @@ final class MessagingSerializerTest extends UnitTestCase
     private function messageSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): MessagingSerializer
     {
         return new MessagingSerializer(
-            new MessagingContentSerializer(),
+            new MessageContentSerializer(),
             new Serializer(
                 $normalizers,
                 [(new SerializeToJson())->getEncoder()]

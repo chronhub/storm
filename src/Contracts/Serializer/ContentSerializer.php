@@ -16,5 +16,5 @@ interface ContentSerializer
     /**
      * Unserialize Message event
      */
-    public function deserialize(string $source, array $payload): object;
+    public function deserialize(string $source, array $payload): Reporting;
 }

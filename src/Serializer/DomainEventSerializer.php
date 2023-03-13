@@ -9,13 +9,13 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
 use function is_string;
 
 final readonly class DomainEventSerializer implements StreamEventSerializer
 {
-    public function __construct(private ContentSerializer $contentSerializer,
+    public function __construct(private EventContentSerializer $contentSerializer,
                                 private Serializer $serializer)
     {
     }

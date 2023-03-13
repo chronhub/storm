@@ -8,14 +8,17 @@ use Closure;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use function array_map;
 use function is_string;
+use function array_merge;
 
 class JsonSerializerFactory
 {
@@ -29,40 +32,48 @@ class JsonSerializerFactory
     public function createMessageSerializer(?ContentSerializer $contentSerializer = null,
                                             NormalizerInterface|DenormalizerInterface|string ...$normalizers): MessageSerializer
     {
-        $symfonySerializer = $this->getSerializer(
-            ...$this->resolveNormalizers(...$normalizers)
-        );
+        $contentSerializer ??= new MessageContentSerializer();
 
-        $contentSerializer ??= new MessagingContentSerializer();
+        $symfonySerializer = $this->getSymfonySerializer(...$normalizers);
 
         return new MessagingSerializer($contentSerializer, $symfonySerializer);
     }
 
-    public function createStreamSerializer(?ContentSerializer $contentSerializer = null,
+    public function createStreamSerializer(?EventContentSerializer $contentSerializer = null,
                                            NormalizerInterface|DenormalizerInterface|string ...$normalizers): StreamEventSerializer
     {
-        $symfonySerializer = $this->getSerializer(
-            ...$this->resolveNormalizers(...$normalizers)
-        );
+        $contentSerializer ??= new DomainEventContentSerializer();
 
-        $contentSerializer ??= new MessagingContentSerializer();
+        $symfonySerializer = $this->getSymfonySerializer(...$normalizers);
 
         return new DomainEventSerializer($contentSerializer, $symfonySerializer);
     }
 
-    protected function dateTimeNormalizer(): DateTimeNormalizer
+    protected function getSymfonySerializer(string|NormalizerInterface|DenormalizerInterface ...$normalizers): Serializer
     {
-        return new DateTimeNormalizer([
-            DateTimeNormalizer::FORMAT_KEY => $this->container->get(SystemClock::class)->getFormat(),
-            DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
-        ]);
+        $normalizers = array_merge($normalizers, $this->getDefaultNormalizers());
+
+        $jsonEncoder = $this->getJsonEncoder();
+
+        return new Serializer($this->resolveNormalizers(...$normalizers), [$jsonEncoder]);
     }
 
-    protected function getSerializer(NormalizerInterface|DenormalizerInterface ...$normalizers): Serializer
+    protected function getJsonEncoder(): JsonEncoder
     {
-        $normalizers[] = $this->dateTimeNormalizer();
+        return (new SerializeToJson())->getEncoder();
+    }
 
-        return new Serializer($normalizers, [(new SerializeToJson())->getEncoder()]);
+    /**
+     * @return array<NormalizerInterface|DenormalizerInterface>
+     */
+    protected function getDefaultNormalizers(): array
+    {
+        return [
+            new DateTimeNormalizer([
+                DateTimeNormalizer::FORMAT_KEY => $this->container->get(SystemClock::class)->getFormat(),
+                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
+            ]),
+        ];
     }
 
     protected function resolveNormalizers(NormalizerInterface|DenormalizerInterface|string ...$normalizers): array

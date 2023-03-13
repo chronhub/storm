@@ -18,8 +18,8 @@ use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Serializer\DomainEventSerializer;
-use Chronhub\Storm\Serializer\MessagingContentSerializer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Chronhub\Storm\Serializer\DomainEventContentSerializer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -278,7 +278,7 @@ final class DomainEventSerializerTest extends UnitTestCase
     private function domainEventSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): DomainEventSerializer
     {
         return new DomainEventSerializer(
-            new MessagingContentSerializer(),
+            new DomainEventContentSerializer(),
             new Serializer(
                 $normalizers,
                 [(new SerializeToJson())->getEncoder()]
