@@ -14,7 +14,7 @@ use function is_string;
 
 final class PointInTime implements SystemClock
 {
-    public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
+    final public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
 
     private DateTimeZone $timezone;
 
