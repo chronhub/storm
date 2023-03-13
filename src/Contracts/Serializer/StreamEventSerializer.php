@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Serializer;
 
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Reporter\Reporting;
 
 interface StreamEventSerializer
 {
@@ -14,7 +13,7 @@ interface StreamEventSerializer
      */
     public function serializeEvent(DomainEvent $event): array;
 
-    public function deserializePayload(array $payload): Reporting;
+    public function deserializePayload(array $payload): DomainEvent;
 
     /**
      * @return array{headers: array, content: array, no: int}
