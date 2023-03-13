@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
-use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Stream\StreamPersistence;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
 use function is_string;
@@ -21,6 +21,17 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
     {
     }
 
+    /**
+     * Serialize event
+     *
+     * A stream persistence strategy should serialize a domain event to array
+     * and done in two steps:
+     *      - normalize headers and content in a mapping context
+     *      - encode headers and content to json string
+     *
+     * @see StreamPersistence::serialize()
+     * @see self::encodePayload()
+     */
     public function serializeEvent(DomainEvent $event): array
     {
         $headers = $event->headers();
@@ -39,7 +50,12 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
         ];
     }
 
-    public function deserializePayload(array $payload): Reporting
+    /**
+     * Deserialize payload
+     *
+     * A stream event loader should deserialize payload to an event sourced
+     */
+    public function deserializePayload(array $payload): DomainEvent
     {
         $headers = $payload['headers'] ?? [];
 
@@ -61,6 +77,20 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
 
         $event = $this->contentSerializer->deserialize($source, ['headers' => $headers, 'content' => $content]);
 
+        /**
+         * Note about 'no' key and internal position header:
+         *
+         * 'no' represents the position in a sequence of events which can be produced in 2 ways:
+         *     - by a stream persistence strategy which is not auto incremented,
+         *       so the position is provided by the aggregate version, done in stream persistence context
+         *
+         *     - by a stream persistence strategy which is auto incremented,
+         *
+         *  Internal position can exist in headers when a persistent projection (no read model)
+         *  have emitted or linked a stream event to a (new) stream event,
+         *  so the internal position referred to the 'original' stream event 'no' key
+         *  (meaning an event sourced have been deserialized and serialized again)
+         */
         if (! isset($headers[EventHeader::INTERNAL_POSITION]) && isset($payload['no'])) {
             $headers[EventHeader::INTERNAL_POSITION] = $payload['no'];
         }
@@ -68,6 +98,12 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
         return $event->withHeaders($headers);
     }
 
+    /**
+     * Deserialize payload
+     *
+     * A stream event loader should deserialize an event sourced payload to array
+     * Mostly used in an api context to avoid unnecessary deserialization/serialization
+     */
     public function decodePayload(array $payload): array
     {
         if (! isset($payload['headers'], $payload['content'], $payload['no'])) {
@@ -81,6 +117,11 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
         ];
     }
 
+    /**
+     * Encode payload
+     *
+     * Second step of event serialization to serialize headers and content to json string
+     */
     public function encodePayload(mixed $data): string
     {
         return $this->serializer->encode($data, 'json');
