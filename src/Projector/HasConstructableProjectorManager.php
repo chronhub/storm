@@ -59,7 +59,7 @@ trait HasConstructableProjectorManager
 
     protected function createLock(ProjectorOption $option): RepositoryLock
     {
-        return new RepositoryLock($this->clock, $option->timeout, $option->lockout);
+        return new RepositoryLock($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
     protected function createOption(array $option): ProjectorOption
@@ -76,8 +76,8 @@ trait HasConstructableProjectorManager
         return new DetectGap(
             $streamPosition,
             $this->clock,
-            $option->retries,
-            $option->detectionWindows
+            $option->getRetries(),
+            $option->getDetectionWindows()
         );
     }
 }

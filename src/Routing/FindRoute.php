@@ -73,7 +73,7 @@ final readonly class FindRoute implements RouteLocator
             return $consumer;
         }
 
-        $callableMethod = $this->group->messageHandlerMethodName();
+        $callableMethod = $this->group->handlerMethod();
 
         if (is_string($callableMethod) && method_exists($consumer, $callableMethod)) {
             return $consumer->$callableMethod(...);

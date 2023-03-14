@@ -22,7 +22,7 @@ abstract class Group implements JsonSerializable
      *
      * Use to register the reporter in ioc
      */
-    private ?string $reporterServiceId = null;
+    private ?string $reporterId = null;
 
     /**
      * Reporter concrete class name
@@ -41,17 +41,17 @@ abstract class Group implements JsonSerializable
      *
      * default null for __invoke magic method
      */
-    private ?string $messageHandlerMethodName = null;
+    private ?string $handlerMethod = null;
 
     /**
      * Message producer strategy key
      */
-    private ?ProducerStrategy $producerStrategy = null;
+    private ?ProducerStrategy $strategy = null;
 
     /**
      * Message producer service id
      */
-    private ?string $producerServiceId = null;
+    private ?string $producerId = null;
 
     /**
      * Group queue
@@ -77,14 +77,14 @@ abstract class Group implements JsonSerializable
     {
     }
 
-    public function reporterServiceId(): ?string
+    public function reporterId(): ?string
     {
-        return $this->reporterServiceId;
+        return $this->reporterId;
     }
 
-    public function withReporterServiceId(string $reporterServiceId): self
+    public function withReporterId(string $reporterId): self
     {
-        $this->reporterServiceId = $reporterServiceId;
+        $this->reporterId = $reporterId;
 
         return $this;
     }
@@ -94,7 +94,7 @@ abstract class Group implements JsonSerializable
         return $this->reporterConcrete;
     }
 
-    public function withReporterConcreteClass(string $reporterConcrete): self
+    public function withReporterConcrete(string $reporterConcrete): self
     {
         if (! is_a($reporterConcrete, Reporter::class, true)) {
             throw new RoutingViolation("Reporter concrete class $reporterConcrete must be an instance of ".Reporter::class);
@@ -117,72 +117,72 @@ abstract class Group implements JsonSerializable
         return $this;
     }
 
-    public function messageHandlerMethodName(): ?string
+    public function handlerMethod(): ?string
     {
-        return $this->messageHandlerMethodName;
+        return $this->handlerMethod;
     }
 
-    public function withMessageHandlerMethodName(string $messageHandlerMethodName): self
+    public function withHandlerMethod(string $handlerMethod): self
     {
-        $this->messageHandlerMethodName = $messageHandlerMethodName;
+        $this->handlerMethod = $handlerMethod;
 
         return $this;
     }
 
-    public function messageDecorators(): array
+    public function decorators(): array
     {
         return $this->messageDecorators;
     }
 
-    public function withMessageDecorators(string|MessageDecorator ...$messageDecorators): self
+    public function withDecorators(string|MessageDecorator ...$messageDecorators): self
     {
         $this->messageDecorators = array_merge($this->messageDecorators, $messageDecorators);
 
         return $this;
     }
 
-    public function messageSubscribers(): array
+    public function subscribers(): array
     {
         return $this->messageSubscribers;
     }
 
-    public function withMessageSubscribers(string|MessageSubscriber ...$messageSubscribers): self
+    public function withSubscribers(string|MessageSubscriber ...$messageSubscribers): self
     {
         $this->messageSubscribers = array_merge($this->messageSubscribers, $messageSubscribers);
 
         return $this;
     }
 
-    public function producerStrategy(): ProducerStrategy
+    public function strategy(): ProducerStrategy
     {
-        if ($this->producerStrategy === null) {
+        if ($this->strategy === null) {
             throw new RoutingViolation('Producer strategy can not be null');
         }
 
-        return $this->producerStrategy;
+        return $this->strategy;
     }
 
-    public function withProducerStrategy(string $producerStrategy): self
+    public function withStrategy(string $strategy): self
     {
-        $strategy = ProducerStrategy::tryFrom($producerStrategy);
+        $producerStrategy = ProducerStrategy::tryFrom($strategy);
 
-        if ($strategy === null) {
+        if ($producerStrategy === null) {
             throw new RoutingViolation('Invalid message producer key: unknown_strategy');
         }
 
-        $this->producerStrategy = $strategy;
+        $this->strategy = $producerStrategy;
 
         return $this;
     }
 
-    public function producerServiceId(): ?string
+    public function producerId(): ?string
     {
-        return $this->producerServiceId;
+        return $this->producerId;
     }
 
-    public function withProducerServiceId(string $producerServiceId): self
+    public function withProducerId(string $producerId): self
     {
-        $this->producerServiceId = $producerServiceId;
+        $this->producerId = $producerId;
 
         return $this;
     }
@@ -205,14 +205,14 @@ abstract class Group implements JsonSerializable
             $this->getType()->value => [
                 $this->name => [
                     'group' => [
-                        'service_id' => $this->producerServiceId(),
+                        'service_id' => $this->producerId(),
                         'concrete' => $this->reporterConcrete(),
                         'tracker_id' => $this->trackerId(),
-                        'handler_method_name' => $this->messageHandlerMethodName(),
-                        'message_decorators' => $this->messageDecorators(),
-                        'message_subscribers' => $this->messageSubscribers(),
-                        'producer_strategy' => $this->producerStrategy()->value,
-                        'producer_service_id' => $this->producerServiceId(),
+                        'handler_method_name' => $this->handlerMethod(),
+                        'message_decorators' => $this->decorators(),
+                        'message_subscribers' => $this->subscribers(),
+                        'producer_strategy' => $this->strategy()->value,
+                        'producer_service_id' => $this->producerId(),
                         'queue' => $this->queue(),
                     ],
                     'routes' => $this->routes->jsonSerialize(),

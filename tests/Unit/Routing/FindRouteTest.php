@@ -88,7 +88,7 @@ final class FindRouteTest extends UnitTestCase
         $routes->addRoute(SomeCommand::class)->to($messageHandler);
 
         $group = new CommandGroup('default', $routes);
-        $group->withMessageHandlerMethodName('command');
+        $group->withHandlerMethod('command');
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 

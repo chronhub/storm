@@ -35,13 +35,13 @@ final class GroupTest extends UnitTestCase
         $group = $this->group;
 
         $this->assertNull($group->reporterConcrete());
-        $this->assertNull($group->reporterServiceId());
+        $this->assertNull($group->reporterId());
         $this->assertNull($group->trackerId());
-        $this->assertNull($group->messageHandlerMethodName());
-        $this->assertNull($group->producerServiceId());
+        $this->assertNull($group->handlerMethod());
+        $this->assertNull($group->producerId());
         $this->assertNull($group->queue());
-        $this->assertEmpty($group->messageDecorators());
-        $this->assertEmpty($group->messageSubscribers());
+        $this->assertEmpty($group->decorators());
+        $this->assertEmpty($group->subscribers());
     }
 
     #[Test]
@@ -50,28 +50,28 @@ final class GroupTest extends UnitTestCase
         $group = $this->group;
 
         $group
-            ->withReporterConcreteClass(ReportCommand::class)
-            ->withReporterServiceId('reporter.command.default')
-            ->withMessageHandlerMethodName('command')
-            ->withProducerStrategy('sync')
-            ->withProducerServiceId('message.producer.id')
+            ->withReporterConcrete(ReportCommand::class)
+            ->withReporterId('reporter.command.default')
+            ->withHandlerMethod('command')
+            ->withStrategy('sync')
+            ->withProducerId('message.producer.id')
             ->withQueue(['connection' => 'redis', 'name' => 'transaction'])
             ->withTrackerId(TrackMessage::class)
-            ->withMessageDecorators(new NoOpMessageDecorator())
-            ->withMessageSubscribers(
+            ->withDecorators(new NoOpMessageDecorator())
+            ->withSubscribers(
                 new NoOpMessageSubscriber(Reporter::DISPATCH_EVENT, 1),
                 new NoOpMessageSubscriber(Reporter::FINALIZE_EVENT, -1),
             );
 
         $this->assertEquals(ReportCommand::class, $group->reporterConcrete());
-        $this->assertEquals('reporter.command.default', $group->reporterServiceId());
+        $this->assertEquals('reporter.command.default', $group->reporterId());
         $this->assertEquals(TrackMessage::class, $group->trackerId());
-        $this->assertEquals('command', $group->messageHandlerMethodName());
-        $this->assertEquals(ProducerStrategy::SYNC, $group->producerStrategy());
-        $this->assertEquals('message.producer.id', $group->producerServiceId());
+        $this->assertEquals('command', $group->handlerMethod());
+        $this->assertEquals(ProducerStrategy::SYNC, $group->strategy());
+        $this->assertEquals('message.producer.id', $group->producerId());
         $this->assertEquals(['connection' => 'redis', 'name' => 'transaction'], $group->queue());
-        $this->assertCount(1, $group->messageDecorators());
-        $this->assertCount(2, $group->messageSubscribers());
+        $this->assertCount(1, $group->decorators());
+        $this->assertCount(2, $group->subscribers());
     }
 
     #[Test]
@@ -82,7 +82,7 @@ final class GroupTest extends UnitTestCase
 
         $group = $this->group;
 
-        $group->withReporterConcreteClass('reporter.command.default');
+        $group->withReporterConcrete('reporter.command.default');
     }
 
     #[Test]
@@ -93,7 +93,7 @@ final class GroupTest extends UnitTestCase
 
         $group = $this->group;
 
-        $group->withProducerStrategy('unknown_strategy');
+        $group->withStrategy('unknown_strategy');
     }
 
     #[Test]
@@ -104,14 +104,14 @@ final class GroupTest extends UnitTestCase
 
         $group = $this->group;
 
-        $group->producerStrategy();
+        $group->strategy();
     }
 
     #[Test]
     public function it_can_be_serialized(): void
     {
         $group = $this->group;
-        $group->withProducerStrategy('sync');
+        $group->withStrategy('sync');
 
         $this->assertEquals([
             'command' => [
