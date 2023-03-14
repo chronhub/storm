@@ -43,4 +43,14 @@ final class ProjectorJsonSerializerTest extends UnitTestCase
 
         $this->assertEquals([], $serializer->decode('{}'));
     }
+
+    #[Test]
+    public function it_deserialize_big_int_as_string(): void
+    {
+        $serializer = new ProjectorJsonSerializer();
+
+        $data = $serializer->encode(['foo' => 99999999999999999999999999]);
+
+        $this->assertEquals(['foo' => '99999999999999999999999999'], $serializer->decode($data));
+    }
 }
