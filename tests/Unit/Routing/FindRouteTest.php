@@ -26,6 +26,8 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
 
 #[CoversClass(FindRoute::class)]
+#[CoversClass(RouteNotFound::class)]
+#[CoversClass(RouteHandlerNotSupported::class)]
 final class FindRouteTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;

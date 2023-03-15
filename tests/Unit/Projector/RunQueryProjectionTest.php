@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
+use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 
 #[CoversClass(RunProjection::class)]
 final class RunQueryProjectionTest extends UnitTestCase

@@ -17,7 +17,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
+use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\PersistentProjectorRepository;
 
 #[CoversClass(PersistentProjectorRepository::class)]

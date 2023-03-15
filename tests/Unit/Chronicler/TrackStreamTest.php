@@ -9,10 +9,13 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Chronicler\TrackStream;
+use Chronhub\Storm\Tracker\InteractWithStory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
 
 #[CoversClass(TrackStream::class)]
+#[CoversClass(InteractWithStory::class)]
 final class TrackStreamTest extends UnitTestCase
 {
     #[DataProvider('provideEventName')]
@@ -26,6 +29,35 @@ final class TrackStreamTest extends UnitTestCase
         $this->assertInstanceOf(EventDraft::class, $draft);
         $this->assertEquals($eventName, $draft->currentEvent());
         $this->assertTrue($tracker->listeners()->isEmpty());
+    }
+
+    #[Test]
+    public function it_stop_propagation_of_story(): void
+    {
+        $tracker = new TrackStream();
+
+        $draft = $tracker->newStory('foo');
+
+        $listeners = [];
+
+        $listeners[] = $tracker->watch('foo', function (StreamStory $story) {
+            $story->deferred(fn () => 1);
+        });
+
+        $listeners[] = $tracker->watch('foo', function (StreamStory $story) {
+            $story->deferred(fn () => 2);
+            $story->stop(true);
+        });
+
+        $listeners[] = $tracker->watch('foo', function (StreamStory $story) {
+            $story->deferred(fn () => 3);
+        });
+
+        $this->assertEquals($listeners, $tracker->listeners()->toArray());
+
+        $tracker->disclose($draft);
+
+        $this->assertEquals(2, $draft->promise());
     }
 
     public static function provideEventName(): Generator

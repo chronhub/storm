@@ -43,7 +43,7 @@ final class AggregateRepositoryTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_can_be_instantiated(): void
+    public function it_assert_instance(): void
     {
         $repository = new AggregateRepository(
             $this->chronicler,

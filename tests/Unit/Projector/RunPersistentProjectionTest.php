@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
+use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
 #[CoversClass(RunProjection::class)]

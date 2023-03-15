@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Tests\Unit\Projector\Util\ProvideMockContext;
+use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
 
 #[CoversClass(ReadModelProjectorRepository::class)]
