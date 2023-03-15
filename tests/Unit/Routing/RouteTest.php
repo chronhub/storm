@@ -9,11 +9,11 @@ use Generator;
 use Chronhub\Storm\Routing\Route;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\Double\SomeQuery;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 
 #[CoversClass(Route::class)]

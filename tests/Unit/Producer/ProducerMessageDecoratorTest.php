@@ -9,9 +9,9 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Producer\ProducerStrategy;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Producer\ProducerMessageDecorator;
 
 final class ProducerMessageDecoratorTest extends UnitTestCase

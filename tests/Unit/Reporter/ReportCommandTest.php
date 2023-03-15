@@ -14,13 +14,13 @@ use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Reporter\ReportCommand;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Message\MessageFactory;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
@@ -29,6 +29,7 @@ use Chronhub\Storm\Reporter\Subscribers\ConsumeCommand;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 
 #[CoversClass(ReportCommand::class)]
+#[CoversClass(MessageNotHandled::class)]
 final class ReportCommandTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
@@ -118,8 +119,8 @@ final class ReportCommandTest extends UnitTestCase
         $this->assertTrue($messageHandled);
     }
 
-    #[DataProvider('provideCommand')]
     #[Test]
+    #[DataProvider('provideCommand')]
     public function it_raise_exception_when_message_has_not_been_handled(DomainCommand $command, string $messageName): void
     {
         $this->expectException(MessageNotHandled::class);

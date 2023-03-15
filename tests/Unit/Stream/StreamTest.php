@@ -11,9 +11,9 @@ use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 
 #[CoversClass(Stream::class)]
 final class StreamTest extends UnitTestCase

@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 use ReflectionClass;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Message\Attribute\AsHandler;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 
 class AsHandlerTest extends UnitTestCase
 {

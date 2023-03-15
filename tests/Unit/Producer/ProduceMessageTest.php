@@ -10,8 +10,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Producer\ProduceMessage;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Producer\MessageQueue;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
 

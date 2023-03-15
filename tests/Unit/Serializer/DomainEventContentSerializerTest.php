@@ -8,7 +8,7 @@ use stdClass;
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Serializer\DomainEventContentSerializer;
 
 class DomainEventContentSerializerTest extends UnitTestCase

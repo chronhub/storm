@@ -11,11 +11,11 @@ use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\DomainQuery;
 use Chronhub\Storm\Reporter\DomainCommand;
-use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\Double\SomeQuery;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 
 final class HasDomainTest extends UnitTestCase
 {

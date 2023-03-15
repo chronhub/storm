@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Double;
+namespace Chronhub\Storm\Tests\Stubs\Double;
 
 use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Contracts\Message\AsyncMessage;

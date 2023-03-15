@@ -9,10 +9,10 @@ use Generator;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 
 final class NoOpMessageDecoratorTest extends UnitTestCase
 {

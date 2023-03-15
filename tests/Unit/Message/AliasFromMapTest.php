@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Message\AliasFromMap;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 
 #[CoversClass(AliasFromMap::class)]
 final class AliasFromMapTest extends UnitTestCase

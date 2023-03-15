@@ -16,8 +16,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
-use Chronhub\Storm\Tests\Double\NoOpMessageSubscriber;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Tests\Stubs\Double\NoOpMessageSubscriber;
 
 #[CoversClass(Group::class)]
 final class GroupTest extends UnitTestCase

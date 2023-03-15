@@ -10,10 +10,10 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Tests\Double\SomeEvent;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Reporter\Subscribers\TryConsumeEvent;
 use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
 

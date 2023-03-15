@@ -10,12 +10,12 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Message\MessageFactory;
-use Chronhub\Storm\Tests\Double\SomeEvent;
-use Chronhub\Storm\Tests\Double\SomeQuery;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 
 final class MessageFactoryTest extends UnitTestCase

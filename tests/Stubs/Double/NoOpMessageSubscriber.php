@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Double;
+namespace Chronhub\Storm\Tests\Stubs\Double;
 
 use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;

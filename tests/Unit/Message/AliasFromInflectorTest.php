@@ -7,9 +7,9 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\AliasFromInflector;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 
 #[CoversClass(AliasFromInflector::class)]
 final class AliasFromInflectorTest extends UnitTestCase

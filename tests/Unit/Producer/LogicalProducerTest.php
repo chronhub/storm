@@ -11,13 +11,13 @@ use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Producer\LogicalProducer;
-use Chronhub\Storm\Tests\Double\SomeCommand;
 use Chronhub\Storm\Producer\ProducerStrategy;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Double\SomeAsyncCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeAsyncCommand;
 
 final class LogicalProducerTest extends UnitTestCase
 {
