@@ -6,5 +6,8 @@ namespace Chronhub\Storm\Contracts\Stream;
 
 interface StreamCategory
 {
-    public function __invoke(string $streamName): ?string;
+    /**
+     * Return string category if it matched separator, otherwise null.
+     */
+    public function determineFrom(string $streamName): ?string;
 }

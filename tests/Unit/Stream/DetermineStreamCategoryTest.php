@@ -28,7 +28,7 @@ final class DetermineStreamCategoryTest extends UnitTestCase
     {
         $detectCategory = new DetermineStreamCategory();
 
-        $this->assertEquals('transaction', $detectCategory($streamName));
+        $this->assertEquals('transaction', $detectCategory->determineFrom($streamName));
     }
 
     #[Test]
@@ -36,7 +36,7 @@ final class DetermineStreamCategoryTest extends UnitTestCase
     {
         $detectCategory = new DetermineStreamCategory();
 
-        $this->assertEquals('transaction', $detectCategory('transaction-add-absolute'));
+        $this->assertEquals('transaction', $detectCategory->determineFrom('transaction-add-absolute'));
     }
 
     #[DataProvider('provideStreamWithoutCategory')]
@@ -45,7 +45,7 @@ final class DetermineStreamCategoryTest extends UnitTestCase
     {
         $detectCategory = new DetermineStreamCategory();
 
-        $this->assertNull($detectCategory($streamName));
+        $this->assertNull($detectCategory->determineFrom($streamName));
     }
 
     public static function provideStreamCategory(): Generator

@@ -14,7 +14,7 @@ final readonly class DetermineStreamCategory implements StreamCategory
     {
     }
 
-    public function __invoke(string $streamName): ?string
+    public function determineFrom(string $streamName): ?string
     {
         $pos = strpos($streamName, $this->separator);
 

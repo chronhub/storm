@@ -47,7 +47,7 @@ final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler i
     {
         $streamName = $stream->name();
 
-        $category = ($this->streamCategory)($streamName->name);
+        $category = $this->streamCategory->determineFrom($streamName->name);
 
         if (! $this->eventStreamProvider->createStream($streamName->name, null, $category)) {
             throw StreamAlreadyExists::withStreamName($streamName);
