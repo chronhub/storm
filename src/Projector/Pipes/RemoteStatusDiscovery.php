@@ -7,23 +7,13 @@ namespace Chronhub\Storm\Projector\Pipes;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 
-trait WhenRetrieveRemoteStatus
+trait RemoteStatusDiscovery
 {
     public function __construct(protected readonly ProjectorRepository $repository)
     {
     }
 
-    protected function stopOnLoadingRemoteStatus(bool $keepRunning): bool
-    {
-        return $this->discoverRemoteProjectionStatus(true, $keepRunning);
-    }
-
-    protected function reloadRemoteStatus(bool $keepRunning): void
-    {
-        $this->discoverRemoteProjectionStatus(false, $keepRunning);
-    }
-
-    private function discoverRemoteProjectionStatus(bool $firstExecution, bool $keepRunning): bool
+    protected function refresh(bool $firstExecution, bool $keepRunning): bool
     {
         return match ($this->repository->disclose()) {
             ProjectionStatus::STOPPING => $this->markAsStop($firstExecution),

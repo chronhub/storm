@@ -19,8 +19,8 @@ use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
-use Chronhub\Storm\Contracts\Projector\ProjectorOption;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
+use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
@@ -28,7 +28,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 #[CoversClass(Context::class)]
 final class ContextTest extends UnitTestCase
 {
-    private ProjectorOption|MockObject $option;
+    private SubscriptionOption|MockObject $option;
 
     private StreamPosition|MockObject $position;
 
@@ -41,7 +41,7 @@ final class ContextTest extends UnitTestCase
      */
     protected function setUp(): void
     {
-        $this->option = $this->createMock(ProjectorOption::class);
+        $this->option = $this->createMock(SubscriptionOption::class);
         $this->position = $this->createMock(StreamPosition::class);
         $this->counter = $this->createMock(EventCounter::class);
         $this->gap = $this->createMock(DetectGap::class);
@@ -64,7 +64,7 @@ final class ContextTest extends UnitTestCase
         $this->assertTrue($context->isPersistent);
         $this->assertFalse($context->runner->inBackground());
         $this->assertFalse($context->runner->isStopped());
-        $this->assertInstanceOf(ProjectorOption::class, $context->option);
+        $this->assertInstanceOf(SubscriptionOption::class, $context->option);
         $this->assertInstanceOf(StreamPosition::class, $context->streamPosition);
         $this->assertInstanceOf(EventCounter::class, $context->eventCounter);
         $this->assertInstanceOf(DetectGap::class, $context->gap);

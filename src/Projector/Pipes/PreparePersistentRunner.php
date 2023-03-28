@@ -8,7 +8,7 @@ use Chronhub\Storm\Projector\Scheme\Context;
 
 final class PreparePersistentRunner
 {
-    use WhenRetrieveRemoteStatus;
+    use RemoteStatusDiscovery;
 
     private bool $isInitialized = false;
 
@@ -17,7 +17,7 @@ final class PreparePersistentRunner
         if (! $this->isInitialized) {
             $this->isInitialized = true;
 
-            if ($this->stopOnLoadingRemoteStatus($context->runner->inBackground())) {
+            if ($this->refresh(true, $context->runner->inBackground())) {
                 return true;
             }
 

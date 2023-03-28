@@ -7,15 +7,15 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Options\InMemoryProjectorOption;
+use Chronhub\Storm\Projector\Options\InMemorySubscriptionOption;
 
-#[CoversClass(InMemoryProjectorOption::class)]
+#[CoversClass(InMemorySubscriptionOption::class)]
 final class InMemoryProjectorOptionTest extends UnitTestCase
 {
     #[Test]
     public function it_assert_in_memory_immutable_option(): void
     {
-        $options = new InMemoryProjectorOption();
+        $options = new InMemorySubscriptionOption();
 
         $this->assertEquals(false, $options->getSignal());
         $this->assertEquals(100, $options->getCacheSize());
@@ -30,7 +30,7 @@ final class InMemoryProjectorOptionTest extends UnitTestCase
     #[Test]
     public function it_can_be_serialized(): void
     {
-        $options = new InMemoryProjectorOption();
+        $options = new InMemorySubscriptionOption();
 
         $this->assertEquals([
             'signal' => false,

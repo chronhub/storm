@@ -8,7 +8,7 @@ use function range;
 use function explode;
 use function is_array;
 
-trait ProvideProjectorOption
+trait ProvideSubscriptionOption
 {
     /**
      * Dispatch async signal

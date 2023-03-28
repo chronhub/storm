@@ -8,11 +8,11 @@ use Chronhub\Storm\Projector\Scheme\Context;
 
 final class UpdateStatusAndPositions
 {
-    use WhenRetrieveRemoteStatus;
+    use RemoteStatusDiscovery;
 
     public function __invoke(Context $context, callable $next): callable|bool
     {
-        $this->reloadRemoteStatus($context->runner->inBackground());
+        $this->refresh(false, $context->runner->inBackground());
 
         $context->streamPosition->watch($context->queries());
 

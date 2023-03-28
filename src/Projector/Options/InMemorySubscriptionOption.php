@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Options;
 
-use Chronhub\Storm\Contracts\Projector\ProjectorOption;
+use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
 
-final class InMemoryProjectorOption implements ProjectorOption
+final class InMemorySubscriptionOption implements SubscriptionOption
 {
-    use ProvideProjectorOption;
+    use ProvideSubscriptionOption;
 
     public function __construct()
     {

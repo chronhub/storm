@@ -26,7 +26,7 @@ final readonly class ProjectQuery implements QueryProjector
     {
         $this->context->compose($this->getCaster(), $inBackground);
 
-        $project = new RunProjection($this->pipes(), null);
+        $project = new RunProjection($this->workflow(), null);
 
         $project($this->context);
     }
@@ -53,7 +53,7 @@ final readonly class ProjectQuery implements QueryProjector
         return new QueryCaster($this, $this->context->currentStreamName);
     }
 
-    private function pipes(): array
+    private function workflow(): array
     {
         return [
             new PrepareQueryRunner(),

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Options;
 
-use Chronhub\Storm\Contracts\Projector\ProjectorOption;
+use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
 
-final class DefaultProjectorOption implements ProjectorOption
+final class ProjectionOption implements SubscriptionOption
 {
-    use ProvideProjectorOption;
+    use ProvideSubscriptionOption;
 
     public function __construct(
         public readonly bool $signal = false,
