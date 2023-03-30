@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -42,8 +41,7 @@ final class AggregateRepositoryTest extends UnitTestCase
         $this->aggregateCache = $this->createMock(AggregateCache::class);
     }
 
-    #[Test]
-    public function it_assert_instance(): void
+    public function testInstance(): void
     {
         $repository = new AggregateRepository(
             $this->chronicler,

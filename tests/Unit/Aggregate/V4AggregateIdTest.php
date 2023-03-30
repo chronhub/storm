@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Symfony\Component\Uid\Uuid;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
@@ -21,8 +20,7 @@ final class V4AggregateIdTest extends UnitTestCase
         $this->aggregateId = V4AggregateId::create();
     }
 
-    #[Test]
-    public function it_can_be_created(): void
+    public function testInstance(): void
     {
         $this->assertInstanceOf(AggregateIdentity::class, $this->aggregateId);
         $this->assertInstanceOf(V4AggregateId::class, $this->aggregateId);
@@ -30,8 +28,7 @@ final class V4AggregateIdTest extends UnitTestCase
         $this->assertInstanceOf(Uuid::class, $this->aggregateId->identifier);
     }
 
-    #[Test]
-    public function it_can_be_instantiated_from_string(): void
+    public function testItCanBeCreatedFromString(): void
     {
         $aggregateId = $this->aggregateId;
 
@@ -41,8 +38,7 @@ final class V4AggregateIdTest extends UnitTestCase
         $this->assertNotSame($aggregateId, $fromString);
     }
 
-    #[Test]
-    public function it_can_be_compared(): void
+    public function testCheckEquality(): void
     {
         $aggregateId = $this->aggregateId;
         $anotherAggregateId = V4AggregateId::create();
@@ -54,8 +50,7 @@ final class V4AggregateIdTest extends UnitTestCase
         $this->assertTrue($anotherAggregateId->equalsTo($anotherAggregateId));
     }
 
-    #[Test]
-    public function it_can_be_serialized(): void
+    public function testInstanceCanBeSerialized(): void
     {
         $aggregateId = V4AggregateId::fromString('99533317-44b3-48cc-9148-f385eddb73e9');
 

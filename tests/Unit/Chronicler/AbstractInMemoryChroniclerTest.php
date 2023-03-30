@@ -8,7 +8,6 @@ use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
@@ -26,8 +25,7 @@ use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
 #[CoversClass(AbstractInMemoryChronicler::class)]
 final class AbstractInMemoryChroniclerTest extends UnitTestCase
 {
-    #[Test]
-    public function it_raise_exception_when_chronicler_is_already_eventable(): void
+    public function testExceptionRaisedWhenEventStoreGivenIsAlreadyADecorator(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to decorate a chronicler which is already decorated');
@@ -53,8 +51,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $provider->resolve('foo', []);
     }
 
-    #[Test]
-    public function it_raise_exception_when_stream_tracker_missing_to_decorate_chronicler(): void
+    public function testExceptionRaisedWhenStreamTrackerMissing(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to decorate chronicler');
@@ -79,8 +76,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $provider->resolve('foo', []);
     }
 
-    #[Test]
-    public function it_resolve_tracker_id_given_in_configuration(): void
+    public function testTrackerIdResolvedFromIoc(): void
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())->method('get')->with('tracker.stream.default')->willReturn(new TrackStream());
@@ -115,8 +111,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(EventChronicler::class, $chronicler::class);
     }
 
-    #[Test]
-    public function it_resolve_transactional_tracker_id_given_in_config(): void
+    public function testTransactionalTrackerIdResolvedFromIoc(): void
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())->method('get')->with('tracker.stream.transactional')->willReturn(new TrackTransactionalStream());
@@ -152,8 +147,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    #[Test]
-    public function it_raise_exception_with_invalid_configuration_when_chronicler_is_not_transactional_as_stream_tracker(): void
+    public function testExceptionRaisedWithIncompatibleEventStoreAndStreamTracker(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
@@ -196,8 +190,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    #[Test]
-    public function it_raise_exception_with_invalid_configuration_when_stream_tracker_is_not_transactional_as_chronicler(): void
+    public function testExceptionRaisedWithIncompatibleEventStoreAndStreamTracker_2(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
@@ -239,8 +232,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
 
-    #[Test]
-    public function it_attach_stream_subscribers_resolved_from_container_or_as_instance_to_eventable_chronicler(): void
+    public function testStreamSubscribersAttachedToEventableEventStore(): void
     {
         $tracker = new TrackStream();
 

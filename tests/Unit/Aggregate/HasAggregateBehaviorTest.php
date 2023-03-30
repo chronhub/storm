@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -18,8 +17,7 @@ use function iterator_to_array;
 #[CoversClass(HasAggregateBehaviour::class)]
 final class HasAggregateBehaviorTest extends UnitTestCase
 {
-    #[Test]
-    public function it_can_be_instantiated(): void
+    public function testInstance(): void
     {
         $aggregateId = V4AggregateId::create();
 
@@ -31,8 +29,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals($aggregateId, $aggregateRoot->aggregateId());
     }
 
-    #[Test]
-    public function it_record_events(): void
+    public function testRecordEvents(): void
     {
         $events = iterator_to_array($this->provideThreeDomainEvents());
 
@@ -45,8 +42,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals(3, $aggregateRoot->getAppliedEvents());
     }
 
-    #[Test]
-    public function it_release_events(): void
+    public function testReleaseEvents(): void
     {
         $events = iterator_to_array($this->provideThreeDomainEvents());
 
@@ -64,8 +60,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals($events, $releasedEvents);
     }
 
-    #[Test]
-    public function it_reconstitute_aggregate_from_events(): void
+    public function testReconstituteAggregateFromHistoryOfEvents(): void
     {
         $events = $this->provideThreeDomainEvents();
 
@@ -80,8 +75,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertEquals(3, $aggregateRoot->getAppliedEvents());
     }
 
-    #[Test]
-    public function it_return_null_aggregate_when_reconstitute_with_empty_events(): void
+    public function testReturnNullWithEmptyHistory(): void
     {
         $aggregateId = V4AggregateId::create();
 
@@ -90,8 +84,7 @@ final class HasAggregateBehaviorTest extends UnitTestCase
         $this->assertNull($aggregateRoot);
     }
 
-    #[Test]
-    public function it_return_null_aggregate_when_reconstitute_with_no_get_return_from_generator(): void
+    public function testReturnNullWithNoGetReturnFromGenerator(): void
     {
         $aggregateId = V4AggregateId::create();
 

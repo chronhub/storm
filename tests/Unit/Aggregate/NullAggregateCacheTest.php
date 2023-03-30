@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -28,21 +27,18 @@ final class NullAggregateCacheTest extends UnitTestCase
     }
 
     #[DataProvider('provideAggregateId')]
-    #[Test]
-    public function it_always_return_null_to_get_aggregate(AggregateIdentity $aggregateId): void
+    public function testAlwaysReturnNull(AggregateIdentity $aggregateId): void
     {
         $this->assertNull($this->aggregateCache->get($aggregateId));
     }
 
     #[DataProvider('provideAggregateId')]
-    #[Test]
-    public function it_always_return_null_to_check_if_aggregate_exists_in_cache(AggregateIdentity $aggregateId): void
+    public function testReturnAlwaysFalseIfAggregateInCache(AggregateIdentity $aggregateId): void
     {
         $this->assertFalse($this->aggregateCache->has($aggregateId));
     }
 
-    #[Test]
-    public function it_always_return_zero_when_counting_aggregates_in_cache(): void
+    public function testReturnZeroCountAggregatesInCache(): void
     {
         $this->aggregateCache->put(AggregateRootStub::create(V4AggregateId::create()));
         $this->aggregateCache->put(AnotherAggregateRootStub::create(V4AggregateId::create()));
@@ -50,8 +46,7 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->assertEquals(0, $this->aggregateCache->count());
     }
 
-    #[Test]
-    public function it_does_not_flush(): void
+    public function testFlushVoid(): void
     {
         $aggregateCache = $this->aggregateCache;
 
@@ -62,8 +57,7 @@ final class NullAggregateCacheTest extends UnitTestCase
         $this->assertEquals($aggregateCache, $cloneAggregateCache);
     }
 
-    #[Test]
-    public function it_does_not_forget(): void
+    public function testForgetVoid(): void
     {
         $aggregateCache = $this->aggregateCache;
 

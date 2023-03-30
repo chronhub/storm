@@ -8,7 +8,6 @@ use stdClass;
 use Generator;
 use InvalidArgumentException;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\AggregateType;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,16 +21,14 @@ use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
 #[CoversClass(AggregateType::class)]
 final class AggregateTypeTest extends UnitTestCase
 {
-    #[Test]
-    public function it_can_be_instantiated(): void
+    public function testInstance(): void
     {
         $aggregateType = new AggregateType(AnotherAggregateRootStub::class);
 
         $this->assertEquals(AnotherAggregateRootStub::class, $aggregateType->current());
     }
 
-    #[Test]
-    public function it_raise_exception_when_aggregate_root_is_not_a_valid_class_name(): void
+    public function testExceptionRaisedWhenAggregateIsNotFQN(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Aggregate root must be a valid class name');
@@ -40,8 +37,7 @@ final class AggregateTypeTest extends UnitTestCase
         new AggregateType('invalid_class');
     }
 
-    #[Test]
-    public function it_raise_exception_when_lineage_are_not_subclass_of_aggregate_root(): void
+    public function testExceptionRaisedWhenAggregateIsNotSubclassOfRoot(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Class '.stdClass::class.' must inherit from '.AnotherAggregateRootStub::class);
@@ -49,8 +45,7 @@ final class AggregateTypeTest extends UnitTestCase
         new AggregateType(AnotherAggregateRootStub::class, [stdClass::class]);
     }
 
-    #[Test]
-    public function it_raise_exception_when_aggregate_root_is_not_supported(): void
+    public function testAggregateIsNotSupported(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Aggregate root '.AnotherAggregateRootStub::class.' class is not supported');
@@ -61,8 +56,7 @@ final class AggregateTypeTest extends UnitTestCase
     }
 
     #[DataProvider('provideValidAggregateTypeHeader')]
-    #[Test]
-    public function it_support_aggregate_root(string $aggregateTypeHeader): void
+    public function testAggregateIsSupported(string $aggregateTypeHeader): void
     {
         $aggregateType = new AggregateType(
             AggregateRootStub::class, [AggregateRootChildStub::class]
@@ -76,16 +70,14 @@ final class AggregateTypeTest extends UnitTestCase
         $this->assertEquals($aggregateTypeHeader, $aggregateRoot);
     }
 
-    #[Test]
-    public function it_check_if_aggregate_root_is_supported(): void
+    public function testAggregateChildIsSupported(): void
     {
         $aggregateType = new AggregateType(AggregateRootStub::class, [AggregateRootChildStub::class]);
 
         $this->assertTrue($aggregateType->isSupported(AggregateRootChildStub::class));
     }
 
-    #[Test]
-    public function it_determine_type_from_aggregate_root_object(): void
+    public function testAggregateIsDetermineFromRootInstance(): void
     {
         $aggregateType = new AggregateType(AggregateRootStub::class, [AggregateRootChildStub::class]);
 
@@ -100,8 +92,7 @@ final class AggregateTypeTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_determine_type_from_aggregate_root_string_class(): void
+    public function testAggregateIsDetermineFromRootString(): void
     {
         $aggregateType = new AggregateType(
             AggregateRootStub::class, [AggregateRootChildStub::class]

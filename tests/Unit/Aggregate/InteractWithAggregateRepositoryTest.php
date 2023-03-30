@@ -63,8 +63,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->streamName = new StreamName('operation');
     }
 
-    #[Test]
-    public function it_assert_stub_accessor(): void
+    public function testInstance(): void
     {
         $stub = $this->aggregateRepositoryStub(null);
 
@@ -73,8 +72,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertEquals($this->streamProducer, $stub->streamProducer);
     }
 
-    #[Test]
-    public function it_retrieve_aggregate_from_cache(): void
+    public function testRetrieveAggregateFromCache(): void
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
 
@@ -89,7 +87,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_reconstitute_aggregate_if_aggregate_does_not_exist_already_in_cache_and_put_in_cache_(): void
+    public function testReconstituteAggregateAndPutInCacheWhenCacheDoesNotHaveIt(): void
     {
         $expectedAggregateRoot = AggregateRootStub::create($this->someIdentity);
 
@@ -106,7 +104,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_does_not_put_in_cache_if_reconstitute_aggregate_return_null_aggregate(): void
+    public function testItDoesNotPutInCacheNullAggregate(): void
     {
         $this->aggregateCache->expects($this->once())->method('has')->willReturn(false);
         $this->aggregateCache->expects($this->never())->method('get');
@@ -120,8 +118,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $this->assertNull($aggregateRoot);
     }
 
-    #[Test]
-    public function it_forget_aggregate_from_cache_if_persist_first_commit_raise_exception(): void
+    public function testForgetAggregateWhenExceptionRaisedOnFirstCommit(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('some exception message');
@@ -158,8 +155,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    #[Test]
-    public function it_forget_aggregate_from_cache_when_an_exception_raised_on_persist(): void
+    public function testForgetAggregateWhenExceptionRaisedOnPersist(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('foo');
@@ -200,8 +196,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
         $stub->store($aggregateRoot);
     }
 
-    #[Test]
-    public function it_does_not_persist_aggregate_with_no_event_to_release(): void
+    public function testDoesNotPersistWithNoStreamEvent(): void
     {
         $events = [];
 
@@ -221,8 +216,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
     }
 
     #[DataProvider('provideMessageDecoratorOrNull')]
-    #[Test]
-    public function it_persists_aggregate_root_with_first_commit_and_decorate_domain_events(?MessageDecorator $messageDecorator): void
+    public function testFirstCommitAggregateWithDecoratedStreamEventHeaders(?MessageDecorator $messageDecorator): void
     {
         $events = iterator_to_array($this->provideFourDomainEvents());
 
@@ -274,8 +268,7 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
     }
 
     #[DataProvider('provideMessageDecoratorOrNull')]
-    #[Test]
-    public function it_persists_aggregate_root_and_decorate_domain_events(?MessageDecorator $messageDecorator): void
+    public function testPersistAggregateWithDecoratedStreamEventHeaders(?MessageDecorator $messageDecorator): void
     {
         /** @var AggregateRootStub $aggregateRoot */
         $aggregateRoot = AggregateRootStub::reconstitute($this->someIdentity, $this->provideFourDomainEvents());

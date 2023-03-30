@@ -33,180 +33,148 @@ class EventChroniclerTest extends UnitTestCase
 
     private StreamTracker|MockObject $tracker;
 
+    private Stream $stream;
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->chronicler = $this->createMock(Chronicler::class);
         $this->tracker = new TrackStream();
+        $this->stream = new Stream(new StreamName('foo'), [
+            SomeEvent::fromContent(['foo' => 'bar']),
+        ]);
     }
 
     #[Test]
-    public function it_create_first_commit_stream(): void
+    public function testFirstCommitStream(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('firstCommit')->with($stream);
+        $this->chronicler->expects($this->once())->method('firstCommit')->with($this->stream);
 
         $this->tracker->watch(EventableChronicler::FIRST_COMMIT_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::FIRST_COMMIT_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream);
+                $this->assertEquals($story->promise(), $this->stream);
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->firstCommit($stream);
+        $eventStore->firstCommit($this->stream);
     }
 
     #[Test]
-    public function it_raise_exception_on_first_commit(): void
+    public function testExceptionRaisedOnFirstCommit(): void
     {
         $this->expectException(StreamAlreadyExists::class);
 
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('firstCommit')->with($stream);
+        $this->chronicler->expects($this->once())->method('firstCommit')->with($this->stream);
 
         $this->tracker->watch(EventableChronicler::FIRST_COMMIT_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::FIRST_COMMIT_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream);
-                $story->withRaisedException(StreamAlreadyExists::withStreamName($stream->name()));
+                $this->assertEquals($story->promise(), $this->stream);
+                $story->withRaisedException(StreamAlreadyExists::withStreamName($this->stream->name()));
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->firstCommit($stream);
+        $eventStore->firstCommit($this->stream);
     }
 
-    #[Test]
-    public function it_amend_stream(): void
+    public function testAmendStream(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('amend')->with($stream);
+        $this->chronicler->expects($this->once())->method('amend')->with($this->stream);
 
         $this->tracker->watch(EventableChronicler::PERSIST_STREAM_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::PERSIST_STREAM_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream);
+                $this->assertEquals($story->promise(), $this->stream);
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->amend($stream);
+        $eventStore->amend($this->stream);
     }
 
     #[Test]
-    public function it_raise_stream_not_found_exception_on_amend_stream(): void
+    public function testExceptionRaisedOnAmendStream(): void
     {
         $this->expectException(StreamNotFound::class);
 
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('amend')->with($stream);
+        $this->chronicler->expects($this->once())->method('amend')->with($this->stream);
 
         $this->tracker->watch(EventableChronicler::PERSIST_STREAM_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::PERSIST_STREAM_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream);
-                $story->withRaisedException(StreamNotFound::withStreamName($stream->name()));
+                $this->assertEquals($story->promise(), $this->stream);
+                $story->withRaisedException(StreamNotFound::withStreamName($this->stream->name()));
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->amend($stream);
+        $eventStore->amend($this->stream);
     }
 
-    #[Test]
-    public function it_raise_concurrency_exception_on_amend_stream(): void
+    public function testConcurrencyExceptionRaisedOnAmendStream(): void
     {
         $this->expectException(ConcurrencyException::class);
 
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('amend')->with($stream);
+        $this->chronicler->expects($this->once())->method('amend')->with($this->stream);
 
         $this->tracker->watch(EventableChronicler::PERSIST_STREAM_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::PERSIST_STREAM_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream);
+                $this->assertEquals($story->promise(), $this->stream);
                 $story->withRaisedException(new ConcurrencyException('concurrency exception'));
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->amend($stream);
+        $eventStore->amend($this->stream);
     }
 
-    #[Test]
-    public function it_delete_stream(): void
+    public function testDeleteStream(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('delete')->with($stream->name());
+        $this->chronicler->expects($this->once())->method('delete')->with($this->stream->name());
 
         $this->tracker->watch(EventableChronicler::DELETE_STREAM_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::DELETE_STREAM_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream->name());
+                $this->assertEquals($story->promise(), $this->stream->name());
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->delete($stream->name());
+        $eventStore->delete($this->stream->name());
     }
 
-    #[Test]
-    public function it_raise_stream_not_found_on_delete_stream(): void
+    public function testStreamNotFoundRaisedOnDeleteStream(): void
     {
         $this->expectException(StreamNotFound::class);
 
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $this->chronicler->expects($this->once())->method('delete')->with($stream->name());
+        $this->chronicler->expects($this->once())->method('delete')->with($this->stream->name());
 
         $this->tracker->watch(EventableChronicler::DELETE_STREAM_EVENT,
-            function (StreamStory $story) use ($stream): void {
+            function (StreamStory $story): void {
                 $this->assertEquals(EventableChronicler::DELETE_STREAM_EVENT, $story->currentEvent());
-                $this->assertEquals($story->promise(), $stream->name());
-                $story->withRaisedException(StreamNotFound::withStreamName($stream->name()));
+                $this->assertEquals($story->promise(), $this->stream->name());
+                $story->withRaisedException(StreamNotFound::withStreamName($this->stream->name()));
             });
 
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
-        $eventStore->delete($stream->name());
+        $eventStore->delete($this->stream->name());
     }
 
-    #[Test]
-    public function it_retrieve_all_stream(): void
+    public function testRetrieveAlStreamEvents(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $args = [$stream->name(), V4AggregateId::create(), 'asc'];
+        $args = [$this->stream->name(), V4AggregateId::create(), 'asc'];
 
         $this->chronicler->expects($this->once())
             ->method('retrieveAll')
             ->with(...$args)
-            ->will($this->returnCallback(function () use ($stream) {
-                yield from $stream->events();
+            ->will($this->returnCallback(function () {
+                yield from $this->stream->events();
             }));
 
         $this->tracker->watch(EventableChronicler::ALL_STREAM_EVENT,
@@ -219,19 +187,14 @@ class EventChroniclerTest extends UnitTestCase
 
         $streamEvents = $eventStore->retrieveAll(...$args);
 
-        $this->assertEquals($stream->events()->current(), $streamEvents->current());
+        $this->assertEquals($this->stream->events()->current(), $streamEvents->current());
     }
 
-    #[Test]
-    public function it_raise_stream_not_found_on_retrieve_all_stream(): void
+    public function testStreamNotFoundRaisedWhenRetrieveAllStreamEvents(): void
     {
         $this->expectException(StreamNotFound::class);
 
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
-        $args = [$stream->name(), V4AggregateId::create(), 'asc'];
+        $args = [$this->stream->name(), V4AggregateId::create(), 'asc'];
 
         $this->chronicler->expects($this->once())
             ->method('retrieveAll')
@@ -249,21 +212,16 @@ class EventChroniclerTest extends UnitTestCase
         $eventStore->retrieveAll(...$args)->current();
     }
 
-    #[Test]
-    public function it_retrieve_filtered_stream(): void
+    public function testRetrieveFilteredStreamEvents(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
         $queryFilter = $this->createMock(QueryFilter::class);
-        $args = [$stream->name(), $queryFilter];
+        $args = [$this->stream->name(), $queryFilter];
 
         $this->chronicler->expects($this->once())
             ->method('retrieveFiltered')
             ->with(...$args)
-            ->will($this->returnCallback(function () use ($stream) {
-                yield from $stream->events();
+            ->will($this->returnCallback(function () {
+                yield from $this->stream->events();
             }));
 
         $this->tracker->watch(EventableChronicler::FILTERED_STREAM_EVENT,
@@ -276,11 +234,10 @@ class EventChroniclerTest extends UnitTestCase
 
         $streamEvents = $eventStore->retrieveFiltered(...$args);
 
-        $this->assertEquals($stream->events()->current(), $streamEvents->current());
+        $this->assertEquals($this->stream->events()->current(), $streamEvents->current());
     }
 
-    #[Test]
-    public function it_raise_stream_not_found_exception_on_retrieve_filtered_stream(): void
+    public function testStreamNotFoundRaisedWhenRetrieveFilteredStreamEvents(): void
     {
         $this->expectException(StreamNotFound::class);
 
@@ -307,8 +264,7 @@ class EventChroniclerTest extends UnitTestCase
         $eventStore->retrieveFiltered(...$args)->current();
     }
 
-    #[Test]
-    public function it_filtered_stream_names(): void
+    public function testFilterStreamNames(): void
     {
         $args = [new StreamName('foo'), new StreamName('bar'), new StreamName('baz')];
 
@@ -330,8 +286,7 @@ class EventChroniclerTest extends UnitTestCase
         $this->assertEquals([new StreamName('foo'), new StreamName('baz')], $streamNames);
     }
 
-    #[Test]
-    public function it_filtered_category_names(): void
+    public function testFilterCategoryNames(): void
     {
         $args = ['foo', 'bar', 'baz'];
 
@@ -354,8 +309,7 @@ class EventChroniclerTest extends UnitTestCase
     }
 
     #[DataProvider('provideBoolean')]
-    #[Test]
-    public function it_check_stream_exists(bool $streamExists): void
+    public function testCheckStreamExists(bool $streamExists): void
     {
         $streamName = new StreamName('foo');
 
@@ -377,16 +331,14 @@ class EventChroniclerTest extends UnitTestCase
         $this->assertSame($streamExists, $hasStream);
     }
 
-    #[Test]
-    public function it_return_inner_event_store(): void
+    public function testInnerEventStoreGetter(): void
     {
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
         $this->assertSame($this->chronicler, $eventStore->innerChronicler());
     }
 
-    #[Test]
-    public function it_return_event_stream_provider(): void
+    public function testEventStreamProviderGetter(): void
     {
         $eventStreamProvider = $this->createMock(EventStreamProvider::class);
 
@@ -400,13 +352,8 @@ class EventChroniclerTest extends UnitTestCase
         $this->assertSame($eventStreamProvider, $eventStore->getEventStreamProvider());
     }
 
-    #[Test]
-    public function it_subscribe_to_event_store(): void
+    public function testSubscribeToEventStore(): void
     {
-        $stream = new Stream(new StreamName('foo'), [
-            SomeEvent::fromContent(['foo' => 'bar']),
-        ]);
-
         $alteredStream = new Stream(new StreamName('foo'), [
             SomeEvent::fromContent(['foo' => 'baz']),
         ]);
@@ -416,19 +363,18 @@ class EventChroniclerTest extends UnitTestCase
         $eventStore = new EventChronicler($this->chronicler, $this->tracker);
 
         $eventStore->subscribe(EventableChronicler::FIRST_COMMIT_EVENT,
-            function (StreamStory $story) use ($alteredStream, $stream): void {
+            function (StreamStory $story) use ($alteredStream): void {
                 $this->assertEquals(EventableChronicler::FIRST_COMMIT_EVENT, $story->currentEvent());
 
-                $this->assertEquals($story->promise(), $stream);
+                $this->assertEquals($story->promise(), $this->stream);
 
                 $story->deferred(fn () => $alteredStream);
             }, 100);
 
-        $eventStore->firstCommit($stream);
+        $eventStore->firstCommit($this->stream);
     }
 
-    #[Test]
-    public function it_unsubscribe_to_event_store(): void
+    public function testItUnsubscribeFromEventStore(): void
     {
         $stream = new Stream(new StreamName('foo'), [
             SomeEvent::fromContent(['foo' => 'bar']),

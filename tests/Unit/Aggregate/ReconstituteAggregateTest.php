@@ -54,8 +54,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->streamName = new StreamName('balance');
     }
 
-    #[Test]
-    public function it_reconstitute_aggregate_root_from_history(): void
+    public function testReconstituteAggregateFromHistory(): void
     {
         $events = iterator_to_array($this->provideFourDummyEvents());
         $countEvents = count($events);
@@ -88,8 +87,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->assertEquals($countEvents, $reconstituteAggregateRoot->getAppliedEvents());
     }
 
-    #[Test]
-    public function it_reconstitute_aggregate_root_from_filtered_history(): void
+    public function testReconstituteAggregateFromFilteredHistory(): void
     {
         $events = iterator_to_array($this->provideFourDummyEvents());
 
@@ -124,8 +122,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
         $this->assertEquals(2, $reconstituteAggregateRoot->getAppliedEvents());
     }
 
-    #[Test]
-    public function it_return_null_aggregate_root_from_empty_history(): void
+    public function testReturnNullAggregateFromEmptyStreamEvent(): void
     {
         $this->streamProducer->expects($this->once())
             ->method('toStreamName')
@@ -151,7 +148,7 @@ final class ReconstituteAggregateTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_return_null_aggregate_root_when_stream_not_found_exception_is_raised(): void
+    public function testReturnNullAggregateWhenStreamNotFoundIsRaised(): void
     {
         $this->streamProducer->expects($this->once())
             ->method('toStreamName')
