@@ -20,7 +20,7 @@ trait ProvidePersistentProjector
     {
         $this->context->compose($this->getCaster(), $inBackground);
 
-        $project = new RunProjection($this->pipes(), $this->repository);
+        $project = new RunProjection($this->workflow(), $this->repository);
 
         $project($this->context);
     }
@@ -53,7 +53,7 @@ trait ProvidePersistentProjector
     /**
      * @return array<callable>
      */
-    protected function pipes(): array
+    protected function workflow(): array
     {
         return [
             new PreparePersistentRunner($this->repository),
