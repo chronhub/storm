@@ -8,7 +8,6 @@ use Generator;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Routing\FindRoute;
 use Psr\Container\ContainerInterface;
-use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Routing\CommandGroup;
@@ -18,11 +17,11 @@ use Chronhub\Storm\Contracts\Message\Header;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Routing\Exceptions\RouteNotFound;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
 
 #[CoversClass(FindRoute::class)]
@@ -34,6 +33,8 @@ final class FindRouteTest extends UnitTestCase
 
     private MockObject|MessageAlias $messageAlias;
 
+    private Message $message;
+
     /**
      * @throws Exception
      */
@@ -41,10 +42,12 @@ final class FindRouteTest extends UnitTestCase
     {
         $this->container = $this->createMock(ContainerInterface::class);
         $this->messageAlias = $this->createMock(MessageAlias::class);
+        $this->message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
+            Header::EVENT_TYPE => SomeCommand::class,
+        ]);
     }
 
-    #[Test]
-    public function it_route_message_to_his_handlers(): void
+    public function testRouteToHandler(): void
     {
         $this->messageAlias->expects($this->exactly(2))
             ->method('classToAlias')
@@ -59,18 +62,13 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $messageHandlers = $matcher->route($message);
+        $messageHandlers = $matcher->route($this->message);
 
         $this->assertCount(1, $messageHandlers);
         $this->assertEquals(42, $messageHandlers[0]());
     }
 
-    #[Test]
-    public function it_route_message_to_his_handlers_transform_to_callable(): void
+    public function testRouteToCallableMessageHandler(): void
     {
         $this->messageAlias->expects($this->exactly(2))
             ->method('classToAlias')
@@ -94,18 +92,14 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $messageHandlers = $matcher->route($message);
+        $messageHandlers = $matcher->route($this->message);
 
         $this->assertCount(1, $messageHandlers);
         $this->assertEquals(74, $messageHandlers[0]());
     }
 
     #[Test]
-    public function it_route_message_to_his_handlers_resolve_from_container(): void
+    public function testRouteToMessageHandlerResolvedFromIOC(): void
     {
         $messageHandler = new class
         {
@@ -133,18 +127,13 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $messageHandlers = $matcher->route($message);
+        $messageHandlers = $matcher->route($this->message);
 
         $this->assertCount(1, $messageHandlers);
         $this->assertEquals(74, $messageHandlers[0]());
     }
 
-    #[Test]
-    public function it_raise_exception_when_message_handler_is_not_supported(): void
+    public function testExceptionRaisedWhenMessageHandlerNotSupported(): void
     {
         $this->expectException(RouteHandlerNotSupported::class);
         $this->expectExceptionMessage('Route handler is not supported for message name some-command');
@@ -170,15 +159,11 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $matcher->route($message);
+        $matcher->route($this->message);
     }
 
     #[Test]
-    public function it_raise_exception_when_message_not_found(): void
+    public function testExceptionRaisedWhenMessageNotFound(): void
     {
         $this->expectException(RouteNotFound::class);
         $this->expectExceptionMessage('Route not found with message name some-command');
@@ -195,15 +180,11 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $matcher->route($message);
+        $matcher->route($this->message);
     }
 
     #[Test]
-    public function it_return_route_queue_options(): void
+    public function testQueueOptionGetter(): void
     {
         $this->messageAlias->expects($this->exactly(2))
             ->method('classToAlias')
@@ -221,17 +202,13 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $queue = $matcher->onQueue($message);
+        $queue = $matcher->onQueue($this->message);
 
         $this->assertEquals(['connection' => 'redis', 'tries' => 3], $queue);
     }
 
     #[Test]
-    public function it_return_null_route_queue_options_if_not_set(): void
+    public function testNullQueueOption(): void
     {
         $this->messageAlias->expects($this->exactly(2))
             ->method('classToAlias')
@@ -246,15 +223,11 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $this->assertNull($matcher->onQueue($message));
+        $this->assertNull($matcher->onQueue($this->message));
     }
 
     #[Test]
-    public function it_raise_exception_access_route_queue_when_message_not_found(): void
+    public function testRaisedExceptionWhenMessageNotFoundWhenGetQueueOption(): void
     {
         $this->expectException(RouteNotFound::class);
 
@@ -270,65 +243,30 @@ final class FindRouteTest extends UnitTestCase
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $matcher->onQueue($message);
+        $matcher->onQueue($this->message);
     }
 
     #[DataProvider('provideInvalidMessageHandlers')]
-    #[Test]
-    public function it_raise_exception_for_command_group_when_count_message_handlers_is_not_exactly_one(array $messageHandlers): void
+    public function testGroupRule(array $invalidCountMessageHandlers): void
     {
         $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage('Group command required one handler only for message name some-command');
+        $this->expectExceptionMessage('Group type command and name default require one route handler only for message some-command');
 
-        $this->messageAlias->expects($this->exactly(2))
+        $this->messageAlias->expects($this->exactly(1))
             ->method('classToAlias')
             ->with(SomeCommand::class)
             ->willReturn('some-command');
 
         $routes = new CollectRoutes($this->messageAlias);
 
-        $routes->addRoute(SomeCommand::class)->to(...$messageHandlers);
+        $routes->addRoute(SomeCommand::class)->to(...$invalidCountMessageHandlers);
 
         $group = new CommandGroup('default', $routes);
+        $group->addRule(new RequireOneHandlerRule());
 
         $matcher = new FindRoute($group, $this->messageAlias, $this->container);
 
-        $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeCommand::class,
-        ]);
-
-        $matcher->route($message);
-    }
-
-    #[DataProvider('provideInvalidMessageHandlers')]
-    #[Test]
-    public function it_raise_exception_for_query_group_when_count_message_handlers_is_not_exactly_one(array $messageHandlers): void
-    {
-        $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage('Group query required one handler only for message name some-query');
-
-        $this->messageAlias->expects($this->exactly(2))
-            ->method('classToAlias')
-            ->with(SomeQuery::class)
-            ->willReturn('some-query');
-
-        $routes = new CollectRoutes($this->messageAlias);
-
-        $routes->addRoute(SomeQuery::class)->to(...$messageHandlers);
-
-        $group = new QueryGroup('default', $routes);
-
-        $matcher = new FindRoute($group, $this->messageAlias, $this->container);
-
-        $message = new Message(SomeQuery::fromContent(['foo' => 'bar']), [
-            Header::EVENT_TYPE => SomeQuery::class,
-        ]);
-
-        $matcher->route($message);
+        $matcher->route($this->message);
     }
 
     public static function provideInvalidMessageHandlers(): Generator

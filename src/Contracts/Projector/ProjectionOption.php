@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use JsonSerializable;
 
-interface SubscriptionOption extends JsonSerializable
+interface ProjectionOption extends JsonSerializable
 {
     public const SIGNAL = 'signal';
 

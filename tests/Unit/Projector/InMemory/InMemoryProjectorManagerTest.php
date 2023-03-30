@@ -22,17 +22,17 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Projector\AbstractProjectorManager;
 use Chronhub\Storm\Projector\InMemoryProjectorManager;
-use Chronhub\Storm\Projector\Options\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
+use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
 #[CoversClass(InMemoryProjectorManager::class)]
@@ -53,7 +53,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
     #[Test]
     public function it_create_persistent_projection(): void
     {
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $projector = $manager->projectProjection('balance');
 
@@ -67,7 +67,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
     {
         $readModel = $this->createMock(ReadModel::class);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $projector = $manager->projectReadModel('balance', $readModel);
 
@@ -85,7 +85,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $model->expects($this->once())->method('status')->willReturn('running');
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $status = $manager->statusOf('balance');
 
@@ -99,7 +99,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
 
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->statusOf('balance');
     }
@@ -113,7 +113,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->jsonSerializer->expects($this->once())->method('decode')->with('{"balance":5}')->willReturn(['balance' => 5]);
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $position = $manager->streamPositionsOf('balance');
 
@@ -129,7 +129,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->jsonSerializer->expects($this->once())->method('decode')->with('{}')->willReturn([]);
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $position = $manager->streamPositionsOf('balance');
 
@@ -143,7 +143,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
 
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->streamPositionsOf('balance');
     }
@@ -156,7 +156,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->jsonSerializer->expects($this->once())->method('decode')->with('{"count":10}')->willReturn(['count' => 10]);
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $position = $manager->stateOf('balance');
 
@@ -172,7 +172,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->jsonSerializer->expects($this->once())->method('decode')->with('{}')->willReturn([]);
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn($model);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $position = $manager->stateOf('balance');
 
@@ -186,7 +186,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
 
         $this->projectionProvider->expects($this->once())->method('retrieve')->with('balance')->willReturn(null);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->stateOf('balance');
     }
@@ -196,7 +196,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
     {
         $this->projectionProvider->expects($this->once())->method('filterByNames')->with('balance', 'foo', 'bar')->willReturn(['balance']);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $streamNames = $manager->filterNamesByAscendantOrder('balance', 'foo', 'bar');
 
@@ -209,7 +209,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
     {
         $this->projectionProvider->expects($this->once())->method('projectionExists')->with('balance')->willReturn($exists);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $this->assertEquals($exists, $manager->exists('balance'));
     }
@@ -217,7 +217,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
     #[Test]
     public function it_access_query_scope(): void
     {
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $this->assertEquals($this->queryScope, $manager->queryScope());
     }
@@ -229,7 +229,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
             'status' => ProjectionStatus::STOPPING->value,
         ])->willReturn(true);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->stop('balance');
     }
@@ -250,7 +250,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => ProjectionStatus::STOPPING->value,
             ])->willReturn(false);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->stop('balance');
     }
@@ -268,7 +268,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => ProjectionStatus::STOPPING->value,
             ])->willThrowException(new RuntimeException('nope'));
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->stop('balance');
     }
@@ -283,7 +283,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => ProjectionStatus::RESETTING->value,
             ])->willReturn(true);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->reset('balance');
     }
@@ -302,7 +302,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => ProjectionStatus::RESETTING->value,
             ])->willReturn(false);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->reset('balance');
     }
@@ -319,7 +319,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => ProjectionStatus::RESETTING->value,
             ])->willThrowException(new RuntimeException('nope'));
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->reset('balance');
     }
@@ -339,7 +339,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => $status,
             ])->willReturn(true);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->delete('balance', $withEmittedEvents);
     }
@@ -366,7 +366,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => $status,
             ])->willReturn(false);
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->delete('balance', $withEmittedEvents);
     }
@@ -389,7 +389,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
                 'status' => $status,
             ])->willThrowException(new RuntimeException('nope'));
 
-        $manager = $this->newProjectorManager(new ProjectionOption());
+        $manager = $this->newProjectorManager(new DefaultProjectionOption());
 
         $manager->delete('balance', $withEmittedEvents);
     }
@@ -410,7 +410,7 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
 
     private SystemClock|MockObject $clock;
 
-    private SubscriptionOption|MockObject $projectorOption;
+    private ProjectionOption|MockObject $projectorOption;
 
     private JsonSerializer|MockObject $jsonSerializer;
 
@@ -426,11 +426,11 @@ final class InMemoryProjectorManagerTest extends UnitTestCase
         $this->projectionProvider = $this->createMock(ProjectionProvider::class);
         $this->queryScope = $this->createMock(ProjectionQueryScope::class);
         $this->clock = $this->createMock(SystemClock::class);
-        $this->projectorOption = $this->createMock(SubscriptionOption::class);
+        $this->projectorOption = $this->createMock(ProjectionOption::class);
         $this->jsonSerializer = $this->createMock(JsonSerializer::class);
     }
 
-    private function newProjectorManager(array|SubscriptionOption $projectorOption = null): InMemoryProjectorManager
+    private function newProjectorManager(array|ProjectionOption $projectorOption = null): InMemoryProjectorManager
     {
         return new InMemoryProjectorManager(
             $this->chronicler,

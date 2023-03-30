@@ -8,6 +8,7 @@ use JsonSerializable;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Producer\ProducerStrategy;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Routing\RoutingRule;
 use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
@@ -71,6 +72,11 @@ abstract class Group implements JsonSerializable
      * @var array<string|MessageSubscriber>
      */
     private array $messageSubscribers = [];
+
+    /**
+     * @var array <RoutingRule>
+     */
+    private array $rules = [];
 
     public function __construct(public readonly string $name,
                                 public readonly RouteCollection $routes)
@@ -155,7 +161,7 @@ abstract class Group implements JsonSerializable
 
     public function strategy(): ProducerStrategy
     {
-        if ($this->strategy === null) {
+        if (! $this->strategy instanceof ProducerStrategy) {
             throw new RoutingViolation('Producer strategy can not be null');
         }
 
@@ -197,6 +203,21 @@ abstract class Group implements JsonSerializable
         $this->queue = $queue;
 
         return $this;
+    }
+
+    public function addRule(RoutingRule ...$rules): self
+    {
+        $this->rules = array_merge($this->rules, $rules);
+
+        return $this;
+    }
+
+    /**
+     * @return array<RoutingRule>
+     */
+    public function rules(): array
+    {
+        return $this->rules;
     }
 
     public function jsonSerialize(): array

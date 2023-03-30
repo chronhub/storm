@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Provider;
 
-use DateTimeZone;
-use DateTimeImmutable;
 use Illuminate\Support\Collection;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
@@ -23,7 +22,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     private array $fillable = ['state', 'position', 'status', 'locked_until'];
 
-    public function __construct()
+    public function __construct(private readonly SystemClock $clock)
     {
         $this->projections = new Collection();
     }
@@ -41,11 +40,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function updateProjection(string $name, array $data): bool
     {
-        foreach (array_keys($data) as $key) {
-            if (! in_array($key, $this->fillable, true)) {
-                throw new InvalidArgumentException("Invalid projection field $key for projection $name");
-            }
-        }
+        $this->assertFillable($data, $name);
 
         $projection = $this->retrieve($name);
 
@@ -85,9 +80,11 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function acquireLock(string $name, string $status, string $lockedUntil, string $datetime): bool
     {
-        $projection = $this->retrieve($name);
+        if (! $projection = $this->retrieve($name)) {
+            return false;
+        }
 
-        if ($projection instanceof InMemoryProjection && $this->shouldUpdateLock($projection, $datetime)) {
+        if ($this->shouldUpdateLock($projection, $datetime)) {
             $projection->setStatus($status);
 
             $projection->setLockedUntil($lockedUntil);
@@ -103,12 +100,11 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->projections->get($name);
     }
 
-    public function filterByNames(string ...$names): array
+    public function filterByNames(string ...$projectionNames): array
     {
-        return $this->projections
-            ->filter(static fn (InMemoryProjection $projection, string $name): bool => in_array($name, $names))
-            ->keys()
-            ->toArray();
+        $byStreamNames = fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames);
+
+        return $this->projections->filter($byStreamNames)->keys()->toArray();
     }
 
     public function projectionExists(string $name): bool
@@ -116,16 +112,21 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->projections->has($name);
     }
 
-    private function shouldUpdateLock(ProjectionModel $projection, string $now): bool
+    private function shouldUpdateLock(ProjectionModel $projection, string $currentTime): bool
     {
         if ($projection->lockedUntil() === null) {
             return true;
         }
 
-        // checkMe bring System clock
+        return $this->clock->isGreaterThan($currentTime, $projection->lockedUntil());
+    }
 
-        $now = new DateTimeImmutable($now, new DateTimeZone('UTC'));
-
-        return $now > new DateTimeImmutable($projection->lockedUntil(), new DateTimeZone('UTC'));
+    private function assertFillable(array $data, string $name): void
+    {
+        foreach (array_keys($data) as $key) {
+            if (! in_array($key, $this->fillable, true)) {
+                throw new InvalidArgumentException("Invalid projection field $key for projection $name");
+            }
+        }
     }
 }

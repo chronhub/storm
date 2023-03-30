@@ -13,9 +13,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Routing\RouteLocator;
 use Chronhub\Storm\Routing\Exceptions\RouteNotFound;
-use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
-use function count;
 use function is_string;
 use function is_callable;
 use function method_exists;
@@ -30,20 +28,15 @@ final readonly class FindRoute implements RouteLocator
 
     public function route(Message $message): Collection
     {
-        $messageName = $this->determineMessageName($message);
-
-        $messageHandlers = $this
-            ->determineMessageHandler($messageName)
-            ->map(fn ($messageHandler): callable => $this->toCallable($messageHandler, $messageName));
-
-        // wip
-        if ($this->group instanceof CommandGroup || $this->group instanceof QueryGroup) {
-            if (count($messageHandlers) !== 1) {
-                throw new RoutingViolation("Group {$this->group->getType()->value} required one handler only for message name $messageName");
-            }
+        foreach ($this->group->rules() as $rule) {
+            $rule->enforce($this->group);
         }
 
-        return $messageHandlers;
+        $messageName = $this->determineMessageName($message);
+
+        return $this
+            ->determineMessageHandler($messageName)
+            ->map(fn ($messageHandler): callable => $this->toCallable($messageHandler, $messageName));
     }
 
     public function onQueue(Message $message): ?array

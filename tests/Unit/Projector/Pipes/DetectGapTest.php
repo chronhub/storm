@@ -31,8 +31,7 @@ final class DetectGapTest extends UnitTestCase
         $this->clock = new PointInTime();
     }
 
-    #[Test]
-    public function it_can_be_constructed(): void
+    public function testInstance(): void
     {
         $gapDetector = new DetectGap(
             $this->streamPosition,
@@ -45,8 +44,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertRetries($gapDetector, 0);
     }
 
-    #[Test]
-    public function it_does_not_detect_gap_when_retries_is_an_empty_array(): void
+    public function testNoGapDetectionWithNoRetriesSet(): void
     {
         $this->streamPosition->expects($this->never())->method('hasNextPosition');
 
@@ -59,7 +57,7 @@ final class DetectGapTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_does_not_detect_gap_when_next_position_is_not_available_with_detection_window(): void
+    public function testGapNotDetectedWithDetectionWindowAsInterval(): void
     {
         $eventTime = $this->clock
             ->now()
@@ -77,8 +75,22 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->hasGap());
     }
 
+    public function testNoGapDetectedWithDetectionWindow(): void
+    {
+        $this->streamPosition
+            ->expects($this->once())
+            ->method('hasNextPosition')
+            ->with('customer', 4);
+
+        $gapDetector = new DetectGap($this->streamPosition, $this->clock, ['5'], 'PT60S');
+
+        $gapDetector->detect('customer', 4, $this->clock->now()->format($this->clock::DATE_TIME_FORMAT));
+
+        $this->assertFalse($gapDetector->hasGap());
+    }
+
     #[Test]
-    public function it_does_not_detect_gap_when_no_more_retries(): void
+    public function testNoGapDetectedWithWastedRetries(): void
     {
         $eventTime = $this->clock
             ->now()
@@ -109,23 +121,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertFalse($gapDetector->detect('customer', 2, $eventTime));
     }
 
-    #[Test]
-    public function it_does_not_detect_gap_when_event_time_is_greater_than_detection_window_from_now(): void
-    {
-        $this->streamPosition
-            ->expects($this->once())
-            ->method('hasNextPosition')
-            ->with('customer', 4);
-
-        $gapDetector = new DetectGap($this->streamPosition, $this->clock, ['5'], 'PT60S');
-
-        $gapDetector->detect('customer', 4, $this->clock->now()->format($this->clock::DATE_TIME_FORMAT));
-
-        $this->assertFalse($gapDetector->hasGap());
-    }
-
-    #[Test]
-    public function it_detect_gap(): void
+    public function testGapDetected(): void
     {
         $eventTime = $this->clock
             ->now()
@@ -143,8 +139,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertTrue($gapDetector->hasGap());
     }
 
-    #[Test]
-    public function it_reset_retries_and_return_silently_when_no_more_retries_available(): void
+    public function testAllRetriesAvailableAndFailSilentlyWithNoMoreRetries(): void
     {
         $gapDetector = new DetectGap($this->streamPosition, $this->clock, [5, 10, 20], 'PT60S');
 
@@ -156,8 +151,7 @@ final class DetectGapTest extends UnitTestCase
         $this->assertRetries($gapDetector, 3);
     }
 
-    #[Test]
-    public function it_reset_gap_detected(): void
+    public function testResetGapDetected(): void
     {
         $this->streamPosition->expects($this->any())
             ->method('hasNextPosition')

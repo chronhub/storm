@@ -7,15 +7,15 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Options\ProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 
-#[CoversClass(ProjectionOption::class)]
+#[CoversClass(DefaultProjectionOption::class)]
 final class DefaultProjectorOptionTest extends UnitTestCase
 {
     #[Test]
     public function it_assert_default_projector_option(): void
     {
-        $options = new ProjectionOption();
+        $options = new DefaultProjectionOption();
 
         $this->assertEquals(false, $options->getSignal());
         $this->assertEquals(1000, $options->getCacheSize());
@@ -30,7 +30,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
     #[Test]
     public function it_promote_parameters(): void
     {
-        $options = new ProjectionOption(signal: true, lockout: 100, detectionWindows: 'PT1H');
+        $options = new DefaultProjectionOption(signal: true, lockout: 100, detectionWindows: 'PT1H');
 
         $this->assertEquals(true, $options->getSignal());
         $this->assertEquals(1000, $options->getCacheSize());
@@ -45,7 +45,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
     #[Test]
     public function it_set_retries_ms_as_string(): void
     {
-        $options = new ProjectionOption(retries: '5,50,10');
+        $options = new DefaultProjectionOption(retries: '5,50,10');
 
         $this->assertEquals([5, 15, 25, 35, 45], $options->retries);
 
@@ -55,7 +55,7 @@ final class DefaultProjectorOptionTest extends UnitTestCase
     #[Test]
     public function it_can_be_serialized(): void
     {
-        $options = new ProjectionOption();
+        $options = new DefaultProjectionOption();
 
         $this->assertEquals([
             'signal' => false,

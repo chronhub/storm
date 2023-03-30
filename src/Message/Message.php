@@ -18,7 +18,7 @@ final class Message
     public function __construct(object $event, array $headers = [])
     {
         if ($event instanceof self) {
-            throw new InvalidArgumentException('Message event can not be an instance of itself');
+            throw new InvalidArgumentException('Message event cannot be an instance of itself');
         }
 
         if (! $event instanceof Reporting) {

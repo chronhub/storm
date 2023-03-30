@@ -9,15 +9,13 @@ use RuntimeException;
 use Chronhub\Storm\Tracker\Draft;
 use React\Promise\PromiseInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use function iterator_to_array;
 
 #[CoversClass(Draft::class)]
 final class DraftTest extends UnitTestCase
 {
-    #[Test]
-    public function it_can_be_constructed(): void
+    public function testInstance(): void
     {
         $draft = new Draft('some_event');
 
@@ -31,8 +29,7 @@ final class DraftTest extends UnitTestCase
         $this->assertNull($draft->exception());
     }
 
-    #[Test]
-    public function it_can_be_constructed_with_empty_event(): void
+    public function testConstructorWithEmptyEvent(): void
     {
         $draft = new Draft(null);
 
@@ -41,16 +38,14 @@ final class DraftTest extends UnitTestCase
         $this->assertEquals('dispatch', $draft->currentEvent());
     }
 
-    #[Test]
-    public function it_can_be_constructed_with_event(): void
+    public function TestConstructorWithEvent(): void
     {
         $draft = new Draft('finalize');
 
         $this->assertEquals('finalize', $draft->currentEvent());
     }
 
-    #[Test]
-    public function it_override_event(): void
+    public function testTakeOverEvent(): void
     {
         $draft = new Draft('dispatch');
 
@@ -61,8 +56,7 @@ final class DraftTest extends UnitTestCase
         $this->assertEquals('finalize', $draft->currentEvent());
     }
 
-    #[Test]
-    public function it_set_transient_message(): void
+    public function testTransientMessage(): void
     {
         $draft = new Draft('dispatch');
 
@@ -77,8 +71,7 @@ final class DraftTest extends UnitTestCase
         $this->assertNull($draft->transientMessage());
     }
 
-    #[Test]
-    public function it_acknowledge_message(): void
+    public function testMessageHandled(): void
     {
         $draft = new Draft('dispatch');
 
@@ -89,8 +82,7 @@ final class DraftTest extends UnitTestCase
         $this->assertTrue($draft->isHandled());
     }
 
-    #[Test]
-    public function it_add_consumers(): void
+    public function testMessageHandlersAdded(): void
     {
         $draft = new Draft('dispatch');
 
@@ -108,8 +100,7 @@ final class DraftTest extends UnitTestCase
         $this->assertEquals($consumers, iterator_to_array($draft->consumers()));
     }
 
-    #[Test]
-    public function it_set_query_promise(): void
+    public function testQueryPromise(): void
     {
         $draft = new Draft('dispatch');
 
@@ -122,8 +113,7 @@ final class DraftTest extends UnitTestCase
         $this->assertEquals($promise, $draft->promise());
     }
 
-    #[Test]
-    public function it_hold_exception_raised_during_dispatch(): void
+    public function TestSilentExceptionRaisedWhenDispatch(): void
     {
         $draft = new Draft('dispatch');
 
@@ -138,8 +128,7 @@ final class DraftTest extends UnitTestCase
         $this->assertEquals($exception, $draft->exception());
     }
 
-    #[Test]
-    public function it_reset_exception(): void
+    public function TestExceptionRaisedReset(): void
     {
         $draft = new Draft('dispatch');
 

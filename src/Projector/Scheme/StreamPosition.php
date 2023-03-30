@@ -8,14 +8,10 @@ use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function key;
-use function count;
 
 class StreamPosition
 {
-    /**
-     * @var Collection<string, int>
-     */
-    protected Collection $container;
+    private Collection $container;
 
     public function __construct(private readonly EventStreamProvider $eventStreamProvider)
     {
@@ -24,13 +20,11 @@ class StreamPosition
 
     public function watch(array $queries): void
     {
-        $container = new Collection();
+        $streams = $this->loadStreamsFrom($queries);
 
-        foreach ($this->loadStreamsFrom($queries) as $stream) {
-            $container->put($stream, 0);
-        }
-
-        $this->container = $container->merge($this->container);
+        $this->container = $this->container->merge($streams->mapWithKeys(function ($stream) {
+            return [$stream => 0];
+        }));
     }
 
     public function discover(array $streamsPositions): void
@@ -50,36 +44,28 @@ class StreamPosition
 
     public function hasNextPosition(string $streamName, int $position): bool
     {
-        return $this->container[$streamName] + 1 === $position;
+        return $this->container->get($streamName, 0) + 1 === $position;
     }
 
-    /**
-     * @return array<string, int>
-     */
     public function all(): array
     {
         return $this->container->toArray();
     }
 
-    protected function loadStreamsFrom(array $queries): array
+    protected function loadStreamsFrom(array $queries): Collection
     {
-        return match (key($queries)) {
+        $streams = match (key($queries)) {
             'all' => $this->eventStreamProvider->allWithoutInternal(),
             'categories' => $this->eventStreamProvider->filterByCategories($queries['categories']),
-            default => $this->handleStreamNames($queries['names'] ?? [])
+            default => $this->handleStreamNames($queries['names'] ?? []),
         };
+
+        return new Collection($streams);
     }
 
-    /**
-     * Return streams initialized from "names" key
-     *
-     * @return array<string>
-     *
-     * @throws InvalidArgumentException when streams are empty
-     */
     protected function handleStreamNames(array $streamNames): array
     {
-        if (count($streamNames) === 0) {
+        if (empty($streamNames)) {
             throw new InvalidArgumentException('Stream names can not be empty');
         }
 

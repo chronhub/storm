@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Tests\Stubs\GroupStub;
@@ -17,6 +16,7 @@ use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Tests\Stubs\Double\NoOpMessageSubscriber;
 
 #[CoversClass(Group::class)]
@@ -29,8 +29,7 @@ final class GroupTest extends UnitTestCase
         $this->group = new GroupStub('default', new CollectRoutes(new AliasFromClassName()));
     }
 
-    #[Test]
-    public function it_test_default_group(): void
+    public function testGroupInstance(): void
     {
         $group = $this->group;
 
@@ -42,10 +41,10 @@ final class GroupTest extends UnitTestCase
         $this->assertNull($group->queue());
         $this->assertEmpty($group->decorators());
         $this->assertEmpty($group->subscribers());
+        $this->assertEmpty($group->rules());
     }
 
-    #[Test]
-    public function it_set_group_properties(): void
+    public function testPropertiesSetter(): void
     {
         $group = $this->group;
 
@@ -74,8 +73,7 @@ final class GroupTest extends UnitTestCase
         $this->assertCount(2, $group->subscribers());
     }
 
-    #[Test]
-    public function it_raise_exception_when_reporter_class_is_not_a_valid_class_name(): void
+    public function testExceptionRaisedWhenReporterConcreteIsNotInstanceOfReporting(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Reporter concrete class reporter.command.default must be an instance of '.Reporter::class);
@@ -85,30 +83,30 @@ final class GroupTest extends UnitTestCase
         $group->withReporterConcrete('reporter.command.default');
     }
 
-    #[Test]
-    public function it_raise_exception_when_producer_strategy_is_unknown_on_set(): void
+    public function testExceptionRaisedWhenProducerStrategyIsInvalid(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Invalid message producer key: unknown_strategy');
 
-        $group = $this->group;
-
-        $group->withStrategy('unknown_strategy');
+        $this->group->withStrategy('unknown_strategy');
     }
 
-    #[Test]
-    public function it_raise_exception_when_producer_strategy_is_null_on_get(): void
+    public function testExceptionRaisedWhenProducerStrategyIsNotSet(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Producer strategy can not be null');
 
-        $group = $this->group;
-
-        $group->strategy();
+        $this->group->strategy();
     }
 
-    #[Test]
-    public function it_can_be_serialized(): void
+    public function testAddRule(): void
+    {
+        $this->group->addRule(new RequireOneHandlerRule());
+
+        $this->assertCount(1, $this->group->rules());
+    }
+
+    public function testItSerializeGroup(): void
     {
         $group = $this->group;
         $group->withStrategy('sync');

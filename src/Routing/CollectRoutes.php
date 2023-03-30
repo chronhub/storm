@@ -20,11 +20,7 @@ final readonly class CollectRoutes implements RouteCollection
 
     public function addRoute(string $messageName): Route
     {
-        $filteredRoutes = $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getOriginalName())
-        );
-
-        if ($filteredRoutes->isNotEmpty()) {
+        if ($this->matchOriginal($messageName) instanceof Route) {
             throw new RoutingViolation("Message name already exists: $messageName");
         }
 
@@ -39,21 +35,26 @@ final readonly class CollectRoutes implements RouteCollection
 
     public function match(string $messageName): ?Route
     {
-        return $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getName())
-        )->first();
+        $byMessageName = fn (Route $route): bool => ($messageName === $route->getName());
+
+        return $this->routes->filter($byMessageName)->first();
     }
 
     public function matchOriginal(string $messageName): ?Route
     {
-        return $this->routes->filter(
-            fn (Route $route): bool => ($messageName === $route->getOriginalName())
-        )->first();
+        $byOriginalMessageName = fn (Route $route): bool => ($messageName === $route->getOriginalName());
+
+        return $this->routes->filter($byOriginalMessageName)->first();
     }
 
     public function getRoutes(): Collection
     {
         return clone $this->routes;
+    }
+
+    public function count(): int
+    {
+        return $this->routes->count();
     }
 
     public function jsonSerialize(): array

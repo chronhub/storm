@@ -22,7 +22,7 @@ interface ProjectionProvider
     /**
      * @return array{string}
      */
-    public function filterByNames(string ...$names): array;
+    public function filterByNames(string ...$projectionNames): array;
 
     public function projectionExists(string $name): bool;
 }

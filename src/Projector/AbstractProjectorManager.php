@@ -38,9 +38,9 @@ abstract class AbstractProjectorManager implements ProjectorManager
         return new ProjectProjection($context, $repository, $this->chronicler, $streamName);
     }
 
-    public function projectReadModel(string $streamName, ReadModel $readModel, array $option = []): ReadModelProjector
+    public function projectReadModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $context = $this->createContext($option, true);
+        $context = $this->createContext($options, true);
 
         $provider = $this->createStore($context, $streamName);
 
@@ -49,47 +49,47 @@ abstract class AbstractProjectorManager implements ProjectorManager
         return new ProjectReadModel($context, $repository, $this->chronicler, $streamName, $readModel);
     }
 
-    public function statusOf(string $name): string
+    public function statusOf(string $projectionName): string
     {
-        $projection = $this->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($projectionName);
 
         if (! $projection instanceof ProjectionModel) {
-            throw ProjectionNotFound::withName($name);
+            throw ProjectionNotFound::withName($projectionName);
         }
 
         return $projection->status();
     }
 
-    public function streamPositionsOf(string $name): array
+    public function streamPositionsOf(string $projectionName): array
     {
-        $projection = $this->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($projectionName);
 
         if (! $projection instanceof ProjectionModel) {
-            throw ProjectionNotFound::withName($name);
+            throw ProjectionNotFound::withName($projectionName);
         }
 
         return $this->jsonSerializer->decode($projection->position());
     }
 
-    public function stateOf(string $name): array
+    public function stateOf(string $projectionName): array
     {
-        $projection = $this->projectionProvider->retrieve($name);
+        $projection = $this->projectionProvider->retrieve($projectionName);
 
         if (! $projection) {
-            throw ProjectionNotFound::withName($name);
+            throw ProjectionNotFound::withName($projectionName);
         }
 
         return $this->jsonSerializer->decode($projection->state());
     }
 
-    public function filterNamesByAscendantOrder(string ...$names): array
+    public function filterNamesByAscendantOrder(string ...$streamNames): array
     {
-        return $this->projectionProvider->filterByNames(...$names);
+        return $this->projectionProvider->filterByNames(...$streamNames);
     }
 
-    public function exists(string $name): bool
+    public function exists(string $projectionName): bool
     {
-        return $this->projectionProvider->projectionExists($name);
+        return $this->projectionProvider->projectionExists($projectionName);
     }
 
     public function queryScope(): ProjectionQueryScope

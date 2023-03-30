@@ -166,7 +166,7 @@ final class StandaloneStoreTest extends UnitTestCase
             ->willReturn(true);
 
         $this->projectorLock->expects($this->once())
-            ->method('update')
+            ->method('increment')
             ->willReturn('current_lock');
 
         $this->position->expects($this->once())

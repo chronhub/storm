@@ -28,8 +28,7 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
         $this->chronicler = $this->createMock(TransactionalEventableChronicler::class);
     }
 
-    #[Test]
-    public function it_begin_transaction_on_dispatch_command(): void
+    public function testBeginTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('beginTransaction');
 
@@ -44,8 +43,7 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[Test]
-    public function it_commit_transaction_on_finalize_when_no_exception_found_in_context_and_chronicler_in_transaction(): void
+    public function testCommitTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn(true);
         $this->chronicler->expects($this->once())->method('commitTransaction');
@@ -64,7 +62,7 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_does_not_commit_transaction_when_chronicler_not_in_transaction(): void
+    public function testNoCommitMadeWhenNotInTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn(false);
         $this->chronicler->expects($this->never())->method('commitTransaction');
@@ -83,7 +81,7 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_rollback_transaction_when_context_has_exception(): void
+    public function testRollbackTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn(true);
         $this->chronicler->expects($this->once())->method('rollbackTransaction');
@@ -102,9 +100,14 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_does_not_commit_transaction_if_chronicler_is_not_transactional_and_eventable(): void
+    public function testDoesNotAffectTransaction(): void
     {
         $mock = $this->createMock(Chronicler::class);
+
+        $this->chronicler->expects($this->never())->method('inTransaction');
+        $this->chronicler->expects($this->never())->method('beginTransaction');
+        $this->chronicler->expects($this->never())->method('rollbackTransaction');
+        $this->chronicler->expects($this->never())->method('commitTransaction');
 
         $subscriber = new HandleTransactionalDomainCommand($mock);
 

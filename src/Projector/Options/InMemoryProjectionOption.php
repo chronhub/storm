@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Options;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 
-final class InMemorySubscriptionOption implements SubscriptionOption
+final class InMemoryProjectionOption implements ProjectionOption
 {
     use ProvideSubscriptionOption;
 

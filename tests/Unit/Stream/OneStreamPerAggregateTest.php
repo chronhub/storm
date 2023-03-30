@@ -30,8 +30,7 @@ final class OneStreamPerAggregateTest extends UnitTestCase
         $this->aggregateId = V4AggregateId::create();
     }
 
-    #[Test]
-    public function it_determine_stream_name(): void
+    public function testDetermineStreamName(): void
     {
         $streamName = new StreamName('some_stream_name');
 
@@ -44,8 +43,7 @@ final class OneStreamPerAggregateTest extends UnitTestCase
     }
 
     #[DataProvider('provideEvents')]
-    #[Test]
-    public function it_produce_stream(iterable $events): void
+    public function testProduceStream(iterable $events): void
     {
         $streamName = new StreamName('some_stream_name');
         $aggregateId = $this->createMock(AggregateIdentity::class);
@@ -60,8 +58,7 @@ final class OneStreamPerAggregateTest extends UnitTestCase
     }
 
     #[DataProvider('provideEventsForFirstCommit')]
-    #[Test]
-    public function it_determine_if_event_is_first_commit(DomainEvent $event, bool $isFirstCommit): void
+    public function testFirstStreamEventDiscerned(DomainEvent $event, bool $isFirstCommit): void
     {
         $streamName = new StreamName('some_stream_name');
 
@@ -71,7 +68,7 @@ final class OneStreamPerAggregateTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_check_if_is_one_stream_per_aggregate_strategy(): void
+    public function testStreamProducerIsNeverAutoIncremented(): void
     {
         $streamName = new StreamName('some_stream_name');
 
@@ -88,22 +85,10 @@ final class OneStreamPerAggregateTest extends UnitTestCase
 
     public static function provideEventsForFirstCommit(): Generator
     {
-        yield [
-            SomeEvent::fromContent(['steph' => 'bug'])
-                ->withHeader(EventHeader::AGGREGATE_VERSION, 1),
-            true,
-        ];
+        $command = SomeEvent::fromContent(['steph' => 'bug']);
 
-        yield [
-            SomeEvent::fromContent(['steph' => 'bug'])
-                ->withHeader(EventHeader::AGGREGATE_VERSION, 2),
-            false,
-        ];
-
-        yield [
-            SomeEvent::fromContent(['steph' => 'bug'])
-                ->withHeader(EventHeader::AGGREGATE_VERSION, 20),
-            false,
-        ];
+        yield [$command->withHeader(EventHeader::AGGREGATE_VERSION, 1), true];
+        yield [$command->withHeader(EventHeader::AGGREGATE_VERSION, 2), false];
+        yield [$command->withHeader(EventHeader::AGGREGATE_VERSION, 20), false];
     }
 }

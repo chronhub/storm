@@ -8,7 +8,6 @@ use stdClass;
 use Generator;
 use Chronhub\Storm\Routing\Route;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -20,8 +19,7 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 final class RouteTest extends UnitTestCase
 {
     #[DataProvider('provideMessageClassName')]
-    #[Test]
-    public function it_can_be_constructed_with_message_class_name(string $messageName): void
+    public function testRouteInstance(string $messageName): void
     {
         $route = new Route($messageName);
 
@@ -31,8 +29,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEmpty($route->getHandlers());
     }
 
-    #[Test]
-    public function it_raise_exception_when_message_name_is_not_a_valid_class_name(): void
+    public function testExceptionRaisedWhenMessageNameIsNotFQN(): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Message name must be a valid class name, got foo');
@@ -41,8 +38,7 @@ final class RouteTest extends UnitTestCase
     }
 
     #[DataProvider('provideMessageClassName')]
-    #[Test]
-    public function it_set_message_alias(string $messageName): void
+    public function testMessageAlias(string $messageName): void
     {
         $route = new Route($messageName);
 
@@ -56,8 +52,7 @@ final class RouteTest extends UnitTestCase
     }
 
     #[DataProvider('provideMessageHandler')]
-    #[Test]
-    public function it_add_message_handler(string|object $messageHandler): void
+    public function testRouteMessageToHisHandler(string|object $messageHandler): void
     {
         $route = new Route(SomeCommand::class);
         $route->to($messageHandler);
@@ -66,8 +61,7 @@ final class RouteTest extends UnitTestCase
     }
 
     #[DataProvider('provideMessageHandler')]
-    #[Test]
-    public function it_merge_message_handlers(): void
+    public function testRouteMessageToHisHandlers(): void
     {
         $route = new Route(SomeCommand::class);
 
@@ -77,8 +71,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals(['some_message_handler', 'another_message_handler'], $route->getHandlers());
     }
 
-    #[Test]
-    public function it_set_queue_options(): void
+    public function testRouteQueueOptionSetter(): void
     {
         $route = new Route(SomeCommand::class);
         $route->onQueue(['connection' => 'redis', 'name' => 'default']);
@@ -86,8 +79,7 @@ final class RouteTest extends UnitTestCase
         $this->assertEquals(['connection' => 'redis', 'name' => 'default'], $route->getQueue());
     }
 
-    #[Test]
-    public function it_return_null_queue_options_when_argument_is_empty(): void
+    public function testNullQueueOptionArgument(): void
     {
         $route = new Route(SomeCommand::class);
         $route->onQueue();
@@ -95,8 +87,7 @@ final class RouteTest extends UnitTestCase
         $this->assertNull($route->getQueue());
     }
 
-    #[Test]
-    public function it_serialize_route(): void
+    public function testItSerializeRoute(): void
     {
         $route = new Route(SomeCommand::class);
 
@@ -108,8 +99,7 @@ final class RouteTest extends UnitTestCase
         ], $route->jsonSerialize());
     }
 
-    #[Test]
-    public function it_serialize_full_route(): void
+    public function testItSerializeRouteWithRouteQueueOption(): void
     {
         $route = new Route(SomeCommand::class);
 

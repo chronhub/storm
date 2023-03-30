@@ -10,15 +10,15 @@ use Chronhub\Storm\Reporter\DomainType;
 
 interface Registrar
 {
-    public function make(DomainType $domainType, string $name): Group;
+    public function make(DomainType $groupType, string $groupName): Group;
 
-    public function makeCommand(string $name): Group;
+    public function makeCommand(string $groupName): Group;
 
-    public function makeEvent(string $name): Group;
+    public function makeEvent(string $groupName): Group;
 
-    public function makeQuery(string $name): Group;
+    public function makeQuery(string $groupName): Group;
 
-    public function get(DomainType $type, string $name): ?Group;
+    public function get(DomainType $groupType, string $groupName): ?Group;
 
     /**
      * @return Collection<Group>

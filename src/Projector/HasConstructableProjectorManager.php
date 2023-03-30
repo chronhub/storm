@@ -11,14 +11,14 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Projector\Options\ProjectionOption;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Repository\RepositoryLock;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Projector\Repository\StandaloneStore;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
+use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use function array_merge;
 
 trait HasConstructableProjectorManager
@@ -29,7 +29,7 @@ trait HasConstructableProjectorManager
                                 protected readonly ProjectionQueryScope $queryScope,
                                 protected readonly SystemClock $clock,
                                 protected readonly JsonSerializer $jsonSerializer,
-                                protected SubscriptionOption|array $options = [])
+                                protected ProjectionOption|array $options = [])
     {
     }
 
@@ -57,27 +57,27 @@ trait HasConstructableProjectorManager
         return new Context($option, $streamPositions, $eventCounter, $gapDetector);
     }
 
-    protected function createLock(SubscriptionOption $option): RepositoryLock
+    protected function createLock(ProjectionOption $option): RepositoryLock
     {
         return new RepositoryLock($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createOption(array $option): SubscriptionOption
+    protected function createOption(array $options): ProjectionOption
     {
-        if ($this->options instanceof SubscriptionOption) {
+        if ($this->options instanceof ProjectionOption) {
             return $this->options;
         }
 
-        return new ProjectionOption(...array_merge($this->options, $option));
+        return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createGapDetector(StreamPosition $streamPosition, SubscriptionOption $option): DetectGap
+    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): DetectGap
     {
         return new DetectGap(
             $streamPosition,
             $this->clock,
-            $option->getRetries(),
-            $option->getDetectionWindows()
+            $options->getRetries(),
+            $options->getDetectionWindows()
         );
     }
 }

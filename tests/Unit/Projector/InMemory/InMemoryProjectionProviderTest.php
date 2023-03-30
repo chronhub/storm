@@ -17,10 +17,18 @@ use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
 #[CoversClass(InMemoryProjectionProvider::class)]
 final class InMemoryProjectionProviderTest extends UnitTestCase
 {
-    #[Test]
-    public function it_create_projection(): void
+    private PointInTime $clock;
+
+    protected function setUp(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        parent::setUp();
+
+        $this->clock = new PointInTime();
+    }
+
+    public function testProjectionInstance(): void
+    {
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertNull($provider->retrieve('account'));
 
@@ -31,10 +39,9 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertInstanceOf(InMemoryProjection::class, $projection);
     }
 
-    #[Test]
-    public function it_return_false_when_creating_projection_if_already_exists(): void
+    public function testReturnFalseWhenProjectionAlreadyExists(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertNull($provider->retrieve('account'));
 
@@ -47,10 +54,9 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertFalse($provider->createProjection('account', 'running'));
     }
 
-    #[Test]
-    public function it_update_projection(): void
+    public function testUpdateProjection(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('account', 'running'));
 
@@ -82,23 +88,21 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals('datetime', $projection->lockedUntil());
     }
 
-    #[Test]
-    public function it_raise_exception_when_updating_projection_with_unknown_field(): void
+    public function testExceptionRaisedWithUnknownField(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid projection field invalid_field for projection account');
 
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('account', 'running'));
 
         $provider->updateProjection('account', ['invalid_field' => '{"count" => 10}']);
     }
 
-    #[Test]
-    public function it_delete_projection(): void
+    public function testDeleteProjection(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('customer', 'running'));
 
@@ -112,9 +116,9 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_return_false_deleting_not_found_projection(): void
+    public function testReturnFalseWhenDeletingProjectionNotFound(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertNull($provider->retrieve('customer'));
 
@@ -122,12 +126,13 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_find_projection_by_names_and_order_ascendant(): void
+    public function testFilterProjectionNames(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('customer', 'running'));
         $this->assertTrue($provider->createProjection('account', 'running'));
+
         $this->assertCount(1, $provider->filterByNames('customer'));
         $this->assertCount(1, $provider->filterByNames('account'));
         $this->assertCount(2, $provider->filterByNames('customer', 'account'));
@@ -138,31 +143,34 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals(['customer', 'account'], $found);
     }
 
-    #[Test]
-    public function it_acquire_lock_with_null_projection_lock(): void
+    public function testLockIsAcquired(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('customer', 'idle'));
         $this->assertNull($provider->retrieve('customer')->lockedUntil());
 
-        $clock = new PointInTime();
-        $now = $clock->now();
+        $now = $this->clock->now();
         $lock = $now->add(new DateInterval('PT1H'));
 
-        $acquired = $provider->acquireLock('customer', 'running', $lock->format($clock::DATE_TIME_FORMAT), $now->format($clock::DATE_TIME_FORMAT));
+        $acquired = $provider->acquireLock(
+            'customer',
+            'running',
+            $lock->format($this->clock::DATE_TIME_FORMAT),
+            $now->format($this->clock::DATE_TIME_FORMAT)
+        );
+
         $this->assertTrue($acquired);
 
         $projection = $provider->retrieve('customer');
 
-        $this->assertEquals($lock->format($clock::DATE_TIME_FORMAT), $projection->lockedUntil());
+        $this->assertEquals($lock->format($this->clock::DATE_TIME_FORMAT), $projection->lockedUntil());
         $this->assertEquals('running', $projection->status());
     }
 
-    #[Test]
-    public function it_return_false_acquiring_lock_with_not_found_projection(): void
+    public function testReturnFalseWhenAcquireLockFromProjectionNotFound(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertNull($provider->retrieve('customer'));
 
@@ -171,17 +179,15 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertFalse($acquired);
     }
 
-    #[Test]
-    public function it_acquire_lock_when_now_is_greater_than_lock_projection(): void
+    public function testAcquireLockWhenCurrentTimeIsGreaterThanProjectionLock(): void
     {
-        $clock = new PointInTime();
-        $now = $clock->now();
+        $now = $this->clock->now();
         $lock = $now->sub(new DateInterval('PT1H'));
 
-        $nowString = $now->format($clock::DATE_TIME_FORMAT);
-        $lockString = $lock->format($clock::DATE_TIME_FORMAT);
+        $nowString = $now->format($this->clock::DATE_TIME_FORMAT);
+        $lockString = $lock->format($this->clock::DATE_TIME_FORMAT);
 
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('customer', 'idle'));
         $this->assertNull($provider->retrieve('customer')->lockedUntil());
@@ -194,20 +200,18 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertEquals($nowString, $provider->retrieve('customer')->lockedUntil());
     }
 
-    #[Test]
-    public function it_does_not_acquire_lock_when_now_is_less_than_lock_projection(): void
+    public function testAcquireLockNotUpdatedWhenCurrentTimeIsLessThanProjectionLock(): void
     {
-        $provider = new InMemoryProjectionProvider();
+        $provider = new InMemoryProjectionProvider($this->clock);
 
         $this->assertTrue($provider->createProjection('customer', 'idle'));
         $this->assertNull($provider->retrieve('customer')->lockedUntil());
 
-        $clock = new PointInTime();
-        $now = $clock->now();
+        $now = $this->clock->now();
         $lock = $now->add(new DateInterval('PT1H'));
 
-        $nowString = $now->format($clock::DATE_TIME_FORMAT);
-        $lockString = $lock->format($clock::DATE_TIME_FORMAT);
+        $nowString = $now->format($this->clock::DATE_TIME_FORMAT);
+        $lockString = $lock->format($this->clock::DATE_TIME_FORMAT);
 
         $acquired = $provider->acquireLock('customer', 'running', $lockString, $nowString);
 

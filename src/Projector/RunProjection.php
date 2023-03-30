@@ -21,29 +21,26 @@ readonly class RunProjection
     {
         $pipeline = (new Pipeline())->through($this->pipes);
 
-        $quit = $this->runProjection($pipeline, $context);
-
-        $this->tryReleaseLock($quit);
+        try {
+            $quit = null;
+            $this->runProjection($pipeline, $context);
+        } catch (Throwable $exception) {
+            $quit = $exception;
+        } finally {
+            $this->tryReleaseLock($quit);
+        }
     }
 
     /**
      * Run Projection
      */
-    protected function runProjection(Pipeline $pipeline, Context $context): ?Throwable
+    protected function runProjection(Pipeline $pipeline, Context $context): void
     {
-        try {
-            $exception = null;
-
-            do {
-                $isStopped = $pipeline
-                    ->send($context)
-                    ->then(static fn (Context $context): bool => $context->runner->isStopped());
-            } while ($context->runner->inBackground() && ! $isStopped);
-        } catch (Throwable $e) {
-            $exception = $e;
-        } finally {
-            return $exception;
-        }
+        do {
+            $isStopped = $pipeline
+                ->send($context)
+                ->then(static fn (Context $context): bool => $context->runner->isStopped());
+        } while ($context->runner->inBackground() && ! $isStopped);
     }
 
     /**
@@ -52,6 +49,7 @@ readonly class RunProjection
      * if an error occurred releasing lock, we just failed silently
      * and raise the original exception if exists
      *
+     * @throws ProjectionAlreadyRunning
      * @throws Throwable
      */
     protected function tryReleaseLock(?Throwable $exception): void
@@ -63,6 +61,7 @@ readonly class RunProjection
         try {
             $this->repository?->freed();
         } catch (Throwable) {
+            // failed silently
         }
 
         if ($exception) {

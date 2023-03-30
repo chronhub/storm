@@ -60,7 +60,7 @@ final class RepositoryLockTest extends UnitTestCase
         $lockUntil = $lock->acquire();
         $updatedTime = $datetime->add(new DateInterval('PT1S'));
 
-        $this->assertEquals($updatedTime->format($this->time->getFormat()), $lock->update());
+        $this->assertEquals($updatedTime->format($this->time->getFormat()), $lock->increment());
         $this->assertEquals($updatedTime->format($this->time->getFormat()), $lockUntil);
     }
 

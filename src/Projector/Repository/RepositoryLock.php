@@ -24,7 +24,7 @@ class RepositoryLock
     {
         $this->lastLock = $this->clock->now();
 
-        return $this->update();
+        return $this->increment();
     }
 
     public function tryUpdate(): bool
@@ -45,7 +45,7 @@ class RepositoryLock
         return $this->updateLockWithTimeout($this->clock->now());
     }
 
-    public function update(): string
+    public function increment(): string
     {
         return $this->updateLockWithTimeout($this->lastLock);
     }

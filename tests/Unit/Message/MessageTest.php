@@ -10,7 +10,6 @@ use RuntimeException;
 use InvalidArgumentException;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -20,8 +19,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 final class MessageTest extends UnitTestCase
 {
     #[DataProvider('provideObject')]
-    #[Test]
-    public function it_instantiate_message_with_object(object $event): void
+    public function TestMessageWithNonReportingInstance(object $event): void
     {
         $message = new Message($event);
 
@@ -30,8 +28,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_instantiate_message_with_domain_instance(Reporting $domain): void
+    public function TestMessageWithReportingInstance(Reporting $domain): void
     {
         $message = new Message($domain);
 
@@ -44,28 +41,24 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals('header', $message->header('some'));
     }
 
-    #[Test]
-    public function it_can_add_header_to_message_with_an_event_without_header(): void
+    public function TestAddHeaderToMessageEvent(): void
     {
         $message = new Message(SomeCommand::fromContent([]), ['some' => 'header']);
 
         $this->assertEquals(['some' => 'header'], $message->headers());
     }
 
-    #[Test]
-    public function it_can_add_header_to_message_with_an_event_when_headers_matched(): void
+    public function TestAddHeadersWhenBothHeadersMatched(): void
     {
-        $message = new Message(
-            SomeCommand::fromContent([])->withHeaders(['some' => 'header']),
-            ['some' => 'header']
-        );
+        $command = SomeCommand::fromContent([])->withHeaders(['some' => 'header']);
+
+        $message = new Message($command, ['some' => 'header']);
 
         $this->assertEquals(['some' => 'header'], $message->headers());
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_raise_exception_when_event_headers_differ_from_headers_on_instantiation(Reporting $domain): void
+    public function TestExceptionRaisedWhenHeadersMismatched(Reporting $domain): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid headers consistency for event class '.$domain::class);
@@ -73,18 +66,16 @@ final class MessageTest extends UnitTestCase
         new Message($domain, ['another' => 'header']);
     }
 
-    #[Test]
-    public function it_raise_exception_when_event_is_an_instance_of_message(): void
+    public function TestExceptionRaisedWhenEventIsInstanceOfMessage(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Message event can not be an instance of itself');
+        $this->expectExceptionMessage('Message event cannot be an instance of itself');
 
         new Message(new Message(new stdClass()));
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_add_header_to_message(Reporting $domain): void
+    public function testAddHeadersToCloneMessage(Reporting $domain): void
     {
         $message = new Message($domain);
 
@@ -97,8 +88,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_override_headers_to_message(Reporting $domain): void
+    public function TestAddHeadersOnMessageEvent(Reporting $domain): void
     {
         $message = new Message($domain);
 
@@ -111,13 +101,82 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_access_event_from_message_with_headers(Reporting $domain): void
+    public function TestAccessMessageEvent(Reporting $domain): void
     {
         $message = new Message($domain);
 
         $this->assertEquals($domain, $message->event());
         $this->assertNotSame($domain, $message->event());
+    }
+
+    public function testEventDoesNotReturnsOriginalEventWithHeaders()
+    {
+        $event = new SomeEvent([]);
+        $headers = ['foo' => 'bar'];
+
+        $message = new Message($event, $headers);
+
+        $this->assertNotEquals($event, $message->event());
+        $this->assertEquals($headers, $message->headers());
+    }
+
+    public function testEventReturnsClonedEventWithHeaders()
+    {
+        $event = new SomeEvent([]);
+        $headers = ['foo' => 'bar'];
+
+        $message = new Message($event, $headers);
+
+        $clonedEvent = $message->event();
+
+        $this->assertInstanceOf(SomeEvent::class, $clonedEvent);
+        $this->assertEquals($headers, $clonedEvent->headers());
+    }
+
+    public function testWithHeaderAddsHeader()
+    {
+        $event = new SomeEvent([]);
+        $headers = ['foo' => 'bar'];
+
+        $message = new Message($event, $headers);
+
+        $newHeader = ['baz' => 'qux'];
+
+        $newMessage = $message->withHeader('baz', 'qux');
+
+        $this->assertEquals($headers + $newHeader, $newMessage->headers());
+    }
+
+    public function testWithHeadersReplacesHeaders()
+    {
+        $event = new SomeEvent([]);
+        $headers = ['foo' => 'bar'];
+
+        $message = new Message($event, $headers);
+
+        $newHeaders = ['baz' => 'qux'];
+
+        $newMessage = $message->withHeaders($newHeaders);
+
+        $this->assertEquals($newHeaders, $newMessage->headers());
+    }
+
+    public function testIsMessagingReturnsFalseForNonReportingEvent()
+    {
+        $event = new stdClass();
+        $headers = ['foo' => 'bar'];
+
+        $message = new Message($event, $headers);
+
+        $this->assertFalse($message->isMessaging());
+    }
+
+    #[DataProvider('provideDomain')]
+    public function testIsMessagingReturnsTrueForReportingEvent(Reporting $event)
+    {
+        $message = new Message($event);
+
+        $this->assertTrue($message->isMessaging());
     }
 
     public static function provideDomain(): Generator

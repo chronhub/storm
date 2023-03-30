@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use DateInterval;
-use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use function usleep;
 use function array_key_exists;
@@ -16,55 +14,57 @@ class DetectGap
 
     protected bool $gapDetected = false;
 
-    public function __construct(protected readonly StreamPosition $streamPosition,
-                                protected readonly SystemClock $clock,
-                                protected readonly array $retriesInMs,
-                                protected readonly ?string $detectionWindows = null)
-    {
+    public function __construct(
+        protected readonly StreamPosition $streamPosition,
+        protected readonly SystemClock $clock,
+        protected readonly array $retriesInMs,
+        protected readonly ?string $detectionWindows = null
+    ) {
     }
 
     public function detect(string $streamName, int $eventPosition, string $eventTime): bool
     {
-        // no retries setup
         if (empty($this->retriesInMs)) {
             return false;
         }
 
-        // the current event position match the next position
-        if ($this->streamPosition->hasNextPosition($streamName, $eventPosition)) {
-            $this->resetRetries();
+        $gapDetected = $this->isGapDetected($streamName, $eventPosition);
 
-            return $this->gapDetected = false;
-        }
-
-        $gapDetected = array_key_exists($this->retries, $this->retriesInMs);
-
-        // when the max attempts of retries has been reached, we just give up
-        // if most of the time, it just a fake gap causing by deadlock/exceeded timeout ...
-        // this can be a real issue cause by the ES miss an event
         if (! $gapDetected) {
             $this->resetRetries();
 
-            return $this->gapDetected = false;
+            $this->resetGap();
+
+            return false;
         }
 
-        // before marking a gap detected, we measure the time elapsed between
-        // the event time and a detection windows
-        // To use for resetting projection to avoid unnecessary retries
-        if ($this->detectionWindows) {
-            $pastDatetime = $this->clock->now()->sub(new DateInterval($this->detectionWindows));
-            $eventDateTime = new DateTimeImmutable($eventTime, $pastDatetime->getTimezone());
+        if ($this->detectionWindows && ! $this->isElapsed($eventTime)) {
+            $this->resetRetries();
 
-            $gapDetected = $pastDatetime > $eventDateTime;
+            $this->resetGap();
 
-            if (! $gapDetected) {
-                $this->resetRetries();
-            }
-
-            return $this->gapDetected = $gapDetected;
+            return false;
         }
 
-        return $this->gapDetected = true;
+        $this->gapDetected = true;
+
+        return true;
+    }
+
+    protected function isGapDetected(string $streamName, int $eventPosition): bool
+    {
+        if ($this->streamPosition->hasNextPosition($streamName, $eventPosition)) {
+            $this->resetRetries();
+
+            return false;
+        }
+
+        return array_key_exists($this->retries, $this->retriesInMs);
+    }
+
+    protected function isElapsed(string $eventTime): bool
+    {
+        return $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime);
     }
 
     public function hasGap(): bool

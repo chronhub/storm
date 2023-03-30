@@ -15,6 +15,7 @@ use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Routing\RouteLocator;
@@ -43,7 +44,7 @@ final class HandleRouteTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_handle_route_sync(): void
+    public function testRouteHandleSync(): void
     {
         $tracker = new TrackMessage();
 
@@ -77,7 +78,7 @@ final class HandleRouteTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_handle_route_async(): void
+    public function testRouteHandleAsync(): void
     {
         $tracker = new TrackMessage();
 
@@ -113,9 +114,8 @@ final class HandleRouteTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideNullAndEmptyArray')]
-    #[Test]
-    public function it_handle_route_async_with_no_queue_options(?array $noQueue): void
+    #[DataProvider('provideNullAndEmptyArray')]
+    public function testRouteHandleASyncWithNoQueueOption(?array $noQueue): void
     {
         $tracker = new TrackMessage();
 
@@ -151,8 +151,7 @@ final class HandleRouteTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[Test]
-    public function it_assert_subscriber_can_be_untracked(): void
+    public function testSubscriberCanBeUntracked(): void
     {
         $subscriber = new HandleRoute($this->routeLocator, $this->messageProducer, $this->producerUnity);
 

@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\PersistentState;
 use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
-use Chronhub\Storm\Contracts\Projector\SubscriptionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function count;
@@ -44,7 +44,7 @@ class Context
 
     public readonly bool $isPersistent;
 
-    public function __construct(public readonly SubscriptionOption $option,
+    public function __construct(public readonly ProjectionOption $option,
                                 public readonly StreamPosition $streamPosition,
                                 public readonly ?EventCounter $eventCounter = null,
                                 public readonly ?DetectGap $gap = null)

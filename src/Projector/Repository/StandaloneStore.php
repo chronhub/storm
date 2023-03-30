@@ -170,7 +170,7 @@ final class StandaloneStore implements Store
         if ($this->repositoryLock->tryUpdate()) {
             return $this->updateProjection(
                 [
-                    'locked_until' => $this->repositoryLock->update(),
+                    'locked_until' => $this->repositoryLock->increment(),
                     'position' => $this->serializer->encode($this->context->streamPosition->all()),
                 ]
             );

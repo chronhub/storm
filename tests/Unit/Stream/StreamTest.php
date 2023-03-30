@@ -27,8 +27,7 @@ final class StreamTest extends UnitTestCase
     }
 
     #[DataProvider('provideIterableEvents')]
-    #[Test]
-    public function it_instantiate_stream(iterable $events): void
+    public function testInstance(iterable $events): void
     {
         $stream = new Stream($this->streamName, $events);
 
@@ -40,7 +39,7 @@ final class StreamTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_instantiate_stream_with_generator(): void
+    public function testGenerateStreamEvents(): void
     {
         $events = $this->provideGenerator();
 

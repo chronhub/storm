@@ -9,7 +9,6 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Contracts\Message\Header;
@@ -27,8 +26,7 @@ use Chronhub\Storm\Support\Bridge\MakeCausationDomainCommand;
 class MakeCausationDomainCommandTest extends UnitTestCase
 {
     #[DataProvider('provideStreamEventName')]
-    #[Test]
-    public function it_add_correlation_headers_from_dispatched_command_on_stream_event(string $streamEventName): void
+    public function testCorrelationHeaderAdded(string $streamEventName): void
     {
         $command = (SomeCommand::fromContent(['foo' => 'bar']))
             ->withHeaders(
@@ -76,8 +74,7 @@ class MakeCausationDomainCommandTest extends UnitTestCase
     }
 
     #[DataProvider('provideStreamEventName')]
-    #[Test]
-    public function it_does_not_add_correlation_headers_if_already_exists(string $streamEventName): void
+    public function testCorrelationHeaderNotOverride(string $streamEventName): void
     {
         $message = (SomeCommand::fromContent(['foo' => 'bar']))
             ->withHeaders(
@@ -131,8 +128,7 @@ class MakeCausationDomainCommandTest extends UnitTestCase
         $this->assertNull(ReflectionProperty::getProperty($subscriber, 'currentCommand'));
     }
 
-    #[Test]
-    public function it_can_be_detach_from_event_store_and_reporter(): void
+    public function testSubscribersCanBeDetached(): void
     {
         $messageTracker = new TrackMessage();
         $streamTracker = new TrackStream();

@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\InMemory;
 
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\Provider\InMemoryProjection;
 
 #[CoversClass(InMemoryProjection::class)]
 final class InMemoryProjectionTest extends UnitTestCase
 {
-    #[Test]
-    public function it_assert_instance(): void
+    public function testInstance(): void
     {
         $projection = InMemoryProjection::create('customer', 'running');
 
@@ -28,8 +26,7 @@ final class InMemoryProjectionTest extends UnitTestCase
         $this->assertNull($projection->lockedUntil());
     }
 
-    #[Test]
-    public function it_set_state(): void
+    public function TestStateSetter(): void
     {
         $projection = InMemoryProjection::create('customer', 'running');
 
@@ -42,8 +39,7 @@ final class InMemoryProjectionTest extends UnitTestCase
         $this->assertEquals('{"count": 10}', $projection->state());
     }
 
-    #[Test]
-    public function it_set_position(): void
+    public function testPositionSetter(): void
     {
         $projection = InMemoryProjection::create('customer', 'running');
 
@@ -56,8 +52,7 @@ final class InMemoryProjectionTest extends UnitTestCase
         $this->assertEquals('{"account": 10}', $projection->position());
     }
 
-    #[Test]
-    public function it_set_status(): void
+    public function testStatusSetter(): void
     {
         $projection = InMemoryProjection::create('customer', 'running');
 
@@ -68,8 +63,7 @@ final class InMemoryProjectionTest extends UnitTestCase
         $this->assertEquals('idle', $projection->status());
     }
 
-    #[Test]
-    public function it_set_locked_until(): void
+    public function testLockedUntilSetter(): void
     {
         $projection = InMemoryProjection::create('customer', 'running');
 

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Routing;
 
+use Countable;
 use JsonSerializable;
 use Chronhub\Storm\Routing\Route;
 use Illuminate\Support\Collection;
 
-interface RouteCollection extends JsonSerializable
+interface RouteCollection extends JsonSerializable, Countable
 {
     /**
      * @param  class-string  $messageName
