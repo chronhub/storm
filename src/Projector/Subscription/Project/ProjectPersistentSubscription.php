@@ -12,10 +12,10 @@ use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
 
 final readonly class ProjectPersistentSubscription implements ProjectionProjector
 {
@@ -25,13 +25,13 @@ final readonly class ProjectPersistentSubscription implements ProjectionProjecto
     private StreamCache $streamCache;
 
     public function __construct(
-      protected Subscription $subscription,
+      protected PersistentViewSubscription $subscription,
       protected ContextBuilder $context,
-      protected SubscriptionManagement $repository,
+      protected ProjectionRepository $repository,
       protected Chronicler $chronicler,
       protected string $streamName)
     {
-        $this->streamCache = new StreamCache($subscription->option->getCacheSize());
+        $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
     }
 
     public function emit(DomainEvent $event): void
@@ -56,7 +56,9 @@ final readonly class ProjectPersistentSubscription implements ProjectionProjecto
 
     protected function getCaster(): PersistentProjectorCaster
     {
-        return new PersistentCaster($this, $this->subscription->clock, $this->subscription->currentStreamName);
+        return new PersistentCaster(
+            $this, $this->subscription->clock(), $this->subscription->currentStreamName
+        );
     }
 
     /**
@@ -65,10 +67,10 @@ final readonly class ProjectPersistentSubscription implements ProjectionProjecto
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
-        if (! $this->subscription->isStreamCreated && ! $this->chronicler->hasStream($streamName)) {
+        if (! $this->subscription->isAttached() && ! $this->chronicler->hasStream($streamName)) {
             $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->subscription->isStreamCreated = true;
+            $this->subscription->attach();
         }
     }
 

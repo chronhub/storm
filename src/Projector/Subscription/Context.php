@@ -8,6 +8,7 @@ use Closure;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
+use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function count;
@@ -124,6 +125,38 @@ final class Context implements ContextBuilder
         }
 
         return $this->queryFilter;
+    }
+
+    /**
+     * @internal
+     */
+    public function castEventHandlers(ProjectorCaster $caster): void
+    {
+        if ($this->eventHandlers instanceof Closure) {
+            $this->eventHandlers = Closure::bind($this->eventHandlers, $caster);
+        } else {
+            foreach ($this->eventHandlers as &$eventHandler) {
+                $eventHandler = Closure::bind($eventHandler, $caster);
+            }
+        }
+    }
+
+    /**
+     * @internal
+     */
+    public function castInitCallback(ProjectorCaster $caster): array
+    {
+        if ($this->initCallback instanceof Closure) {
+            $callback = Closure::bind($this->initCallback(), $caster);
+
+            $result = $callback();
+
+            $this->initCallback = $callback;
+
+            return $result;
+        }
+
+        return [];
     }
 
     protected function assertQueriesNotSet(): void

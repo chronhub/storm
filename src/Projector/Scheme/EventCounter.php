@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-class EventCounter
+final class EventCounter
 {
+    private int $counter = 0;
+
     public function __construct(public readonly int $limit)
     {
     }
-
-    protected int $counter = 0;
 
     public function increment(): void
     {

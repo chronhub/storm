@@ -43,7 +43,7 @@ trait ProvidePersistentSubscription
 
     public function getState(): array
     {
-        return $this->subscription->state->get();
+        return $this->subscription->state()->get();
     }
 
     public function getStreamName(): string

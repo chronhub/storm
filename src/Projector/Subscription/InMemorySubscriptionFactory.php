@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\Repository\InMemoryStore;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
-use Chronhub\Storm\Projector\Repository\ReadModelSubscriptionManagement;
-use Chronhub\Storm\Projector\Repository\PersistentSubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
+use Chronhub\Storm\Projector\Repository\InMemoryProjectionStore;
+use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
+use Chronhub\Storm\Projector\Repository\ReadModelProjectionRepository;
+use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Projector\Repository\PersistentProjectionRepository;
 
 final readonly class InMemorySubscriptionFactory extends SubscriptionFactory
 {
     public function createSubscriptionManagement(
-        Subscription $subscription,
+        PersistentViewSubscription|PersistentReadModelSubscription $subscription,
         string $streamName,
-        ?ReadModel $readModel): SubscriptionManagement
+        ?ReadModel $readModel): ProjectionRepository
     {
         $store = $this->createStore($subscription, $streamName);
 
-        $store = new InMemoryStore($store);
+        $adapter = new InMemoryProjectionStore($store);
 
         if ($readModel) {
-            return new ReadModelSubscriptionManagement($subscription, $store, $readModel);
+            return new ReadModelProjectionRepository($subscription, $adapter, $readModel);
         }
 
-        return new PersistentSubscriptionManagement($subscription, $store, $this->chronicler);
+        return new PersistentProjectionRepository($subscription, $adapter, $this->chronicler);
     }
 }

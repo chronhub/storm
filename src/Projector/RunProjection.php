@@ -6,15 +6,15 @@ namespace Chronhub\Storm\Projector;
 
 use Throwable;
 use Chronhub\Storm\Projector\Scheme\Workflow;
-use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
 readonly class RunProjection
 {
     public function __construct(
         private array $activities,
-        private ?SubscriptionManagement $repository
+        private ?ProjectionRepository $repository
     ) {
     }
 
@@ -35,13 +35,13 @@ readonly class RunProjection
     protected function runProjection(Workflow $workflow, Subscription $subscription): void
     {
         do {
-            $isStopped = $workflow->then(static fn (Subscription $subscription): bool => $subscription->runner->isStopped());
-        } while ($subscription->runner->inBackground() && ! $isStopped);
+            $inProgress = $workflow->process(
+                static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+            );
+        } while ($subscription->sprint()->inBackground() && $inProgress);
     }
 
     /**
-     * Try release lock
-     *
      * if an error occurred releasing lock, we just failed silently
      * and raise the original exception if exists
      *

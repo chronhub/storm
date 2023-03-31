@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\Store;
-use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
+use Chronhub\Storm\Contracts\Projector\ProjectionStore;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
-use Chronhub\Storm\Projector\Repository\RepositoryLock;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Projector\Repository\StandaloneStore;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
+use Chronhub\Storm\Projector\Repository\StandaloneProjectionStore;
+use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
 use function array_merge;
 
 abstract readonly class SubscriptionFactory
@@ -46,14 +49,28 @@ abstract readonly class SubscriptionFactory
         );
     }
 
-    public function createPersistentSubscription(array $options = []): Subscription
+    public function createPersistentSubscription(array $options = []): PersistentViewSubscription
     {
         $subscriptionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
-        return new PersistentSubscription(
+        return new BoundSubscription(
             $subscriptionOption,
             $this->createStreamPosition(),
+            $this->createEventCounter($subscriptionOption),
+            $this->createGapDetector($streamPosition, $subscriptionOption),
+            $this->clock
+        );
+    }
+
+    public function createReadModelSubscription(array $options = []): PersistentReadModelSubscription
+    {
+        $subscriptionOption = $this->createOption($options);
+        $streamPosition = $this->createStreamPosition();
+
+        return new ReadModelSubscription(
+            $subscriptionOption,
+            $streamPosition,
             $this->createEventCounter($subscriptionOption),
             $this->createGapDetector($streamPosition, $subscriptionOption),
             $this->clock
@@ -66,24 +83,24 @@ abstract readonly class SubscriptionFactory
     }
 
     abstract public function createSubscriptionManagement(
-        Subscription $subscription,
+        PersistentViewSubscription|PersistentReadModelSubscription $subscription,
         string $streamName,
-        ?ReadModel $readModel): SubscriptionManagement;
+        ?ReadModel $readModel): ProjectionRepository;
 
-    protected function createStore(Subscription $subscription, string $streamName): Store
+    protected function createStore(Subscription $subscription, string $streamName): ProjectionStore
     {
-        return new StandaloneStore(
+        return new StandaloneProjectionStore(
             $subscription,
             $this->projectionProvider,
-            $this->createLock($subscription->option),
+            $this->createLock($subscription->option()),
             $this->jsonSerializer,
             $streamName
         );
     }
 
-    protected function createLock(ProjectionOption $option): RepositoryLock
+    protected function createLock(ProjectionOption $option): LockManager
     {
-        return new RepositoryLock($this->clock, $option->getTimeout(), $option->getLockout());
+        return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
     protected function createOption(array $options): ProjectionOption
@@ -95,9 +112,9 @@ abstract readonly class SubscriptionFactory
         return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): DetectGap
+    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): GapDetector
     {
-        return new DetectGap(
+        return new GapDetector(
             $streamPosition,
             $this->clock,
             $options->getRetries(),

@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
+use JsonSerializable;
 use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function key;
 
-class StreamPosition
+final class StreamPosition implements JsonSerializable
 {
+    /**
+     * @var Collection<string, int>
+     */
     private Collection $container;
 
     public function __construct(private readonly EventStreamProvider $eventStreamProvider)
@@ -48,6 +52,11 @@ class StreamPosition
     }
 
     public function all(): array
+    {
+        return $this->container->toArray();
+    }
+
+    public function jsonSerialize(): array
     {
         return $this->container->toArray();
     }

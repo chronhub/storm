@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final class PreparePersistentRunner
 {
@@ -17,7 +17,7 @@ final class PreparePersistentRunner
         if (! $this->isInitialized) {
             $this->isInitialized = true;
 
-            if ($this->refresh(true, $subscription->runner->inBackground())) {
+            if ($this->refresh(true, $subscription->sprint()->inBackground())) {
                 return true;
             }
 

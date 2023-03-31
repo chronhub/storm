@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscription;
 
 final readonly class HandleGap
 {
-    public function __construct(private SubscriptionManagement $repository)
+    public function __construct(private ProjectionRepository $repository)
     {
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(PersistentSubscription $subscription, callable $next): callable|bool
     {
-        if ($subscription->gap->hasGap()) {
-            $subscription->gap->sleep();
+        if ($subscription->gap()->hasGap()) {
+            $subscription->gap()->sleep();
 
             $this->repository->store();
         }

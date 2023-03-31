@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Closure;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 use function array_reduce;
 use function array_reverse;
 
-final class Workflow
+final readonly class Workflow
 {
     private function __construct(
-        private readonly Subscription $subscription,
-        private readonly array $activities
+        private Subscription $subscription,
+        private array $activities
     ) {
     }
 
@@ -22,7 +22,7 @@ final class Workflow
         return new self($subscription, $activities);
     }
 
-    public function then(Closure $destination): bool
+    public function process(Closure $destination): bool
     {
         $execute = array_reduce(
             array_reverse($this->activities),

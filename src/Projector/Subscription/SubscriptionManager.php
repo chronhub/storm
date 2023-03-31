@@ -50,7 +50,7 @@ final readonly class SubscriptionManager implements ProjectorManager
 
     public function projectReadModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $subscription = $this->subscriptionFactory->createPersistentSubscription($options);
+        $subscription = $this->subscriptionFactory->createReadModelSubscription($options);
 
         return new ProjectReadModelSubscription(
             $subscription,

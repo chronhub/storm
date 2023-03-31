@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final class UpdateStatusAndPositions
 {
@@ -12,9 +12,9 @@ final class UpdateStatusAndPositions
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $this->refresh(false, $subscription->runner->inBackground());
+        $this->refresh(false, $subscription->sprint()->inBackground());
 
-        $subscription->streamPosition->watch(
+        $subscription->streamPosition()->watch(
             $subscription->context()->queries()
         );
 

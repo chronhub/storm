@@ -9,10 +9,10 @@ use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
 
 final readonly class ProjectReadModelSubscription implements ReadModelProjector
 {
@@ -20,9 +20,9 @@ final readonly class ProjectReadModelSubscription implements ReadModelProjector
     use ProvidePersistentSubscription;
 
     public function __construct(
-        protected Subscription $subscription,
+        protected PersistentReadModelSubscription $subscription,
         protected ContextBuilder $context,
-        protected SubscriptionManagement $repository,
+        protected ProjectionRepository $repository,
         protected Chronicler $chronicler,
         protected string $streamName,
         private ReadModel $readModel)
@@ -36,6 +36,8 @@ final readonly class ProjectReadModelSubscription implements ReadModelProjector
 
     protected function getCaster(): ReadModelProjectorCaster
     {
-        return new ReadModelCaster($this, $this->subscription->clock, $this->subscription->currentStreamName);
+        return new ReadModelCaster(
+            $this, $this->subscription->clock(), $this->subscription->currentStreamName
+        );
     }
 }

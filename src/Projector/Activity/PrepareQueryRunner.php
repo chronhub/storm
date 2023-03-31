@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final class PrepareQueryRunner
 {
@@ -15,7 +15,7 @@ final class PrepareQueryRunner
         if (! $this->isInitialized) {
             $this->isInitialized = true;
 
-            $subscription->streamPosition->watch(
+            $subscription->streamPosition()->watch(
                 $subscription->context()->queries()
             );
         }

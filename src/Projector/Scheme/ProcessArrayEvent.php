@@ -6,8 +6,9 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscription;
 
 final readonly class ProcessArrayEvent extends EventProcessor
 {
@@ -16,21 +17,21 @@ final readonly class ProcessArrayEvent extends EventProcessor
     {
     }
 
-    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?SubscriptionManagement $repository): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?ProjectionRepository $repository): bool
     {
         if (! $this->preProcess($subscription, $event, $key, $repository)) {
             return false;
         }
 
         if (null === $eventHandler = $this->determineEventHandler($event)) {
-            if ($repository) {
+            if ($repository && $subscription instanceof PersistentSubscription) {
                 $this->persistOnReachedCounter($subscription, $repository);
             }
 
-            return ! $subscription->runner->isStopped();
+            return $subscription->sprint()->inProgress();
         }
 
-        $state = $eventHandler($event, $subscription->state->get());
+        $state = $eventHandler($event, $subscription->state()->get());
 
         return $this->afterProcess($subscription, $state, $repository);
     }

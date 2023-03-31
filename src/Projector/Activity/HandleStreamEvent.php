@@ -8,19 +8,19 @@ use Closure;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use function array_keys;
 use function array_values;
 
 final readonly class HandleStreamEvent
 {
     public function __construct(private Chronicler $chronicler,
-                                private ?SubscriptionManagement $repository)
+                                private ?ProjectionRepository $repository)
     {
     }
 
@@ -28,7 +28,7 @@ final readonly class HandleStreamEvent
     {
         $queryFilter = $subscription->context()->queryFilter();
 
-        $streams = $this->retrieveStreams($subscription->streamPosition->all(), $queryFilter);
+        $streams = $this->retrieveStreams($subscription->streamPosition()->all(), $queryFilter);
 
         $eventHandlers = $subscription->context()->eventHandlers();
 
@@ -37,7 +37,7 @@ final readonly class HandleStreamEvent
 
             $eventHandled = $eventHandlers($subscription, $event, $eventPosition, $this->repository);
 
-            if (! $eventHandled || $subscription->runner->isStopped()) {
+            if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
                 return $next($subscription);
             }
         }
