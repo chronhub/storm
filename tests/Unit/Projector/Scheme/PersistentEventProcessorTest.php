@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;
@@ -30,7 +30,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->preProcess($context, $event, $key, $repository);
             }
@@ -63,7 +63,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->preProcess($context, $event, $key, $repository);
             }
@@ -87,7 +87,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->preProcess($context, $event, $key, $repository);
             }
@@ -112,7 +112,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->afterProcess($context, ['foo' => 'bar'], $repository);
             }
@@ -136,7 +136,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->afterProcess($context, ['foo' => 'bar'], $repository);
             }
@@ -162,7 +162,7 @@ final class PersistentEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->afterProcess($context, [], $repository);
             }

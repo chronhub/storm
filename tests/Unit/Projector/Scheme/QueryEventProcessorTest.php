@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;
@@ -29,7 +29,7 @@ final class QueryEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->preProcess($context, $event, $key, $repository);
             }
@@ -50,7 +50,7 @@ final class QueryEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->preProcess($context, $event, $key, $repository);
             }
@@ -81,7 +81,7 @@ final class QueryEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->afterProcess($context, ['foo' => 'bar'], $repository);
             }
@@ -102,7 +102,7 @@ final class QueryEventProcessorTest extends UnitTestCase
     {
         $processEvent = new class extends EventProcessor
         {
-            public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository)
+            public function __invoke(Context $context, DomainEvent $event, int $key, ?SubscriptionManagement $repository)
             {
                 return $this->afterProcess($context, null, $repository);
             }

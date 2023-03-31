@@ -6,22 +6,23 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Closure;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
-final class ProcessClosureEvent extends EventProcessor
+final readonly class ProcessClosureEvent extends EventProcessor
 {
-    public function __construct(private readonly Closure $eventHandlers)
+    public function __construct(private Closure $eventHandlers)
     {
     }
 
-    public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?SubscriptionManagement $repository): bool
     {
-        if (! $this->preProcess($context, $event, $key, $repository)) {
+        if (! $this->preProcess($subscription, $event, $key, $repository)) {
             return false;
         }
 
-        $state = ($this->eventHandlers)($event, $context->state->get());
+        $state = ($this->eventHandlers)($event, $subscription->state->get());
 
-        return $this->afterProcess($context, $state, $repository);
+        return $this->afterProcess($subscription, $state, $repository);
     }
 }

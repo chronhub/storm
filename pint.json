@@ -19,7 +19,7 @@
     },
     "ordered_imports" : {
       "sort_algorithm" : "length",
-      "imports_order" : ["const","class","function"]
+      "imports_order" : ["const", "class", "function"]
     }
   },
   "exclude": [

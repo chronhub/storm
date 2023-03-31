@@ -12,7 +12,7 @@ use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Projector\Pipes\PreparePersistentRunner;
+use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 
 #[CoversClass(PreparePersistentRunner::class)]

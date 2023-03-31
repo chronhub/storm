@@ -18,9 +18,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
-use Chronhub\Storm\Projector\Repository\PersistentProjectorRepository;
+use Chronhub\Storm\Projector\Repository\PersistentSubscriptionManagement;
 
-#[CoversClass(PersistentProjectorRepository::class)]
+#[CoversClass(PersistentSubscriptionManagement::class)]
 final class PersistentProjectorRepositoryTest extends UnitTestCase
 {
     use ProvideMockContext {
@@ -240,9 +240,9 @@ final class PersistentProjectorRepositoryTest extends UnitTestCase
         $this->assertEquals('foo', $repository->streamName());
     }
 
-    private function persistentRepositoryInstance(Context $context): PersistentProjectorRepository
+    private function persistentRepositoryInstance(Context $context): PersistentSubscriptionManagement
     {
-        return new PersistentProjectorRepository($context, $this->store, $this->chronicler);
+        return new PersistentSubscriptionManagement($context, $this->store, $this->chronicler);
     }
 
     public static function provideBoolean(): Generator

@@ -16,9 +16,9 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
-use Chronhub\Storm\Projector\Repository\ReadModelProjectorRepository;
+use Chronhub\Storm\Projector\Repository\ReadModelSubscriptionManagement;
 
-#[CoversClass(ReadModelProjectorRepository::class)]
+#[CoversClass(ReadModelSubscriptionManagement::class)]
 final class ReadModelProjectorRepositoryTest extends UnitTestCase
 {
     use ProvideMockContext {
@@ -216,9 +216,9 @@ final class ReadModelProjectorRepositoryTest extends UnitTestCase
         $this->assertEquals('foo', $repository->streamName());
     }
 
-    private function readModelRepositoryInstance(Context $context): ReadModelProjectorRepository
+    private function readModelRepositoryInstance(Context $context): ReadModelSubscriptionManagement
     {
-        return new ReadModelProjectorRepository($context, $this->store, $this->readModel);
+        return new ReadModelSubscriptionManagement($context, $this->store, $this->readModel);
     }
 
     public static function provideBooleanForRise(): Generator

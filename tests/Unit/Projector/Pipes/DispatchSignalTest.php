@@ -8,7 +8,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Pipes\DispatchSignal;
+use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 use function posix_kill;
 use function pcntl_signal;

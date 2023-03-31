@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
-final readonly class PersistentProjectorRepository implements ProjectorRepository
+final readonly class PersistentSubscriptionManagement implements SubscriptionManagement
 {
-    public function __construct(private Context $context,
+    public function __construct(private Subscription $subscription,
                                 private Store $store,
                                 private Chronicler $chronicler)
     {
@@ -22,7 +22,7 @@ final readonly class PersistentProjectorRepository implements ProjectorRepositor
 
     public function rise(): void
     {
-        $this->context->runner->stop(false);
+        $this->subscription->runner->stop(false);
 
         if (! $this->store->exists()) {
             $this->store->create();
@@ -30,7 +30,9 @@ final readonly class PersistentProjectorRepository implements ProjectorRepositor
 
         $this->store->acquireLock();
 
-        $this->context->streamPosition->watch($this->context->queries());
+        $this->subscription->streamPosition->watch(
+            $this->subscription->context()->queries()
+        );
 
         $this->boundState();
     }
@@ -98,6 +100,6 @@ final readonly class PersistentProjectorRepository implements ProjectorRepositor
         } catch (StreamNotFound) {
         }
 
-        $this->context->isStreamCreated = false;
+        $this->subscription->isStreamCreated = false;
     }
 }

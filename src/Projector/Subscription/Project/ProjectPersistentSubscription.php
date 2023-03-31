@@ -2,32 +2,36 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription\Project;
 
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
+use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
+use Chronhub\Storm\Contracts\Projector\ContextBuilder;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
 
-final readonly class ProjectProjection implements ProjectionProjector
+final readonly class ProjectPersistentSubscription implements ProjectionProjector
 {
     use InteractWithContext;
-    use ProvidePersistentProjector;
+    use ProvidePersistentSubscription;
 
     private StreamCache $streamCache;
 
-    public function __construct(protected Context $context,
-                                protected ProjectorRepository $repository,
-                                protected Chronicler $chronicler,
-                                protected string $streamName)
+    public function __construct(
+      protected Subscription $subscription,
+      protected ContextBuilder $context,
+      protected SubscriptionManagement $repository,
+      protected Chronicler $chronicler,
+      protected string $streamName)
     {
-        $this->streamCache = new StreamCache($context->option->getCacheSize());
+        $this->streamCache = new StreamCache($subscription->option->getCacheSize());
     }
 
     public function emit(DomainEvent $event): void
@@ -52,7 +56,7 @@ final readonly class ProjectProjection implements ProjectionProjector
 
     protected function getCaster(): PersistentProjectorCaster
     {
-        return new PersistentCaster($this, $this->context->currentStreamName);
+        return new PersistentCaster($this, $this->subscription->clock, $this->subscription->currentStreamName);
     }
 
     /**
@@ -61,15 +65,17 @@ final readonly class ProjectProjection implements ProjectionProjector
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
-        if (! $this->context->isStreamCreated && ! $this->chronicler->hasStream($streamName)) {
+        if (! $this->subscription->isStreamCreated && ! $this->chronicler->hasStream($streamName)) {
             $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->context->isStreamCreated = true;
+            $this->subscription->isStreamCreated = true;
         }
     }
 
     /**
      * Check if stream name already exists in cache and/or in the event store
+     * if the in-memory cache has the stream, we assume it already exists in the event store
+     * otherwise, we push the stream into it and check if it exists in the event store
      */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {

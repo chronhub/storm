@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
-final readonly class ReadModelProjectorRepository implements ProjectorRepository
+final readonly class ReadModelSubscriptionManagement implements SubscriptionManagement
 {
-    public function __construct(private Context $context,
+    public function __construct(private Subscription $subscription,
                                 private Store $store,
                                 private ReadModel $readModel)
     {
@@ -20,7 +20,7 @@ final readonly class ReadModelProjectorRepository implements ProjectorRepository
 
     public function rise(): void
     {
-        $this->context->runner->stop(false);
+        $this->subscription->runner->stop(false);
 
         if (! $this->store->exists()) {
             $this->store->create();
@@ -32,7 +32,9 @@ final readonly class ReadModelProjectorRepository implements ProjectorRepository
             $this->readModel->initialize();
         }
 
-        $this->context->streamPosition->watch($this->context->queries());
+        $this->subscription->streamPosition->watch(
+            $this->subscription->context()->queries()
+        );
 
         $this->boundState();
     }

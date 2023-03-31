@@ -6,32 +6,33 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
-final class ProcessArrayEvent extends EventProcessor
+final readonly class ProcessArrayEvent extends EventProcessor
 {
-    public function __construct(private readonly array $eventHandlers,
-                                private readonly ?MessageAlias $messageAlias = null)
+    public function __construct(private array $eventHandlers,
+                                private ?MessageAlias $messageAlias = null)
     {
     }
 
-    public function __invoke(Context $context, DomainEvent $event, int $key, ?ProjectorRepository $repository): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?SubscriptionManagement $repository): bool
     {
-        if (! $this->preProcess($context, $event, $key, $repository)) {
+        if (! $this->preProcess($subscription, $event, $key, $repository)) {
             return false;
         }
 
         if (null === $eventHandler = $this->determineEventHandler($event)) {
             if ($repository) {
-                $this->persistOnReachedCounter($context, $repository);
+                $this->persistOnReachedCounter($subscription, $repository);
             }
 
-            return ! $context->runner->isStopped();
+            return ! $subscription->runner->isStopped();
         }
 
-        $state = $eventHandler($event, $context->state->get());
+        $state = $eventHandler($event, $subscription->state->get());
 
-        return $this->afterProcess($context, $state, $repository);
+        return $this->afterProcess($subscription, $state, $repository);
     }
 
     private function determineEventHandler(DomainEvent $event): ?callable

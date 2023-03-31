@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Pipes;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Projector\Pipes\HandleGap;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Chronhub\Storm\Projector\Activity\HandleGap;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 
 #[CoversClass(HandleGap::class)]

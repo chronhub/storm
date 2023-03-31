@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 
-interface ProjectorRepository
+interface SubscriptionManagement
 {
     public function rise(): void;
 

@@ -2,27 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription\Project;
 
-use Chronhub\Storm\Projector\Pipes\HandleGap;
-use Chronhub\Storm\Projector\Pipes\DispatchSignal;
-use Chronhub\Storm\Projector\Pipes\HandleStreamEvent;
-use Chronhub\Storm\Projector\Pipes\ResetEventCounter;
+use Chronhub\Storm\Projector\RunProjection;
+use Chronhub\Storm\Projector\Activity\HandleGap;
+use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
-use Chronhub\Storm\Projector\Pipes\PersistOrUpdateLock;
-use Chronhub\Storm\Projector\Pipes\StopWhenRunningOnce;
-use Chronhub\Storm\Projector\Pipes\PreparePersistentRunner;
-use Chronhub\Storm\Projector\Pipes\UpdateStatusAndPositions;
+use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
+use Chronhub\Storm\Projector\Activity\ResetEventCounter;
+use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
+use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
+use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
+use Chronhub\Storm\Projector\Activity\UpdateStatusAndPositions;
 
-trait ProvidePersistentProjector
+trait ProvidePersistentSubscription
 {
     public function run(bool $inBackground): void
     {
-        $this->context->compose($this->getCaster(), $inBackground);
+        $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
 
-        $project = new RunProjection($this->workflow(), $this->repository);
+        $project = new RunProjection($this->activities(), $this->repository);
 
-        $project($this->context);
+        $project($this->subscription);
     }
 
     public function stop(): void
@@ -42,7 +43,7 @@ trait ProvidePersistentProjector
 
     public function getState(): array
     {
-        return $this->context->state->get();
+        return $this->subscription->state->get();
     }
 
     public function getStreamName(): string
@@ -53,7 +54,7 @@ trait ProvidePersistentProjector
     /**
      * @return array<callable>
      */
-    protected function workflow(): array
+    protected function activities(): array
     {
         return [
             new PreparePersistentRunner($this->repository),

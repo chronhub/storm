@@ -8,7 +8,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Pipes\PersistOrUpdateLock;
+use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Tests\Unit\Projector\Mock\ProvideMockContext;
 
 #[CoversClass(PersistOrUpdateLock::class)]

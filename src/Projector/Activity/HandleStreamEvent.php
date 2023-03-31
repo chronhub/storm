@@ -2,45 +2,47 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Pipes;
+namespace Chronhub\Storm\Projector\Activity;
 
 use Closure;
 use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use function array_keys;
 use function array_values;
 
 final readonly class HandleStreamEvent
 {
     public function __construct(private Chronicler $chronicler,
-                                private ?ProjectorRepository $repository)
+                                private ?SubscriptionManagement $repository)
     {
     }
 
-    public function __invoke(Context $context, Closure $next): callable|bool
+    public function __invoke(Subscription $subscription, Closure $next): callable|bool
     {
-        $streams = $this->retrieveStreams($context->streamPosition->all(), $context->queryFilter());
+        $queryFilter = $subscription->context()->queryFilter();
 
-        $eventHandlers = $context->eventHandlers();
+        $streams = $this->retrieveStreams($subscription->streamPosition->all(), $queryFilter);
+
+        $eventHandlers = $subscription->context()->eventHandlers();
 
         foreach ($streams as $eventPosition => $event) {
-            $context->currentStreamName = $streams->streamName();
+            $subscription->currentStreamName = $streams->streamName();
 
-            $eventHandled = $eventHandlers($context, $event, $eventPosition, $this->repository);
+            $eventHandled = $eventHandlers($subscription, $event, $eventPosition, $this->repository);
 
-            if (! $eventHandled || $context->runner->isStopped()) {
-                return $next($context);
+            if (! $eventHandled || $subscription->runner->isStopped()) {
+                return $next($subscription);
             }
         }
 
-        return $next($context);
+        return $next($subscription);
     }
 
     private function retrieveStreams(array $streamPositions, QueryFilter $queryFilter): SortStreamIterator

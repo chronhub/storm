@@ -10,11 +10,11 @@ use Chronhub\Storm\Projector\Scheme\DetectGap;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
 trait ProvideMockContext
 {
-    protected ProjectorRepository|MockObject $repository;
+    protected SubscriptionManagement|MockObject $repository;
 
     protected ProjectionOption|MockObject $option;
 
@@ -26,7 +26,7 @@ trait ProvideMockContext
 
     protected function setUp(): void
     {
-        $this->repository = $this->createMock(ProjectorRepository::class);
+        $this->repository = $this->createMock(SubscriptionManagement::class);
         $this->option = $this->createMock(ProjectionOption::class);
         $this->position = $this->createMock(StreamPosition::class);
         $this->counter = $this->createMock(EventCounter::class);

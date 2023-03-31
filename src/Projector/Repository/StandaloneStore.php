@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Projector\Store;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use function is_array;
 
 final class StandaloneStore implements Store
 {
-    public function __construct(public Context $context,
+    public function __construct(public Subscription $subscription,
                                 public ProjectionProvider $projectionProvider,
                                 public RepositoryLock $repositoryLock,
                                 public JsonSerializer $serializer,
@@ -27,7 +27,7 @@ final class StandaloneStore implements Store
     {
         return $this->projectionProvider->createProjection(
             $this->streamName,
-            $this->context->status->value
+            $this->subscription->status->value
         );
     }
 
@@ -39,12 +39,12 @@ final class StandaloneStore implements Store
             throw ProjectionNotFound::withName($this->streamName);
         }
 
-        $this->context->streamPosition->discover($this->serializer->decode($projection->position()));
+        $this->subscription->streamPosition->discover($this->serializer->decode($projection->position()));
 
         $state = $this->serializer->decode($projection->state());
 
         if (is_array($state) && ! empty($state)) {
-            $this->context->state->put($state);
+            $this->subscription->state->put($state);
         }
 
         return true;
@@ -54,7 +54,7 @@ final class StandaloneStore implements Store
     {
         $this->persist();
 
-        $this->context->runner->stop(true);
+        $this->subscription->runner->stop(true);
 
         $idleProjection = ProjectionStatus::IDLE;
 
@@ -64,14 +64,14 @@ final class StandaloneStore implements Store
             return false;
         }
 
-        $this->context->status = $idleProjection;
+        $this->subscription->status = $idleProjection;
 
         return true;
     }
 
     public function startAgain(): bool
     {
-        $this->context->runner->stop(false);
+        $this->subscription->runner->stop(false);
 
         $runningStatus = ProjectionStatus::RUNNING;
 
@@ -86,7 +86,7 @@ final class StandaloneStore implements Store
             return false;
         }
 
-        $this->context->status = $runningStatus;
+        $this->subscription->status = $runningStatus;
 
         return true;
     }
@@ -95,8 +95,8 @@ final class StandaloneStore implements Store
     {
         return $this->updateprojection(
             [
-                'position' => $this->serializer->encode($this->context->streamPosition->all()),
-                'state' => $this->serializer->encode($this->context->state->get()),
+                'position' => $this->serializer->encode($this->subscription->streamPosition->all()),
+                'state' => $this->serializer->encode($this->subscription->state->get()),
                 'locked_until' => $this->repositoryLock->refresh(),
             ]
         );
@@ -104,15 +104,15 @@ final class StandaloneStore implements Store
 
     public function reset(): bool
     {
-        $this->context->streamPosition->reset();
+        $this->subscription->streamPosition->reset();
 
-        $this->context->resetStateWithInitialize();
+        $this->subscription->initializeAgain();
 
         return $this->updateProjection(
             [
-                'position' => $this->serializer->encode($this->context->streamPosition->all()),
-                'state' => $this->serializer->encode($this->context->state->get()),
-                'status' => $this->context->status->value,
+                'position' => $this->serializer->encode($this->subscription->streamPosition->all()),
+                'state' => $this->serializer->encode($this->subscription->state->get()),
+                'status' => $this->subscription->status->value,
             ]
         );
     }
@@ -125,11 +125,11 @@ final class StandaloneStore implements Store
             return false;
         }
 
-        $this->context->runner->stop(true);
+        $this->subscription->runner->stop(true);
 
-        $this->context->resetStateWithInitialize();
+        $this->subscription->initializeAgain();
 
-        $this->context->streamPosition->reset();
+        $this->subscription->streamPosition->reset();
 
         return true;
     }
@@ -160,7 +160,7 @@ final class StandaloneStore implements Store
             return false;
         }
 
-        $this->context->status = $runningProjection;
+        $this->subscription->status = $runningProjection;
 
         return true;
     }
@@ -171,7 +171,7 @@ final class StandaloneStore implements Store
             return $this->updateProjection(
                 [
                     'locked_until' => $this->repositoryLock->increment(),
-                    'position' => $this->serializer->encode($this->context->streamPosition->all()),
+                    'position' => $this->serializer->encode($this->subscription->streamPosition->all()),
                 ]
             );
         }
@@ -194,7 +194,7 @@ final class StandaloneStore implements Store
             return false;
         }
 
-        $this->context->status = $idleProjection;
+        $this->subscription->status = $idleProjection;
 
         return true;
     }

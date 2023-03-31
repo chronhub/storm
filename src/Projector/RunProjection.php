@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Throwable;
-use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Projector\Scheme\Pipeline;
-use Chronhub\Storm\Contracts\Projector\ProjectorRepository;
+use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
 readonly class RunProjection
 {
-    public function __construct(private array $pipes,
-                                private ?ProjectorRepository $repository)
-    {
+    public function __construct(
+        private array $activities,
+        private ?SubscriptionManagement $repository
+    ) {
     }
 
-    public function __invoke(Context $context): void
+    public function __invoke(Subscription $subscription): void
     {
-        $pipeline = (new Pipeline())->through($this->pipes);
+        $workflow = Workflow::carry($subscription, $this->activities);
 
         try {
             $quit = null;
-            $this->runProjection($pipeline, $context);
+            $this->runProjection($workflow, $subscription);
         } catch (Throwable $exception) {
             $quit = $exception;
         } finally {
@@ -31,16 +32,11 @@ readonly class RunProjection
         }
     }
 
-    /**
-     * Run Projection
-     */
-    protected function runProjection(Pipeline $pipeline, Context $context): void
+    protected function runProjection(Workflow $workflow, Subscription $subscription): void
     {
         do {
-            $isStopped = $pipeline
-                ->send($context)
-                ->then(static fn (Context $context): bool => $context->runner->isStopped());
-        } while ($context->runner->inBackground() && ! $isStopped);
+            $isStopped = $workflow->then(static fn (Subscription $subscription): bool => $subscription->runner->isStopped());
+        } while ($subscription->runner->inBackground() && ! $isStopped);
     }
 
     /**

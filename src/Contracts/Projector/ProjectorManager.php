@@ -28,17 +28,17 @@ interface ProjectorManager
     /**
      * @throws ProjectionNotFound
      */
-    public function stop(string $streamName): void;
+    public function stop(string $projectionName): void;
 
     /**
      * @throws ProjectionNotFound
      */
-    public function reset(string $streamName): void;
+    public function reset(string $projectionName): void;
 
     /**
      * @throws ProjectionNotFound
      */
-    public function delete(string $streamName, bool $withEmittedEvents): void;
+    public function delete(string $projectionName, bool $withEmittedEvents): void;
 
     /**
      * @throws ProjectionNotFound

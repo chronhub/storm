@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-class Runner
+// fixMe make method available on subscription
+class KeepRunning
 {
     protected bool $runInBackground = false;
 

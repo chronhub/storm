@@ -11,11 +11,11 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Projector\Scheme\Context;
 use PHPUnit\Framework\MockObject\MockObject;
-use Chronhub\Storm\Projector\Scheme\Pipeline;
+use Chronhub\Storm\Projector\Scheme\Workflow;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-#[CoversClass(Pipeline::class)]
+#[CoversClass(Workflow::class)]
 final class PipelineTest extends UnitTestCase
 {
     private MockObject|Context $context;
@@ -34,10 +34,10 @@ final class PipelineTest extends UnitTestCase
     {
         $count = 0;
 
-        $pipeline = new Pipeline();
+        $pipeline = new Workflow();
 
         $result = $pipeline
-            ->send($this->context)
+            ->carry($this->context)
             ->through([$this->providePipe($count), $this->providePipe($count), $this->providePipe($count)])
             ->then(fn (): bool => $return);
 
@@ -51,10 +51,10 @@ final class PipelineTest extends UnitTestCase
     {
         $count = 0;
 
-        $pipeline = new Pipeline();
+        $pipeline = new Workflow();
 
         $result = $pipeline
-            ->send($this->context)
+            ->carry($this->context)
             ->through([
                 $this->providePipe($count),
                 fn (): false => false,

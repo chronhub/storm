@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
@@ -13,6 +14,7 @@ final class ReadModelCaster implements ReadModelProjectorCaster
     private ?string $currentStreamName = null;
 
     public function __construct(private readonly ReadModelProjector $projector,
+                                private readonly SystemClock $clock,
                                 ?string &$currentStreamName)
     {
         $this->currentStreamName = &$currentStreamName;
@@ -31,5 +33,10 @@ final class ReadModelCaster implements ReadModelProjectorCaster
     public function streamName(): ?string
     {
         return $this->currentStreamName;
+    }
+
+    public function clock(): SystemClock
+    {
+        return $this->clock;
     }
 }
