@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
+use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use function usleep;
 use function array_key_exists;
@@ -22,7 +23,7 @@ class GapDetector
     ) {
     }
 
-    public function detect(string $streamName, int $eventPosition, string $eventTime): bool
+    public function detect(string $streamName, int $eventPosition, string|DateTimeImmutable $eventTime): bool
     {
         if (empty($this->retriesInMs)) {
             return false;
@@ -84,7 +85,7 @@ class GapDetector
         return array_key_exists($this->retries, $this->retriesInMs);
     }
 
-    protected function isElapsed(string $eventTime): bool
+    protected function isElapsed(string|DateTimeImmutable $eventTime): bool
     {
         return $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime);
     }
