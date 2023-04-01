@@ -53,7 +53,7 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function startAgain(): bool
     {
-        $this->subscription->sprint()->stop();
+        $this->subscription->sprint()->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
 
