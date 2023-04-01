@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use DateInterval;
 use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use function floor;
-use function sprintf;
 
 final class LockManager
 {
@@ -16,11 +13,18 @@ final class LockManager
 
     public function __construct(
         private readonly SystemClock $clock,
+        //The duration for which a lock is valid, in milliseconds
         private readonly int $lockTimeoutMs,
+        // The duration after which a lock should be refreshed, in milliseconds
         private readonly int $lockThreshold
     ) {
     }
 
+    /**
+     * Acquires a lock and returns the new lock value.
+     *
+     * @return string The new lock value.
+     */
     public function acquire(): string
     {
         $this->lastLock = $this->clock->now();
@@ -28,6 +32,11 @@ final class LockManager
         return $this->increment();
     }
 
+    /**
+     * Attempts to update the lock if it has exceeded the lock threshold.
+     *
+     * @return bool Whether the lock was updated.
+     */
     public function tryUpdate(): bool
     {
         $now = $this->clock->now();
@@ -41,21 +50,42 @@ final class LockManager
         return false;
     }
 
+    /**
+     * Refreshes the lock and returns the new lock value.
+     *
+     * @return string The new lock value.
+     */
     public function refresh(): string
     {
         return $this->updateLockWithTimeout($this->clock->now());
     }
 
+    /**
+     * Increments the lock and returns the new lock value.
+     *
+     * @return string The new lock value.
+     */
     public function increment(): string
     {
         return $this->updateLockWithTimeout($this->lastLock);
     }
 
-    public function current(): ?string
+    /**
+     * Returns the current lock value.
+     *
+     * @return string The current lock value
+     */
+    public function current(): string
     {
-        return $this->lastLock?->format($this->clock->getFormat());
+        return $this->lastLock->format($this->clock->getFormat());
     }
 
+    /**
+     * Updates the lock with a new timeout and returns the new lock value.
+     *
+     * @param  DateTimeImmutable  $dateTime The new expiration time.
+     * @return string The new lock value.
+     */
     protected function updateLockWithTimeout(DateTimeImmutable $dateTime): string
     {
         $newLockExpiration = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
@@ -65,21 +95,19 @@ final class LockManager
         return $newLockExpiration->format($this->clock->getFormat());
     }
 
+    /**
+     * Determines whether the lock should be updated based on the current time and lock threshold.
+     *
+     * @param  DateTimeImmutable  $dateTime The current time.
+     * @return bool Whether the lock should be updated.
+     */
     protected function shouldUpdateLock(DateTimeImmutable $dateTime): bool
     {
         if ($this->lastLock === null || $this->lockThreshold === 0) {
             return true;
         }
 
-        $updateLockThreshold = $this->lastLock->add(
-            new DateInterval(sprintf('PT%sS', floor($this->lockThreshold / 1000)))
-        );
-
-        $f = ($this->lockThreshold % 1000) / 1000;
-
-        if ($f > 0) {
-            $updateLockThreshold = $updateLockThreshold->add(new DateInterval(sprintf('PT%sS', $f)));
-        }
+        $updateLockThreshold = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
 
         return $updateLockThreshold <= $dateTime;
     }

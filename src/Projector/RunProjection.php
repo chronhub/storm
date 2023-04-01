@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
-readonly class RunProjection
+final readonly class RunProjection
 {
     public function __construct(
         private array $activities,

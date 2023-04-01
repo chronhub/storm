@@ -74,6 +74,11 @@ class GapDetector
         $this->gapDetected = false;
     }
 
+    public function retries(): int
+    {
+        return $this->retries;
+    }
+
     protected function isGapDetected(string $streamName, int $eventPosition): bool
     {
         if ($this->streamPosition->hasNextPosition($streamName, $eventPosition)) {

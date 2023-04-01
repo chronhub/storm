@@ -60,7 +60,7 @@ final class StreamPosition implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return $this->container->toArray();
+        return $this->all();
     }
 
     protected function loadStreamsFrom(array $queries): Collection

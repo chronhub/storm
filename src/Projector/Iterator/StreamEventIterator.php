@@ -43,10 +43,6 @@ final class StreamEventIterator implements Iterator
 
     public function key(): false|int
     {
-        if ($this->currentEvent === null) {
-            return false;
-        }
-
         return $this->currentPosition;
     }
 

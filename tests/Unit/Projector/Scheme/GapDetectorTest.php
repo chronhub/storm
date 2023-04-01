@@ -1,0 +1,142 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
+
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Scheme\GapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use function microtime;
+
+final class GapDetectorTest extends UnitTestCase
+{
+    private StreamPosition $streamPosition;
+
+    private SystemClock|MockObject $clock;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->streamPosition = new StreamPosition($this->createMock(EventStreamProvider::class));
+        $this->clock = $this->createMock(SystemClock::class);
+    }
+
+    public function testDetectShouldReturnFalseWhenRetriesInMsIsEmpty(): void
+    {
+        $retriesInMs = [];
+        $detectionWindows = null;
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $result = $detector->detect('streamName', 1, '2022-01-01');
+
+        $this->assertFalse($result);
+        $this->assertSame(0, $detector->retries());
+    }
+
+    public function testDetectShouldReturnFalseWhenGapIsNotDetected(): void
+    {
+        $retriesInMs = [1000];
+        $detectionWindows = null;
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $result = $detector->detect('streamName', 1, '2022-01-01');
+
+        $this->assertFalse($result);
+        $this->assertFalse($detector->hasGap());
+        $this->assertSame(0, $detector->retries());
+    }
+
+    public function testDetectShouldReturnFalseWhenDetectionWindowIsNotElapsed(): void
+    {
+        $this->clock->expects($this->once())->method('isNowSubGreaterThan')->willReturn(false);
+
+        $retriesInMs = [1000];
+        $detectionWindows = 'PT1S';
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $result = $detector->detect('streamName', 10, '2022-01-01');
+
+        $this->assertFalse($result);
+        $this->assertFalse($detector->hasGap());
+        $this->assertSame(0, $detector->retries());
+    }
+
+    public function testDetectShouldReturnTrueAndSetGapDetectedWhenGapIsDetected(): void
+    {
+        $this->clock->method('isNowSubGreaterThan')->willReturn(true);
+
+        $retriesInMs = [1000];
+        $detectionWindows = 'PT1S';
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $result = $detector->detect('streamName', 10, '2022-01-01');
+
+        $this->assertTrue($result);
+        $this->assertTrue($detector->hasGap());
+        $this->assertSame(0, $detector->retries());
+    }
+
+    public function testSleepTillRetries(): void
+    {
+        $retriesInMs = [1000, 2000, 3000];
+        $detectionWindows = null;
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $startTime = microtime(true);
+
+        $detector->sleep();
+        $detector->sleep();
+        $detector->sleep();
+
+        $this->assertSame(3, $detector->retries());
+
+        $endTime = microtime(true);
+
+        $elapsedTimeInMs = ($endTime - $startTime) * 100000;
+
+        // Assert that the elapsed time is within an acceptable range
+        $this->assertGreaterThanOrEqual(600, $elapsedTimeInMs);
+        $this->assertLessThanOrEqual(700, $elapsedTimeInMs);
+    }
+
+    public function testNoSleepWhenNoMoreRetries(): void
+    {
+        $retriesInMs = [1000, 2000, 3000];
+        $detectionWindows = null;
+
+        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+
+        $startTime = microtime(true);
+
+        $detector->sleep();
+        $detector->sleep();
+        $detector->sleep();
+
+        $this->assertSame(3, $detector->retries());
+
+        // No more retries
+        $detector->sleep();
+        $detector->sleep();
+        $detector->sleep();
+
+        $this->assertSame(3, $detector->retries());
+
+        $endTime = microtime(true);
+
+        $elapsedTimeInMs = ($endTime - $startTime) * 100000;
+
+        // Assert that the elapsed time is within an acceptable range
+        $this->assertGreaterThanOrEqual(600, $elapsedTimeInMs);
+        $this->assertLessThanOrEqual(700, $elapsedTimeInMs);
+    }
+}

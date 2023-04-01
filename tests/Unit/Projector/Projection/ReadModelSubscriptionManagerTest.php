@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Unit\Projector;
+namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Clock\PointInTime;
