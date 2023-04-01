@@ -9,37 +9,51 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use function array_reduce;
 use function array_reverse;
 
-final readonly class Workflow
+final class Workflow
 {
-    private function __construct(
-        private Subscription $subscription,
-        private array $activities
-    ) {
+    /**
+     * @var array<callable>
+     */
+    private array $pipes;
+
+    private Subscription $passable;
+
+    public function send(Subscription $passable): self
+    {
+        $this->passable = $passable;
+
+        return $this;
     }
 
-    public static function carry(Subscription $subscription, array $activities): self
+    /**
+     * @param  array<callable>  $pipes
+     * @return $this
+     */
+    public function through(array $pipes): self
     {
-        return new self($subscription, $activities);
+        $this->pipes = $pipes;
+
+        return $this;
     }
 
-    public function process(Closure $destination): bool
+    public function then(Closure $destination): bool
     {
-        $execute = array_reduce(
-            array_reverse($this->activities),
-            $this->funnel(),
+        $pipeline = array_reduce(
+            array_reverse($this->pipes),
+            $this->carry(),
             $this->prepareDestination($destination)
         );
 
-        return $execute($this->subscription);
+        return $pipeline($this->passable);
     }
 
     protected function prepareDestination(Closure $destination): Closure
     {
-        return static fn (Subscription $subscription) => $destination($subscription);
+        return static fn (Subscription $passable) => $destination($passable);
     }
 
-    protected function funnel(): Closure
+    protected function carry(): Closure
     {
-        return static fn (Closure $stack, callable $activity) => static fn (Subscription $subscription) => $activity($subscription, $stack);
+        return static fn (Closure $stack, callable $pipe) => static fn (Subscription $passable) => $pipe($passable, $stack);
     }
 }

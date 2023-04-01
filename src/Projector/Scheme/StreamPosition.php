@@ -24,11 +24,13 @@ final class StreamPosition implements JsonSerializable
 
     public function watch(array $queries): void
     {
-        $streams = $this->loadStreamsFrom($queries);
+        $container = new Collection();
 
-        $this->container = $this->container->merge($streams->mapWithKeys(function ($stream) {
-            return [$stream => 0];
-        }));
+        foreach ($this->loadStreamsFrom($queries) as $stream) {
+            $container->put($stream, 0);
+        }
+
+        $this->container = $container->merge($this->container);
     }
 
     public function discover(array $streamsPositions): void
@@ -48,7 +50,7 @@ final class StreamPosition implements JsonSerializable
 
     public function hasNextPosition(string $streamName, int $position): bool
     {
-        return $this->container->get($streamName, 0) + 1 === $position;
+        return $this->container[$streamName] + 1 === $position;
     }
 
     public function all(): array

@@ -20,11 +20,10 @@ readonly class RunProjection
 
     public function __invoke(Subscription $subscription): void
     {
-        $workflow = Workflow::carry($subscription, $this->activities);
-
         try {
             $quit = null;
-            $this->beginCycle($workflow, $subscription);
+
+            $this->beginCycle((new Workflow())->through($this->activities), $subscription);
         } catch (Throwable $exception) {
             $quit = $exception;
         } finally {
@@ -35,9 +34,9 @@ readonly class RunProjection
     protected function beginCycle(Workflow $workflow, Subscription $subscription): void
     {
         do {
-            $inProgress = $workflow->process(
-                static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
-            );
+            $inProgress = $workflow
+                ->send($subscription)
+                ->then(static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
         } while ($subscription->sprint()->inBackground() && $inProgress);
     }
 
