@@ -107,7 +107,7 @@ final class StandaloneProjectionStore implements ProjectionStore
             return false;
         }
 
-        $this->subscription->sprint->stop(true);
+        $this->subscription->sprint()->stop();
 
         $this->subscription->initializeAgain();
 

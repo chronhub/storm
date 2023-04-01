@@ -20,7 +20,7 @@ final readonly class ReadModelProjectionRepository implements ProjectionReposito
 
     public function rise(): void
     {
-        $this->subscription->sprint->continue();
+        $this->subscription->sprint()->continue();
 
         if (! $this->store->exists()) {
             $this->store->create();

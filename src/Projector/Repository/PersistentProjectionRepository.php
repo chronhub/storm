@@ -23,7 +23,7 @@ final readonly class PersistentProjectionRepository implements ProjectionReposit
 
     public function rise(): void
     {
-        $this->subscription->sprint->stop(false);
+        $this->subscription->sprint()->continue();
 
         if (! $this->store->exists()) {
             $this->store->create();

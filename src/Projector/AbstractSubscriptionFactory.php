@@ -94,13 +94,13 @@ abstract class AbstractSubscriptionFactory
         return new StandaloneProjectionStore(
             $subscription,
             $this->projectionProvider,
-            $this->createLock($subscription->option()),
+            $this->createLockManager($subscription->option()),
             $this->jsonSerializer,
             $streamName
         );
     }
 
-    protected function createLock(ProjectionOption $option): LockManager
+    protected function createLockManager(ProjectionOption $option): LockManager
     {
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
