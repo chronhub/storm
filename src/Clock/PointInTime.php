@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Clock;
 
 use DateInterval;
 use DateTimeZone;
+use DomainException;
 use DateTimeImmutable;
 use Symfony\Component\Clock\MonotonicClock;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
@@ -14,19 +15,15 @@ use function usleep;
 use function is_string;
 use function strtoupper;
 
-final class PointInTime implements SystemClock
+final readonly class PointInTime implements SystemClock
 {
     final public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
 
     private DateTimeZone $timezone;
 
-    public function __construct(null|string|DateTimeZone $timezone = null)
+    public function __construct()
     {
-        if ($timezone === null) {
-            $this->timezone = new DateTimeZone('UTC');
-        } else {
-            $this->timezone = is_string($timezone) ? new DateTimeZone($timezone) : $timezone;
-        }
+        $this->timezone = new DateTimeZone('UTC');
     }
 
     public function now(): DateTimeImmutable
@@ -64,13 +61,18 @@ final class PointInTime implements SystemClock
         }
     }
 
-    public function withTimeZone(DateTimeZone|string $timezone): static
+    public function toDateTimeImmutable(string|DateTimeImmutable $pointInTime): DateTimeImmutable
     {
-        $clone = clone $this;
+        if ($pointInTime instanceof DateTimeImmutable) {
+            $pointInTime = $pointInTime->getTimestamp();
+        }
 
-        $clone->timezone = is_string($timezone) ? new DateTimeZone($timezone) : $timezone;
+        return DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);
+    }
 
-        return $clone;
+    public function format(string|DateTimeImmutable $pointInTime): string
+    {
+        return $this->toDateTimeImmutable($pointInTime)->format(self::DATE_TIME_FORMAT);
     }
 
     public function getFormat(): string
@@ -78,12 +80,8 @@ final class PointInTime implements SystemClock
         return self::DATE_TIME_FORMAT;
     }
 
-    private function toDateTimeImmutable(DateTimeImmutable|string $pointInTime): DateTimeImmutable
+    public function withTimeZone(DateTimeZone|string $timezone): static
     {
-        if ($pointInTime instanceof DateTimeImmutable) {
-            return $pointInTime;
-        }
-
-        return DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);
+        throw new DomainException('Point in time use immutable UTC date time zone by default');
     }
 }
