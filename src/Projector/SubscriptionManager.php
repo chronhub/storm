@@ -14,7 +14,6 @@ use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
 final readonly class SubscriptionManager implements ProjectorManager
 {
@@ -124,7 +123,7 @@ final readonly class SubscriptionManager implements ProjectorManager
 
     /**
      * @throws ProjectionNotFound
-     * @throws InMemoryProjectionFailed
+     * @throws ProjectionFailed
      */
     private function updateProjectionStatus(string $projectionName, ProjectionStatus $projectionStatus): void
     {
