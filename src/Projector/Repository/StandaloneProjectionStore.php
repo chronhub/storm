@@ -129,7 +129,7 @@ final class StandaloneProjectionStore implements ProjectionStore
         $state = $this->serializer->decode($projection->state());
 
         if (is_array($state) && ! empty($state)) {
-            $this->subscription->state->put($state);
+            $this->subscription->state()->put($state);
         }
 
         return true;
