@@ -14,20 +14,20 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Projector\SubscriptionFactory;
+use Chronhub\Storm\Projector\SubscriptionManager;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
+use Chronhub\Storm\Projector\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorCaster;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Projector\Subscription\SubscriptionFactory;
-use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
-use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
-use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 
 final class SubscriptionManagerTest extends UnitTestCase
 {

@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription;
+namespace Chronhub\Storm\Projector;
 
 use Throwable;
-use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
@@ -16,9 +15,6 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
-use Chronhub\Storm\Projector\Subscription\Project\ProjectLiveSubscription;
-use Chronhub\Storm\Projector\Subscription\Project\ProjectReadModelSubscription;
-use Chronhub\Storm\Projector\Subscription\Project\ProjectPersistentSubscription;
 
 final readonly class SubscriptionManager implements ProjectorManager
 {
@@ -28,8 +24,8 @@ final readonly class SubscriptionManager implements ProjectorManager
 
     public function projectQuery(array $options = []): QueryProjector
     {
-        return new ProjectLiveSubscription(
-            $this->subscriptionFactory->createLiveSubscription($options),
+        return new ProjectQuery(
+            $this->subscriptionFactory->createQuerySubscription($options),
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->chronicler
         );
@@ -37,9 +33,9 @@ final readonly class SubscriptionManager implements ProjectorManager
 
     public function projectProjection(string $streamName, array $options = []): ProjectionProjector
     {
-        $subscription = $this->subscriptionFactory->createPersistentSubscription($options);
+        $subscription = $this->subscriptionFactory->createPersistentEmitterSubscription($options);
 
-        return new ProjectPersistentSubscription(
+        return new ProjectProjection(
             $subscription,
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->createSubscriptionManagement($subscription, $streamName, null),
@@ -52,7 +48,7 @@ final readonly class SubscriptionManager implements ProjectorManager
     {
         $subscription = $this->subscriptionFactory->createReadModelSubscription($options);
 
-        return new ProjectReadModelSubscription(
+        return new ProjectReadModel(
             $subscription,
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->createSubscriptionManagement($subscription, $streamName, $readModel),

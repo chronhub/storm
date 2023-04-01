@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription;
+namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
@@ -40,39 +41,39 @@ abstract readonly class SubscriptionFactory
     {
     }
 
-    public function createLiveSubscription(array $options = []): Subscription
+    public function createQuerySubscription(array $options = []): Subscription
     {
-        return new LiveSubscription(
+        return new QuerySubscription(
             $this->createOption($options),
             $this->createStreamPosition(),
             $this->clock
         );
     }
 
-    public function createPersistentSubscription(array $options = []): PersistentViewSubscription
+    public function createPersistentEmitterSubscription(array $options = []): PersistentViewSubscription
     {
-        $subscriptionOption = $this->createOption($options);
+        $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
-        return new BoundSubscription(
-            $subscriptionOption,
+        return new PersistentEmitterSubscription(
+            $projectionOption,
             $this->createStreamPosition(),
-            $this->createEventCounter($subscriptionOption),
-            $this->createGapDetector($streamPosition, $subscriptionOption),
+            $this->createEventCounter($projectionOption),
+            $this->createGapDetector($streamPosition, $projectionOption),
             $this->clock
         );
     }
 
     public function createReadModelSubscription(array $options = []): PersistentReadModelSubscription
     {
-        $subscriptionOption = $this->createOption($options);
+        $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
         return new ReadModelSubscription(
-            $subscriptionOption,
+            $projectionOption,
             $streamPosition,
-            $this->createEventCounter($subscriptionOption),
-            $this->createGapDetector($streamPosition, $subscriptionOption),
+            $this->createEventCounter($projectionOption),
+            $this->createGapDetector($streamPosition, $projectionOption),
             $this->clock
         );
     }

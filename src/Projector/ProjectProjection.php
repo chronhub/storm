@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Project;
+namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
-use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\PersistentCaster;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
@@ -17,10 +16,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
 use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
 
-final readonly class ProjectPersistentSubscription implements ProjectionProjector
+final readonly class ProjectProjection implements ProjectionProjector
 {
     use InteractWithContext;
-    use ProvidePersistentSubscription;
+    use InteractWithPersistentProjection;
 
     private StreamCache $streamCache;
 

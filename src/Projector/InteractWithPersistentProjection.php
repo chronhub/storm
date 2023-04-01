@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Project;
+namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Activity\HandleGap;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
@@ -15,7 +14,7 @@ use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
 use Chronhub\Storm\Projector\Activity\UpdateStatusAndPositions;
 
-trait ProvidePersistentSubscription
+trait InteractWithPersistentProjection
 {
     public function run(bool $inBackground): void
     {

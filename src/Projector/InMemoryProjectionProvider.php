@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Provider;
+namespace Chronhub\Storm\Projector;
 
 use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Clock\SystemClock;

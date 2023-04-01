@@ -8,7 +8,7 @@ use function range;
 use function explode;
 use function is_array;
 
-trait ProvideSubscriptionOption
+trait ProvideProjectionOption
 {
     /**
      * Dispatch async signal
@@ -31,7 +31,7 @@ trait ProvideSubscriptionOption
     public readonly int $sleep;
 
     /**
-     * Number of event to keep during process before persisting
+     * threshold of event to keep in memory before persisting
      */
     public readonly int $blockSize;
 

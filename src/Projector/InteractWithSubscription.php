@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription;
+namespace Chronhub\Storm\Projector;
 
 use Closure;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextRead;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;

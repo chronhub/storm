@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription;
+namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
@@ -11,11 +11,13 @@ use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
 
-final class ReadModelSubscription implements PersistentReadModelSubscription
+final class PersistentEmitterSubscription implements PersistentViewSubscription
 {
     use InteractWithSubscription;
+
+    private bool $isStreamCreated = false;
 
     public readonly bool $isPersistent;
 
@@ -39,5 +41,20 @@ final class ReadModelSubscription implements PersistentReadModelSubscription
     public function gap(): GapDetector
     {
         return $this->gap;
+    }
+
+    public function isAttached(): bool
+    {
+        return $this->isStreamCreated;
+    }
+
+    public function attach(): void
+    {
+        $this->isStreamCreated = true;
+    }
+
+    public function detach(): void
+    {
+        $this->isStreamCreated = false;
     }
 }

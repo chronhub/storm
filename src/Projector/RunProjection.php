@@ -14,7 +14,7 @@ readonly class RunProjection
 {
     public function __construct(
         private array $activities,
-        private ?ProjectionRepository $repository
+        protected ?ProjectionRepository $repository
     ) {
     }
 
@@ -24,7 +24,7 @@ readonly class RunProjection
 
         try {
             $quit = null;
-            $this->runProjection($workflow, $subscription);
+            $this->beginCycle($workflow, $subscription);
         } catch (Throwable $exception) {
             $quit = $exception;
         } finally {
@@ -32,7 +32,7 @@ readonly class RunProjection
         }
     }
 
-    protected function runProjection(Workflow $workflow, Subscription $subscription): void
+    protected function beginCycle(Workflow $workflow, Subscription $subscription): void
     {
         do {
             $inProgress = $workflow->process(

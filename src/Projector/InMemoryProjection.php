@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Provider;
+namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 

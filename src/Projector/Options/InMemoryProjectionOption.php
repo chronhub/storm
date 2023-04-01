@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 
 final class InMemoryProjectionOption implements ProjectionOption
 {
-    use ProvideSubscriptionOption;
+    use ProvideProjectionOption;
 
     public function __construct()
     {

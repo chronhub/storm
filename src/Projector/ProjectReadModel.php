@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Project;
+namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
@@ -14,10 +13,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
 use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
 
-final readonly class ProjectReadModelSubscription implements ReadModelProjector
+final readonly class ProjectReadModel implements ReadModelProjector
 {
     use InteractWithContext;
-    use ProvidePersistentSubscription;
+    use InteractWithPersistentProjection;
 
     public function __construct(
         protected PersistentReadModelSubscription $subscription,

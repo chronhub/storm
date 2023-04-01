@@ -19,7 +19,7 @@ final readonly class ProcessArrayEvent extends EventProcessor
 
     public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?ProjectionRepository $repository): bool
     {
-        if (! $this->preProcess($subscription, $event, $key, $repository)) {
+        if (! $this->preProcess($subscription, $event, $key)) {
             return false;
         }
 

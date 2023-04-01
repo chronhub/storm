@@ -32,25 +32,6 @@ final class StandaloneProjectionStore implements ProjectionStore
         );
     }
 
-    public function loadState(): bool
-    {
-        $projection = $this->projectionProvider->retrieve($this->streamName);
-
-        if (! $projection instanceof ProjectionModel) {
-            throw ProjectionNotFound::withName($this->streamName);
-        }
-
-        $this->subscription->streamPosition()->discover($this->serializer->decode($projection->position()));
-
-        $state = $this->serializer->decode($projection->state());
-
-        if (is_array($state) && ! empty($state)) {
-            $this->subscription->state->put($state);
-        }
-
-        return true;
-    }
-
     public function stop(): bool
     {
         $this->persist();
@@ -131,6 +112,25 @@ final class StandaloneProjectionStore implements ProjectionStore
         $this->subscription->initializeAgain();
 
         $this->subscription->streamPosition()->reset();
+
+        return true;
+    }
+
+    public function loadState(): bool
+    {
+        $projection = $this->projectionProvider->retrieve($this->streamName);
+
+        if (! $projection instanceof ProjectionModel) {
+            throw ProjectionNotFound::withName($this->streamName);
+        }
+
+        $this->subscription->streamPosition()->discover($this->serializer->decode($projection->position()));
+
+        $state = $this->serializer->decode($projection->state());
+
+        if (is_array($state) && ! empty($state)) {
+            $this->subscription->state->put($state);
+        }
 
         return true;
     }

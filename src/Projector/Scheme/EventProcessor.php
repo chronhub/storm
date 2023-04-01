@@ -18,8 +18,7 @@ abstract readonly class EventProcessor
 {
     final protected function preProcess(Subscription $subscription,
                                         DomainEvent $event,
-                                        int $position,
-                                        ?ProjectionRepository $repository): bool
+                                        int $position): bool
     {
         if ($subscription->option()->getSignal()) {
             pcntl_signal_dispatch();
@@ -56,7 +55,6 @@ abstract readonly class EventProcessor
             $this->persistOnReachedCounter($subscription, $repository);
         }
 
-        // keep running if projection has not been stopped
         return $subscription->sprint()->inProgress();
     }
 

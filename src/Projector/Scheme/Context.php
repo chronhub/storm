@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription;
+namespace Chronhub\Storm\Projector\Scheme;
 
 use Closure;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
-use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function count;
 use function is_array;

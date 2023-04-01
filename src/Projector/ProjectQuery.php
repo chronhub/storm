@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Project;
+namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\QueryCaster;
-use Chronhub\Storm\Projector\InteractWithContext;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
@@ -16,7 +14,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 
-final readonly class ProjectLiveSubscription implements QueryProjector
+final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithContext;
 
