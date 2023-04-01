@@ -15,7 +15,7 @@ final readonly class StopWhenRunningOnce
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if (! $subscription->sprint()->inBackground() && ! $subscription->sprint()->inProgress()) {
+        if (! $subscription->sprint()->inBackground() && $subscription->sprint()->inProgress()) {
             $this->projector->stop();
         }
 

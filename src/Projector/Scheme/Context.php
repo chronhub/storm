@@ -145,7 +145,7 @@ final class Context implements ContextBuilder
     public function castInitCallback(ProjectorCaster $caster): array
     {
         if ($this->initCallback instanceof Closure) {
-            $callback = Closure::bind($this->initCallback(), $caster);
+            $callback = Closure::bind($this->initCallback, $caster);
 
             $result = $callback();
 
