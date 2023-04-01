@@ -17,9 +17,7 @@ final class PersistentEmitterSubscription implements PersistentViewSubscription
 {
     use InteractWithSubscription;
 
-    private bool $isStreamCreated = false;
-
-    public readonly bool $isPersistent;
+    private bool $streamFixed = false;
 
     public function __construct(
         protected readonly ProjectionOption $option,
@@ -45,16 +43,16 @@ final class PersistentEmitterSubscription implements PersistentViewSubscription
 
     public function isAttached(): bool
     {
-        return $this->isStreamCreated;
+        return $this->streamFixed;
     }
 
     public function attach(): void
     {
-        $this->isStreamCreated = true;
+        $this->streamFixed = true;
     }
 
     public function detach(): void
     {
-        $this->isStreamCreated = false;
+        $this->streamFixed = false;
     }
 }

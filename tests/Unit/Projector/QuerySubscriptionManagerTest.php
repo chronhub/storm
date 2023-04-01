@@ -29,7 +29,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjectorCaster;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 
-final class SubscriptionManagerTest extends UnitTestCase
+final class QuerySubscriptionManagerTest extends UnitTestCase
 {
     private SystemClock $clock;
 
@@ -74,8 +74,6 @@ final class SubscriptionManagerTest extends UnitTestCase
                 UnitTestCase::assertInstanceOf(SystemClock::class, $this->clock());
             })
             ->run(false);
-
-        $liveSubscription->run(false);
     }
 
     public function testLiveSubscription(): void

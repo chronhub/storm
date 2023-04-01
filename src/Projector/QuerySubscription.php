@@ -15,8 +15,6 @@ final class QuerySubscription implements Subscription
 {
     use InteractWithSubscription;
 
-    public readonly bool $isPersistent;
-
     public function __construct(
         protected readonly ProjectionOption $option,
         protected readonly StreamPosition $streamPosition,

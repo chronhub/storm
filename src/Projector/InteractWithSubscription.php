@@ -21,13 +21,15 @@ trait InteractWithSubscription
 {
     public ?string $currentStreamName = null;
 
+    public readonly bool $isPersistent;
+
+    protected ContextBuilder $context;
+
     public ProjectionStatus $status = ProjectionStatus::IDLE;
 
     protected readonly PersistentState $state;
 
     protected readonly Sprint $sprint;
-
-    protected ?ContextBuilder $context = null;
 
     public function compose(ContextBuilder $context, ProjectorCaster $projectorCaster, bool $keepRunning): void
     {
