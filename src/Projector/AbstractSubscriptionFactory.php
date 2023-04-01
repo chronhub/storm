@@ -28,17 +28,18 @@ use Chronhub\Storm\Projector\Repository\StandaloneProjectionStore;
 use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
 use function array_merge;
 
-abstract readonly class SubscriptionFactory
+abstract class AbstractSubscriptionFactory
 {
-    public function __construct(public Chronicler $chronicler,
-                                public ProjectionProvider $projectionProvider,
-                                public EventStreamProvider $eventStreamProvider,
-                                public ProjectionQueryScope $queryScope,
-                                public SystemClock $clock,
-                                public MessageAlias $messageAlias,
-                                public JsonSerializer $jsonSerializer,
-                                public ProjectionOption|array $options = [])
-    {
+    public function __construct(
+        public readonly Chronicler $chronicler,
+        public readonly ProjectionProvider $projectionProvider,
+        public readonly EventStreamProvider $eventStreamProvider,
+        public readonly ProjectionQueryScope $queryScope,
+        public readonly SystemClock $clock,
+        public readonly MessageAlias $messageAlias,
+        public readonly JsonSerializer $jsonSerializer,
+        public readonly ProjectionOption|array $options = []
+    ) {
     }
 
     public function createQuerySubscription(array $options = []): Subscription

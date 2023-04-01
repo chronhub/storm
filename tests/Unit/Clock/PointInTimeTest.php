@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Clock;
 
 use DateInterval;
-use DateTimeZone;
+use DomainException;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -29,33 +29,13 @@ final class PointInTimeTest extends UnitTestCase
         $this->assertSame($timezone, $clock->now()->getTimezone()->getName());
     }
 
-    public function testInstanceWithStringTimezone(): void
-    {
-        $clock = new PointInTime('UTC');
-
-        $this->assertSame('UTC', $clock->now()->getTimezone()->getName());
-    }
-
-    public function testInstanceWithInstanceTimezone(): void
-    {
-        $clock = new PointInTime(new DateTimeZone('UTC'));
-
-        $this->assertSame('UTC', $clock->now()->getTimezone()->getName());
-    }
-
     public function testUpdateTimezone(): void
     {
+        $this->expectException(DomainException::class);
+
         $clock = new PointInTime();
-        $this->assertSame('UTC', $clock->now()->getTimezone()->getName());
 
-        $timezone = date_default_timezone_get();
-        $clock = new PointInTime();
-        $this->assertSame($timezone, $clock->now()->getTimezone()->getName());
-
-        $newClock = $clock->withTimeZone('Europe/Paris');
-        $this->assertNotSame($clock, $newClock);
-
-        $this->assertSame('Europe/Paris', $newClock->now()->getTimezone()->getName());
+        $clock->withTimeZone('Europe/Paris');
     }
 
     public function testCurrentTime(): void

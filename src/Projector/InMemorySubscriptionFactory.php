@@ -12,7 +12,7 @@ use Chronhub\Storm\Projector\Repository\ReadModelProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
 use Chronhub\Storm\Projector\Repository\PersistentProjectionRepository;
 
-final readonly class InMemorySubscriptionFactory extends SubscriptionFactory
+final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
 {
     public function createSubscriptionManagement(
         PersistentViewSubscription|PersistentReadModelSubscription $subscription,

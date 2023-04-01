@@ -18,7 +18,7 @@ use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 
 final readonly class SubscriptionManager implements ProjectorManager
 {
-    public function __construct(private SubscriptionFactory $subscriptionFactory)
+    public function __construct(private AbstractSubscriptionFactory $subscriptionFactory)
     {
     }
 

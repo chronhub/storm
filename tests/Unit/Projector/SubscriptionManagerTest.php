@@ -14,12 +14,12 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\SubscriptionFactory;
 use Chronhub\Storm\Projector\SubscriptionManager;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
@@ -166,7 +166,7 @@ final class SubscriptionManagerTest extends UnitTestCase
         $this->assertEquals([10, 9, 8], $liveSubscription->getState()['event_version']);
     }
 
-    private function createSubscriptionFactory(): SubscriptionFactory
+    private function createSubscriptionFactory(): AbstractSubscriptionFactory
     {
         return new InMemorySubscriptionFactory(
             $this->eventStore,
