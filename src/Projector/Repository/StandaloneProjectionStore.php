@@ -78,7 +78,7 @@ final class StandaloneProjectionStore implements ProjectionStore
         return $this->updateprojection(
             [
                 'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
-                'state' => $this->serializer->encode($this->subscription->state->get()),
+                'state' => $this->serializer->encode($this->subscription->state()->get()),
                 'locked_until' => $this->lockManager->refresh(),
             ]
         );
@@ -93,7 +93,7 @@ final class StandaloneProjectionStore implements ProjectionStore
         return $this->updateProjection(
             [
                 'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
-                'state' => $this->serializer->encode($this->subscription->state->get()),
+                'state' => $this->serializer->encode($this->subscription->state()->get()),
                 'status' => $this->subscription->status->value,
             ]
         );
