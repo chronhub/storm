@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use function usleep;
 use function array_key_exists;
 
-class GapDetector
+class StreamGapDetector
 {
     protected int $retries = 0;
 

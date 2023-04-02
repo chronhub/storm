@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
-final readonly class HandleGap
+final readonly class HandleStreamGap
 {
     public function __construct(private ProjectionManagement $repository)
     {

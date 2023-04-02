@@ -16,13 +16,8 @@ final class Workflow
      */
     private array $activities;
 
-    private Subscription $subscription;
-
-    public function process(Subscription $subscription): self
+    public function __construct(private readonly Subscription $subscription)
     {
-        $this->subscription = $subscription;
-
-        return $this;
     }
 
     public function through(array $activities): self
@@ -32,7 +27,7 @@ final class Workflow
         return $this;
     }
 
-    public function then(Closure $destination): bool
+    public function process(Closure $destination): bool
     {
         $process = array_reduce(
             array_reverse($this->activities),

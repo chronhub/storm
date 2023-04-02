@@ -16,6 +16,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use function array_keys;
 use function array_values;
+use function gc_collect_cycles;
 
 final readonly class HandleStreamEvent
 {
@@ -39,9 +40,15 @@ final readonly class HandleStreamEvent
             $eventHandled = $eventProcessor($subscription, $event, $eventPosition, $this->repository);
 
             if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
+                $streams = null;
+                gc_collect_cycles();
+
                 return $next($subscription);
             }
         }
+
+        $streams = null;
+        gc_collect_cycles();
 
         return $next($subscription);
     }

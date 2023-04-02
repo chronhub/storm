@@ -23,7 +23,7 @@ final readonly class RunProjection
         try {
             $quit = null;
 
-            $this->beginCycle((new Workflow())->through($this->activities), $subscription);
+            $this->beginCycle($this->newWorkflow($subscription), $subscription->sprint()->inBackground());
         } catch (Throwable $exception) {
             $quit = $exception;
         } finally {
@@ -31,13 +31,12 @@ final readonly class RunProjection
         }
     }
 
-    protected function beginCycle(Workflow $workflow, Subscription $subscription): void
+    protected function beginCycle(Workflow $workflow, bool $keepRunning): void
     {
         do {
             $inProgress = $workflow
-                ->process($subscription)
-                ->then(static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
-        } while ($subscription->sprint()->inBackground() && $inProgress);
+                ->process(static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+        } while ($keepRunning && $inProgress);
     }
 
     protected function tryReleaseLock(?Throwable $exception): void
@@ -55,5 +54,12 @@ final readonly class RunProjection
         if ($exception) {
             throw $exception;
         }
+    }
+
+    protected function newWorkflow(Subscription $subscription): Workflow
+    {
+        $stub = new Workflow($subscription);
+
+        return $stub->through($this->activities);
     }
 }

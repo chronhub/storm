@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
@@ -14,6 +13,7 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Repository\LockManager;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -113,9 +113,9 @@ abstract class AbstractSubscriptionFactory
         return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): GapDetector
+    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): StreamGapDetector
     {
-        return new GapDetector(
+        return new StreamGapDetector(
             $streamPosition,
             $this->clock,
             $options->getRetries(),

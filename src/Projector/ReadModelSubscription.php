@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
@@ -21,7 +21,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
         protected readonly ProjectionOption $option,
         protected readonly StreamPosition $streamPosition,
         protected readonly EventCounter $eventCounter,
-        protected readonly GapDetector $gap,
+        protected readonly StreamGapDetector $gap,
         protected readonly SystemClock $clock)
     {
         $this->state = new ProjectionState();
@@ -34,7 +34,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
         return $this->eventCounter;
     }
 
-    public function gap(): GapDetector
+    public function gap(): StreamGapDetector
     {
         return $this->gap;
     }

@@ -6,17 +6,24 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use function microtime;
 
-final class GapDetectorTest extends UnitTestCase
+#[CoversClass(StreamGapDetector::class)]
+final class StreamGapDetectorTest extends UnitTestCase
 {
     private StreamPosition $streamPosition;
 
     private SystemClock|MockObject $clock;
+
+    private function getGapDetector(array $retriesInMs, null|string $detectionWindows): StreamGapDetector
+    {
+        return new StreamGapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+    }
 
     protected function setUp(): void
     {
@@ -31,7 +38,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [];
         $detectionWindows = null;
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $result = $detector->detect('streamName', 1, '2022-01-01');
 
@@ -44,7 +51,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [1000];
         $detectionWindows = null;
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $result = $detector->detect('streamName', 1, '2022-01-01');
 
@@ -60,7 +67,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [1000];
         $detectionWindows = 'PT1S';
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $result = $detector->detect('streamName', 10, '2022-01-01');
 
@@ -76,7 +83,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [1000];
         $detectionWindows = 'PT1S';
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $result = $detector->detect('streamName', 10, '2022-01-01');
 
@@ -90,7 +97,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [1000, 2000, 3000];
         $detectionWindows = null;
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $startTime = microtime(true);
 
@@ -114,7 +121,7 @@ final class GapDetectorTest extends UnitTestCase
         $retriesInMs = [1000, 2000, 3000];
         $detectionWindows = null;
 
-        $detector = new GapDetector($this->streamPosition, $this->clock, $retriesInMs, $detectionWindows);
+        $detector = $this->getGapDetector($retriesInMs, $detectionWindows);
 
         $startTime = microtime(true);
 

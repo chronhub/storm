@@ -37,9 +37,7 @@ final class RunProjectionTest extends UnitTestCase
         $sprint->continue();
         $sprint->runInBackground(true);
 
-        $this->subscription->expects($this->any())
-            ->method('sprint')
-            ->willReturn($sprint);
+        $this->subscription->expects($this->any())->method('sprint')->willReturn($sprint);
 
         $called = 0;
 
@@ -78,10 +76,7 @@ final class RunProjectionTest extends UnitTestCase
         $sprint->continue();
         $sprint->runInBackground(true);
 
-        $this->subscription->expects($this->any())
-            ->method('sprint')
-            ->willReturn($sprint);
-
+        $this->subscription->expects($this->any())->method('sprint')->willReturn($sprint);
         $this->repository->expects($this->once())->method('freed');
 
         $called = 0;
@@ -123,10 +118,7 @@ final class RunProjectionTest extends UnitTestCase
         $sprint->continue();
         $sprint->runInBackground(true);
 
-        $this->subscription->expects($this->any())
-            ->method('sprint')
-            ->willReturn($sprint);
-
+        $this->subscription->expects($this->any())->method('sprint')->willReturn($sprint);
         $this->repository->expects($this->once())->method('freed');
 
         $activities = [
@@ -143,19 +135,14 @@ final class RunProjectionTest extends UnitTestCase
     public function testRaiseOriginalExceptionWhenReleaseLockRaiseException(): void
     {
         $this->expectException(RuntimeException::class);
+        $silentException = new InvalidArgumentException('fail silently');
 
         $sprint = new Sprint();
         $sprint->continue();
         $sprint->runInBackground(true);
 
-        $this->subscription->expects($this->any())
-            ->method('sprint')
-            ->willReturn($sprint);
-
-        $this->repository
-            ->expects($this->once())
-            ->method('freed')
-            ->willThrowException(new InvalidArgumentException('fail silently'));
+        $this->subscription->expects($this->any())->method('sprint')->willReturn($sprint);
+        $this->repository->expects($this->once())->method('freed')->willThrowException($silentException);
 
         $activities = [
             function (): void {
