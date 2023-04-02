@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Scheme;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
 final readonly class ProcessArrayEvent extends EventProcessor
@@ -17,7 +17,7 @@ final readonly class ProcessArrayEvent extends EventProcessor
     {
     }
 
-    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?ProjectionRepositoryInterface $repository): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?ProjectionManagement $repository): bool
     {
         if (! $this->preProcess($subscription, $event, $key)) {
             return false;

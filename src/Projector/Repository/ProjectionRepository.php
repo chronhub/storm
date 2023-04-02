@@ -10,10 +10,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use function is_array;
 
-final class ProjectionManager implements ProjectionManagerInterface
+final class ProjectionRepository implements ProjectionRepositoryInterface
 {
     public function __construct(
         public Subscription $subscription,

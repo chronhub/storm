@@ -7,14 +7,14 @@ namespace Chronhub\Storm\Projector;
 use Throwable;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
 final readonly class RunProjection
 {
     public function __construct(
         private array $activities,
-        protected ?ProjectionRepositoryInterface $repository
+        protected ?ProjectionManagement $repository
     ) {
     }
 

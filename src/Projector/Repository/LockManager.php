@@ -86,7 +86,7 @@ final class LockManager
      * @param  DateTimeImmutable  $dateTime The new expiration time.
      * @return string The new lock value.
      */
-    protected function updateLockWithTimeout(DateTimeImmutable $dateTime): string
+    private function updateLockWithTimeout(DateTimeImmutable $dateTime): string
     {
         $newLockExpiration = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
 
@@ -101,7 +101,7 @@ final class LockManager
      * @param  DateTimeImmutable  $dateTime The current time.
      * @return bool Whether the lock should be updated.
      */
-    protected function shouldUpdateLock(DateTimeImmutable $dateTime): bool
+    private function shouldUpdateLock(DateTimeImmutable $dateTime): bool
     {
         if ($this->lastLock === null || $this->lockThreshold === 0) {
             return true;

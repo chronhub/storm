@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 
 trait RemoteStatusDiscovery
 {
-    public function __construct(protected readonly ProjectionRepositoryInterface $repository)
+    public function __construct(protected readonly ProjectionManagement $repository)
     {
     }
 

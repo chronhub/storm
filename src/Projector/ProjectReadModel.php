@@ -9,8 +9,8 @@ use Chronhub\Storm\Projector\Scheme\CastReadModel;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
 final readonly class ProjectReadModel implements ReadModelProjector
@@ -21,7 +21,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function __construct(
         protected ReadModelSubscriptionInterface $subscription,
         protected ContextInterface $context,
-        protected ProjectionRepositoryInterface $repository,
+        protected ProjectionManagement $repository,
         protected Chronicler $chronicler,
         protected string $streamName,
         private ReadModel $readModel

@@ -7,11 +7,11 @@ namespace Chronhub\Storm\Projector\Repository;
 use Throwable;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
-final readonly class InMemoryProjectionManager implements ProjectionManagerInterface
+final readonly class InMemoryRepository implements ProjectionRepositoryInterface
 {
-    public function __construct(private ProjectionManagerInterface $manager)
+    public function __construct(private ProjectionRepositoryInterface $repository)
     {
     }
 
@@ -21,7 +21,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function create(): bool
     {
         try {
-            $created = $this->manager->create();
+            $created = $this->repository->create();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -39,7 +39,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function stop(): bool
     {
         try {
-            $stopped = $this->manager->stop();
+            $stopped = $this->repository->stop();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -57,7 +57,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function startAgain(): bool
     {
         try {
-            $restarted = $this->manager->startAgain();
+            $restarted = $this->repository->startAgain();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -75,7 +75,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function persist(): bool
     {
         try {
-            $persisted = $this->manager->persist();
+            $persisted = $this->repository->persist();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -93,7 +93,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function reset(): bool
     {
         try {
-            $reset = $this->manager->reset();
+            $reset = $this->repository->reset();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -111,7 +111,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function delete(bool $withEmittedEvents): bool
     {
         try {
-            $deleted = $this->manager->delete($withEmittedEvents);
+            $deleted = $this->repository->delete($withEmittedEvents);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -129,7 +129,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function acquireLock(): bool
     {
         try {
-            $locked = $this->manager->acquireLock();
+            $locked = $this->repository->acquireLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -147,7 +147,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function updateLock(): bool
     {
         try {
-            $updated = $this->manager->updateLock();
+            $updated = $this->repository->updateLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -165,7 +165,7 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
     public function releaseLock(): bool
     {
         try {
-            $released = $this->manager->releaseLock();
+            $released = $this->repository->releaseLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -179,21 +179,21 @@ final readonly class InMemoryProjectionManager implements ProjectionManagerInter
 
     public function loadState(): bool
     {
-        return $this->manager->loadState();
+        return $this->repository->loadState();
     }
 
     public function loadStatus(): ProjectionStatus
     {
-        return $this->manager->loadStatus();
+        return $this->repository->loadStatus();
     }
 
     public function exists(): bool
     {
-        return $this->manager->exists();
+        return $this->repository->exists();
     }
 
     public function projectionName(): string
     {
-        return $this->manager->projectionName();
+        return $this->repository->projectionName();
     }
 }

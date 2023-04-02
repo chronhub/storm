@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
-final readonly class EmitterRepository implements ProjectionRepositoryInterface
+final readonly class EmitterManager implements ProjectionManagement
 {
+    use InteractWithManagement;
+
     public function __construct(
         private EmitterSubscriptionInterface $subscription,
-        private ProjectionManagerInterface $store,
+        protected ProjectionRepositoryInterface $repository,
         private Chronicler $chronicler
     ) {
     }
@@ -25,11 +26,11 @@ final readonly class EmitterRepository implements ProjectionRepositoryInterface
     {
         $this->subscription->sprint()->continue();
 
-        if (! $this->store->exists()) {
-            $this->store->create();
+        if (! $this->repository->exists()) {
+            $this->repository->create();
         }
 
-        $this->store->acquireLock();
+        $this->repository->acquireLock();
 
         $this->subscription->streamPosition()->watch(
             $this->subscription->context()->queries()
@@ -40,58 +41,23 @@ final readonly class EmitterRepository implements ProjectionRepositoryInterface
 
     public function store(): void
     {
-        $this->store->persist();
+        $this->repository->persist();
     }
 
     public function revise(): void
     {
-        $this->store->reset();
+        $this->repository->reset();
 
         $this->deleteStream();
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->store->delete($withEmittedEvents);
+        $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->deleteStream();
         }
-    }
-
-    public function renew(): void
-    {
-        $this->store->updateLock();
-    }
-
-    public function freed(): void
-    {
-        $this->store->releaseLock();
-    }
-
-    public function boundState(): void
-    {
-        $this->store->loadState();
-    }
-
-    public function close(): void
-    {
-        $this->store->stop();
-    }
-
-    public function restart(): void
-    {
-        $this->store->startAgain();
-    }
-
-    public function disclose(): ProjectionStatus
-    {
-        return $this->store->loadStatus();
-    }
-
-    public function projectionName(): string
-    {
-        return $this->store->projectionName();
     }
 
     private function deleteStream(): void

@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use function in_array;
 use function pcntl_signal_dispatch;
@@ -45,7 +45,7 @@ abstract readonly class EventProcessor
         return true;
     }
 
-    final protected function afterProcess(Subscription $subscription, ?array $state, ?ProjectionRepositoryInterface $repository): bool
+    final protected function afterProcess(Subscription $subscription, ?array $state, ?ProjectionManagement $repository): bool
     {
         if ($state) {
             $subscription->state()->put($state);
@@ -63,7 +63,7 @@ abstract readonly class EventProcessor
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription, ProjectionRepositoryInterface $projection): void
+    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription, ProjectionManagement $projection): void
     {
         if ($subscription->eventCounter()->isReached()) {
             $projection->store();

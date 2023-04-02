@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\Repository\EmitterRepository;
-use Chronhub\Storm\Projector\Repository\ReadModelRepository;
-use Chronhub\Storm\Projector\Repository\InMemoryProjectionManager;
+use Chronhub\Storm\Projector\Repository\EmitterManager;
+use Chronhub\Storm\Projector\Repository\ReadModelManager;
+use Chronhub\Storm\Projector\Repository\InMemoryRepository;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
 final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
@@ -17,16 +17,16 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
     public function createSubscriptionManagement(
         EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
         string $streamName,
-        ?ReadModel $readModel): ProjectionRepositoryInterface
+        ?ReadModel $readModel): ProjectionManagement
     {
         $store = $this->createStore($subscription, $streamName);
 
-        $adapter = new InMemoryProjectionManager($store);
+        $repository = new InMemoryRepository($store);
 
         if ($readModel) {
-            return new ReadModelRepository($subscription, $adapter, $readModel);
+            return new ReadModelManager($subscription, $repository, $readModel);
         }
 
-        return new EmitterRepository($subscription, $adapter, $this->chronicler);
+        return new EmitterManager($subscription, $repository, $this->chronicler);
     }
 }

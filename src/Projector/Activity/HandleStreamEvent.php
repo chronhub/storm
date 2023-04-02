@@ -12,15 +12,15 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use function array_keys;
 use function array_values;
 
 final readonly class HandleStreamEvent
 {
     public function __construct(private Chronicler $chronicler,
-                                private ?ProjectionRepositoryInterface $repository)
+                                private ?ProjectionManagement $repository)
     {
     }
 

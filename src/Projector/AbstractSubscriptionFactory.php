@@ -17,11 +17,11 @@ use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Projector\Repository\ProjectionManager;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Projector\Repository\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
@@ -86,11 +86,11 @@ abstract class AbstractSubscriptionFactory
     abstract public function createSubscriptionManagement(
         EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
         string $streamName,
-        ?ReadModel $readModel): ProjectionRepositoryInterface;
+        ?ReadModel $readModel): ProjectionManagement;
 
-    protected function createStore(Subscription $subscription, string $streamName): ProjectionManagerInterface
+    protected function createStore(Subscription $subscription, string $streamName): ProjectionRepositoryInterface
     {
-        return new ProjectionManager(
+        return new ProjectionRepository(
             $subscription,
             $this->projectionProvider,
             $this->createLockManager($subscription->option()),

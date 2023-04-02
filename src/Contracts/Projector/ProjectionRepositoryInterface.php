@@ -6,31 +6,39 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
 interface ProjectionRepositoryInterface
 {
-    public function rise(): void;
-
-    public function close(): void;
-
-    public function restart(): void;
+    public function create(): bool;
 
     /**
      * @throws ProjectionNotFound
      */
-    public function boundState(): void;
+    public function loadState(): bool;
 
-    public function disclose(): ProjectionStatus;
+    public function stop(): bool;
 
-    public function store(): void;
+    public function startAgain(): bool;
 
-    public function revise(): void;
+    public function loadStatus(): ProjectionStatus;
 
-    public function discard(bool $withEmittedEvents): void;
+    public function persist(): bool;
 
-    public function renew(): void;
+    public function reset(): bool;
 
-    public function freed(): void;
+    public function delete(bool $withEmittedEvents): bool;
+
+    public function exists(): bool;
+
+    /**
+     * @throws ProjectionAlreadyRunning
+     */
+    public function acquireLock(): bool;
+
+    public function updateLock(): bool;
+
+    public function releaseLock(): bool;
 
     public function projectionName(): string;
 }
