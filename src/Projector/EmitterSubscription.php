@@ -24,8 +24,8 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         protected readonly StreamPosition $streamPosition,
         protected readonly EventCounter $eventCounter,
         protected readonly StreamGapDetector $gap,
-        protected readonly SystemClock $clock)
-    {
+        protected readonly SystemClock $clock
+    ) {
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
         $this->isPersistent = true;

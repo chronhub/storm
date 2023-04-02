@@ -226,11 +226,11 @@ final class DomainEventSerializerTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_raise_exception_if_message_event_type_missing_during_unserialize_content(): void
+    public function it_raise_exception_if_message_event_type_missing_during_deserialize_content(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->expectExceptionMessage('Missing event type header to unserialize payload');
+        $this->expectExceptionMessage('Missing event type header to deserialize payload');
 
         $payload = [
             'headers' => [

@@ -23,9 +23,9 @@ trait InteractWithSubscription
 
     public readonly bool $isPersistent;
 
-    protected ContextInterface $context;
-
     public ProjectionStatus $status = ProjectionStatus::IDLE;
+
+    protected ContextInterface $context;
 
     protected readonly ProjectionStateInterface $state;
 

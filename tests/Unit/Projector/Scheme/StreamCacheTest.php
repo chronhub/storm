@@ -83,6 +83,24 @@ final class StreamCacheTest extends UnitTestCase
         $this->assertTrue($cache->has($firstStream));
     }
 
+    public function testItJsonSerialize(): void
+    {
+        $cache = new StreamCache(2);
+
+        $firstStream = 'foo';
+        $cache->push($firstStream);
+
+        $secondStream = 'bar';
+        $cache->push($secondStream);
+
+        $this->assertEquals(['foo', 'bar'], $cache->jsonSerialize());
+
+        $thirdStream = 'foo_bar';
+        $cache->push($thirdStream);
+
+        $this->assertEquals(['foo_bar', 'bar'], $cache->jsonSerialize());
+    }
+
     public static function provideInvalidCacheSize(): Generator
     {
         yield [0];

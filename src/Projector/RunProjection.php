@@ -34,8 +34,9 @@ final readonly class RunProjection
     protected function beginCycle(Workflow $workflow, bool $keepRunning): void
     {
         do {
-            $inProgress = $workflow
-                ->process(static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+            $inProgress = $workflow->process(
+                static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+            );
         } while ($keepRunning && $inProgress);
     }
 

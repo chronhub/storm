@@ -49,7 +49,7 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
         $source = $headers[Header::EVENT_TYPE] ?? null;
 
         if ($source === null) {
-            throw new InvalidArgumentException('Missing event type header to unserialize payload');
+            throw new InvalidArgumentException('Missing event type header to deserialize payload');
         }
 
         $content = $payload['content'] ?? [];
