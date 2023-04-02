@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\PersistentState;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 
-final class ProjectionState implements PersistentState
+final class ProjectionState implements ProjectionStateInterface
 {
     private array $state = [];
 

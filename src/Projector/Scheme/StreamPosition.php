@@ -63,7 +63,7 @@ final class StreamPosition implements JsonSerializable
         return $this->all();
     }
 
-    protected function loadStreamsFrom(array $queries): Collection
+    private function loadStreamsFrom(array $queries): Collection
     {
         $streams = match (key($queries)) {
             'all' => $this->eventStreamProvider->allWithoutInternal(),
@@ -74,7 +74,7 @@ final class StreamPosition implements JsonSerializable
         return new Collection($streams);
     }
 
-    protected function handleStreamNames(array $streamNames): array
+    private function handleStreamNames(array $streamNames): array
     {
         if (empty($streamNames)) {
             throw new InvalidArgumentException('Stream names can not be empty');

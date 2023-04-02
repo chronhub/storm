@@ -7,16 +7,16 @@ namespace Chronhub\Storm\Projector\Repository;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ProjectionStore;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
-final readonly class PersistentProjectionRepository implements ProjectionRepository
+final readonly class EmitterRepository implements ProjectionRepositoryInterface
 {
     public function __construct(
-        private PersistentViewSubscription $subscription,
-        private ProjectionStore $store,
+        private EmitterSubscriptionInterface $subscription,
+        private ProjectionManagerInterface $store,
         private Chronicler $chronicler
     ) {
     }
@@ -89,18 +89,18 @@ final readonly class PersistentProjectionRepository implements ProjectionReposit
         return $this->store->loadStatus();
     }
 
-    public function streamName(): string
+    public function projectionName(): string
     {
-        return $this->store->currentStreamName();
+        return $this->store->projectionName();
     }
 
     private function deleteStream(): void
     {
         try {
-            $this->chronicler->delete(new StreamName($this->streamName()));
+            $this->chronicler->delete(new StreamName($this->projectionName()));
         } catch (StreamNotFound) {
         }
 
-        $this->subscription->detach();
+        $this->subscription->disjoin();
     }
 }

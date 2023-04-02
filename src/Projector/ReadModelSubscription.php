@@ -11,9 +11,9 @@ use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
-final class ReadModelSubscription implements PersistentReadModelSubscription
+final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithSubscription;
 

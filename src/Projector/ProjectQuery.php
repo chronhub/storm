@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Projector\Scheme\QueryCaster;
+use Chronhub\Storm\Contracts\Projector\Caster;
+use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 
@@ -20,7 +20,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function __construct(
        protected Subscription $subscription,
-       protected ContextBuilder $context,
+       protected ContextInterface $context,
        private Chronicler $chronicler)
     {
     }
@@ -53,9 +53,9 @@ final readonly class ProjectQuery implements QueryProjector
          return $this->subscription->state()->get();
      }
 
-     protected function getCaster(): ProjectorCaster
+     protected function getCaster(): Caster
      {
-         return new QueryCaster(
+         return new CastQuery(
              $this, $this->subscription->clock(), $this->subscription->currentStreamName
          );
      }

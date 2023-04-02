@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ProjectionStore;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
-final readonly class ReadModelProjectionRepository implements ProjectionRepository
+final readonly class ReadModelRepository implements ProjectionRepositoryInterface
 {
-    public function __construct(private PersistentReadModelSubscription $subscription,
-                                private ProjectionStore $store,
+    public function __construct(private ReadModelSubscriptionInterface $subscription,
+                                private ProjectionManagerInterface $manager,
                                 private ReadModel $readModel)
     {
     }
@@ -22,11 +22,11 @@ final readonly class ReadModelProjectionRepository implements ProjectionReposito
     {
         $this->subscription->sprint()->continue();
 
-        if (! $this->store->exists()) {
-            $this->store->create();
+        if (! $this->manager->exists()) {
+            $this->manager->create();
         }
 
-        $this->store->acquireLock();
+        $this->manager->acquireLock();
 
         if (! $this->readModel->isInitialized()) {
             $this->readModel->initialize();
@@ -41,21 +41,21 @@ final readonly class ReadModelProjectionRepository implements ProjectionReposito
 
     public function store(): void
     {
-        $this->store->persist();
+        $this->manager->persist();
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        $this->store->reset();
+        $this->manager->reset();
 
         $this->readModel->reset();
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->store->delete($withEmittedEvents);
+        $this->manager->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->readModel->down();
@@ -64,36 +64,36 @@ final readonly class ReadModelProjectionRepository implements ProjectionReposito
 
     public function renew(): void
     {
-        $this->store->updateLock();
+        $this->manager->updateLock();
     }
 
     public function freed(): void
     {
-        $this->store->releaseLock();
+        $this->manager->releaseLock();
     }
 
     public function boundState(): void
     {
-        $this->store->loadState();
+        $this->manager->loadState();
     }
 
     public function close(): void
     {
-        $this->store->stop();
+        $this->manager->stop();
     }
 
     public function restart(): void
     {
-        $this->store->startAgain();
+        $this->manager->startAgain();
     }
 
     public function disclose(): ProjectionStatus
     {
-        return $this->store->loadStatus();
+        return $this->manager->loadStatus();
     }
 
-    public function streamName(): string
+    public function projectionName(): string
     {
-        return $this->store->currentStreamName();
+        return $this->manager->projectionName();
     }
 }

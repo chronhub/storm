@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Projector\Scheme\CastReadModel;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Projector\Scheme\ReadModelCaster;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
-use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
@@ -19,13 +19,13 @@ final readonly class ProjectReadModel implements ReadModelProjector
     use InteractWithPersistentProjection;
 
     public function __construct(
-        protected PersistentReadModelSubscription $subscription,
-        protected ContextBuilder $context,
-        protected ProjectionRepository $repository,
+        protected ReadModelSubscriptionInterface $subscription,
+        protected ContextInterface $context,
+        protected ProjectionRepositoryInterface $repository,
         protected Chronicler $chronicler,
         protected string $streamName,
-        private ReadModel $readModel)
-    {
+        private ReadModel $readModel
+    ) {
     }
 
     public function readModel(): ReadModel
@@ -33,9 +33,9 @@ final readonly class ProjectReadModel implements ReadModelProjector
         return $this->readModel;
     }
 
-    protected function getCaster(): ReadModelProjectorCaster
+    protected function getCaster(): ReadModelCasterInterface
     {
-        return new ReadModelCaster(
+        return new CastReadModel(
             $this, $this->subscription->clock(), $this->subscription->currentStreamName
         );
     }

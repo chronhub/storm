@@ -6,17 +6,18 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
-use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\EmitterProjector;
+use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 
-final class PersistentCaster implements PersistentProjectorCaster
+final class CastEmitter implements EmitterCasterInterface
 {
     private ?string $currentStreamName = null;
 
-    public function __construct(private readonly ProjectionProjector $projector,
-                                private readonly SystemClock $clock,
-                                ?string &$currentStreamName)
-    {
+    public function __construct(
+        private readonly EmitterProjector $projector,
+        private readonly SystemClock $clock,
+        ?string &$currentStreamName
+    ) {
         $this->currentStreamName = &$currentStreamName;
     }
 

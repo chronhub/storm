@@ -7,9 +7,9 @@ namespace Chronhub\Storm\Projector\Scheme;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 
-final class ReadModelCaster implements ReadModelProjectorCaster
+final class CastReadModel implements ReadModelCasterInterface
 {
     private ?string $currentStreamName = null;
 

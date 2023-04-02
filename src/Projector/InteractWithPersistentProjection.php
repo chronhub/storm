@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Projector\Activity\HandleGap;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
@@ -67,5 +67,5 @@ trait InteractWithPersistentProjection
         ];
     }
 
-    abstract protected function getCaster(): ProjectorCaster;
+    abstract protected function getCaster(): Caster;
 }

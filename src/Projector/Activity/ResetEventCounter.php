@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscription;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
 final class ResetEventCounter
 {
-    public function __invoke(PersistentSubscription $subscription, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         $subscription->eventCounter()->reset();
 

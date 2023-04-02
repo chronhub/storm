@@ -12,7 +12,7 @@ final class UpdateStatusAndPositions
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $this->refresh(false, $subscription->sprint()->inBackground());
+        $this->recoverProjectionStatus(false, $subscription->sprint()->inBackground());
 
         $subscription->streamPosition()->watch(
             $subscription->context()->queries()

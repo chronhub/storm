@@ -14,18 +14,17 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Repository\LockManager;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Contracts\Projector\ProjectionStore;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
+use Chronhub\Storm\Projector\Repository\ProjectionManager;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
-use Chronhub\Storm\Projector\Repository\StandaloneProjectionStore;
-use Chronhub\Storm\Contracts\Projector\PersistentReadModelSubscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use function array_merge;
 
 abstract class AbstractSubscriptionFactory
@@ -51,12 +50,12 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    public function createPersistentEmitterSubscription(array $options = []): PersistentViewSubscription
+    public function createEmitterSubscription(array $options = []): EmitterSubscriptionInterface
     {
         $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
-        return new PersistentEmitterSubscription(
+        return new EmitterSubscription(
             $projectionOption,
             $this->createStreamPosition(),
             $this->createEventCounter($projectionOption),
@@ -65,7 +64,7 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    public function createReadModelSubscription(array $options = []): PersistentReadModelSubscription
+    public function createReadModelSubscription(array $options = []): ReadModelSubscriptionInterface
     {
         $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
@@ -79,19 +78,19 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    public function createContextBuilder(): ContextBuilder
+    public function createContextBuilder(): Context
     {
         return new Context();
     }
 
     abstract public function createSubscriptionManagement(
-        PersistentViewSubscription|PersistentReadModelSubscription $subscription,
+        EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
         string $streamName,
-        ?ReadModel $readModel): ProjectionRepository;
+        ?ReadModel $readModel): ProjectionRepositoryInterface;
 
-    protected function createStore(Subscription $subscription, string $streamName): ProjectionStore
+    protected function createStore(Subscription $subscription, string $streamName): ProjectionManagerInterface
     {
-        return new StandaloneProjectionStore(
+        return new ProjectionManager(
             $subscription,
             $this->projectionProvider,
             $this->createLockManager($subscription->option()),

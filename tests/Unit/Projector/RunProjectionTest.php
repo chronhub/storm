@@ -13,13 +13,13 @@ use Chronhub\Storm\Projector\Scheme\Sprint;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
 #[CoversClass(RunProjection::class)]
 final class RunProjectionTest extends UnitTestCase
 {
-    private ProjectionRepository|MockObject $repository;
+    private ProjectionRepositoryInterface|MockObject $repository;
 
     private Subscription|MockObject $subscription;
 
@@ -27,7 +27,7 @@ final class RunProjectionTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(ProjectionRepository::class);
+        $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
         $this->subscription = $this->createMock(Subscription::class);
     }
 
@@ -193,7 +193,7 @@ final class RunProjectionTest extends UnitTestCase
         $runner($this->subscription);
     }
 
-    private function createRunProjection(array $activities, null|ProjectionRepository|MockObject $repository): RunProjection
+    private function createRunProjection(array $activities, null|ProjectionRepositoryInterface|MockObject $repository): RunProjection
     {
         return new RunProjection($activities, $repository);
     }

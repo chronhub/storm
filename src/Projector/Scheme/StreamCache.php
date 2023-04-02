@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
+use JsonSerializable;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function in_array;
 use function array_fill;
 
-class StreamCache
+final class StreamCache implements JsonSerializable
 {
     /**
      * @var array<int, string|null>
@@ -39,6 +40,11 @@ class StreamCache
     }
 
     public function all(): array
+    {
+        return $this->container;
+    }
+
+    public function jsonSerialize(): array
     {
         return $this->container;
     }

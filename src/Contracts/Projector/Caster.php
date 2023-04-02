@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 
-interface ProjectorCaster
+interface Caster
 {
     public function stop(): void;
 

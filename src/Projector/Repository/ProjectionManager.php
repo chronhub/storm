@@ -7,17 +7,17 @@ namespace Chronhub\Storm\Projector\Repository;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Contracts\Projector\ProjectionStore;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
 use function is_array;
 
-final class StandaloneProjectionStore implements ProjectionStore
+final class ProjectionManager implements ProjectionManagerInterface
 {
     public function __construct(
         public Subscription $subscription,
-        public ProjectionProvider $projectionProvider,
+        public ProjectionProvider $provider,
         public LockManager $lockManager,
         public JsonSerializer $serializer,
         public string $streamName
@@ -26,7 +26,7 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function create(): bool
     {
-        return $this->projectionProvider->createProjection(
+        return $this->provider->createProjection(
             $this->streamName,
             $this->subscription->status->value
         );
@@ -101,7 +101,7 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function delete(bool $withEmittedEvents): bool
     {
-        $deleted = $this->projectionProvider->deleteProjection($this->streamName);
+        $deleted = $this->provider->deleteProjection($this->streamName);
 
         if (! $deleted) {
             return false;
@@ -118,7 +118,7 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function loadState(): bool
     {
-        $projection = $this->projectionProvider->retrieve($this->streamName);
+        $projection = $this->provider->retrieve($this->streamName);
 
         if (! $projection instanceof ProjectionModel) {
             throw ProjectionNotFound::withName($this->streamName);
@@ -137,7 +137,7 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function loadStatus(): ProjectionStatus
     {
-        $projection = $this->projectionProvider->retrieve($this->streamName);
+        $projection = $this->provider->retrieve($this->streamName);
 
         if (! $projection instanceof ProjectionModel) {
             return ProjectionStatus::RUNNING;
@@ -150,7 +150,7 @@ final class StandaloneProjectionStore implements ProjectionStore
     {
         $runningProjection = ProjectionStatus::RUNNING;
 
-        $acquired = $this->projectionProvider->acquireLock(
+        $acquired = $this->provider->acquireLock(
             $this->streamName,
             $runningProjection->value,
             $this->lockManager->acquire(),
@@ -202,16 +202,16 @@ final class StandaloneProjectionStore implements ProjectionStore
 
     public function exists(): bool
     {
-        return $this->projectionProvider->projectionExists($this->streamName);
+        return $this->provider->exists($this->streamName);
     }
 
-    public function currentStreamName(): string
+    public function projectionName(): string
     {
         return $this->streamName;
     }
 
     private function updateProjection(array $data): bool
     {
-        return $this->projectionProvider->updateProjection($this->streamName, $data);
+        return $this->provider->updateProjection($this->streamName, $data);
     }
 }

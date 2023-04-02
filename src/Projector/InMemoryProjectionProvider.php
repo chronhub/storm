@@ -27,22 +27,22 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         $this->projections = new Collection();
     }
 
-    public function createProjection(string $name, string $status): bool
+    public function createProjection(string $projectionName, string $status): bool
     {
-        if ($this->projectionExists($name)) {
+        if ($this->exists($projectionName)) {
             return false;
         }
 
-        $this->projections->put($name, InMemoryProjection::create($name, $status));
+        $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $status));
 
         return true;
     }
 
-    public function updateProjection(string $name, array $data): bool
+    public function updateProjection(string $projectionName, array $data): bool
     {
-        $this->assertFillable($data, $name);
+        $this->assertFillable($data, $projectionName);
 
-        $projection = $this->retrieve($name);
+        $projection = $this->retrieve($projectionName);
 
         if ($projection instanceof InMemoryProjection) {
             if (isset($data['state'])) {
@@ -67,20 +67,20 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return false;
     }
 
-    public function deleteProjection(string $name): bool
+    public function deleteProjection(string $projectionName): bool
     {
-        if (! $this->projections->has($name)) {
+        if (! $this->projections->has($projectionName)) {
             return false;
         }
 
-        $this->projections->forget($name);
+        $this->projections->forget($projectionName);
 
         return true;
     }
 
-    public function acquireLock(string $name, string $status, string $lockedUntil, string $datetime): bool
+    public function acquireLock(string $projectionName, string $status, string $lockedUntil, string $datetime): bool
     {
-        if (! $projection = $this->retrieve($name)) {
+        if (! $projection = $this->retrieve($projectionName)) {
             return false;
         }
 
@@ -95,9 +95,9 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return false;
     }
 
-    public function retrieve(string $name): ?ProjectionModel
+    public function retrieve(string $projectionName): ?ProjectionModel
     {
-        return $this->projections->get($name);
+        return $this->projections->get($projectionName);
     }
 
     public function filterByNames(string ...$projectionNames): array
@@ -107,9 +107,9 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->projections->filter($byStreamNames)->keys()->toArray();
     }
 
-    public function projectionExists(string $name): bool
+    public function exists(string $projectionName): bool
     {
-        return $this->projections->has($name);
+        return $this->projections->has($projectionName);
     }
 
     private function shouldUpdateLock(ProjectionModel $projection, string $currentTime): bool

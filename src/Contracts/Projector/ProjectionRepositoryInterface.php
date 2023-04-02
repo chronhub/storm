@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 
-interface ProjectionRepository
+interface ProjectionRepositoryInterface
 {
     public function rise(): void;
 
@@ -32,5 +32,5 @@ interface ProjectionRepository
 
     public function freed(): void;
 
-    public function streamName(): string;
+    public function projectionName(): string;
 }

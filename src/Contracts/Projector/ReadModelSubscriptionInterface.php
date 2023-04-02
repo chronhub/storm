@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface PersistentReadModelSubscription extends PersistentSubscription
+interface ReadModelSubscriptionInterface extends PersistentSubscriptionInterface
 {
 }

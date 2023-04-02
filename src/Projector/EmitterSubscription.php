@@ -11,9 +11,9 @@ use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 
-final class PersistentEmitterSubscription implements PersistentViewSubscription
+final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithSubscription;
 
@@ -41,17 +41,17 @@ final class PersistentEmitterSubscription implements PersistentViewSubscription
         return $this->gap;
     }
 
-    public function isAttached(): bool
+    public function isJoined(): bool
     {
         return $this->streamFixed;
     }
 
-    public function attach(): void
+    public function join(): void
     {
         $this->streamFixed = true;
     }
 
-    public function detach(): void
+    public function disjoin(): void
     {
         $this->streamFixed = false;
     }

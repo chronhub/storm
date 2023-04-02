@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface PersistentState
+interface ProjectionStateInterface
 {
     public function put(array $state): void;
 

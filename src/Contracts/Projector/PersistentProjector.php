@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface PersistentProjector extends ProjectorBuilder
+interface PersistentProjector extends ProjectorFactory
 {
     public function delete(bool $withEmittedEvents): void;
 

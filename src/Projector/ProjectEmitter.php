@@ -7,16 +7,16 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Projector\Scheme\PersistentCaster;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\PersistentProjectorCaster;
-use Chronhub\Storm\Contracts\Projector\PersistentViewSubscription;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjector;
+use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 
-final readonly class ProjectProjection implements ProjectionProjector
+final readonly class ProjectEmitter implements EmitterProjector
 {
     use InteractWithContext;
     use InteractWithPersistentProjection;
@@ -24,9 +24,9 @@ final readonly class ProjectProjection implements ProjectionProjector
     private StreamCache $streamCache;
 
     public function __construct(
-      protected PersistentViewSubscription $subscription,
-      protected ContextBuilder $context,
-      protected ProjectionRepository $repository,
+      protected EmitterSubscriptionInterface $subscription,
+      protected ContextInterface $context,
+      protected ProjectionRepositoryInterface $repository,
       protected Chronicler $chronicler,
       protected string $streamName)
     {
@@ -53,9 +53,9 @@ final readonly class ProjectProjection implements ProjectionProjector
             : $this->chronicler->firstCommit($stream);
     }
 
-    protected function getCaster(): PersistentProjectorCaster
+    protected function getCaster(): EmitterCasterInterface
     {
-        return new PersistentCaster(
+        return new CastEmitter(
             $this, $this->subscription->clock(), $this->subscription->currentStreamName
         );
     }
@@ -66,10 +66,10 @@ final readonly class ProjectProjection implements ProjectionProjector
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
-        if (! $this->subscription->isAttached() && ! $this->chronicler->hasStream($streamName)) {
+        if (! $this->subscription->isJoined() && ! $this->chronicler->hasStream($streamName)) {
             $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->subscription->attach();
+            $this->subscription->join();
         }
     }
 

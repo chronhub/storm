@@ -8,7 +8,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 
-interface ProjectionStore
+interface ProjectionManagerInterface
 {
     public function create(): bool;
 
@@ -40,5 +40,5 @@ interface ProjectionStore
 
     public function releaseLock(): bool;
 
-    public function currentStreamName(): string;
+    public function projectionName(): string;
 }

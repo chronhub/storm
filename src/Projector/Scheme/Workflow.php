@@ -14,46 +14,42 @@ final class Workflow
     /**
      * @var array<callable>
      */
-    private array $pipes;
+    private array $activities;
 
-    private Subscription $passable;
+    private Subscription $subscription;
 
-    public function send(Subscription $passable): self
+    public function process(Subscription $subscription): self
     {
-        $this->passable = $passable;
+        $this->subscription = $subscription;
 
         return $this;
     }
 
-    /**
-     * @param  array<callable>  $pipes
-     * @return $this
-     */
-    public function through(array $pipes): self
+    public function through(array $activities): self
     {
-        $this->pipes = $pipes;
+        $this->activities = $activities;
 
         return $this;
     }
 
     public function then(Closure $destination): bool
     {
-        $pipeline = array_reduce(
-            array_reverse($this->pipes),
+        $process = array_reduce(
+            array_reverse($this->activities),
             $this->carry(),
             $this->prepareDestination($destination)
         );
 
-        return $pipeline($this->passable);
+        return $process($this->subscription);
     }
 
     protected function prepareDestination(Closure $destination): Closure
     {
-        return static fn (Subscription $passable) => $destination($passable);
+        return static fn (Subscription $subscription) => $destination($subscription);
     }
 
     protected function carry(): Closure
     {
-        return static fn (Closure $stack, callable $pipe) => static fn (Subscription $passable) => $pipe($passable, $stack);
+        return static fn (Closure $stack, callable $activity) => static fn (Subscription $subscription) => $activity($subscription, $stack);
     }
 }

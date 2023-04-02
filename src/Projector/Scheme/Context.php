@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Closure;
+use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function count;
 use function is_array;
 
-final class Context implements ContextBuilder
+final class Context implements ContextInterface
 {
     protected array|Closure|null $eventHandlers = null;
 
@@ -128,7 +128,7 @@ final class Context implements ContextBuilder
     /**
      * @internal
      */
-    public function castEventHandlers(ProjectorCaster $caster): void
+    public function castEventHandlers(Caster $caster): void
     {
         if ($this->eventHandlers instanceof Closure) {
             $this->eventHandlers = Closure::bind($this->eventHandlers, $caster);
@@ -142,7 +142,7 @@ final class Context implements ContextBuilder
     /**
      * @internal
      */
-    public function castInitCallback(ProjectorCaster $caster): array
+    public function castInitCallback(Caster $caster): array
     {
         if ($this->initCallback instanceof Closure) {
             $callback = Closure::bind($this->initCallback, $caster);

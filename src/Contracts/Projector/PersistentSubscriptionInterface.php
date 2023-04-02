@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Scheme\GapDetector;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
-interface PersistentSubscription extends Subscription
+interface PersistentSubscriptionInterface extends Subscription
 {
     public function eventCounter(): EventCounter;
 

@@ -10,15 +10,15 @@ use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
 interface Subscription
 {
-    public function compose(ContextBuilder $context, ProjectorCaster $projectorCaster, bool $keepRunning): void;
+    public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void;
 
     public function initializeAgain(): void;
 
-    public function context(): ContextRead;
+    public function context(): ContextReader;
 
     public function sprint(): Sprint;
 
-    public function state(): PersistentState;
+    public function state(): ProjectionStateInterface;
 
     public function option(): ProjectionOption;
 

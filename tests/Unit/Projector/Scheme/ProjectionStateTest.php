@@ -27,6 +27,19 @@ final class ProjectionStateTest extends UnitTestCase
         $this->assertSame(['foo' => 'bar'], $state->get());
     }
 
+    public function testOverrideState(): void
+    {
+        $state = new ProjectionState();
+
+        $state->put(['foo' => 'bar']);
+
+        $this->assertSame(['foo' => 'bar'], $state->get());
+
+        $state->put(['baz' => 'foo_bar']);
+
+        $this->assertSame(['baz' => 'foo_bar'], $state->get());
+    }
+
     public function testSetEmptyState(): void
     {
         $state = new ProjectionState();

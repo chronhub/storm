@@ -14,7 +14,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 #[CoversClass(StreamCache::class)]
 final class StreamCacheTest extends UnitTestCase
 {
-    public function itTestInstanceWitCacheSize(): void
+    public function testInstanceWitCacheSize(): void
     {
         $cache = new StreamCache(5);
 

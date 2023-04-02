@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 interface ProjectorServiceManager
 {
-    public function create(string $name): ProjectorManager;
+    public function create(string $name): ProjectorManagerInterface;
 
     public function extend(string $name, callable $callback): ProjectorServiceManager;
 

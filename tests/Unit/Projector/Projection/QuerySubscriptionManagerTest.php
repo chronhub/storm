@@ -10,13 +10,14 @@ use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Message\AliasFromClassName;
+use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\SubscriptionManager;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\QueryCaster;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
@@ -25,7 +26,6 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorCaster;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 
@@ -58,18 +58,18 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
     public function testEventHandlers(): void
     {
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(1);
 
-        $liveSubscription = $manager->projectQuery();
+        $liveSubscription = $manager->query();
 
         $liveSubscription
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event): void {
-                /** @var QueryProjectorCaster $this */
-                UnitTestCase::assertInstanceOf(QueryProjectorCaster::class, $this);
+                /** @var QueryCaster $this */
+                UnitTestCase::assertInstanceOf(QueryCaster::class, $this);
                 UnitTestCase::assertSame('balance', $this->streamName());
                 UnitTestCase::assertInstanceOf(SystemClock::class, $this->clock());
             })
@@ -78,11 +78,11 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
     public function testLiveSubscription(): void
     {
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->projectQuery();
+        $liveSubscription = $manager->query();
 
         $liveSubscription
             ->initialize(fn (): array => ['count' => 0])
@@ -100,18 +100,18 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
     public function testStopLiveSubscription(): void
     {
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->projectQuery();
+        $liveSubscription = $manager->query();
 
         $liveSubscription
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var QueryProjectorCaster $this */
+                /** @var QueryCaster $this */
                 $state['count']++;
 
                 if ($state['count'] === 5) {
@@ -144,11 +144,11 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             }
         };
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->projectQuery();
+        $liveSubscription = $manager->query();
 
         $liveSubscription
             ->initialize(fn (): array => ['event_version' => []])

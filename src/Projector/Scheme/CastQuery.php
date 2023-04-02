@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\QueryCaster;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorCaster;
 
-final class QueryCaster implements QueryProjectorCaster
+final class CastQuery implements QueryCaster
 {
     private ?string $currentStreamName = null;
 

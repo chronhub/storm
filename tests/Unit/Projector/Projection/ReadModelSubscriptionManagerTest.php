@@ -11,11 +11,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Message\AliasFromClassName;
+use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\SubscriptionManager;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
@@ -28,7 +28,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 
 final class ReadModelSubscriptionManagerTest extends UnitTestCase
@@ -46,25 +46,25 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
     public function testInstance(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 1;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
-                UnitTestCase::assertInstanceOf(ReadModelProjectorCaster::class, $this);
+                /** @var ReadModelCasterInterface $this */
+                UnitTestCase::assertInstanceOf(ReadModelCasterInterface::class, $this);
                 UnitTestCase::assertSame('balance', $this->streamName());
                 UnitTestCase::assertInstanceOf(SystemClock::class, $this->clock());
 
@@ -78,7 +78,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
             ->run(false);
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
     }
@@ -86,25 +86,25 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
     public function testReadModelProjection(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
+                /** @var ReadModelCasterInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -125,7 +125,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
             ->run(false);
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
     }
@@ -133,25 +133,25 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
     public function testStopReadModelProjection(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
+                /** @var ReadModelCasterInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -178,7 +178,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $expectedEvents = $expectedEvents / 2;
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
     }
@@ -186,25 +186,25 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
     public function testResetReadModelProjection(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
+                /** @var ReadModelCasterInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -225,7 +225,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
             ->run(false);
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
 
@@ -233,31 +233,31 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
 
         $this->assertEmpty($readModel->getContainer());
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
     }
 
     public function testDeleteReadModelProjection(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
+                /** @var ReadModelCasterInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -278,7 +278,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
             ->run(false);
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
 
@@ -286,31 +286,31 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
 
         $this->assertNotEmpty($readModel->getContainer());
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
     }
 
     public function testDeleteWithEmittedEventsReadModelProjection(): void
     {
         $this->assertFalse($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
 
         $readModel = new InMemoryReadModel();
 
-        $manager = new SubscriptionManager($this->createSubscriptionFactory());
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
         $this->feedEventStore($aggregateId, $expectedEvents);
 
-        $projection = $manager->projectReadModel('read_balance', $readModel);
+        $projection = $manager->readModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelProjectorCaster $this */
+                /** @var ReadModelCasterInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -331,7 +331,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
             ->run(false);
 
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertTrue($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertTrue($this->projectionProvider->exists('read_balance'));
         $this->assertSame($expectedEvents, $projection->getState()['count']);
         $this->assertEquals(($expectedEvents * ($expectedEvents + 1)) / 2, $readModel->getContainer()[$aggregateId->toString()]['balance']);
 
@@ -339,7 +339,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
 
         $this->assertEmpty($readModel->getContainer());
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
-        $this->assertFalse($this->projectionProvider->projectionExists('read_balance'));
+        $this->assertFalse($this->projectionProvider->exists('read_balance'));
     }
 
     protected function setUp(): void

@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector\Repository;
 
 use Throwable;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Contracts\Projector\ProjectionStore;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagerInterface;
 
-final readonly class InMemoryProjectionStore implements ProjectionStore
+final readonly class InMemoryProjectionManager implements ProjectionManagerInterface
 {
-    public function __construct(private ProjectionStore $provider)
+    public function __construct(private ProjectionManagerInterface $manager)
     {
     }
 
@@ -21,13 +21,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function create(): bool
     {
         try {
-            $created = $this->provider->create();
+            $created = $this->manager->create();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $created) {
-            throw InMemoryProjectionFailed::failedOnCreate($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnCreate($this->projectionName());
         }
 
         return true;
@@ -39,13 +39,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function stop(): bool
     {
         try {
-            $stopped = $this->provider->stop();
+            $stopped = $this->manager->stop();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $stopped) {
-            throw InMemoryProjectionFailed::failedOnStop($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnStop($this->projectionName());
         }
 
         return true;
@@ -57,13 +57,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function startAgain(): bool
     {
         try {
-            $restarted = $this->provider->startAgain();
+            $restarted = $this->manager->startAgain();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $restarted) {
-            throw InMemoryProjectionFailed::failedOnStartAgain($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnStartAgain($this->projectionName());
         }
 
         return true;
@@ -75,13 +75,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function persist(): bool
     {
         try {
-            $persisted = $this->provider->persist();
+            $persisted = $this->manager->persist();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $persisted) {
-            throw InMemoryProjectionFailed::failedOnPersist($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnPersist($this->projectionName());
         }
 
         return true;
@@ -93,13 +93,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function reset(): bool
     {
         try {
-            $reset = $this->provider->reset();
+            $reset = $this->manager->reset();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $reset) {
-            throw InMemoryProjectionFailed::failedOnReset($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnReset($this->projectionName());
         }
 
         return true;
@@ -111,13 +111,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function delete(bool $withEmittedEvents): bool
     {
         try {
-            $deleted = $this->provider->delete($withEmittedEvents);
+            $deleted = $this->manager->delete($withEmittedEvents);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $deleted) {
-            throw InMemoryProjectionFailed::failedOnDelete($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnDelete($this->projectionName());
         }
 
         return true;
@@ -129,13 +129,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function acquireLock(): bool
     {
         try {
-            $locked = $this->provider->acquireLock();
+            $locked = $this->manager->acquireLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $locked) {
-            throw InMemoryProjectionFailed::failedOnAcquireLock($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnAcquireLock($this->projectionName());
         }
 
         return true;
@@ -147,13 +147,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function updateLock(): bool
     {
         try {
-            $updated = $this->provider->updateLock();
+            $updated = $this->manager->updateLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $updated) {
-            throw InMemoryProjectionFailed::failedOnUpdateLock($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnUpdateLock($this->projectionName());
         }
 
         return true;
@@ -165,13 +165,13 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
     public function releaseLock(): bool
     {
         try {
-            $released = $this->provider->releaseLock();
+            $released = $this->manager->releaseLock();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
 
         if (! $released) {
-            throw InMemoryProjectionFailed::failedOnReleaseLock($this->currentStreamName());
+            throw InMemoryProjectionFailed::failedOnReleaseLock($this->projectionName());
         }
 
         return true;
@@ -179,21 +179,21 @@ final readonly class InMemoryProjectionStore implements ProjectionStore
 
     public function loadState(): bool
     {
-        return $this->provider->loadState();
+        return $this->manager->loadState();
     }
 
     public function loadStatus(): ProjectionStatus
     {
-        return $this->provider->loadStatus();
+        return $this->manager->loadStatus();
     }
 
     public function exists(): bool
     {
-        return $this->provider->exists();
+        return $this->manager->exists();
     }
 
-    public function currentStreamName(): string
+    public function projectionName(): string
     {
-        return $this->provider->currentStreamName();
+        return $this->manager->projectionName();
     }
 }

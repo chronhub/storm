@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 /**
  * @template T of Closure(DomainEvent): void|Closure(DomainEvent, array): array
  */
-interface ProjectorBuilder extends Projector
+interface ProjectorFactory extends Projector
 {
     public function initialize(Closure $initCallback): static;
 

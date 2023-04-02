@@ -8,20 +8,20 @@ use Throwable;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Contracts\Projector\ProjectorManager;
+use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectionProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
+use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 
-final readonly class SubscriptionManager implements ProjectorManager
+final readonly class ProjectorManager implements ProjectorManagerInterface
 {
     public function __construct(private AbstractSubscriptionFactory $subscriptionFactory)
     {
     }
 
-    public function projectQuery(array $options = []): QueryProjector
+    public function query(array $options = []): QueryProjector
     {
         return new ProjectQuery(
             $this->subscriptionFactory->createQuerySubscription($options),
@@ -30,11 +30,11 @@ final readonly class SubscriptionManager implements ProjectorManager
         );
     }
 
-    public function projectProjection(string $streamName, array $options = []): ProjectionProjector
+    public function emitter(string $streamName, array $options = []): EmitterProjector
     {
-        $subscription = $this->subscriptionFactory->createPersistentEmitterSubscription($options);
+        $subscription = $this->subscriptionFactory->createEmitterSubscription($options);
 
-        return new ProjectProjection(
+        return new ProjectEmitter(
             $subscription,
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->createSubscriptionManagement($subscription, $streamName, null),
@@ -43,7 +43,7 @@ final readonly class SubscriptionManager implements ProjectorManager
         );
     }
 
-    public function projectReadModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
+    public function readModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
         $subscription = $this->subscriptionFactory->createReadModelSubscription($options);
 
@@ -102,7 +102,7 @@ final readonly class SubscriptionManager implements ProjectorManager
 
     public function exists(string $projectionName): bool
     {
-        return $this->subscriptionFactory->projectionProvider->projectionExists($projectionName);
+        return $this->subscriptionFactory->projectionProvider->exists($projectionName);
     }
 
     public function queryScope(): ProjectionQueryScope

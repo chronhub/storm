@@ -9,8 +9,8 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscription;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use function in_array;
 use function pcntl_signal_dispatch;
 
@@ -30,7 +30,7 @@ abstract readonly class EventProcessor
         // for a persistent projection, we check if position match our internal cache
         // if it does not, we return early to store what we have and sleep before the next run
         // and so on, till a gap is detected and provide retries
-        if ($subscription instanceof PersistentSubscription) {
+        if ($subscription instanceof PersistentSubscriptionInterface) {
             if ($subscription->gap()->detect($streamName, $position, $event->header(Header::EVENT_TIME))) {
                 return false;
             }
@@ -38,21 +38,21 @@ abstract readonly class EventProcessor
 
         $subscription->streamPosition()->bind($streamName, $position);
 
-        if ($subscription instanceof PersistentSubscription) {
+        if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->eventCounter()->increment();
         }
 
         return true;
     }
 
-    final protected function afterProcess(Subscription $subscription, ?array $state, ?ProjectionRepository $repository): bool
+    final protected function afterProcess(Subscription $subscription, ?array $state, ?ProjectionRepositoryInterface $repository): bool
     {
         if ($state) {
             $subscription->state()->put($state);
         }
 
-        if ($repository && $subscription instanceof PersistentSubscription) {
-            $this->persistOnReachedCounter($subscription, $repository);
+        if ($repository && $subscription instanceof PersistentSubscriptionInterface) {
+            $this->persistWhenCounterIsReached($subscription, $repository);
         }
 
         return $subscription->sprint()->inProgress();
@@ -63,7 +63,7 @@ abstract readonly class EventProcessor
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    final protected function persistOnReachedCounter(PersistentSubscription $subscription, ProjectionRepository $projection): void
+    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription, ProjectionRepositoryInterface $projection): void
     {
         if ($subscription->eventCounter()->isReached()) {
             $projection->store();

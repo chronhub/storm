@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Projector;
 
 use Closure;
 use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ContextRead;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Contracts\Projector\ContextBuilder;
-use Chronhub\Storm\Contracts\Projector\PersistentState;
-use Chronhub\Storm\Contracts\Projector\ProjectorCaster;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function is_array;
 
@@ -23,15 +23,15 @@ trait InteractWithSubscription
 
     public readonly bool $isPersistent;
 
-    protected ContextBuilder $context;
+    protected ContextInterface $context;
 
     public ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    protected readonly PersistentState $state;
+    protected readonly ProjectionStateInterface $state;
 
     protected readonly Sprint $sprint;
 
-    public function compose(ContextBuilder $context, ProjectorCaster $projectorCaster, bool $keepRunning): void
+    public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void
     {
         $this->context = $context;
 
@@ -61,7 +61,7 @@ trait InteractWithSubscription
         }
     }
 
-    public function context(): ContextRead
+    public function context(): ContextReader
     {
         return $this->context;
     }
@@ -81,7 +81,7 @@ trait InteractWithSubscription
         return $this->streamPosition;
     }
 
-    public function state(): PersistentState
+    public function state(): ProjectionStateInterface
     {
         return $this->state;
     }
@@ -91,7 +91,7 @@ trait InteractWithSubscription
         return $this->clock;
     }
 
-    protected function cast(ProjectorCaster $caster): void
+    protected function cast(Caster $caster): void
     {
         $originalState = $this->context->castInitCallback($caster);
 

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Closure;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 
-interface ContextBuilder extends ContextRead
+interface ContextInterface extends ContextReader
 {
     public function initialize(Closure $initCallback): self;
 
