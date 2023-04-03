@@ -67,7 +67,13 @@ final readonly class PointInTime implements SystemClock
             $pointInTime = $pointInTime->format(self::DATE_TIME_FORMAT);
         }
 
-        return DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);
+        $fromFormat = DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);
+
+        if (! $fromFormat instanceof DateTimeImmutable) {
+            throw new DomainException(sprintf('Invalid date time format: %s', $pointInTime));
+        }
+
+        return $fromFormat;
     }
 
     public function format(string|DateTimeImmutable $pointInTime): string
