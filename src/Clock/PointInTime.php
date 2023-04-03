@@ -12,6 +12,7 @@ use Symfony\Component\Clock\MonotonicClock;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use function sleep;
 use function usleep;
+use function sprintf;
 use function is_string;
 use function strtoupper;
 
