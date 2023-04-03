@@ -7,15 +7,17 @@ namespace Chronhub\Storm\Projector\Repository;
 use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 
+/**
+ * @property $lockTimeoutMs The duration for which a lock is valid, in milliseconds
+ * @property $lockThreshold The duration after which a lock should be refreshed, in milliseconds
+ */
 final class LockManager
 {
     private ?DateTimeImmutable $lastLock = null;
 
     public function __construct(
         private readonly SystemClock $clock,
-        //The duration for which a lock is valid, in milliseconds
         private readonly int $lockTimeoutMs,
-        // The duration after which a lock should be refreshed, in milliseconds
         private readonly int $lockThreshold
     ) {
     }

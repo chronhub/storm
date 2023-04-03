@@ -57,12 +57,10 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $restarted = $this->updateProjection(
-            [
-                'status' => $runningStatus->value,
-                'locked_until' => $this->lockManager->acquire(),
-            ]
-        );
+        $restarted = $this->updateProjection([
+            'status' => $runningStatus->value,
+            'locked_until' => $this->lockManager->acquire(),
+        ]);
 
         if (! $restarted) {
             return false;
@@ -75,13 +73,11 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function persist(): bool
     {
-        return $this->updateprojection(
-            [
-                'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
-                'state' => $this->serializer->encode($this->subscription->state()->get()),
-                'locked_until' => $this->lockManager->refresh(),
-            ]
-        );
+        return $this->updateprojection([
+            'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
+            'state' => $this->serializer->encode($this->subscription->state()->get()),
+            'locked_until' => $this->lockManager->refresh(),
+        ]);
     }
 
     public function reset(): bool
@@ -90,13 +86,11 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
         $this->subscription->initializeAgain();
 
-        return $this->updateProjection(
-            [
-                'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
-                'state' => $this->serializer->encode($this->subscription->state()->get()),
-                'status' => $this->subscription->status->value,
-            ]
-        );
+        return $this->updateProjection([
+            'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
+            'state' => $this->serializer->encode($this->subscription->state()->get()),
+            'status' => $this->subscription->status->value,
+        ]);
     }
 
     public function delete(bool $withEmittedEvents): bool
@@ -169,12 +163,10 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     public function updateLock(): bool
     {
         if ($this->lockManager->tryUpdate()) {
-            return $this->updateProjection(
-                [
-                    'locked_until' => $this->lockManager->increment(),
-                    'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
-                ]
-            );
+            return $this->updateProjection([
+                'locked_until' => $this->lockManager->increment(),
+                'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
+            ]);
         }
 
         return true;
@@ -184,12 +176,10 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     {
         $idleProjection = ProjectionStatus::IDLE;
 
-        $released = $this->updateProjection(
-            [
-                'status' => $idleProjection->value,
-                'locked_until' => null,
-            ]
-        );
+        $released = $this->updateProjection([
+            'status' => $idleProjection->value,
+            'locked_until' => null,
+        ]);
 
         if (! $released) {
             return false;

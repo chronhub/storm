@@ -78,11 +78,6 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    public function createContextBuilder(): Context
-    {
-        return new Context();
-    }
-
     abstract public function createSubscriptionManagement(
         EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
         string $streamName,
@@ -131,5 +126,10 @@ abstract class AbstractSubscriptionFactory
     protected function createEventCounter(ProjectionOption $options): EventCounter
     {
         return new EventCounter($options->getBlockSize());
+    }
+
+    public function createContextBuilder(): Context
+    {
+        return new Context();
     }
 }
