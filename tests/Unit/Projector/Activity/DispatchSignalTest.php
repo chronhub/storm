@@ -23,9 +23,7 @@ final class DispatchSignalTest extends UnitTestCase
 
         $subscription = $this->createMock(Subscription::class);
 
-        $subscription->expects($this->once())
-            ->method('option')
-            ->willReturn($options);
+        $subscription->expects($this->once())->method('option')->willReturn($options);
 
         $activity = new DispatchSignal();
 
@@ -36,9 +34,7 @@ final class DispatchSignalTest extends UnitTestCase
 
         posix_kill(posix_getpid(), SIGTERM);
 
-        $activity($subscription, function () {
-            return true;
-        });
+        $activity($subscription, fn () => true);
 
         $this->assertSame($dispatchSignal, $called);
     }
