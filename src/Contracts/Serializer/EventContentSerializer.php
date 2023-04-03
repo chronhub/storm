@@ -14,7 +14,7 @@ interface EventContentSerializer
     public function serialize(DomainEvent $event): array;
 
     /**
-     * Unserialize Domain event
+     * Deserialize Domain event
      */
     public function deserialize(string $source, array $payload): DomainEvent;
 }
