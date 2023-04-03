@@ -76,6 +76,8 @@ final class EmitterSubscriptionManagerTest extends UnitTestCase
             ->whenAny(function (SomeEvent $event, array $state): array {
                 /** @var EmitterCasterInterface $this */
                 UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                UnitTestCase::assertSame('balance', $this->streamName());
+                UnitTestCase::assertInstanceOf(PointInTime::class, $this->clock());
 
                 $this->emit($event);
 

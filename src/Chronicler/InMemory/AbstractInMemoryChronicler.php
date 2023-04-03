@@ -56,7 +56,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 
         $this->eventStreamProvider->deleteStream($streamName->toString());
 
-        $this->streams->forget($streamName->toString());
+        $this->streams = $this->streams->reject(fn (array $events, string $name): bool => $name === $streamName->toString());
     }
 
     public function filterStreamNames(StreamName ...$streamNames): array
@@ -105,7 +105,6 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 
     /**
      * @param  array<DomainEvent>  $events
-     * @return array<DomainEvent>
      */
     protected function decorateEventWithInternalPosition(array $events): array
     {

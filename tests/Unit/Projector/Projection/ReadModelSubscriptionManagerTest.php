@@ -57,6 +57,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $this->feedEventStore($aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
+        $this->assertSame('read_balance', $projection->getStreamName());
 
         $projection
             ->initialize(fn (): array => ['count' => 0])

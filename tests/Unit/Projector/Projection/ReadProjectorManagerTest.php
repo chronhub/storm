@@ -19,6 +19,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\QueryCaster;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
@@ -64,6 +65,7 @@ final class ReadProjectorManagerTest extends UnitTestCase
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $projection = $manager->emitter('amount');
+        $this->assertSame('amount', $projection->getStreamName());
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -96,6 +98,42 @@ final class ReadProjectorManagerTest extends UnitTestCase
             ->run(true);
 
         $this->assertEquals(1, $projection->getState()['count']);
+    }
+
+    public function testResetQueryProjection(): void
+    {
+        $this->assertFalse($this->projectionProvider->exists('amount'));
+
+        $aggregateId = V4AggregateId::create();
+        $expectedEvents = 2;
+
+        $this->feedEventStore($aggregateId, $expectedEvents);
+
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
+
+        $projection = $manager->emitter('amount');
+
+        $projection
+            ->initialize(fn (): array => ['count' => 0])
+            ->fromStreams($this->streamName->name)
+            ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
+            ->whenAny(function (SomeEvent $event, array $state): array {
+                /** @var QueryCaster $this */
+                $state['count']++;
+
+                if ($state['count'] === 2) {
+                    $this->stop();
+                }
+
+                return $state;
+            })
+            ->run(true);
+
+        $this->assertEquals(2, $projection->getState()['count']);
+
+        $projection->reset();
+
+        $this->assertEquals(0, $projection->getState()['count']);
     }
 
     public function testExceptionRaisedOnStopProjectionNotFound(): void
