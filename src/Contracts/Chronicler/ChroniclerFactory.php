@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Chronicler;
 
-interface ChroniclerProvider
+interface ChroniclerFactory
 {
     /**
      * @param  non-empty-string  $name
      */
-    public function resolve(string $name, array $config): Chronicler;
+    public function createEventStore(string $name, array $config): Chronicler;
 }

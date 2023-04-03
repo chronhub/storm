@@ -22,5 +22,5 @@ interface ChroniclerManager
     /**
      * @param  non-empty-string  $driver
      */
-    public function shouldUse(string $driver, string|ChroniclerProvider $provider): ChroniclerManager;
+    public function shouldUse(string $driver, string|ChroniclerFactory $provider): ChroniclerManager;
 }

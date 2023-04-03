@@ -13,17 +13,17 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
-use Chronhub\Storm\Chronicler\AbstractChroniclerProvider;
 use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerFactory;
 use Chronhub\Storm\Chronicler\TransactionalEventChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
 
-#[CoversClass(AbstractInMemoryChronicler::class)]
-final class AbstractInMemoryChroniclerTest extends UnitTestCase
+#[CoversClass(ProvideChroniclerFactory::class)]
+final class ProvideChroniclerFactoryTest extends UnitTestCase
 {
     public function testExceptionRaisedWhenEventStoreGivenIsAlreadyADecorator(): void
     {
@@ -35,20 +35,22 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $container = $this->createMock(ContainerInterface::class);
         $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 return $this->decorateChronicler($this->chronicler, null);
             }
         };
 
-        $provider->resolve('foo', []);
+        $provider->createEventStore('foo', []);
     }
 
     public function testExceptionRaisedWhenStreamTrackerMissing(): void
@@ -60,39 +62,42 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
         $container = $this->createMock(ContainerInterface::class);
         $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 return $this->decorateChronicler($this->chronicler, null);
             }
         };
 
-        $provider->resolve('foo', []);
+        $provider->createEventStore('foo', []);
     }
 
     public function testTrackerIdResolvedFromIoc(): void
     {
+        $chronicler = $this->createMock(Chronicler::class);
         $container = $this->createMock(ContainerInterface::class);
+
         $container->expects($this->once())->method('get')->with('tracker.stream.default')->willReturn(new TrackStream());
         $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $chronicler = $this->createMock(Chronicler::class);
-
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
-            public function __construct(Closure $containerAsClosure,
-                                        private readonly Chronicler $chronicler)
+            use ProvideChroniclerFactory;
+
+            public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 $streamTracker = $this->resolveStreamTracker($config);
 
@@ -102,11 +107,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
             }
         };
 
-        $chronicler = $provider->resolve('foo', [
-            'tracking' => [
-                'tracker_id' => 'tracker.stream.default',
-            ],
-        ]);
+        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.default']]);
 
         $this->assertEquals(EventChronicler::class, $chronicler::class);
     }
@@ -120,15 +121,17 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
 
         $chronicler = $this->createMock(TransactionalChronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure,
                                         private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 $streamTracker = $this->resolveStreamTracker($config);
 
@@ -138,11 +141,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
             }
         };
 
-        $chronicler = $provider->resolve('foo', [
-            'tracking' => [
-                'tracker_id' => 'tracker.stream.transactional',
-            ],
-        ]);
+        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
 
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
@@ -163,15 +162,17 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
 
         $chronicler = $this->createMock(Chronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure,
                                         private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 $streamTracker = $this->resolveStreamTracker($config);
 
@@ -181,11 +182,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
             }
         };
 
-        $chronicler = $provider->resolve('foo', [
-            'tracking' => [
-                'tracker_id' => 'tracker.stream.transactional',
-            ],
-        ]);
+        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
 
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
@@ -205,15 +202,17 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
 
         $chronicler = $this->createMock(TransactionalChronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure,
                                         private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 $streamTracker = $this->resolveStreamTracker($config);
 
@@ -223,11 +222,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
             }
         };
 
-        $chronicler = $provider->resolve('foo', [
-            'tracking' => [
-                'tracker_id' => 'tracker.stream.not_transactional',
-            ],
-        ]);
+        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.not_transactional']]);
 
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
@@ -265,15 +260,17 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
 
         $chronicler = $this->createMock(Chronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) extends AbstractChroniclerProvider
+        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
         {
+            use ProvideChroniclerFactory;
+
             public function __construct(Closure $containerAsClosure,
                                         private readonly Chronicler $chronicler)
             {
-                parent::__construct($containerAsClosure);
+                $this->container = $containerAsClosure();
             }
 
-            public function resolve(string $name, array $config): Chronicler
+            public function createEventStore(string $name, array $config): Chronicler
             {
                 $streamTracker = $this->resolveStreamTracker($config);
 
@@ -287,7 +284,7 @@ final class AbstractInMemoryChroniclerTest extends UnitTestCase
             }
         };
 
-        $provider->resolve('foo', [
+        $provider->createEventStore('foo', [
             'tracking' => [
                 'tracker_id' => 'tracker.stream.default',
                 'subscribers' => [

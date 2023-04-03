@@ -17,6 +17,7 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use function sprintf;
 use function array_map;
 
 abstract class AbstractInMemoryChronicler implements InMemoryChronicler
@@ -42,7 +43,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
     {
         if (! $queryFilter instanceof InMemoryQueryFilter) {
-            throw new InvalidArgumentException('Query filter must be an instance of '.InMemoryQueryFilter::class);
+            throw new InvalidArgumentException(sprintf('Query filter must be an instance of %s', InMemoryQueryFilter::class));
         }
 
         return $this->filterEvents($streamName, $queryFilter);

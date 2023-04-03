@@ -4,32 +4,25 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Closure;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Tracker\StreamTracker;
 use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
-use Chronhub\Storm\Contracts\Chronicler\ChroniclerProvider;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use function sprintf;
 use function is_string;
 
-abstract class AbstractChroniclerProvider implements ChroniclerProvider
+trait ProvideChroniclerFactory
 {
     protected ContainerInterface $container;
 
-    public function __construct(Closure $app)
-    {
-        $this->container = $app();
-    }
-
-    protected function decorateChronicler(Chronicler $chronicler,
-                                          ?StreamTracker $tracker): EventableChronicler|TransactionalEventableChronicler
+    protected function decorateChronicler(Chronicler $chronicler, ?StreamTracker $tracker): EventableChronicler|TransactionalEventableChronicler
     {
         if ($chronicler instanceof EventableChronicler) {
             throw new InvalidArgumentException('Unable to decorate a chronicler which is already decorated');
@@ -37,7 +30,7 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
 
         if (! $tracker instanceof StreamTracker) {
             throw new InvalidArgumentException(
-                'Unable to decorate chronicler '.$chronicler::class.', stream tracker is not defined or invalid'
+                sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $chronicler::class)
             );
         }
 
@@ -49,9 +42,9 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
             return new EventChronicler($chronicler, $tracker);
         }
 
-        throw new InvalidArgumentException(
-            'Invalid configuration to decorate chronicler from chronicler provider: '.static::class
-        );
+        throw new InvalidArgumentException(sprintf(
+            'Invalid configuration to decorate chronicler from chronicler provider: %s', static::class
+        ));
     }
 
     protected function resolveStreamTracker(array $config): ?StreamTracker
@@ -62,11 +55,11 @@ abstract class AbstractChroniclerProvider implements ChroniclerProvider
             $streamTracker = $this->container->get($streamTracker);
         }
 
-        return $streamTracker;
+        return $streamTracker instanceof StreamTracker ? $streamTracker : null;
     }
 
     /**
-     * @param array{string|StreamSubscriber} $streamSubscribers
+     * @param  array<StreamSubscriber|string>  $streamSubscribers
      *
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface

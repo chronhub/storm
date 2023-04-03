@@ -13,17 +13,17 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
-use Chronhub\Storm\Chronicler\AbstractChroniclerProvider;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Chronicler\InMemory\InMemoryChroniclerFactory;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryChroniclerProvider;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
-#[CoversClass(InMemoryChroniclerProvider::class)]
-#[CoversClass(AbstractChroniclerProvider::class)]
+#[CoversClass(InMemoryChroniclerFactory::class)]
+#[CoversClass(ProvideChroniclerFactory::class)]
 final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;
@@ -49,14 +49,14 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
         $config = ['standalone' => []];
-        $chronicler = $provider->resolve('standalone', $config);
+        $chronicler = $provider->createEventStore('standalone', $config);
 
         $this->assertEquals(StandaloneInMemoryChronicler::class, $chronicler::class);
-        $this->assertEquals($chronicler, $provider->resolve('standalone', $config));
-        $this->assertNotSame($chronicler, $provider->resolve('standalone', $config));
+        $this->assertEquals($chronicler, $provider->createEventStore('standalone', $config));
+        $this->assertNotSame($chronicler, $provider->createEventStore('standalone', $config));
     }
 
     #[Test]
@@ -70,14 +70,14 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
         $config = ['transactional' => []];
-        $chronicler = $provider->resolve('transactional', $config);
+        $chronicler = $provider->createEventStore('transactional', $config);
 
         $this->assertEquals(TransactionalInMemoryChronicler::class, $chronicler::class);
-        $this->assertEquals($chronicler, $provider->resolve('transactional', $config));
-        $this->assertNotSame($chronicler, $provider->resolve('transactional', $config));
+        $this->assertEquals($chronicler, $provider->createEventStore('transactional', $config));
+        $this->assertNotSame($chronicler, $provider->createEventStore('transactional', $config));
     }
 
     #[Test]
@@ -92,7 +92,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
         $config = [
             'tracking' => [
@@ -101,12 +101,12 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ],
         ];
 
-        $chronicler = $provider->resolve('eventable', $config);
+        $chronicler = $provider->createEventStore('eventable', $config);
 
         $this->assertInstanceOf(EventableChronicler::class, $chronicler);
         $this->assertEquals(StandaloneInMemoryChronicler::class, $chronicler->innerChronicler()::class);
-        $this->assertEquals($chronicler, $provider->resolve('eventable', $config));
-        $this->assertNotSame($chronicler, $provider->resolve('eventable', $config));
+        $this->assertEquals($chronicler, $provider->createEventStore('eventable', $config));
+        $this->assertNotSame($chronicler, $provider->createEventStore('eventable', $config));
     }
 
     #[Test]
@@ -121,7 +121,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
         $config = [
             'tracking' => [
@@ -130,13 +130,13 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ],
         ];
 
-        $chronicler = $provider->resolve('transactional_eventable', $config);
+        $chronicler = $provider->createEventStore('transactional_eventable', $config);
 
         $this->assertInstanceOf(TransactionalEventableChronicler::class, $chronicler);
         $this->assertInstanceOf(EventableChronicler::class, $chronicler);
         $this->assertEquals(TransactionalInMemoryChronicler::class, $chronicler->innerChronicler()::class);
-        $this->assertEquals($chronicler, $provider->resolve('transactional_eventable', $config));
-        $this->assertNotSame($chronicler, $provider->resolve('transactional_eventable', $config));
+        $this->assertEquals($chronicler, $provider->createEventStore('transactional_eventable', $config));
+        $this->assertNotSame($chronicler, $provider->createEventStore('transactional_eventable', $config));
     }
 
     #[Test]
@@ -150,9 +150,9 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->container = $this->createMock(ContainerInterface::class);
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
-        $provider->resolve('foo', $config);
+        $provider->createEventStore('foo', $config);
     }
 
     #[Test]
@@ -174,9 +174,9 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
-        $provider->resolve('eventable', $config);
+        $provider->createEventStore('eventable', $config);
     }
 
     #[Test]
@@ -198,8 +198,8 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $containerAsClosure = fn (): ContainerInterface => $this->container;
 
-        $provider = new InMemoryChroniclerProvider($containerAsClosure);
+        $provider = new InMemoryChroniclerFactory($containerAsClosure);
 
-        $provider->resolve('transactional_eventable', $config);
+        $provider->createEventStore('transactional_eventable', $config);
     }
 }

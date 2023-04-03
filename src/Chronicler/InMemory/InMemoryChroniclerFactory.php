@@ -4,23 +4,33 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler\InMemory;
 
+use Closure;
 use Illuminate\Support\Str;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
-use Chronhub\Storm\Chronicler\AbstractChroniclerProvider;
+use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerFactory;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalInMemoryChronicler as Transactional;
+use function sprintf;
 use function ucfirst;
 use function method_exists;
 
-final class InMemoryChroniclerProvider extends AbstractChroniclerProvider
+final class InMemoryChroniclerFactory implements ChroniclerFactory
 {
-    public function resolve(string $name, array $config): Chronicler
+    use ProvideChroniclerFactory;
+
+    public function __construct(Closure $app)
     {
-        $chronicler = $this->make($name, $config);
+        $this->container = $app();
+    }
+
+    public function createEventStore(string $name, array $config): Chronicler
+    {
+        $chronicler = $this->resolve($name, $config);
 
         if ($chronicler instanceof EventableChronicler) {
             $this->attachStreamSubscribers($chronicler, $config['tracking']['subscribers'] ?? []);
@@ -29,7 +39,7 @@ final class InMemoryChroniclerProvider extends AbstractChroniclerProvider
         return $chronicler;
     }
 
-    private function make(string $name, array $config): Chronicler
+    private function resolve(string $name, array $config): Chronicler
     {
         // fixMe illuminate support is not part of composer dep
         // either set it or make the fn
@@ -45,7 +55,7 @@ final class InMemoryChroniclerProvider extends AbstractChroniclerProvider
             return $this->{$driverMethod}($config);
         }
 
-        throw new InvalidArgumentException("In memory chronicler provider $name is not defined");
+        throw new InvalidArgumentException(sprintf('In memory chronicler provider %s is not defined', $name));
     }
 
     private function createStandaloneDriver(): InMemoryChronicler
