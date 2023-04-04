@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Tests\Unit\Serializer;
 use InvalidArgumentException;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\Header;
 use Symfony\Component\Serializer\Serializer;
@@ -28,8 +27,7 @@ use function json_encode;
 #[CoversClass(DomainEventSerializer::class)]
 final class DomainEventSerializerTest extends UnitTestCase
 {
-    #[Test]
-    public function it_serialize_message_with_scalar_headers(): void
+    public function testSerializeDomainEvent(): void
     {
         $aggregateId = V4AggregateId::create();
 
@@ -53,8 +51,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    #[Test]
-    public function it_normalize_and_serialize_headers(): void
+    public function testNormalizeAndSerializeHeaders(): void
     {
         $aggregateId = V4AggregateId::create();
         $datetime = new PointInTime();
@@ -87,8 +84,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    #[Test]
-    public function it_raise_exception_if_event_header_aggregate_id_is_missing_during_serialization(): void
+    public function testExceptionRaisedWhenMissingAggregateIdOnSerialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -97,8 +93,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->domainEventSerializerInstance()->serializeEvent(SomeEvent::fromContent([]));
     }
 
-    #[Test]
-    public function it_raise_exception_if_event_header_aggregate_id_type_is_missing_during_serialization(): void
+    public function testExceptionRaisedWhenMissingAggregateIdTypeOnSerialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -113,8 +108,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
-    #[Test]
-    public function it_raise_exception_if_event_header_aggregate_type_is_missing_during_serialization(): void
+    public function testExceptionRaisedWhenMissingAggregateTypeOnSerialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -132,8 +126,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->domainEventSerializerInstance()->serializeEvent($event);
     }
 
-    #[Test]
-    public function it_unserialize_payload(): void
+    public function testDeserializePayload(): void
     {
         $payload = [
             'headers' => [
@@ -152,8 +145,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    #[Test]
-    public function it_decode_and_unserialize_payload(): void
+    public function testDecodeAndDeserializePayload(): void
     {
         $payload = [
             'headers' => [
@@ -176,8 +168,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertIsArray($payload['content']);
     }
 
-    #[Test]
-    public function it_unserialize_payload_and_add_version_to_payload_as_no(): void
+    public function testDeserializePayloadAndAddSequenceNo(): void
     {
         $payload = [
             'no' => 42,
@@ -200,8 +191,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    #[Test]
-    public function it_does_not_add_version_to_payload_when_internal_position_header_already_exists(): void
+    public function testInternalPositionNotSetWhenItAlreadyExists(): void
     {
         $payload = [
             'no' => 42,
@@ -225,8 +215,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    #[Test]
-    public function it_raise_exception_if_message_event_type_missing_during_deserialize_content(): void
+    public function testExceptionRaisedWhenMissingEventTypeHeaderDuringDeserialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -245,8 +234,7 @@ final class DomainEventSerializerTest extends UnitTestCase
         $serializer->deserializePayload($payload);
     }
 
-    #[Test]
-    public function it_normalize_content(): void
+    public function testNormalizeContent(): void
     {
         $aggregateId = V4AggregateId::create();
 
@@ -273,6 +261,49 @@ final class DomainEventSerializerTest extends UnitTestCase
         $this->assertEquals($headers, $normalized['headers']);
         $this->assertEquals($content, $normalized['content']);
         $this->assertEquals(25, $normalized['no']);
+    }
+
+    public function testExceptionRaisedWhenMissingHeaderKeyOnDecodingPayload(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->expectExceptionMessage('Missing headers, content and/or no key(s) to decode payload');
+
+        $serializer = $this->domainEventSerializerInstance();
+
+        $serializer->decodePayload(['content' => 'some content']);
+    }
+
+    public function testExceptionRaisedWhenMissingContentKeyOnDecodingPayload(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->expectExceptionMessage('Missing headers, content and/or no key(s) to decode payload');
+
+        $serializer = $this->domainEventSerializerInstance();
+
+        $serializer->decodePayload(['headers' => 'some headers']);
+    }
+
+    public function testExceptionRaisedWhenMissingSequenceNoKeyOnDecodingPayload(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->expectExceptionMessage('Missing headers, content and/or no key(s) to decode payload');
+
+        $serializer = $this->domainEventSerializerInstance();
+
+        $serializer->decodePayload(['headers' => 'some headers', 'content' => 'some content']);
+    }
+
+    public function testEncodePayload(): void
+    {
+        $serializer = $this->domainEventSerializerInstance();
+
+        $this->assertEquals(
+            '{"headers":"some headers","content":"some content","no":25}',
+            $serializer->encodePayload(['headers' => 'some headers', 'content' => 'some content', 'no' => 25])
+        );
     }
 
     private function domainEventSerializerInstance(NormalizerInterface|DenormalizerInterface ...$normalizers): DomainEventSerializer

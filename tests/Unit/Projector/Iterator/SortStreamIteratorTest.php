@@ -60,6 +60,20 @@ final class SortStreamIteratorTest extends UnitTestCase
         }
     }
 
+    public function testDoesNotRewind(): void
+    {
+        $streams = $this->provideStreams();
+
+        $iterator = new SortStreamIterator(array_keys($streams), ...array_values($streams));
+        $iterator->next();
+        $iterator->next();
+
+        $iteratorCp = $iterator;
+        $iterator->rewind();
+
+        $this->assertSame($iterator, $iteratorCp);
+    }
+
     public function provideStreams(): array
     {
         return [
