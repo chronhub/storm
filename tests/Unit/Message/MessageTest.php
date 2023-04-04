@@ -19,7 +19,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 final class MessageTest extends UnitTestCase
 {
     #[DataProvider('provideObject')]
-    public function TestMessageWithNonReportingInstance(object $event): void
+    public function testMessageWithNonReportingInstance(object $event): void
     {
         $message = new Message($event);
 
@@ -28,7 +28,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    public function TestMessageWithReportingInstance(Reporting $domain): void
+    public function testMessageWithReportingInstance(Reporting $domain): void
     {
         $message = new Message($domain);
 
@@ -41,14 +41,14 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals('header', $message->header('some'));
     }
 
-    public function TestAddHeaderToMessageEvent(): void
+    public function testAddHeaderToMessageEvent(): void
     {
         $message = new Message(SomeCommand::fromContent([]), ['some' => 'header']);
 
         $this->assertEquals(['some' => 'header'], $message->headers());
     }
 
-    public function TestAddHeadersWhenBothHeadersMatched(): void
+    public function testAddHeadersWhenBothHeadersMatched(): void
     {
         $command = SomeCommand::fromContent([])->withHeaders(['some' => 'header']);
 
@@ -58,7 +58,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    public function TestExceptionRaisedWhenHeadersMismatched(Reporting $domain): void
+    public function testExceptionRaisedWhenHeadersMismatched(Reporting $domain): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid headers consistency for event class '.$domain::class);
@@ -66,7 +66,7 @@ final class MessageTest extends UnitTestCase
         new Message($domain, ['another' => 'header']);
     }
 
-    public function TestExceptionRaisedWhenEventIsInstanceOfMessage(): void
+    public function testExceptionRaisedWhenEventIsInstanceOfMessage(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Message event cannot be an instance of itself');
@@ -88,7 +88,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    public function TestAddHeadersOnMessageEvent(Reporting $domain): void
+    public function testAddHeadersOnMessageEvent(Reporting $domain): void
     {
         $message = new Message($domain);
 
@@ -101,7 +101,7 @@ final class MessageTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    public function TestAccessMessageEvent(Reporting $domain): void
+    public function testAccessMessageEvent(Reporting $domain): void
     {
         $message = new Message($domain);
 

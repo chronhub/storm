@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Message\MessageAlias;
 use function class_exists;
 
 /**
- * @invalid
+ * @deprecated
  */
 final readonly class AliasFromMap implements MessageAlias
 {
