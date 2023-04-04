@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Closure;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Closure;
 
 /**
  * @template T of Closure(DomainEvent): void|Closure(DomainEvent, array): array

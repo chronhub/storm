@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Reporter\DomainEvent;
 use function in_array;
 use function pcntl_signal_dispatch;
 

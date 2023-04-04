@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Exceptions;
 
-use Throwable;
-use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Contracts\Projector\ProjectorFailed;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Throwable;
 
 class ProjectionFailed extends RuntimeException implements ProjectorFailed
 {

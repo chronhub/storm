@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
-use stdClass;
-use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Serializer\DomainEventContentSerializer;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use stdClass;
 
+#[CoversClass(DomainEventContentSerializer::class)]
 class DomainEventContentSerializerTest extends UnitTestCase
 {
-    #[Test]
-    public function it_return_message_content(): void
+    public function testSerializeContent(): void
     {
         $event = new SomeEvent(['name' => 'steph bug']);
 
@@ -25,8 +25,7 @@ class DomainEventContentSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $content);
     }
 
-    #[Test]
-    public function it_return_domain_event_instance_from_array_content(): void
+    public function testDeserializePayload(): void
     {
         $contentSerializer = new DomainEventContentSerializer();
 
@@ -39,8 +38,7 @@ class DomainEventContentSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $event->toContent());
     }
 
-    #[Test]
-    public function it_raise_exception_with_invalid_source_when_deserialize(): void
+    public function testExceptionRaisedWithInvalidSourceToDeserialize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

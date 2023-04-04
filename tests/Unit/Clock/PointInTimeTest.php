@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Clock;
 
-use DateInterval;
-use DomainException;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
+use DateInterval;
+use DomainException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use function usleep;
-use function microtime;
+use PHPUnit\Framework\Attributes\Test;
 use function date_default_timezone_get;
+use function microtime;
+use function usleep;
 
 // todo tests
 #[CoversClass(PointInTime::class)]

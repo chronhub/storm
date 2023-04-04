@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use InvalidArgumentException;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateType as Type;
-use function is_a;
-use function in_array;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Reporter\DomainEvent;
+use InvalidArgumentException;
 use function class_exists;
+use function in_array;
+use function is_a;
 
 final readonly class AggregateType implements Type
 {

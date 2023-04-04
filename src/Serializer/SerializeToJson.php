@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 
 final readonly class SerializeToJson implements JsonSerializer
 {

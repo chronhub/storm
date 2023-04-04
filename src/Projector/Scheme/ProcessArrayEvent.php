@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Reporter\DomainEvent;
+use function is_callable;
 
 final readonly class ProcessArrayEvent extends EventProcessor
 {
@@ -23,7 +24,9 @@ final readonly class ProcessArrayEvent extends EventProcessor
             return false;
         }
 
-        if (null === $eventHandler = $this->determineEventHandler($event)) {
+        $eventHandler = $this->determineEventHandler($event);
+
+        if (! is_callable($eventHandler)) {
             if ($repository && $subscription instanceof PersistentSubscriptionInterface) {
                 $this->persistWhenCounterIsReached($subscription, $repository);
             }

@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Support;
 
-use Generator;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Chronicler\TrackStream;
-use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Chronicler\EventChronicler;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Tests\Util\ReflectionProperty;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Support\Bridge\MakeCausationDomainCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tests\Util\ReflectionProperty;
+use Chronhub\Storm\Tracker\TrackMessage;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class MakeCausationDomainCommandTest extends UnitTestCase
 {

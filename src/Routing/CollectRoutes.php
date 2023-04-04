@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Routing;
 
-use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Illuminate\Support\Collection;
+use function sprintf;
 
 final readonly class CollectRoutes implements RouteCollection
 {
@@ -21,7 +22,7 @@ final readonly class CollectRoutes implements RouteCollection
     public function addRoute(string $messageName): Route
     {
         if ($this->matchOriginal($messageName) instanceof Route) {
-            throw new RoutingViolation("Message name already exists: $messageName");
+            throw new RoutingViolation(sprintf('Message name already exists: %s', $messageName));
         }
 
         $route = new Route($messageName);
@@ -35,14 +36,14 @@ final readonly class CollectRoutes implements RouteCollection
 
     public function match(string $messageName): ?Route
     {
-        $byMessageName = fn (Route $route): bool => ($messageName === $route->getName());
+        $byMessageName = static fn (Route $route): bool => ($messageName === $route->getName());
 
         return $this->routes->filter($byMessageName)->first();
     }
 
     public function matchOriginal(string $messageName): ?Route
     {
-        $byOriginalMessageName = fn (Route $route): bool => ($messageName === $route->getOriginalName());
+        $byOriginalMessageName = static fn (Route $route): bool => ($messageName === $route->getOriginalName());
 
         return $this->routes->filter($byOriginalMessageName)->first();
     }

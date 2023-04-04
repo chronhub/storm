@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Stream\StreamName;
 
 final readonly class EmitterManager implements ProjectionManagement
 {
@@ -65,6 +65,7 @@ final readonly class EmitterManager implements ProjectionManagement
         try {
             $this->chronicler->delete(new StreamName($this->projectionName()));
         } catch (StreamNotFound) {
+            //fail silently
         }
 
         $this->subscription->disjoin();

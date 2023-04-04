@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Aggregate\V4AggregateId;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Aggregate\NullAggregateCache;
+use Chronhub\Storm\Aggregate\V4AggregateId;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(NullAggregateCache::class)]
 final class NullAggregateCacheTest extends UnitTestCase

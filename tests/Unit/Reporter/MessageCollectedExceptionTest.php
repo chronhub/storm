@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use Exception;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(MessageCollectedException::class)]
 class MessageCollectedExceptionTest extends UnitTestCase
 {
-    #[Test]
-    public function it_collect_exceptions(): void
+    public function testCollectExceptions(): void
     {
         $exceptions = [new Exception('foo'), new Exception('bar')];
 
@@ -24,8 +22,7 @@ class MessageCollectedExceptionTest extends UnitTestCase
         self::assertEquals($exceptions, $exception->getExceptions());
     }
 
-    #[Test]
-    public function it_print_exception_messages(): void
+    public function testConcatExceptionMessagesCollected(): void
     {
         $exceptions = [new Exception('foo'), new Exception('bar')];
 

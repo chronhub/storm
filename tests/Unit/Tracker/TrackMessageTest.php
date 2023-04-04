@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use Generator;
-use Chronhub\Storm\Tracker\Draft;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\Draft;
 use Chronhub\Storm\Tracker\TrackMessage;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 

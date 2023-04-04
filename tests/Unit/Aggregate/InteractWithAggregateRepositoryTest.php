@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Generator;
-use RuntimeException;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Aggregate\InteractWithAggregateRepository;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateType;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Stream\StreamProducer;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Message\NoOpMessageDecorator;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\InteractWithAggregateRepositoryStub;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Message\NoOpMessageDecorator;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Stream\StreamProducer;
-use Chronhub\Storm\Contracts\Aggregate\AggregateType;
-use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Aggregate\InteractWithAggregateRepository;
-use Chronhub\Storm\Tests\Stubs\InteractWithAggregateRepositoryStub;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
+use RuntimeException;
 use function iterator_to_array;
 
 #[CoversClass(InteractWithAggregateRepository::class)]
@@ -329,9 +329,9 @@ final class InteractWithAggregateRepositoryTest extends UnitTestCase
 
     public static function provideMessageDecoratorOrNull(): Generator
     {
-        yield[null];
+        yield [null];
 
-        yield[
+        yield [
             new class implements MessageDecorator
             {
                 public function decorate(Message $message): Message

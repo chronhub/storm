@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Support\Bridge;
 
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Reporter\DomainCommand;
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Tracker\Listener;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
-use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Reporter\DetachMessageListener;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
-use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
-use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Tracker\Listener;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Reporter\DetachMessageListener;
+use Chronhub\Storm\Reporter\DomainCommand;
 
 final class MakeCausationDomainCommand implements MessageSubscriber, StreamSubscriber
 {
@@ -77,9 +77,10 @@ final class MakeCausationDomainCommand implements MessageSubscriber, StreamSubsc
 
         return new class($eventId, $eventType) implements MessageDecorator
         {
-            public function __construct(private readonly string $eventId,
-                                        private readonly string $eventType)
-            {
+            public function __construct(
+                private readonly string $eventId,
+                private readonly string $eventType
+            ) {
             }
 
             public function decorate(Message $message): Message

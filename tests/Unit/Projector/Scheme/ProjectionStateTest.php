@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
 
 #[CoversClass(ProjectionState::class)]
 final class ProjectionStateTest extends UnitTestCase

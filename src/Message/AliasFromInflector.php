@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message;
 
-use InvalidArgumentException;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use function ucwords;
+use InvalidArgumentException;
 use function basename;
-use function ctype_lower;
-use function str_replace;
 use function class_exists;
-use function preg_replace;
+use function ctype_lower;
 use function mb_strtolower;
+use function preg_replace;
+use function str_replace;
+use function ucwords;
 
 final class AliasFromInflector implements MessageAlias
 {

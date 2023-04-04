@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Unit\Projector\Stubs\CasterStub;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Tests\UnitTestCase;
 
 final class ContextTest extends UnitTestCase
 {

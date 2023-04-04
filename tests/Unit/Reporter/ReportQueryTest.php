@@ -4,33 +4,30 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use Generator;
-use Throwable;
-use RuntimeException;
-use React\Promise\Deferred;
-use PHPUnit\Framework\TestCase;
-use Chronhub\Storm\Message\Message;
-use React\Promise\PromiseInterface;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\DomainQuery;
-use Chronhub\Storm\Reporter\ReportQuery;
-use Chronhub\Storm\Tracker\TrackMessage;
-use PHPUnit\Framework\MockObject\Exception;
-use Chronhub\Storm\Contracts\Message\Header;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
-use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
-use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Reporter\DomainQuery;
+use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\ReportQuery;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
 use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
-use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
-use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
+use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+use RuntimeException;
+use Throwable;
 
 #[CoversClass(ReportQuery::class)]
 #[CoversClass(MessageNotHandled::class)]
@@ -48,8 +45,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    #[Test]
-    public function it_relay_query(): void
+    public function testRelayQuery(): void
     {
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
         $this->messageFactory->expects($this->once())
@@ -87,8 +83,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->assertEquals('steph bug', $this->handlePromise($promise));
     }
 
-    #[Test]
-    public function it_relay_query_as_array(): void
+    public function testRelayQueryAsArray(): void
     {
         $queryAsArray = ['some' => 'query'];
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
@@ -128,8 +123,7 @@ final class ReportQueryTest extends UnitTestCase
         $this->assertEquals('steph bug', $this->handlePromise($promise));
     }
 
-    #[Test]
-    public function it_raise_exception_when_message_not_handled(): void
+    public function testExceptionRaisedWhenQueryNotHandled(): void
     {
         $this->expectException(MessageNotHandled::class);
 
@@ -174,8 +168,7 @@ final class ReportQueryTest extends UnitTestCase
         $reporter->relay($event);
     }
 
-    #[Test]
-    public function it_raise_exception_caught_during_dispatch_of_query(): void
+    public function testExceptionRaisedDuringDispatch(): void
     {
         $exception = new RuntimeException('some exception');
 
@@ -207,15 +200,6 @@ final class ReportQueryTest extends UnitTestCase
         $reporter->subscribe(...$subscribers);
 
         $reporter->relay($query);
-    }
-
-    public function provideEvent(): Generator
-    {
-        yield [SomeQuery::fromContent(['name' => 'steph bug']), SomeQuery::class];
-
-        yield [SomeQuery::fromContent(['name' => 'steph bug'])
-            ->withHeader(Header::EVENT_TYPE, 'some.query'), 'some.query',
-        ];
     }
 
     private function provideRouter(iterable $consumers): MessageSubscriber

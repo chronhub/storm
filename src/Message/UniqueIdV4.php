@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message;
 
-use Symfony\Component\Uid\Uuid;
 use Chronhub\Storm\Contracts\Message\UniqueId;
+use Symfony\Component\Uid\Uuid;
 
 final class UniqueIdV4 implements UniqueId
 {

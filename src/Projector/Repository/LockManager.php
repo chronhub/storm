@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use DateTimeImmutable;
 
 /**
  * @property $lockTimeoutMs The duration for which a lock is valid, in milliseconds

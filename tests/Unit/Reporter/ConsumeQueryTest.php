@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use Throwable;
-use RuntimeException;
-use React\Promise\Deferred;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
-use React\Promise\PromiseInterface;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
-use Chronhub\Storm\Reporter\Subscribers\ConsumeQuery;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+use RuntimeException;
+use Throwable;
 
 #[CoversClass(ConsumeQuery::class)]
 final class ConsumeQueryTest extends UnitTestCase
 {
-    #[Test]
-    public function it_test_subscriber(): void
+    public function testSubscriber(): void
     {
         $subscriber = new ConsumeQuery();
 
@@ -33,8 +31,7 @@ final class ConsumeQueryTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_does_not_mark_message_handled_when_query_consumer_is_null(): void
+    public function testDoesNotMarkMessageHandledWithNullConsumer(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeQuery();
@@ -55,8 +52,7 @@ final class ConsumeQueryTest extends UnitTestCase
         $this->assertFalse($story->isHandled());
     }
 
-    #[Test]
-    public function it_consume_query_and_mark_message_handled(): void
+    public function testConsumerQueryAndMarkMessageHandled(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeQuery();
@@ -88,8 +84,7 @@ final class ConsumeQueryTest extends UnitTestCase
         $this->assertEquals(42, $result);
     }
 
-    #[Test]
-    public function it_hold_exception_on_promise_when_query_is_handled_and_mark_message_handled(): void
+    public function testPromiseHoldExceptionAndMarkMessageHandled(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeQuery();

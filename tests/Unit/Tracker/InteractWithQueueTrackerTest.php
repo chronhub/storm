@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use stdClass;
-use Chronhub\Storm\Tracker\Draft;
+use Chronhub\Storm\Contracts\Tracker\Story;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Contracts\Tracker\Story;
+use Chronhub\Storm\Tracker\Draft;
 use Chronhub\Storm\Tracker\InteractWithQueueTracker;
+use stdClass;
 
 final class InteractWithQueueTrackerTest extends UnitTestCase
 {

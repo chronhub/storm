@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
+use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
+use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
+use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use Chronhub\Storm\Contracts\Tracker\StreamTracker;
+use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Tracker\StreamTracker;
-use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
-use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
-use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
-use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
-use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
-use function sprintf;
 use function is_string;
+use function sprintf;
 
 trait ProvideChroniclerFactory
 {

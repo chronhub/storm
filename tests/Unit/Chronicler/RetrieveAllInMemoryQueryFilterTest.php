@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Chronicler\InMemory\RetrieveAllInMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
-use Chronhub\Storm\Chronicler\InMemory\RetrieveAllInMemoryQueryFilter;
-use function array_map;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use function array_filter;
+use function array_map;
 use function array_values;
 
 class RetrieveAllInMemoryQueryFilterTest extends UnitTestCase

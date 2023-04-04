@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use Chronhub\Storm\Tracker\Draft;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Tracker\InteractWithTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\Draft;
+use Chronhub\Storm\Tracker\InteractWithTracker;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(InteractWithTracker::class)]
 final class InteractWithTrackerTest extends UnitTestCase

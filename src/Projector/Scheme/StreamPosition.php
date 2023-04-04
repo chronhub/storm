@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use JsonSerializable;
-use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Illuminate\Support\Collection;
+use JsonSerializable;
+use function count;
 use function key;
 
 final class StreamPosition implements JsonSerializable
@@ -76,7 +77,7 @@ final class StreamPosition implements JsonSerializable
 
     private function handleStreamNames(array $streamNames): array
     {
-        if (empty($streamNames)) {
+        if (count($streamNames) === 0) {
             throw new InvalidArgumentException('Stream names can not be empty');
         }
 

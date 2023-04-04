@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use stdClass;
-use Generator;
-use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Aggregate\AggregateType;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Tests\Stubs\AggregateRootChildStub;
+use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
+use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
-use Chronhub\Storm\Tests\Stubs\AggregateRootChildStub;
-use Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub;
+use stdClass;
 
 #[CoversClass(AggregateType::class)]
 final class AggregateTypeTest extends UnitTestCase

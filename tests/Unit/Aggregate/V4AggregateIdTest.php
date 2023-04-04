@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Symfony\Component\Uid\Uuid;
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Symfony\Component\Uid\Uuid;
 
 #[CoversClass(V4AggregateId::class)]
 final class V4AggregateIdTest extends UnitTestCase

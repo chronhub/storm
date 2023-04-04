@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Reporter\Subscribers;
 
-use Throwable;
-use React\Promise\Deferred;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Reporter\DetachMessageListener;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\DetachMessageListener;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use React\Promise\Deferred;
+use Throwable;
 
 final class ConsumeQuery implements MessageSubscriber
 {

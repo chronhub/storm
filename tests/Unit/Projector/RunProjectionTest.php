@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Closure;
-use RuntimeException;
-use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Closure;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
-use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use PHPUnit\Framework\MockObject\MockObject;
+use RuntimeException;
 
 #[CoversClass(RunProjection::class)]
 final class RunProjectionTest extends UnitTestCase

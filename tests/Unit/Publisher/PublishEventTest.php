@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Publisher;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use Illuminate\Support\LazyCollection;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\ReportEvent;
+use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
 use Chronhub\Storm\Publisher\PublishEvent;
+use Chronhub\Storm\Reporter\ReportEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tests\Util\ReflectionProperty;
+use Illuminate\Support\LazyCollection;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\Util\ReflectionProperty;
-use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
 use function iterator_count;
 
 #[CoversClass(PublishEvent::class)]

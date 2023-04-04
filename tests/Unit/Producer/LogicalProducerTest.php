@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Producer;
 
-use stdClass;
-use Generator;
-use ValueError;
-use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Producer\LogicalProducer;
 use Chronhub\Storm\Producer\ProducerStrategy;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\Stubs\Double\SomeAsyncCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use stdClass;
+use ValueError;
 
 final class LogicalProducerTest extends UnitTestCase
 {

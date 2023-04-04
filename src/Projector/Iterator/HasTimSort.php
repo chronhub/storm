@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Iterator;
 
-use Iterator;
-use DateTimeZone;
-use DateTimeImmutable;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Reporter\DomainEvent;
+use DateTimeImmutable;
+use DateTimeZone;
+use Iterator;
 use function min;
 
 trait HasTimSort

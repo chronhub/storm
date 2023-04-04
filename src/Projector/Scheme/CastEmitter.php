@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjector;
+use Chronhub\Storm\Reporter\DomainEvent;
 
 final class CastEmitter implements EmitterCasterInterface
 {

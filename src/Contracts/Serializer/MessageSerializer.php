@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Serializer;
 
-use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Message\Message;
 
 interface MessageSerializer
 {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Publisher;
 
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
+use Chronhub\Storm\Reporter\ReportEvent;
+use Illuminate\Support\Collection;
 use function iterator_to_array;
 
 final class PublishEvent implements EventPublisher

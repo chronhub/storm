@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
+use Chronhub\Storm\Chronicler\Exceptions\QueryFailure;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Exception;
 use Generator;
-use RuntimeException;
 use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Chronicler\Exceptions\QueryFailure;
+use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 
 #[CoversClass(QueryFailure::class)]
 final class QueryFailureTest extends UnitTestCase

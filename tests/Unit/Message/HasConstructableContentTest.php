@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
+use Chronhub\Storm\Message\HasConstructableContent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Message\HasConstructableContent;
 
 final class HasConstructableContentTest extends UnitTestCase
 {

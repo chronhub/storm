@@ -4,50 +4,44 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Serializer\SerializeToJson;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use function is_string;
 
 #[CoversClass(SerializeToJson::class)]
 final class SerializeToJsonTest extends UnitTestCase
 {
-    #[Test]
-    public function it_encode_data(): void
+    public function testEncodeData(): void
     {
         $serializer = new SerializeToJson();
 
         $this->assertEquals('{"foo":"bar"}', $serializer->encode(['foo' => 'bar']));
     }
 
-    #[Test]
-    public function it_decode_data(): void
+    public function testDecodeData(): void
     {
         $serializer = new SerializeToJson();
 
         $this->assertEquals(['foo' => 'bar'], $serializer->decode('{"foo":"bar"}'));
     }
 
-    #[Test]
-    public function it_serialize_empty_array_and_does_not_force_object_array(): void
+    public function testSerializeEmptyArray(): void
     {
         $serializer = new SerializeToJson();
 
         $this->assertEquals('[]', $serializer->encode([]));
     }
 
-    #[Test]
-    public function it_deserialize_string_as_array_to_empty_array(): void
+    public function testDeserializeEmptyArrayToEmptyArray(): void
     {
         $serializer = new SerializeToJson();
 
         $this->assertEquals([], $serializer->decode('[]'));
     }
 
-    #[Test]
-    public function it_deserialize_big_int_as_string(): void
+    public function testDeserializeBigIntegerToString(): void
     {
         $serializer = new SerializeToJson();
 
@@ -56,8 +50,7 @@ final class SerializeToJsonTest extends UnitTestCase
         $this->assertTrue(is_string($integer['foo']));
     }
 
-    #[Test]
-    public function it_access_inner_json_encoder(): void
+    public function testGetInnerJsonEncoder(): void
     {
         $serializer = new SerializeToJson();
 

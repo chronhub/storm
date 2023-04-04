@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Routing;
 
-use Countable;
-use JsonSerializable;
 use Chronhub\Storm\Routing\Route;
+use Countable;
 use Illuminate\Support\Collection;
+use JsonSerializable;
 
 interface RouteCollection extends JsonSerializable, Countable
 {

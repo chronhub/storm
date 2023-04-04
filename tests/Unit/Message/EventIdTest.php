@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use stdClass;
-use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Uid\UuidV4;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Message\Decorator\EventId;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Message\UniqueIdV4;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Message\Decorator\EventId;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use stdClass;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\UuidV4;
 
 #[CoversClass(EventId::class)]
 final class EventIdTest extends UnitTestCase

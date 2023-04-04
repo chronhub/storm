@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Generator;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Chronicler\TrackStream;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Chronicler\EventChronicler;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Tracker\StreamTracker;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Chronicler\TrackStream;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use Chronhub\Storm\Contracts\Tracker\StreamTracker;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(EventChronicler::class)]
 class EventChroniclerTest extends UnitTestCase

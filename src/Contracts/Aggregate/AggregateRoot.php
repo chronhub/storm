@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Aggregate;
 
-use Generator;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Generator;
 
 interface AggregateRoot
 {

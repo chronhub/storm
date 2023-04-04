@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\ProjectionStatus;
 
 interface ProjectionRepositoryInterface
 {

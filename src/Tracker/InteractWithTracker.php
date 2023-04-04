@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tracker;
 
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Contracts\Tracker\Story;
 use Chronhub\Storm\Contracts\Tracker\Listener;
+use Chronhub\Storm\Contracts\Tracker\Story;
+use Illuminate\Support\Collection;
 
 trait InteractWithTracker
 {
@@ -39,7 +39,7 @@ trait InteractWithTracker
     public function forget(Listener $listener): void
     {
         $this->listeners = $this->listeners->reject(
-            fn (Listener $subscriber): bool => $listener === $subscriber
+            static fn (Listener $subscriber): bool => $listener === $subscriber
         );
     }
 
@@ -54,9 +54,9 @@ trait InteractWithTracker
     private function fireEvent(Story $story, ?callable $callback): void
     {
         $this->listeners
-            ->filter(fn (Listener $listener): bool => $story->currentEvent() === $listener->eventName)
-            ->sortByDesc(fn (Listener $listener): int => $listener->eventPriority, SORT_NUMERIC)
-            ->each(function (Listener $listener) use ($story, $callback): bool {
+            ->filter(static fn (Listener $listener): bool => $story->currentEvent() === $listener->eventName)
+            ->sortByDesc(static fn (Listener $listener): int => $listener->eventPriority, SORT_NUMERIC)
+            ->each(static function (Listener $listener) use ($story, $callback): bool {
                 $listener->story()($story);
 
                 if ($story->isStopped()) {

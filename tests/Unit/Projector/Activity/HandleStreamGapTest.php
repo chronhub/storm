@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class HandleStreamGapTest extends UnitTestCase
 {

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Producer;
 
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Producer\ProduceMessage;
-use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
-use PHPUnit\Framework\MockObject\MockObject;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Producer\MessageQueue;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Producer\ProduceMessage;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class ProduceMessageTest extends UnitTestCase
 {

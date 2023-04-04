@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use ReflectionClass;
-use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Message\Attribute\AsDomainQuery;
+use Chronhub\Storm\Tests\UnitTestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 
 #[CoversClass(AsDomainQuery::class)]
 class AsDomainQueryTest extends UnitTestCase

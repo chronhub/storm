@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 
 final class CastReadModel implements ReadModelCasterInterface
 {

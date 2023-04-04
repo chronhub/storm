@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Chronhub\Storm\Projector\ProjectionStatus;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class InMemoryProjectionProviderTest extends UnitTestCase
 {
@@ -109,10 +109,10 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
 
     public static function provideStatus(): Generator
     {
-        yield[ProjectionStatus::IDLE->value];
-        yield[ProjectionStatus::RUNNING->value];
-        yield[ProjectionStatus::RESETTING->value];
-        yield[ProjectionStatus::DELETING->value];
-        yield[ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value];
+        yield [ProjectionStatus::IDLE->value];
+        yield [ProjectionStatus::RUNNING->value];
+        yield [ProjectionStatus::RESETTING->value];
+        yield [ProjectionStatus::DELETING->value];
+        yield [ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value];
     }
 }

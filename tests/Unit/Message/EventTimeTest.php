@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use stdClass;
-use DateInterval;
-use DateTimeZone;
-use DateTimeImmutable;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Message\Decorator\EventTime;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Contracts\Message\Header;
-use PHPUnit\Framework\MockObject\MockObject;
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeZone;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Message\Decorator\EventTime;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use stdClass;
 
 #[CoversClass(EventTime::class)]
 class EventTimeTest extends UnitTestCase

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message;
 
-use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use Chronhub\Storm\Contracts\Message\MessageFactory as Factory;
+use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use function is_array;
 
 final readonly class MessageFactory implements Factory

@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use RuntimeException;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\Subscribers\TryConsumeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Reporter\Subscribers\TryConsumeEvent;
-use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
+use RuntimeException;
 
 #[CoversClass(TryConsumeEvent::class)]
 final class TryConsumeEventTest extends UnitTestCase
 {
-    #[Test]
-    public function it_test_subscriber(): void
+    public function testSubscriber(): void
     {
         $subscriber = new TryConsumeEvent();
 
@@ -32,8 +30,7 @@ final class TryConsumeEventTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_collect_exceptions_raised_by_some_consumers_and_keep_consuming(): void
+    public function testCollectExceptionsWhileConsuming(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new TryConsumeEvent();

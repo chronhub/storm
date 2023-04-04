@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Producer;
 
-use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\AsyncMessage;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
+use Chronhub\Storm\Message\Message;
+use InvalidArgumentException;
 use function is_bool;
 use function is_string;
 

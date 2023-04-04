@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
-use Closure;
-use Psr\Container\ContainerInterface;
-use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
+use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
 use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
-use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
+use Closure;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Serializer;
 use function array_map;
-use function is_string;
 use function array_merge;
+use function is_string;
 
 class JsonSerializerFactory
 {
@@ -29,9 +29,10 @@ class JsonSerializerFactory
         $this->container = $container();
     }
 
-    public function createMessageSerializer(?ContentSerializer $contentSerializer = null,
-                                            NormalizerInterface|DenormalizerInterface|string ...$normalizers): MessageSerializer
-    {
+    public function createMessageSerializer(
+        ?ContentSerializer $contentSerializer = null,
+        NormalizerInterface|DenormalizerInterface|string ...$normalizers
+    ): MessageSerializer {
         $contentSerializer ??= new MessageContentSerializer();
 
         $symfonySerializer = $this->getSymfonySerializer(...$normalizers);
@@ -39,9 +40,10 @@ class JsonSerializerFactory
         return new MessagingSerializer($contentSerializer, $symfonySerializer);
     }
 
-    public function createStreamSerializer(?EventContentSerializer $contentSerializer = null,
-                                           NormalizerInterface|DenormalizerInterface|string ...$normalizers): StreamEventSerializer
-    {
+    public function createStreamSerializer(
+        ?EventContentSerializer $contentSerializer = null,
+        NormalizerInterface|DenormalizerInterface|string ...$normalizers
+    ): StreamEventSerializer {
         $contentSerializer ??= new DomainEventContentSerializer();
 
         $symfonySerializer = $this->getSymfonySerializer(...$normalizers);

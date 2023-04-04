@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Exceptions;
 
-use RuntimeException;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Tests\UnitTestCase;
+use RuntimeException;
 
 final class ProjectionFailedTest extends UnitTestCase
 {

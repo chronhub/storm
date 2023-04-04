@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message;
 
-use RuntimeException;
-use InvalidArgumentException;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use InvalidArgumentException;
+use RuntimeException;
 use function count;
 
 final class Message

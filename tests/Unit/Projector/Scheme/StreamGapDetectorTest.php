@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use function microtime;
 
 #[CoversClass(StreamGapDetector::class)]

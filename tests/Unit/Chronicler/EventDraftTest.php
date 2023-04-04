@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use stdClass;
-use Generator;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Message\NoOpMessageDecorator;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\Exceptions\UnexpectedCallback;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Message\NoOpMessageDecorator;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use stdClass;
 
 #[CoversClass(EventDraft::class)]
 final class EventDraftTest extends UnitTestCase

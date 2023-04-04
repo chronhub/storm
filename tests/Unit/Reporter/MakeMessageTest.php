@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
+use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
-use Chronhub\Storm\Contracts\Message\MessageFactory;
-use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
 
 #[CoversClass(MakeMessage::class)]
 final class MakeMessageTest extends UnitTestCase
@@ -30,8 +29,7 @@ final class MakeMessageTest extends UnitTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    #[Test]
-    public function it_test_subscriber(): void
+    public function testSubscriber(): void
     {
         $subscriber = new MakeMessage($this->messageFactory);
 
@@ -42,8 +40,7 @@ final class MakeMessageTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_create_message_instance(): void
+    public function testCreateMessage(): void
     {
         $message = new Message(new SomeCommand(['name' => 'steph bug']));
 
@@ -66,8 +63,7 @@ final class MakeMessageTest extends UnitTestCase
         $this->assertEquals($message, $story->message());
     }
 
-    #[Test]
-    public function it_create_message_instance_from_array(): void
+    public function tetCreateMessageFromArray(): void
     {
         $message = new Message(new SomeCommand(['some' => 'content']));
 

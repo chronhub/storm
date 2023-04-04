@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 
 final readonly class HandleStreamGap
 {

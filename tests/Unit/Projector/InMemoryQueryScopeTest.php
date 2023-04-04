@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
-use Generator;
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Reporter\DomainEvent;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Projector\InMemoryQueryScope;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use function count;
+use Chronhub\Storm\Projector\InMemoryQueryScope;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use Illuminate\Support\Collection;
+use PHPUnit\Framework\Attributes\DataProvider;
 use function array_filter;
+use function count;
 use function iterator_to_array;
 
 final class InMemoryQueryScopeTest extends UnitTestCase
@@ -91,7 +91,7 @@ final class InMemoryQueryScopeTest extends UnitTestCase
         $i = 1;
 
         while ($i !== 11) {
-            yield[$i, 11 - $i];
+            yield [$i, 11 - $i];
             $i++;
         }
 

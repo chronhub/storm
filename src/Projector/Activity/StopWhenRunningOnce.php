@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\PersistentProjector;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final readonly class StopWhenRunningOnce
 {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Stream;
 
-use Generator;
 use ArrayObject;
-use Traversable;
-use IteratorAggregate;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Generator;
+use IteratorAggregate;
+use Traversable;
 use function is_array;
 use function iterator_count;
 use function iterator_to_array;

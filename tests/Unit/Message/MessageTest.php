@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use stdClass;
-use Generator;
-use RuntimeException;
-use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
+use stdClass;
 
 final class MessageTest extends UnitTestCase
 {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Tests\UnitTestCase;
 
 final class SprintTest extends UnitTestCase
 {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tracker;
 
-use Generator;
-use Chronhub\Storm\Message\Message;
-use React\Promise\PromiseInterface;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Message\Message;
+use Generator;
+use React\Promise\PromiseInterface;
 
 class Draft implements MessageStory
 {

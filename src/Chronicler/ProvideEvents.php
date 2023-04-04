@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Tracker\StreamTracker;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
-use Chronhub\Storm\Contracts\Tracker\TransactionalStreamStory;
-use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
-use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
-use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
+use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use Chronhub\Storm\Contracts\Tracker\StreamTracker;
+use Chronhub\Storm\Contracts\Tracker\TransactionalStreamStory;
+use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
+use Chronhub\Storm\Stream\Stream;
 
 final class ProvideEvents
 {
@@ -67,7 +67,7 @@ final class ProvideEvents
 
                         $newStream = new Stream($streamName, $streamEvents);
 
-                        $story->deferred(fn (): Stream => $newStream);
+                        $story->deferred(static fn (): Stream => $newStream);
                     } catch (StreamNotFound $exception) {
                         $story->withRaisedException($exception);
                     }
@@ -85,7 +85,7 @@ final class ProvideEvents
 
                     $newStream = new Stream($streamName, $streamEvents);
 
-                    $story->deferred(fn (): Stream => $newStream);
+                    $story->deferred(static fn (): Stream => $newStream);
                 } catch (StreamNotFound $exception) {
                     $story->withRaisedException($exception);
                 }
@@ -97,7 +97,7 @@ final class ProvideEvents
             static function (StreamStory $story) use ($chronicler): void {
                 $streamNames = $chronicler->filterStreamNames(...$story->promise());
 
-                $story->deferred(fn (): array => $streamNames);
+                $story->deferred(static fn (): array => $streamNames);
             }
         );
 
@@ -106,7 +106,7 @@ final class ProvideEvents
             static function (StreamStory $story) use ($chronicler): void {
                 $categoryNames = $chronicler->filterCategoryNames(...$story->promise());
 
-                $story->deferred(fn (): array => $categoryNames);
+                $story->deferred(static fn (): array => $categoryNames);
             }
         );
 
@@ -115,7 +115,7 @@ final class ProvideEvents
             static function (StreamStory $story) use ($chronicler): void {
                 $streamExists = $chronicler->hasStream($story->promise());
 
-                $story->deferred(fn (): bool => $streamExists);
+                $story->deferred(static fn (): bool => $streamExists);
             }
         );
     }

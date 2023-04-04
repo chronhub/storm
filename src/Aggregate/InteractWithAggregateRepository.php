@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Throwable;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Throwable;
+use function array_map;
 use function count;
 use function reset;
-use function array_map;
 
 trait InteractWithAggregateRepository
 {
@@ -51,8 +51,11 @@ trait InteractWithAggregateRepository
      *
      * @throws Throwable
      */
-    protected function storeStream(DomainEvent $firstEvent, AggregateRoot $aggregateRoot, array $releasedEvents): void
-    {
+    protected function storeStream(
+        DomainEvent $firstEvent,
+        AggregateRoot $aggregateRoot,
+        array $releasedEvents
+    ): void {
         $stream = $this->streamProducer->toStream($aggregateRoot->aggregateId(), $releasedEvents);
 
         try {

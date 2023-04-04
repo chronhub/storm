@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use PHPUnit\Framework\TestCase;
-use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Tests\Util\ReflectionProperty;
+use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\TestCase;
 
 final class AssertMessageListener
 {

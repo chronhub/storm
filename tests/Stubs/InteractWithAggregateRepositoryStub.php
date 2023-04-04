@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Stubs;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Stream\StreamProducer;
-use Chronhub\Storm\Contracts\Aggregate\AggregateType;
-use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Aggregate\InteractWithAggregateRepository;
+use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateType;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Stream\StreamProducer;
 
 final class InteractWithAggregateRepositoryStub
 {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use Exception;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tests\Stubs\StoryStub;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\InteractWithStory;
+use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(InteractWithStory::class)]
 class InteractWithStoryTest extends UnitTestCase

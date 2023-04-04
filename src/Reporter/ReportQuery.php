@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Reporter;
 
-use React\Promise\PromiseInterface;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
+use React\Promise\PromiseInterface;
 
 class ReportQuery implements Reporter
 {

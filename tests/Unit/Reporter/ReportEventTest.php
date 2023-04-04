@@ -4,29 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use Generator;
-use RuntimeException;
-use PHPUnit\Framework\TestCase;
+use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\ReportEvent;
+use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
+use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
-use PHPUnit\Framework\MockObject\Exception;
-use Chronhub\Storm\Contracts\Message\Header;
-use PHPUnit\Framework\MockObject\MockObject;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Contracts\Message\MessageFactory;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
-use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
-use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
-use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 #[CoversClass(ReportEvent::class)]
 final class ReportEventTest extends UnitTestCase
@@ -43,8 +41,7 @@ final class ReportEventTest extends UnitTestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
-    #[Test]
-    public function it_relay_event(): void
+    public function testRelayEvent(): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 
@@ -79,8 +76,7 @@ final class ReportEventTest extends UnitTestCase
         $this->assertTrue($messageHandled);
     }
 
-    #[Test]
-    public function it_relay_command_as_array(): void
+    public function testRelayEventAsArray(): void
     {
         $eventAsArray = ['some' => 'event'];
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
@@ -117,8 +113,7 @@ final class ReportEventTest extends UnitTestCase
     }
 
     #[DataProvider('provideConsumers')]
-    #[Test]
-    public function it_always_considered_domain_event_acked_regardless_of_consumers(iterable $consumers): void
+    public function testAlwaysMarkMessageHandlers(iterable $consumers): void
     {
         $event = SomeEvent::fromContent(['name' => 'steph bug']);
 
@@ -161,8 +156,7 @@ final class ReportEventTest extends UnitTestCase
         $reporter->relay($event);
     }
 
-    #[Test]
-    public function it_raise_exception_caught_during_dispatch_of_event(): void
+    public function testExceptionRaisedDuringDispatch(): void
     {
         $exception = new RuntimeException('some exception');
 
@@ -196,15 +190,6 @@ final class ReportEventTest extends UnitTestCase
         $reporter->relay($event);
     }
 
-    public function provideEvent(): Generator
-    {
-        yield [SomeEvent::fromContent(['name' => 'steph bug']), SomeEvent::class];
-
-        yield [SomeEvent::fromContent(['name' => 'steph bug'])
-            ->withHeader(Header::EVENT_TYPE, 'some.event'), 'some.event',
-        ];
-    }
-
     public static function provideConsumers(): Generator
     {
         yield [[]];
@@ -213,9 +198,9 @@ final class ReportEventTest extends UnitTestCase
             self::assertInstanceOf(SomeEvent::class, $dispatchedEvent);
         };
 
-        yield[[$consumer]];
+        yield [[$consumer]];
 
-        yield[[$consumer, $consumer]];
+        yield [[$consumer, $consumer]];
     }
 
     private function provideRouter(iterable $consumers): MessageSubscriber

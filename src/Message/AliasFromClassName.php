@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message;
 
-use InvalidArgumentException;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
+use InvalidArgumentException;
 use function class_exists;
 
 final class AliasFromClassName implements MessageAlias

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\Caster;
-use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\Caster;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
+use Chronhub\Storm\Projector\Scheme\CastQuery;
 
 final readonly class ProjectQuery implements QueryProjector
 {

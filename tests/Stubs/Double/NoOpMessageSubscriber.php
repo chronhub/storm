@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Stubs\Double;
 
-use Chronhub\Storm\Reporter\DetachMessageListener;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\DetachMessageListener;
 
 final class NoOpMessageSubscriber implements MessageSubscriber
 {

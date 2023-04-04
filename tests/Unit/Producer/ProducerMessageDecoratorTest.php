@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Producer;
 
-use Generator;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Producer\ProducerStrategy;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Producer\ProducerMessageDecorator;
+use Chronhub\Storm\Producer\ProducerStrategy;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class ProducerMessageDecoratorTest extends UnitTestCase
 {

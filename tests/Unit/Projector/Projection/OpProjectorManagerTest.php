@@ -4,34 +4,34 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
+use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
+use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
+use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
+use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Message\AliasFromClassName;
+use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\InMemoryQueryScope;
+use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
+use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectorManager;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\InMemoryQueryScope;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
-use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
-use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
-use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
+use Chronhub\Storm\Stream\DetermineStreamCategory;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
 
 final class OpProjectorManagerTest extends UnitTestCase
 {

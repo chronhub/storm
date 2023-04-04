@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
-use Chronhub\Storm\Routing\Route;
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
+use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Routing\CollectRoutes;
+use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Route;
+use Chronhub\Storm\Tests\Stubs\Double\AnotherCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Illuminate\Support\Collection;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
-use Chronhub\Storm\Tests\Stubs\Double\AnotherCommand;
-use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use function sprintf;
 
 #[CoversClass(CollectRoutes::class)]
 final class CollectRoutesTest extends UnitTestCase
@@ -32,8 +32,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->messageAlias = $this->createMock(MessageAlias::class);
     }
 
-    #[Test]
-    public function it_can_be_constructed_with_empty_routes(): void
+    public function testInstanceWithEmptyRoutes(): void
     {
         $routes = new CollectRoutes($this->messageAlias);
 
@@ -42,8 +41,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertNull($routes->match('foo'));
     }
 
-    #[Test]
-    public function it_add_route_to_collection(): void
+    public function testAddRoute(): void
     {
         $this->messageAlias->expects($this->once())
             ->method('classToAlias')
@@ -60,11 +58,10 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertEquals(SomeCommand::class, $route->getOriginalName());
     }
 
-    #[Test]
-    public function it_raise_exception_when_message_name_is_duplicate(): void
+    public function testExceptionRaisedWithDuplicateRoute(): void
     {
         $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage('Message name already exists: '.SomeCommand::class);
+        $this->expectExceptionMessage(sprintf('Message name already exists: %s', SomeCommand::class));
 
         $this->messageAlias->expects($this->once())
             ->method('classToAlias')
@@ -80,8 +77,7 @@ final class CollectRoutesTest extends UnitTestCase
         $routes->addRoute(SomeCommand::class);
     }
 
-    #[Test]
-    public function it_find_routes_in_collection_with_message_class_name(): void
+    public function testMatchRoute(): void
     {
         $this->messageAlias->expects($this->any())
             ->method('classToAlias')
@@ -96,8 +92,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->match(AnotherCommand::class)->getName());
     }
 
-    #[Test]
-    public function it_find_routes_in_collection_with_message_alias(): void
+    public function testMatchRouteWithMessageAlias(): void
     {
         $this->messageAlias->expects($this->any())
             ->method('classToAlias')
@@ -112,8 +107,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->match('another-command')->getName());
     }
 
-    #[Test]
-    public function it_find_routes_in_collection_with_original_message_class_name(): void
+    public function testMatchOriginalRoute(): void
     {
         $this->messageAlias->expects($this->any())
             ->method('classToAlias')
@@ -128,8 +122,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertEquals($anotherRoute->getName(), $routes->matchOriginal(AnotherCommand::class)->getName());
     }
 
-    #[Test]
-    public function it_access_a_clone_routes_collection(): void
+    public function testGetCloneRouteCollection(): void
     {
         $this->messageAlias->expects($this->any())
             ->method('classToAlias')
@@ -144,8 +137,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertNotSame($routes->getRoutes(), $routes->getRoutes());
     }
 
-    #[Test]
-    public function it_serialize_routes(): void
+    public function testJsonSerializeRouteCollection(): void
     {
         $this->messageAlias->expects($this->any())
             ->method('classToAlias')

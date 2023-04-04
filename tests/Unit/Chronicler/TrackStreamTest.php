@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\EventDraft;
 use Chronhub\Storm\Chronicler\TrackStream;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\InteractWithStory;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(TrackStream::class)]
 #[CoversClass(InteractWithStory::class)]

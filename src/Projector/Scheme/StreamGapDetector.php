@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use DateTimeImmutable;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use function usleep;
+use DateTimeImmutable;
 use function array_key_exists;
+use function count;
+use function usleep;
 
 class StreamGapDetector
 {
@@ -25,7 +26,7 @@ class StreamGapDetector
 
     public function detect(string $streamName, int $eventPosition, string|DateTimeImmutable $eventTime): bool
     {
-        if (empty($this->retriesInMs)) {
+        if (count($this->retriesInMs) === 0) {
             return false;
         }
 

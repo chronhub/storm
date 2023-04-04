@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use Throwable;
-use RuntimeException;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Reporter\Subscribers\ConsumeEvent;
+use RuntimeException;
+use Throwable;
 
 #[CoversClass(ConsumeEvent::class)]
 final class ConsumeEventTest extends UnitTestCase
 {
-    #[Test]
-    public function it_test_subscriber(): void
+    public function testSubscriber(): void
     {
         $subscriber = new ConsumeEvent();
 
@@ -32,8 +30,7 @@ final class ConsumeEventTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_consume_event_with_many_consumers(): void
+    public function testConsumeEvent(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeEvent();
@@ -75,8 +72,7 @@ final class ConsumeEventTest extends UnitTestCase
         $this->assertTrue($story->isHandled());
     }
 
-    #[Test]
-    public function it_stop_consume_at_first_exception_and_does_not_mark_message_handled_even_if_one_has_been_consumed(): void
+    public function testConsumeTillNoExceptionRaised(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeEvent();
@@ -126,8 +122,7 @@ final class ConsumeEventTest extends UnitTestCase
         $this->assertFalse($story->isHandled());
     }
 
-    #[Test]
-    public function it_mark_message_handled_even_when_consumers_are_empty(): void
+    public function testMarkMessageHandled(): void
     {
         $tracker = new TrackMessage();
         $subscriber = new ConsumeEvent();

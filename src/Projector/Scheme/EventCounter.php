@@ -29,7 +29,7 @@ final class EventCounter
 
     public function isReset(): bool
     {
-        return 0 === $this->counter;
+        return $this->counter === 0;
     }
 
     public function isReached(): bool

@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Clock;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateInterval;
+use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
-use DateTimeImmutable;
 use Symfony\Component\Clock\MonotonicClock;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use function sleep;
-use function usleep;
-use function sprintf;
 use function is_string;
+use function sleep;
+use function sprintf;
 use function strtoupper;
+use function usleep;
 
 final readonly class PointInTime implements SystemClock
 {

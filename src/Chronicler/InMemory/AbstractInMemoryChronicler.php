@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler\InMemory;
 
-use Generator;
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Stream\StreamCategory;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
-use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
-use function sprintf;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\StreamName;
+use Generator;
+use Illuminate\Support\Collection;
 use function array_map;
+use function sprintf;
 
 abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 {
@@ -27,9 +27,10 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
      */
     protected Collection $streams;
 
-    public function __construct(protected readonly EventStreamProvider $eventStreamProvider,
-                                protected readonly StreamCategory $streamCategory)
-    {
+    public function __construct(
+        protected readonly EventStreamProvider $eventStreamProvider,
+        protected readonly StreamCategory $streamCategory
+    ) {
         $this->streams = new Collection();
     }
 
@@ -43,7 +44,9 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
     {
         if (! $queryFilter instanceof InMemoryQueryFilter) {
-            throw new InvalidArgumentException(sprintf('Query filter must be an instance of %s', InMemoryQueryFilter::class));
+            throw new InvalidArgumentException(
+                sprintf('Query filter must be an instance of %s', InMemoryQueryFilter::class)
+            );
         }
 
         return $this->filterEvents($streamName, $queryFilter);
@@ -55,9 +58,11 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
             throw StreamNotFound::withStreamName($streamName);
         }
 
-        $this->eventStreamProvider->deleteStream($streamName->toString());
+        $this->eventStreamProvider->deleteStream($streamName->name);
 
-        $this->streams = $this->streams->reject(fn (array $events, string $name): bool => $name === $streamName->toString());
+        $this->streams = $this->streams->reject(
+            static fn (array $events, string $name): bool => $name === $streamName->name
+        );
     }
 
     public function filterStreamNames(StreamName ...$streamNames): array

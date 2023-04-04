@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use ReflectionClass;
-use InvalidArgumentException;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Message\Attribute\AsDomainEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 
 class AsDomainEventTest extends UnitTestCase
 {

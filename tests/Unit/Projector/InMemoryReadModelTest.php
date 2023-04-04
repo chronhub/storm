@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
+use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 
 #[CoversClass(InMemoryReadModel::class)]
 final class InMemoryReadModelTest extends UnitTestCase

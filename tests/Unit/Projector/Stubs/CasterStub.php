@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Stubs;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\Caster;
 
 final class CasterStub implements Caster
 {

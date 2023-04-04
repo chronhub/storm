@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Closure;
-use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Closure;
 use function is_array;
 
 trait InteractWithSubscription

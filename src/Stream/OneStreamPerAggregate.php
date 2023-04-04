@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Stream;
 
-use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Stream\StreamProducer;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Reporter\DomainEvent;
 
 final readonly class OneStreamPerAggregate implements StreamProducer
 {

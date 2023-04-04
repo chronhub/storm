@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Generator;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Contracts\Tracker\Listener;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Tracker\StreamTracker;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
+use Chronhub\Storm\Contracts\Tracker\Listener;
+use Chronhub\Storm\Contracts\Tracker\StreamTracker;
 use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Generator;
 
 class EventChronicler implements EventableChronicler
 {
@@ -30,7 +30,7 @@ class EventChronicler implements EventableChronicler
     {
         $story = $this->tracker->newStory(self::FIRST_COMMIT_EVENT);
 
-        $story->deferred(fn (): Stream => $stream);
+        $story->deferred(static fn (): Stream => $stream);
 
         $this->tracker->disclose($story);
 
@@ -43,7 +43,7 @@ class EventChronicler implements EventableChronicler
     {
         $story = $this->tracker->newStory(self::PERSIST_STREAM_EVENT);
 
-        $story->deferred(fn (): Stream => $stream);
+        $story->deferred(static fn (): Stream => $stream);
 
         $this->tracker->disclose($story);
 
@@ -56,7 +56,7 @@ class EventChronicler implements EventableChronicler
     {
         $story = $this->tracker->newStory(self::DELETE_STREAM_EVENT);
 
-        $story->deferred(fn (): StreamName => $streamName);
+        $story->deferred(static fn (): StreamName => $streamName);
 
         $this->tracker->disclose($story);
 
@@ -71,7 +71,7 @@ class EventChronicler implements EventableChronicler
 
         $story = $this->tracker->newStory($eventName);
 
-        $story->deferred(fn (): array => [$streamName, $aggregateId, $direction]);
+        $story->deferred(static fn (): array => [$streamName, $aggregateId, $direction]);
 
         $this->tracker->disclose($story);
 
@@ -79,17 +79,14 @@ class EventChronicler implements EventableChronicler
             throw $story->exception();
         }
 
-        /** @var Generator $events */
-        $events = $story->promise()->events();
-
-        return $events;
+        return $story->promise()->events();
     }
 
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
     {
         $story = $this->tracker->newStory(self::FILTERED_STREAM_EVENT);
 
-        $story->deferred(fn (): array => [$streamName, $queryFilter]);
+        $story->deferred(static fn (): array => [$streamName, $queryFilter]);
 
         $this->tracker->disclose($story);
 
@@ -97,17 +94,14 @@ class EventChronicler implements EventableChronicler
             throw $story->exception();
         }
 
-        /** @var Generator $events */
-        $events = $story->promise()->events();
-
-        return $events;
+        return $story->promise()->events();
     }
 
     public function filterStreamNames(StreamName ...$streamNames): array
     {
         $story = $this->tracker->newStory(self::FILTER_STREAM_NAMES);
 
-        $story->deferred(fn (): array => $streamNames);
+        $story->deferred(static fn (): array => $streamNames);
 
         $this->tracker->disclose($story);
 
@@ -118,7 +112,7 @@ class EventChronicler implements EventableChronicler
     {
         $story = $this->tracker->newStory(self::FILTER_CATEGORY_NAMES);
 
-        $story->deferred(fn (): array => $categoryNames);
+        $story->deferred(static fn (): array => $categoryNames);
 
         $this->tracker->disclose($story);
 
@@ -129,7 +123,7 @@ class EventChronicler implements EventableChronicler
     {
         $story = $this->tracker->newStory(self::HAS_STREAM_EVENT);
 
-        $story->deferred(fn (): StreamName => $streamName);
+        $story->deferred(static fn (): StreamName => $streamName);
 
         $this->tracker->disclose($story);
 

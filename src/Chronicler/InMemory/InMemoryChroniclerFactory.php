@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler\InMemory;
 
-use Closure;
-use Illuminate\Support\Str;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Stream\StreamCategory;
-use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
-use Chronhub\Storm\Contracts\Chronicler\ChroniclerFactory;
-use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
-use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerFactory;
+use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
+use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalInMemoryChronicler as Transactional;
+use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Closure;
+use Illuminate\Support\Str;
+use function method_exists;
 use function sprintf;
 use function ucfirst;
-use function method_exists;
 
 final class InMemoryChroniclerFactory implements ChroniclerFactory
 {

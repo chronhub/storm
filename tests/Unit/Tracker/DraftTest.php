@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use stdClass;
-use RuntimeException;
-use Chronhub\Storm\Tracker\Draft;
-use React\Promise\PromiseInterface;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\Draft;
 use PHPUnit\Framework\Attributes\CoversClass;
+use React\Promise\PromiseInterface;
+use RuntimeException;
+use stdClass;
 use function iterator_to_array;
 
 #[CoversClass(Draft::class)]

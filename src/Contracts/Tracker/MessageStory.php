@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Tracker;
 
-use Generator;
 use Chronhub\Storm\Message\Message;
+use Generator;
 use React\Promise\PromiseInterface;
 
 interface MessageStory extends Story

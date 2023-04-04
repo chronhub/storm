@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class PersistOrUpdateLockTest extends UnitTestCase
 {

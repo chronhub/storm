@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Reporter;
 
-use Throwable;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
+use Throwable;
 
 trait HasConstructableReporter
 {

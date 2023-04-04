@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Projector\Options\ProvideProjectionOption;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(ProvideProjectionOption::class)]
 final class ProvideProjectionOptionTest extends UnitTestCase
@@ -31,19 +31,12 @@ final class ProvideProjectionOptionTest extends UnitTestCase
             }
         };
 
-        $this->assertSame(true, $options->signal);
         $this->assertSame(true, $options->getSignal());
-        $this->assertSame(10, $options->cacheSize);
         $this->assertSame(10, $options->getCacheSize());
-        $this->assertSame(5000, $options->timeout);
         $this->assertSame(5000, $options->getTimeout());
-        $this->assertSame(100, $options->blockSize);
         $this->assertSame(100, $options->getBlockSize());
-        $this->assertSame(10000, $options->lockout);
         $this->assertSame(10000, $options->getLockout());
-        $this->assertSame([10, 20, 30, 40, 50], $options->retries);
         $this->assertSame([10, 20, 30, 40, 50], $options->getRetries());
-        $this->assertNull($options->detectionWindows);
         $this->assertNull($options->getDetectionWindows());
     }
 

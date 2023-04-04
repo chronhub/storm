@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Chronhub\Storm\Contracts\Tracker\TransactionalStreamStory;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
-use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use Chronhub\Storm\Contracts\Tracker\TransactionalStreamStory;
+use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 
 final class TransactionalEventChronicler extends EventChronicler implements TransactionalEventableChronicler
 {

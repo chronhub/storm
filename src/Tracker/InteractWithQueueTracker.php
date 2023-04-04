@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tracker;
 
-use SplPriorityQueue;
-use Chronhub\Storm\Contracts\Tracker\Story;
 use Chronhub\Storm\Contracts\Tracker\Listener;
-use function uasort;
+use Chronhub\Storm\Contracts\Tracker\Story;
+use SplPriorityQueue;
 use function iterator_to_array;
+use function uasort;
 
 trait InteractWithQueueTracker
 {

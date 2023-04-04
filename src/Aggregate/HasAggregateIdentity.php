@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Symfony\Component\Uid\Uuid;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Symfony\Component\Uid\Uuid;
 
 trait HasAggregateIdentity
 {

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
-use Chronhub\Storm\Routing\Group;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Routing\CollectRoutes;
-use Chronhub\Storm\Tests\Stubs\GroupStub;
-use Chronhub\Storm\Reporter\ReportCommand;
-use Chronhub\Storm\Producer\ProducerStrategy;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
+use Chronhub\Storm\Producer\ProducerStrategy;
+use Chronhub\Storm\Reporter\ReportCommand;
+use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Tests\Stubs\Double\NoOpMessageSubscriber;
+use Chronhub\Storm\Tests\Stubs\GroupStub;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Group::class)]
 final class GroupTest extends UnitTestCase

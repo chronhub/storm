@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Stream;
 
-use Generator;
+use Chronhub\Storm\Aggregate\V4AggregateId;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\OneStreamPerAggregate;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Aggregate\V4AggregateId;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Stream\OneStreamPerAggregate;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(OneStreamPerAggregate::class)]
 final class OneStreamPerAggregateTest extends UnitTestCase

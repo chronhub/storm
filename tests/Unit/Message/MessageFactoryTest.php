@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use stdClass;
-use Generator;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Message\MessageFactory;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Message\MessageFactory;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
-use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use stdClass;
 
 final class MessageFactoryTest extends UnitTestCase
 {

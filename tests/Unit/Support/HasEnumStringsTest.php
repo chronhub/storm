@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Support;
 
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Support\HasEnumStrings;
+use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(HasEnumStrings::class)]

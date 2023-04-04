@@ -6,11 +6,11 @@ namespace Chronhub\Storm\Reporter\Subscribers;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Reporter\DetachMessageListener;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\DetachMessageListener;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
 
 final class ConsumeCommand implements MessageSubscriber
 {
@@ -25,7 +25,7 @@ final class ConsumeCommand implements MessageSubscriber
                 $messageHandler($story->message()->event());
             }
 
-            if (null !== $messageHandler || $story->message()->header(Header::EVENT_DISPATCHED) === true) {
+            if ($messageHandler !== null || $story->message()->header(Header::EVENT_DISPATCHED) === true) {
                 $story->markHandled(true);
             }
         }, OnDispatchPriority::INVOKE_HANDLER->value);

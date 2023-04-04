@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Illuminate\Support\Collection;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use function in_array;
-use function array_keys;
+use Illuminate\Support\Collection;
 use function array_key_exists;
+use function array_keys;
+use function in_array;
+use function sprintf;
 
 final class InMemoryProjectionProvider implements ProjectionProvider
 {
@@ -80,7 +81,9 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function acquireLock(string $projectionName, string $status, string $lockedUntil, string $datetime): bool
     {
-        if (! $projection = $this->retrieve($projectionName)) {
+        $projection = $this->retrieve($projectionName);
+
+        if (! $projection instanceof ProjectionModel) {
             return false;
         }
 
@@ -102,7 +105,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function filterByNames(string ...$projectionNames): array
     {
-        $byStreamNames = fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames);
+        $byStreamNames = static fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames);
 
         return $this->projections->filter($byStreamNames)->keys()->toArray();
     }
@@ -125,7 +128,9 @@ final class InMemoryProjectionProvider implements ProjectionProvider
     {
         foreach (array_keys($data) as $key) {
             if (! in_array($key, $this->fillable, true)) {
-                throw new InvalidArgumentException("Invalid projection field $key for projection $name");
+                throw new InvalidArgumentException(
+                    sprintf('Invalid projection field %s for projection %s', $key, $name)
+                );
             }
         }
     }

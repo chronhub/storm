@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Generator;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Generator;
 use function end;
 use function explode;
 

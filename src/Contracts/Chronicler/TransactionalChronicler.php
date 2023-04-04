@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Chronicler;
 
-use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
+use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
 
 interface TransactionalChronicler extends Chronicler
 {

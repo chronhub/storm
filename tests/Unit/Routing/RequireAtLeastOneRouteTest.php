@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Routing\CommandGroup;
-use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Message\AliasFromClassName;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Routing\CollectRoutes;
+use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Rules\RequireAtLeastOneRoute;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
 
 final class RequireAtLeastOneRouteTest extends UnitTestCase
 {

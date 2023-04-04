@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Routing;
 
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Reporter\DomainType;
-use Chronhub\Storm\Contracts\Routing\Registrar;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
+use Chronhub\Storm\Contracts\Routing\Registrar;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Illuminate\Support\Collection;
 use function array_merge;
+use function sprintf;
 
 final class GroupRegistrar implements Registrar
 {
@@ -84,7 +85,9 @@ final class GroupRegistrar implements Registrar
     private function assertUniqueDomainTypeAndName(DomainType $domainType, string $name): void
     {
         if (isset($this->groups[$domainType->value][$name])) {
-            throw new RoutingViolation("Group $domainType->value already exists with name $name");
+            throw new RoutingViolation(
+                sprintf('Group %s already exists with name %s', $domainType->value, $name)
+            );
         }
     }
 }

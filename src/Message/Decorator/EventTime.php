@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Message\Decorator;
 
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Message\Message;
 
 final readonly class EventTime implements MessageDecorator
 {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Chronhub\Storm\Tracker\InteractWithTracker;
 use Chronhub\Storm\Contracts\Tracker\StreamStory;
 use Chronhub\Storm\Contracts\Tracker\StreamTracker;
+use Chronhub\Storm\Tracker\InteractWithTracker;
 
 class TrackStream implements StreamTracker
 {

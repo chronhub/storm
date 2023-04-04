@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Message\ChainMessageDecorator;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Message\ChainMessageDecorator;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(ChainMessageDecorator::class)]
 final class ChainMessageDecoratorTest extends UnitTestCase
@@ -53,7 +53,7 @@ final class ChainMessageDecoratorTest extends UnitTestCase
         {
             public function decorate(Message $message): Message
             {
-                return  $message->withHeader('another', 'header');
+                return $message->withHeader('another', 'header');
             }
         };
 

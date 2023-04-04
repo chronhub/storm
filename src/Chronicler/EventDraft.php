@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler;
 
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tracker\InteractWithStory;
-use Chronhub\Storm\Contracts\Tracker\StreamStory;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\Exceptions\UnexpectedCallback;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Tracker\StreamStory;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Tracker\InteractWithStory;
 
 class EventDraft implements StreamStory
 {
@@ -30,7 +30,7 @@ class EventDraft implements StreamStory
 
     public function promise(): mixed
     {
-        if (null === $this->callback) {
+        if ($this->callback === null) {
             throw new UnexpectedCallback('No event callback has been set');
         }
 
@@ -51,7 +51,7 @@ class EventDraft implements StreamStory
             $events[] = $messageDecorator->decorate(new Message($streamEvent))->event();
         }
 
-        $this->deferred(fn (): Stream => new Stream($stream->name(), $events));
+        $this->deferred(static fn (): Stream => new Stream($stream->name(), $events));
     }
 
     public function hasStreamNotFound(): bool

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\DomainType;
+use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Reporter\DomainCommand;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\DomainQuery;
-use Chronhub\Storm\Reporter\DomainCommand;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Reporter\Reporting;
+use Chronhub\Storm\Reporter\DomainType;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class HasDomainTest extends UnitTestCase
 {

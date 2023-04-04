@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
-use Generator;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Routing\FindRoute;
-use Psr\Container\ContainerInterface;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Routing\CommandGroup;
-use Chronhub\Storm\Routing\CollectRoutes;
-use PHPUnit\Framework\MockObject\Exception;
 use Chronhub\Storm\Contracts\Message\Header;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Routing\CollectRoutes;
+use Chronhub\Storm\Routing\CommandGroup;
+use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
 use Chronhub\Storm\Routing\Exceptions\RouteNotFound;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\FindRoute;
 use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
-use Chronhub\Storm\Routing\Exceptions\RouteHandlerNotSupported;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
 
 #[CoversClass(FindRoute::class)]
 #[CoversClass(RouteNotFound::class)]

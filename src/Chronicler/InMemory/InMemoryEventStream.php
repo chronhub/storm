@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler\InMemory;
 
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use function is_null;
+use Chronhub\Storm\Stream\StreamName;
+use Illuminate\Support\Collection;
 use function in_array;
+use function is_null;
 use function is_string;
 use function str_starts_with;
 

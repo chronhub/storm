@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
-use InvalidArgumentException;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
+use Chronhub\Storm\Reporter\DomainEvent;
+use InvalidArgumentException;
 use function is_a;
 
 class DomainEventContentSerializer implements EventContentSerializer

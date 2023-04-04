@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 
 final class NullAggregateCache implements AggregateCache
 {
@@ -25,7 +25,7 @@ final class NullAggregateCache implements AggregateCache
 
     public function flush(): void
     {
-       //
+        // no op
     }
 
     public function has(AggregateIdentity $aggregateId): bool

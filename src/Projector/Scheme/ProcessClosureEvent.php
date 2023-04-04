@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Closure;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Closure;
 
 final readonly class ProcessClosureEvent extends EventProcessor
 {

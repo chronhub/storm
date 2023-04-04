@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Routing;
 
-use JsonSerializable;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
-use function count;
+use JsonSerializable;
 use function array_merge;
 use function class_exists;
+use function count;
+use function sprintf;
 
 class Route implements JsonSerializable
 {
@@ -16,12 +17,15 @@ class Route implements JsonSerializable
 
     private ?string $alias = null;
 
+    /**
+     * @return array<int, string|object>
+     */
     private array $handlers = [];
 
     public function __construct(private readonly string $name)
     {
         if (! class_exists($this->name)) {
-            throw new RoutingViolation("Message name must be a valid class name, got $this->name");
+            throw new RoutingViolation(sprintf('Message name must be a valid class name, got %s', $this->name));
         }
     }
 
@@ -66,9 +70,6 @@ class Route implements JsonSerializable
         return $this->name;
     }
 
-    /**
-     * @return array<int, string|object>
-     */
     public function getHandlers(): array
     {
         return $this->handlers;

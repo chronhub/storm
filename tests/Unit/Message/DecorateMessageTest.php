@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Message;
 
-use stdClass;
+use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Message\DecorateMessage;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Message\DecorateMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use PHPUnit\Framework\Attributes\Test;
+use stdClass;
 
 #[CoversClass(DecorateMessage::class)]
 final class DecorateMessageTest extends UnitTestCase

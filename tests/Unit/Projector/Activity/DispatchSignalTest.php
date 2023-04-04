@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use function posix_kill;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use function pcntl_signal;
 use function posix_getpid;
+use function posix_kill;
 
 final class DispatchSignalTest extends UnitTestCase
 {

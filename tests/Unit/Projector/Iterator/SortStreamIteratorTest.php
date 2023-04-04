@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
-use Generator;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
 use function array_keys;
 use function array_values;
 

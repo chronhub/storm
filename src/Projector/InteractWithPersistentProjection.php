@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\ResetEventCounter;
+use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
-use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
+use Chronhub\Storm\Projector\Activity\ResetEventCounter;
+use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Activity\UpdateStatusAndPositions;
 
 trait InteractWithPersistentProjection

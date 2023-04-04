@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Aggregate;
 
-use InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
+use InvalidArgumentException;
 
 interface AggregateType
 {

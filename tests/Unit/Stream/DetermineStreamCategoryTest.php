@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Stream;
 
-use Generator;
+use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
 
 #[CoversClass(DetermineStreamCategory::class)]
 final class DetermineStreamCategoryTest extends UnitTestCase

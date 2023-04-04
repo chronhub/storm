@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use RuntimeException;
-use Chronhub\Storm\Stream\Stream;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
-use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
+use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Stream\DetermineStreamCategory;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use function array_merge;
 use function random_bytes;
 

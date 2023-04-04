@@ -4,51 +4,51 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Options;
 
-use function range;
 use function explode;
 use function is_array;
+use function range;
 
 trait ProvideProjectionOption
 {
     /**
      * Dispatch async signal
      */
-    public readonly bool $signal;
+    protected readonly bool $signal;
 
     /**
      * Number of stream to keep in cache
      */
-    public readonly int $cacheSize;
+    protected readonly int $cacheSize;
 
     /**
      * Lock timeout in milliseconds
      */
-    public readonly int $timeout;
+    protected readonly int $timeout;
 
     /**
      * Sleep before update lock in milliseconds
      */
-    public readonly int $sleep;
+    protected readonly int $sleep;
 
     /**
      * threshold of event to keep in memory before persisting
      */
-    public readonly int $blockSize;
+    protected readonly int $blockSize;
 
     /**
      * Update lock Threshold
      */
-    public readonly int $lockout;
+    protected readonly int $lockout;
 
     /**
      * Number of retries in milliseconds to fill a gap detected
      */
-    public readonly array $retries;
+    protected readonly array $retries;
 
     /**
      * Detection windows as a string interval
      */
-    public readonly string|null $detectionWindows;
+    protected readonly string|null $detectionWindows;
 
     public function getSignal(): bool
     {

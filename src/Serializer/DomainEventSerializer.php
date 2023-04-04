@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Serializer;
 
-use InvalidArgumentException;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Message\Header;
-use Symfony\Component\Serializer\Serializer;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Serializer\EventContentSerializer;
+use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Chronhub\Storm\Reporter\DomainEvent;
+use InvalidArgumentException;
+use Symfony\Component\Serializer\Serializer;
 use function is_string;
 
 final readonly class DomainEventSerializer implements StreamEventSerializer
 {
-    public function __construct(private EventContentSerializer $contentSerializer,
-                                private Serializer $serializer)
-    {
+    public function __construct(
+        private EventContentSerializer $contentSerializer,
+        private Serializer $serializer
+    ) {
     }
 
     public function serializeEvent(DomainEvent $event): array

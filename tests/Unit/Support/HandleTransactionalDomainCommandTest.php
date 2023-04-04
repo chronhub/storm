@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Support;
 
-use RuntimeException;
-use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Tracker\TrackMessage;
-use PHPUnit\Framework\MockObject\MockObject;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Support\Bridge\HandleTransactionalDomainCommand;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Support\Bridge\HandleTransactionalDomainCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use RuntimeException;
 
 class HandleTransactionalDomainCommandTest extends UnitTestCase
 {

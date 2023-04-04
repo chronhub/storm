@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Throwable;
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Throwable;
 
 final readonly class InMemoryRepository implements ProjectionRepositoryInterface
 {

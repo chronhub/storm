@@ -10,7 +10,7 @@ trait HasDomain
 {
     use HasHeaders;
 
-    public function withHeader(string $header, null|int|float|string|bool|array|object $value): static
+    public function withHeader(string $header, int|float|string|bool|array|object|null $value): static
     {
         $domain = clone $this;
 

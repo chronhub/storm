@@ -2,7 +2,7 @@
   "name": "chronhub/storm",
   "description": "foundation",
   "keywords": [
-    "message", "stream", "cqrs", "aggregate", "ddd", "es"
+    "message", "stream", "cqrs", "aggregate", "domain driven design", "event sourcing"
   ],
   "license": "MIT",
   "authors": [
@@ -21,14 +21,15 @@
     "ext-pcntl": "*"
   },
   "require-dev": {
-    "rector/rector": "dev-main",
+    "ext-posix": "*",
     "laravel/pint": "^1.6",
-    "phpstan/phpstan":"^1.10",
     "nunomaduro/larastan": "^2.5",
+    "nunomaduro/phpinsights": "dev-master",
     "orchestra/testbench": "^8.0",
+    "phpstan/phpstan": "^1.10",
     "phpunit/phpunit": "^10.0",
-    "roave/security-advisories": "dev-latest",
-    "ext-posix": "*"
+    "rector/rector": "dev-main",
+    "roave/security-advisories": "dev-latest"
   },
   "autoload": {
     "psr-4": {
@@ -48,7 +49,10 @@
     "rector-process": "vendor/bin/rector process"
   },
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   },
   "minimum-stability": "dev"
 }

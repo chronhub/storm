@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Routing;
 
-use JsonSerializable;
-use Chronhub\Storm\Reporter\DomainType;
-use Chronhub\Storm\Producer\ProducerStrategy;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Contracts\Routing\RoutingRule;
-use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Routing\RouteCollection;
+use Chronhub\Storm\Contracts\Routing\RoutingRule;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Producer\ProducerStrategy;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
-use function is_a;
+use JsonSerializable;
 use function array_merge;
+use function is_a;
+use function sprintf;
 
 abstract class Group implements JsonSerializable
 {
@@ -103,7 +104,9 @@ abstract class Group implements JsonSerializable
     public function withReporterConcrete(string $reporterConcrete): self
     {
         if (! is_a($reporterConcrete, Reporter::class, true)) {
-            throw new RoutingViolation("Reporter concrete class $reporterConcrete must be an instance of ".Reporter::class);
+            throw new RoutingViolation(
+                sprintf('Reporter concrete class %s must be an instance of %s', $reporterConcrete, Reporter::class)
+            );
         }
 
         $this->reporterConcrete = $reporterConcrete;

@@ -4,33 +4,33 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Generator;
+use Chronhub\Storm\Aggregate\V4AggregateId;
+use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
+use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
+use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
+use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Aggregate\V4AggregateId;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
-use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Chronicler\InMemory\AbstractInMemoryChronicler;
-use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
-use function count;
-use function range;
+use PHPUnit\Framework\Attributes\Test;
 use function array_map;
-use function random_bytes;
 use function array_reverse;
+use function count;
 use function iterator_to_array;
+use function random_bytes;
+use function range;
 
 #[CoversClass(StandaloneInMemoryChronicler::class)]
 #[CoversClass(AbstractInMemoryChronicler::class)]

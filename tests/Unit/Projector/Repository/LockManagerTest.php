@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Repository;
 
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Projector\Repository\LockManager;
 use function sleep;
 
 #[CoversClass(LockManager::class)]

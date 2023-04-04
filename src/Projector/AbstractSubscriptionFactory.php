@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Repository\LockManager;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
-use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Message\MessageAlias;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Projector\Repository\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Repository\LockManager;
+use Chronhub\Storm\Projector\Repository\ProjectionRepository;
+use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use function array_merge;
 
 abstract class AbstractSubscriptionFactory

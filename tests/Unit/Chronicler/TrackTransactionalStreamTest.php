@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Chronicler\TrackStream;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Chronicler\TransactionalEventDraft;
 use Chronhub\Storm\Chronicler\TrackTransactionalStream;
+use Chronhub\Storm\Chronicler\TransactionalEventDraft;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(TrackTransactionalStream::class)]
 class TrackTransactionalStreamTest extends UnitTestCase

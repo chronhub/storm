@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
 final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {

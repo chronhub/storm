@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Generator;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Projector\Scheme\StreamCache;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 #[CoversClass(StreamCache::class)]
 final class StreamCacheTest extends UnitTestCase

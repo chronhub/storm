@@ -6,6 +6,9 @@ namespace Chronhub\Storm\Support;
 
 trait HasEnumStrings
 {
+    /**
+     * @return array<int, string>
+     */
     public static function strings(): array
     {
         $strings = [];

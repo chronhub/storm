@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Psr\Container\ContainerInterface;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
+use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Chronhub\Storm\Serializer\DomainEventSerializer;
+use Chronhub\Storm\Serializer\JsonSerializerFactory;
+use Chronhub\Storm\Serializer\MessagingSerializer;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Serializer\MessagingSerializer;
-use Chronhub\Storm\Serializer\DomainEventSerializer;
-use Chronhub\Storm\Serializer\JsonSerializerFactory;
-use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
-use Symfony\Component\Serializer\Normalizer\UidNormalizer;
-use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Serializer\Normalizer\DateIntervalNormalizer;
+use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 
 #[CoversClass(JsonSerializerFactory::class)]
 final class JsonSerializerFactoryTest extends UnitTestCase
@@ -35,8 +35,7 @@ final class JsonSerializerFactoryTest extends UnitTestCase
         $this->container = $this->createMock(ContainerInterface::class);
     }
 
-    #[Test]
-    public function it_create_message_serializer(): void
+    public function testCreateMessageSerializerInstance(): void
     {
         $this->container->expects($this->any())
             ->method('get')
@@ -51,8 +50,7 @@ final class JsonSerializerFactoryTest extends UnitTestCase
         $this->assertEquals(MessagingSerializer::class, $serializer::class);
     }
 
-    #[Test]
-    public function it_create_stream_serializer(): void
+    public function testCreateStreamSerializerInstance(): void
     {
         $this->container->expects($this->any())
             ->method('get')
@@ -67,8 +65,7 @@ final class JsonSerializerFactoryTest extends UnitTestCase
         $this->assertEquals(DomainEventSerializer::class, $serializer::class);
     }
 
-    #[Test]
-    public function it_merge_message_normalizers(): void
+    public function testMergeMessageNormalizers(): void
     {
         $this->container->expects($this->exactly(2))
             ->method('get')
@@ -83,7 +80,7 @@ final class JsonSerializerFactoryTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_merge_stream_normalizers(): void
+    public function testMergeStreamSerializerNormalizers(): void
     {
         $this->container->expects($this->exactly(2))
             ->method('get')

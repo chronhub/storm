@@ -11,7 +11,7 @@ trait HasHeaders
      */
     protected array $headers = [];
 
-    public function header(string $key): null|int|float|string|bool|array|object
+    public function header(string $key): int|float|string|bool|array|object|null
     {
         return $this->headers[$key] ?? null;
     }

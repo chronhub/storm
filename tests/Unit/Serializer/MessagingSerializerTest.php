@@ -4,30 +4,29 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
-use stdClass;
-use InvalidArgumentException;
-use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Chronhub\Storm\Contracts\Message\Header;
-use Symfony\Component\Serializer\Serializer;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Serializer\SerializeToJson;
-use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
-use Chronhub\Storm\Serializer\MessagingSerializer;
-use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Serializer\MessageContentSerializer;
-use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Chronhub\Storm\Serializer\MessagingSerializer;
+use Chronhub\Storm\Serializer\SerializeToJson;
+use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
+use Chronhub\Storm\Tests\UnitTestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use stdClass;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use function sprintf;
 
 #[CoversClass(MessagingSerializer::class)]
 final class MessagingSerializerTest extends UnitTestCase
 {
-    #[Test]
-    public function it_serialize_message_with_scalar_headers(): void
+    public function testSerializePayload(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug'])->withHeaders([
             Header::EVENT_ID => '123-456',
@@ -54,36 +53,7 @@ final class MessagingSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    #[Test]
-    public function it_serialize_content_message(): void
-    {
-        $command = SomeCommand::fromContent(['name' => 'steph bug'])->withHeaders([
-            Header::EVENT_ID => '123-456',
-            Header::EVENT_TIME => 'some_time',
-        ]);
-
-        $message = new Message($command);
-
-        $serializer = $this->messageSerializerInstance();
-
-        $payload = $serializer->serializeMessage($message);
-
-        $this->assertArrayHasKey('headers', $payload);
-        $this->assertArrayHasKey('content', $payload);
-
-        $this->assertEquals(
-            [
-                '__event_id' => '123-456',
-                '__event_time' => 'some_time',
-            ],
-            $payload['headers']
-        );
-
-        $this->assertEquals(['name' => 'steph bug'], $payload['content']);
-    }
-
-    #[Test]
-    public function it_normalize_and_serialize_headers(): void
+    public function testNormalizeAndSerializePayload(): void
     {
         $datetime = new PointInTime();
         $now = $datetime->now();
@@ -119,20 +89,19 @@ final class MessagingSerializerTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $payload['content']);
     }
 
-    #[Test]
-    public function it_raise_exception_if_message_event_is_not_an_instance_of_reporting_during_serialization(): void
+    public function testExceptionRaisedWithInvalidMessageEvent(): void
     {
         $this->expectException(InvalidArgumentException::class);
-
-        $this->expectExceptionMessage('Message event '.stdClass::class.' must be an instance of Reporting to be serialized');
+        $this->expectExceptionMessage(
+            sprintf('Message event %s must be an instance of Reporting to be serialized', stdClass::class)
+        );
 
         $serializer = $this->messageSerializerInstance();
 
         $serializer->serializeMessage(new Message(new stdClass()));
     }
 
-    #[Test]
-    public function it_unserialize_payload(): void
+    public function testDeserializePayloadToReport(): void
     {
         $payload = [
             'headers' => [
@@ -153,12 +122,10 @@ final class MessagingSerializerTest extends UnitTestCase
         $this->assertEquals($payload['content'], $event->toContent());
     }
 
-    #[Test]
-    public function it_raise_exception_if_message_event_type_missing_during_unserialize_content(): void
+    public function testExceptionRaisedWithMissingEventTypeHeaderDuringDeserialization(): void
     {
         $this->expectException(InvalidArgumentException::class);
-
-        $this->expectExceptionMessage('Missing event type header to unserialize payload');
+        $this->expectExceptionMessage('Missing event type header to deserialize payload');
 
         $payload = [
             'headers' => [

@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Serializer;
 
-use InvalidArgumentException;
-use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Contracts\Message\Header;
-use Symfony\Component\Serializer\Serializer;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Serializer\SerializeToJson;
-use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
-use Chronhub\Storm\Serializer\DomainEventSerializer;
-use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Serializer\DomainEventContentSerializer;
+use Chronhub\Storm\Serializer\DomainEventSerializer;
+use Chronhub\Storm\Serializer\SerializeToJson;
+use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\V4UniqueIdStub;
+use Chronhub\Storm\Tests\UnitTestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use function json_encode;
 
 #[CoversClass(DomainEventSerializer::class)]

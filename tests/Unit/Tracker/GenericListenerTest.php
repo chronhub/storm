@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Tracker;
 
-use Generator;
+use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\GenericListener;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Contracts\Tracker\Listener;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(GenericListener::class)]

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Stream;
 
-use Stringable;
 use InvalidArgumentException;
+use Stringable;
 
 final readonly class StreamName implements Stringable
 {

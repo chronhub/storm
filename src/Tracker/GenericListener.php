@@ -13,10 +13,11 @@ final class GenericListener implements Listener
      */
     private $story;
 
-    public function __construct(public readonly string $eventName,
-                                callable $story,
-                                public readonly int $eventPriority)
-    {
+    public function __construct(
+        public readonly string $eventName,
+        callable $story,
+        public readonly int $eventPriority
+    ) {
         $this->story = $story;
     }
 

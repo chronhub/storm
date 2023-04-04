@@ -4,27 +4,25 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
-use stdClass;
-use Generator;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
+use Chronhub\Storm\Reporter\OnDispatchPriority;
+use Chronhub\Storm\Reporter\ReportCommand;
 use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Reporter\ReportQuery;
+use Chronhub\Storm\Reporter\Subscribers\NameReporterService;
+use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
-use Chronhub\Storm\Reporter\ReportCommand;
-use Chronhub\Storm\Contracts\Message\Header;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
-use Chronhub\Storm\Reporter\OnDispatchPriority;
-use Chronhub\Storm\Reporter\Subscribers\NameReporterService;
+use stdClass;
 
 #[CoversClass(NameReporterService::class)]
 final class NameReporterServiceTest extends UnitTestCase
 {
-    #[Test]
-    public function it_test_subscriber(): void
+    public function testSubscriber(): void
     {
         $subscriber = new NameReporterService('reporter.service.id');
 
@@ -36,8 +34,7 @@ final class NameReporterServiceTest extends UnitTestCase
     }
 
     #[DataProvider('provideReporterServiceId')]
-    #[Test]
-    public function it_mark_reporter_service_name_in_message_header(string $serviceId): void
+    public function testSetHeader(string $serviceId): void
     {
         $tracker = new TrackMessage();
 
@@ -54,8 +51,7 @@ final class NameReporterServiceTest extends UnitTestCase
         $this->assertEquals($serviceId, $story->message()->header(Header::REPORTER_ID));
     }
 
-    #[Test]
-    public function it_does_not_mark_reporter_name_header_if_already_exists(): void
+    public function testDoesNotSetHeaderIfAlreadyExists(): void
     {
         $tracker = new TrackMessage();
 

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use JsonSerializable;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use function in_array;
+use JsonSerializable;
 use function array_fill;
+use function in_array;
 
 final class StreamCache implements JsonSerializable
 {
     /**
      * @var array<int, string|null>
      */
-    protected array $container;
+    private array $container;
 
-    protected int $position = -1;
+    private int $position = -1;
 
     public function __construct(private readonly int $cacheSize)
     {

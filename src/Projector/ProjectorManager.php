@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Throwable;
-use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
-use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
+use Chronhub\Storm\Contracts\Projector\QueryProjector;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
+use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Throwable;
 
 final readonly class ProjectorManager implements ProjectorManagerInterface
 {

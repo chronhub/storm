@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Chronicler\InMemory;
 
-use Generator;
-use Throwable;
-use Chronhub\Storm\Stream\Stream;
-use Illuminate\Support\Collection;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Stream\StreamCategory;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
-use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
+use Chronhub\Storm\Chronicler\Exceptions\TransactionNotStarted;
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Contracts\Chronicler\TransactionalChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalInMemoryChronicler as TransactionalInMemory;
+use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\Stream;
+use Chronhub\Storm\Stream\StreamName;
+use Generator;
+use Illuminate\Support\Collection;
+use Throwable;
 use function array_merge;
 use function iterator_to_array;
 

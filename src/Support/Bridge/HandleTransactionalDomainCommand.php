@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Support\Bridge;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
+use Chronhub\Storm\Contracts\Tracker\MessageStory;
+use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
+use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\OnFinalizePriority;
-use Chronhub\Storm\Contracts\Tracker\MessageStory;
-use Chronhub\Storm\Reporter\DetachMessageListener;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Tracker\MessageTracker;
-use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
-use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 
 final class HandleTransactionalDomainCommand implements MessageSubscriber
 {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Iterator;
 
-use Iterator;
-use Generator;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Generator;
+use Iterator;
 
 final class StreamEventIterator implements Iterator
 {

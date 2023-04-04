@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Routing\Rules;
 
-use Chronhub\Storm\Routing\Group;
-use Chronhub\Storm\Routing\Route;
-use Chronhub\Storm\Routing\QueryGroup;
-use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Contracts\Routing\RoutingRule;
+use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Group;
+use Chronhub\Storm\Routing\QueryGroup;
+use Chronhub\Storm\Routing\Route;
 use function count;
+use function sprintf;
 
 final readonly class RequireOneHandlerRule implements RoutingRule
 {
@@ -33,12 +34,11 @@ final readonly class RequireOneHandlerRule implements RoutingRule
             return;
         }
 
-        $routes->each(function (Route $route) use ($group): void {
+        $routes->each(static function (Route $route) use ($group): void {
             if (count($route->getHandlers()) !== 1) {
-                $message = "Group type {$group->getType()->value} and name {$group->name}";
-                $message .= " require one route handler only for message {$route->getName()}";
+                $message = 'Group type %s and name %s require one route handler only for message %s';
 
-                throw new RoutingViolation($message);
+                throw new RoutingViolation(sprintf($message, $group->getType()->value, $group->name, $route->getName()));
             }
         });
     }

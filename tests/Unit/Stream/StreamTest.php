@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Stream;
 
-use Generator;
 use Chronhub\Storm\Stream\Stream;
-use Illuminate\Support\Collection;
 use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(Stream::class)]
 final class StreamTest extends UnitTestCase
@@ -58,7 +58,7 @@ final class StreamTest extends UnitTestCase
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
 
-        yield[[$event]];
+        yield [[$event]];
 
         yield [new Collection([$event])];
 

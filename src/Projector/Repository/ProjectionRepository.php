@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use function count;
 use function is_array;
 
 final class ProjectionRepository implements ProjectionRepositoryInterface
@@ -122,7 +123,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
         $state = $this->serializer->decode($projection->state());
 
-        if (is_array($state) && ! empty($state)) {
+        if (is_array($state) && count($state) > 0) {
             $this->subscription->state()->put($state);
         }
 

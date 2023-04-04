@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\Repository\EmitterManager;
-use Chronhub\Storm\Projector\Repository\ReadModelManager;
-use Chronhub\Storm\Projector\Repository\InMemoryRepository;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\Repository\EmitterManager;
+use Chronhub\Storm\Projector\Repository\InMemoryRepository;
+use Chronhub\Storm\Projector\Repository\ReadModelManager;
 
 final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
 {

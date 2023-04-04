@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Closure;
-use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
-use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
+use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Stream\StreamName;
+use Closure;
 use function array_keys;
 use function array_values;
 use function gc_collect_cycles;
@@ -40,14 +40,12 @@ final readonly class HandleStreamEvent
             $eventHandled = $eventProcessor($subscription, $event, $eventPosition, $this->repository);
 
             if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
-                $streams = null;
                 gc_collect_cycles();
 
                 return $next($subscription);
             }
         }
 
-        $streams = null;
         gc_collect_cycles();
 
         return $next($subscription);

@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Chronicler;
 
-use Psr\Container\ContainerInterface;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
-use Chronhub\Storm\Chronicler\TrackStream;
-use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Contracts\Stream\StreamCategory;
-use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
-use Chronhub\Storm\Chronicler\TrackTransactionalStream;
-use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryChroniclerFactory;
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\InMemory\InMemoryChroniclerFactory;
 use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
 use Chronhub\Storm\Chronicler\InMemory\TransactionalInMemoryChronicler;
+use Chronhub\Storm\Chronicler\ProvideChroniclerFactory;
+use Chronhub\Storm\Chronicler\TrackStream;
+use Chronhub\Storm\Chronicler\TrackTransactionalStream;
+use Chronhub\Storm\Contracts\Chronicler\EventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
+use Chronhub\Storm\Contracts\Stream\StreamCategory;
+use Chronhub\Storm\Stream\DetermineStreamCategory;
+use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
+use function sprintf;
 
 #[CoversClass(InMemoryChroniclerFactory::class)]
 #[CoversClass(ProvideChroniclerFactory::class)]
@@ -28,9 +27,6 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;
 
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -38,8 +34,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->container = $this->createMock(ContainerInterface::class);
     }
 
-    #[Test]
-    public function it_create_standalone_in_memory_chronicler_instance(): void
+    public function testStandaloneInstance(): void
     {
         $this->container
             ->expects($this->any())
@@ -59,8 +54,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->createEventStore('standalone', $config));
     }
 
-    #[Test]
-    public function it_create_transactional_in_memory_chronicler_instance(): void
+    public function testTransactionalInstance(): void
     {
         $this->container
             ->expects($this->any())
@@ -80,8 +74,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->createEventStore('transactional', $config));
     }
 
-    #[Test]
-    public function it_create_eventable_in_memory_chronicler_instance(): void
+    public function testEventableInstance(): void
     {
         $this->container
             ->method('get')
@@ -109,8 +102,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->createEventStore('eventable', $config));
     }
 
-    #[Test]
-    public function it_create_transactional_eventable_in_memory_chronicler_instance(): void
+    public function testTransactionalEventableInstance(): void
     {
         $this->container
             ->method('get')
@@ -139,8 +131,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $this->assertNotSame($chronicler, $provider->createEventStore('transactional_eventable', $config));
     }
 
-    #[Test]
-    public function it_raise_exception_when_in_memory_driver_is_not_found(): void
+    public function testExceptionRaisedWhenDriverIsNotDefined(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('In memory chronicler provider foo is not defined');
@@ -155,13 +146,14 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $provider->createEventStore('foo', $config);
     }
 
-    #[Test]
-    public function it_raise_exception_when_eventable_chronicler_has_not_tracker(): void
+    public function testExceptionRaisedWhenExpectEventableInstanceWithNoTracker(): void
     {
         $expectedClass = StandaloneInMemoryChronicler::class;
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to decorate chronicler '.$expectedClass.', stream tracker is not defined or invalid');
+        $this->expectExceptionMessage(
+            sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $expectedClass)
+        );
 
         $config = ['tracking' => []];
 
@@ -179,13 +171,14 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
         $provider->createEventStore('eventable', $config);
     }
 
-    #[Test]
-    public function it_raise_exception_when_transactional_eventable_chronicler_has_not_tracker(): void
+    public function testExceptionRaisedWhenExpectTransactionalEventableInstanceWithNoTracker(): void
     {
         $expectedClass = TransactionalInMemoryChronicler::class;
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to decorate chronicler '.$expectedClass.', stream tracker is not defined or invalid');
+        $this->expectExceptionMessage(
+            sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $expectedClass)
+        );
 
         $config = ['tracking' => []];
 

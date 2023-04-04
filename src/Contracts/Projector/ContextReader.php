@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Closure;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Closure;
 
 interface ContextReader
 {

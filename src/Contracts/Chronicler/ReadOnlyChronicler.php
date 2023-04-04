@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Chronicler;
 
-use Generator;
-use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\StreamName;
+use Generator;
 
 interface ReadOnlyChronicler
 {

@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Aggregate;
 
-use Generator;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Generator;
 
 trait ReconstituteAggregate
 {
-    protected function reconstituteAggregateRoot(AggregateIdentity $aggregateId, ?QueryFilter $queryFilter = null): ?AggregateRoot
-    {
+    protected function reconstituteAggregateRoot(
+        AggregateIdentity $aggregateId,
+        ?QueryFilter $queryFilter = null
+    ): ?AggregateRoot {
         try {
             $history = $this->fromHistory($aggregateId, $queryFilter);
 
@@ -36,8 +38,10 @@ trait ReconstituteAggregate
      *
      * @throws StreamNotFound
      */
-    protected function fromHistory(AggregateIdentity $aggregateId, ?QueryFilter $queryFilter): Generator
-    {
+    protected function fromHistory(
+        AggregateIdentity $aggregateId,
+        ?QueryFilter $queryFilter
+    ): Generator {
         $streamName = $this->streamProducer->toStreamName($aggregateId);
 
         if ($queryFilter) {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Tests\UnitTestCase;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Tests\UnitTestCase;
 
 final class EventCounterTest extends UnitTestCase
 {

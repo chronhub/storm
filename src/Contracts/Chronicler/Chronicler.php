@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Chronicler;
 
+use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
+use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Chronicler\Exceptions\StreamAlreadyExists;
-use Chronhub\Storm\Chronicler\Exceptions\ConcurrencyException;
 
 interface Chronicler extends ReadOnlyChronicler
 {

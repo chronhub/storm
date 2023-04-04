@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Closure;
-use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Closure;
 use function count;
 use function is_array;
 
 final class Context implements ContextInterface
 {
-    protected array|Closure|null $eventHandlers = null;
+    private array|Closure|null $eventHandlers = null;
 
-    protected ?QueryFilter $queryFilter = null;
+    private ?QueryFilter $queryFilter = null;
 
-    protected ?Closure $initCallback = null;
+    private ?Closure $initCallback = null;
 
-    protected array $queries = [];
+    private array $queries = [];
 
     public function initialize(Closure $initCallback): self
     {
@@ -109,7 +109,7 @@ final class Context implements ContextInterface
 
     public function queries(): array
     {
-        if (empty($this->queries)) {
+        if (count($this->queries) === 0) {
             throw new InvalidArgumentException('Projection streams all|names|categories not set');
         }
 
@@ -157,14 +157,14 @@ final class Context implements ContextInterface
         return [];
     }
 
-    protected function assertQueriesNotSet(): void
+    private function assertQueriesNotSet(): void
     {
         if (count($this->queries) > 0) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
         }
     }
 
-    protected function assertEventHandlersNotSet(): void
+    private function assertEventHandlersNotSet(): void
     {
         if ($this->eventHandlers !== null) {
             throw new InvalidArgumentException('Projection event handlers already set');
