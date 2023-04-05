@@ -33,22 +33,6 @@ trait HasAggregateBehaviour
         return $this->version;
     }
 
-    protected function recordThat(DomainEvent $event): void
-    {
-        $this->apply($event);
-
-        $this->recordedEvents[] = $event;
-    }
-
-    protected function apply(DomainEvent $event): void
-    {
-        $parts = explode('\\', $event::class);
-
-        $this->{'apply'.end($parts)}($event);
-
-        $this->version++;
-    }
-
     public function releaseEvents(): array
     {
         $releasedEvents = $this->recordedEvents;
@@ -69,5 +53,21 @@ trait HasAggregateBehaviour
         $aggregateRoot->version = (int) $events->getReturn();
 
         return $aggregateRoot->version() > 0 ? $aggregateRoot : null;
+    }
+
+    protected function recordThat(DomainEvent $event): void
+    {
+        $this->apply($event);
+
+        $this->recordedEvents[] = $event;
+    }
+
+    protected function apply(DomainEvent $event): void
+    {
+        $parts = explode('\\', $event::class);
+
+        $this->{'apply'.end($parts)}($event);
+
+        $this->version++;
     }
 }
