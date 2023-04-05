@@ -8,11 +8,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\ProjectionStatus;
 
 final readonly class ReadModelManager implements ProjectionManagement
 {
-    use InteractWithManagement;
-
     public function __construct(
         private ReadModelSubscriptionInterface $subscription,
         protected ProjectionRepositoryInterface $repository,
@@ -62,5 +61,40 @@ final readonly class ReadModelManager implements ProjectionManagement
         if ($withEmittedEvents) {
             $this->readModel->down();
         }
+    }
+
+    public function renew(): void
+    {
+        $this->repository->updateLock();
+    }
+
+    public function freed(): void
+    {
+        $this->repository->releaseLock();
+    }
+
+    public function boundState(): void
+    {
+        $this->repository->loadState();
+    }
+
+    public function close(): void
+    {
+        $this->repository->stop();
+    }
+
+    public function restart(): void
+    {
+        $this->repository->startAgain();
+    }
+
+    public function disclose(): ProjectionStatus
+    {
+        return $this->repository->loadStatus();
+    }
+
+    public function projectionName(): string
+    {
+        return $this->repository->projectionName();
     }
 }

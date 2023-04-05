@@ -9,12 +9,11 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Stream\StreamName;
 
 final readonly class EmitterManager implements ProjectionManagement
 {
-    use InteractWithManagement;
-
     public function __construct(
         private EmitterSubscriptionInterface $subscription,
         protected ProjectionRepositoryInterface $repository,
@@ -58,6 +57,41 @@ final readonly class EmitterManager implements ProjectionManagement
         if ($withEmittedEvents) {
             $this->deleteStream();
         }
+    }
+
+    public function renew(): void
+    {
+        $this->repository->updateLock();
+    }
+
+    public function freed(): void
+    {
+        $this->repository->releaseLock();
+    }
+
+    public function boundState(): void
+    {
+        $this->repository->loadState();
+    }
+
+    public function close(): void
+    {
+        $this->repository->stop();
+    }
+
+    public function restart(): void
+    {
+        $this->repository->startAgain();
+    }
+
+    public function disclose(): ProjectionStatus
+    {
+        return $this->repository->loadStatus();
+    }
+
+    public function projectionName(): string
+    {
+        return $this->repository->projectionName();
     }
 
     private function deleteStream(): void
