@@ -83,7 +83,7 @@ abstract class AbstractSubscriptionFactory
         string $streamName,
         ?ReadModel $readModel): ProjectionManagement;
 
-    protected function createStore(Subscription $subscription, string $streamName): ProjectionRepositoryInterface
+    protected function createRepository(Subscription $subscription, string $streamName): ProjectionRepositoryInterface
     {
         return new ProjectionRepository(
             $subscription,

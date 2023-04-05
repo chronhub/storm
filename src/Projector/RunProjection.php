@@ -23,7 +23,9 @@ final readonly class RunProjection
         try {
             $quit = null;
 
-            $this->beginCycle($this->newWorkflow($subscription), $subscription->sprint()->inBackground());
+            $this->beginCycle(
+                $this->newWorkflow($subscription), $subscription->sprint()->inBackground()
+            );
         } catch (Throwable $exception) {
             $quit = $exception;
         } finally {

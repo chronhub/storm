@@ -19,14 +19,14 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
         string $streamName,
         ?ReadModel $readModel): ProjectionManagement
     {
-        $store = $this->createStore($subscription, $streamName);
+        $repository = $this->createRepository($subscription, $streamName);
 
-        $repository = new InMemoryRepository($store);
+        $adapter = new InMemoryRepository($repository);
 
         if ($readModel) {
-            return new ReadModelManager($subscription, $repository, $readModel);
+            return new ReadModelManager($subscription, $adapter, $readModel);
         }
 
-        return new EmitterManager($subscription, $repository, $this->chronicler);
+        return new EmitterManager($subscription, $adapter, $this->chronicler);
     }
 }

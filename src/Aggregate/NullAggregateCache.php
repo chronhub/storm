@@ -25,7 +25,6 @@ final class NullAggregateCache implements AggregateCache
 
     public function flush(): void
     {
-        // no op
     }
 
     public function has(AggregateIdentity $aggregateId): bool
