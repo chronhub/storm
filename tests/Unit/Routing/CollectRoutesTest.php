@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use function count;
 use function sprintf;
 
 #[CoversClass(CollectRoutes::class)]
@@ -39,6 +40,7 @@ final class CollectRoutesTest extends UnitTestCase
         $this->assertTrue($routes->getRoutes()->isEmpty());
         $this->assertNotSame($routes->getRoutes(), $routes->getRoutes());
         $this->assertNull($routes->match('foo'));
+        $this->assertSame(0, count($routes));
     }
 
     public function testAddRoute(): void
@@ -51,6 +53,7 @@ final class CollectRoutesTest extends UnitTestCase
         $routes = new CollectRoutes($this->messageAlias);
 
         $route = $routes->addRoute(SomeCommand::class);
+        $this->assertSame(1, count($routes));
 
         $this->assertInstanceOf(Route::class, $route);
 

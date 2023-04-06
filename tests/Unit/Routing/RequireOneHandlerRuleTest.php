@@ -8,15 +8,19 @@ use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Group;
+use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class RequireOneHandlerRuleTest extends UnitTestCase
 {
-    public function testGroupRouteHasOneHandlerOnly(): void
+    #[DataProvider('provideGroup')]
+    public function testGroupRouteHasOneHandlerOnly(Group $group): void
     {
-        $group = new CommandGroup('command', new CollectRoutes(new AliasFromClassName()));
         $route = $group->routes->addRoute(SomeCommand::class)->to(fn () => null);
 
         $this->assertCount(1, $route->getHandlers());
@@ -26,11 +30,11 @@ final class RequireOneHandlerRuleTest extends UnitTestCase
         $rule->enforce($group);
     }
 
-    public function testExceptionRaisedWhenGroupRouteDoesNotMetCondition(): void
+    #[DataProvider('provideGroup')]
+    public function testExceptionRaisedWhenGroupRouteDoesNotMetCondition(Group $group): void
     {
         $this->expectException(RoutingViolation::class);
 
-        $group = new CommandGroup('command', new CollectRoutes(new AliasFromClassName()));
         $route = $group->routes->addRoute(SomeCommand::class);
 
         $this->assertEmpty($route->getHandlers());
@@ -40,14 +44,19 @@ final class RequireOneHandlerRuleTest extends UnitTestCase
         $rule->enforce($group);
     }
 
-    public function testGroupRouteDoesNotEnforceWithNoRouteSet(): void
+    #[DataProvider('provideGroup')]
+    public function testGroupRouteDoesNotEnforceWithNoRouteSet(Group $group): void
     {
-        $group = new CommandGroup('command', new CollectRoutes(new AliasFromClassName()));
-
         $this->assertEmpty($group->routes->getRoutes());
 
         $rule = new RequireOneHandlerRule();
 
         $rule->enforce($group);
+    }
+
+    public static function provideGroup(): Generator
+    {
+        yield [new CommandGroup('command', new CollectRoutes(new AliasFromClassName()))];
+        yield [new QueryGroup('query', new CollectRoutes(new AliasFromClassName()))];
     }
 }
