@@ -10,7 +10,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface EventPublisher
 {
     /**
-     * @param  iterable<DomainEvent>  $streamEvents
+     * @param iterable<DomainEvent> $streamEvents
      */
     public function record(iterable $streamEvents): void;
 
@@ -20,7 +20,7 @@ interface EventPublisher
     public function pull(): iterable;
 
     /**
-     * @param  iterable<DomainEvent>  $streamEvents
+     * @param iterable<DomainEvent> $streamEvents
      */
     public function publish(iterable $streamEvents): void;
 

@@ -9,17 +9,17 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 interface ProjectorManagerInterface
 {
     /**
-     * @param  array<ProjectionOption::*, null|string|int|bool|array>  $options
+     * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
     public function query(array $options = []): QueryProjector;
 
     /**
-     * @param  array<ProjectionOption::*, null|string|int|bool|array>  $options
+     * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
     public function emitter(string $streamName, array $options = []): EmitterProjector;
 
     /**
-     * @param  array<ProjectionOption::*, null|string|int|bool|array>  $options
+     * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
     public function readModel(string $streamName,
                               ReadModel $readModel,

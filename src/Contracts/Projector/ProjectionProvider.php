@@ -9,7 +9,7 @@ interface ProjectionProvider
     public function createProjection(string $projectionName, string $status): bool;
 
     /**
-     * @param  array{"state"?: string, "position"?: string, "status"?: string, "locked_until"?: null|string}  $data
+     * @param array{"state"?: string, "position"?: string, "status"?: string, "locked_until"?: null|string} $data
      */
     public function updateProjection(string $projectionName, array $data): bool;
 

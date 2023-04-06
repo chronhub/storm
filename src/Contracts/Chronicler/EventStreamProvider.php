@@ -9,16 +9,16 @@ interface EventStreamProvider
     /**
      * Create new stream
      *
-     * @param  non-empty-string  $streamName
-     * @param  non-empty-string|null  $tableName
-     * @param  non-empty-string|null  $category
+     * @param non-empty-string      $streamName
+     * @param non-empty-string|null $tableName
+     * @param non-empty-string|null $category
      */
     public function createStream(string $streamName, ?string $tableName, ?string $category = null): bool;
 
     /**
      * Delete stream by name
      *
-     * @param  non-empty-string  $streamName
+     * @param non-empty-string $streamName
      */
     public function deleteStream(string $streamName): bool;
 
@@ -30,7 +30,7 @@ interface EventStreamProvider
     /**
      * Filter categories by names
      *
-     * @param  array<string>  $categoryNames
+     * @param  array<string> $categoryNames
      * @return array<string>
      */
     public function filterByCategories(array $categoryNames): array;
@@ -45,7 +45,7 @@ interface EventStreamProvider
     /**
      * Check if real stream name exists
      *
-     * @param  non-empty-string  $streamName
+     * @param non-empty-string $streamName
      */
     public function hasRealStreamName(string $streamName): bool;
 }

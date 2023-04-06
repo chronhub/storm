@@ -10,7 +10,7 @@ use Generator;
 interface AggregateRoot
 {
     /**
-     * @param  Generator<int, DomainEvent>  $events
+     * @param Generator<int, DomainEvent> $events
      */
     public static function reconstitute(AggregateIdentity $aggregateId, Generator $events): ?static;
 

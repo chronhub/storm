@@ -17,12 +17,12 @@ interface AggregateType
     public function from(string|DomainEvent|AggregateRoot $event): string;
 
     /**
-     * @param  class-string  $aggregateRoot
+     * @param class-string $aggregateRoot
      */
     public function isSupported(string $aggregateRoot): bool;
 
     /**
-     * @param  class-string  $aggregate
+     * @param class-string $aggregate
      *
      * @throws InvalidArgumentException
      */

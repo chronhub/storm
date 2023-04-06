@@ -85,8 +85,8 @@ final class LockManager
     /**
      * Updates the lock with a new timeout and returns the new lock value.
      *
-     * @param  DateTimeImmutable  $dateTime The new expiration time.
-     * @return string The new lock value.
+     * @param  DateTimeImmutable $dateTime The new expiration time.
+     * @return string            The new lock value.
      */
     private function updateLockWithTimeout(DateTimeImmutable $dateTime): string
     {
@@ -100,8 +100,8 @@ final class LockManager
     /**
      * Determines whether the lock should be updated based on the current time and lock threshold.
      *
-     * @param  DateTimeImmutable  $dateTime The current time.
-     * @return bool Whether the lock should be updated.
+     * @param  DateTimeImmutable $dateTime The current time.
+     * @return bool              Whether the lock should be updated.
      */
     private function shouldUpdateLock(DateTimeImmutable $dateTime): bool
     {

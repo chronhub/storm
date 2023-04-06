@@ -9,7 +9,7 @@ use Chronhub\Storm\Reporter\DomainType;
 interface Reporting
 {
     /**
-     * @param  array<string, int|float|string|bool|array|object|null>  $content
+     * @param array<string, int|float|string|bool|array|object|null> $content
      */
     public static function fromContent(array $content): static;
 
@@ -19,7 +19,7 @@ interface Reporting
     public function toContent(): array;
 
     /**
-     * @param  array<string, int|float|string|bool|array|object|null>  $headers
+     * @param array<string, int|float|string|bool|array|object|null> $headers
      */
     public function withHeaders(array $headers): static;
 

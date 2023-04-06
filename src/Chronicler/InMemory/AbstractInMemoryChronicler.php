@@ -110,7 +110,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
     }
 
     /**
-     * @param  array<DomainEvent>  $events
+     * @param array<DomainEvent> $events
      */
     protected function decorateEventWithInternalPosition(array $events): array
     {

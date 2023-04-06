@@ -59,7 +59,7 @@ trait ProvideChroniclerFactory
     }
 
     /**
-     * @param  array<StreamSubscriber|string>  $streamSubscribers
+     * @param array<StreamSubscriber|string> $streamSubscribers
      *
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface

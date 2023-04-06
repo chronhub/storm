@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Message;
 interface MessageAlias
 {
     /**
-     * @param  class-string  $eventClass
+     * @param class-string $eventClass
      */
     public function classToAlias(string $eventClass): string;
 
