@@ -22,7 +22,7 @@
   },
   "require-dev": {
     "ext-posix": "*",
-    "laravel/pint": "^1.6",
+    "laravel/pint": "^1.8",
     "nunomaduro/larastan": "^2.5",
     "nunomaduro/phpinsights": "dev-master",
     "orchestra/testbench": "^8.0",
