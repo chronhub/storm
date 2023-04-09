@@ -132,7 +132,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             public function apply(): callable
             {
                 return static function (DomainEvent $event): ?DomainEvent {
-                    $internalPosition = $event->header(EventHeader::INTERNAL_POSITION);
+                    $internalPosition = (int)$event->header(EventHeader::INTERNAL_POSITION);
 
                     return ($internalPosition > 7) ? $event : null;
                 };
