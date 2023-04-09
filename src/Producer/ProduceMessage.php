@@ -12,9 +12,10 @@ use Chronhub\Storm\Message\Message;
 
 final readonly class ProduceMessage implements MessageProducer
 {
-    public function __construct(private ProducerUnity $unity,
-                                private ?MessageQueue $enqueue)
-    {
+    public function __construct(
+        private ProducerUnity $unity,
+        private ?MessageQueue $enqueue
+    ) {
     }
 
     public function produce(Message $message): Message

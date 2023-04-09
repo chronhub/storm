@@ -20,9 +20,10 @@ use function gc_collect_cycles;
 
 final readonly class HandleStreamEvent
 {
-    public function __construct(private Chronicler $chronicler,
-                                private ?ProjectionManagement $repository)
-    {
+    public function __construct(
+        private Chronicler $chronicler,
+        private ?ProjectionManagement $repository
+    ) {
     }
 
     public function __invoke(Subscription $subscription, Closure $next): callable|bool

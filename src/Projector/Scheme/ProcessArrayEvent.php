@@ -13,9 +13,10 @@ use function is_callable;
 
 final readonly class ProcessArrayEvent extends EventProcessor
 {
-    public function __construct(private array $eventHandlers,
-                                private ?MessageAlias $messageAlias = null)
-    {
+    public function __construct(
+        private array $eventHandlers,
+        private ?MessageAlias $messageAlias = null
+    ) {
     }
 
     public function __invoke(Subscription $subscription, DomainEvent $event, int $key, ?ProjectionManagement $repository): bool

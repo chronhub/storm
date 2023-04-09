@@ -20,8 +20,10 @@ final class Stream
      */
     private iterable $events;
 
-    public function __construct(public readonly StreamName $streamName, iterable $events = [])
-    {
+    public function __construct(
+        public readonly StreamName $streamName,
+        iterable $events = []
+    ) {
         if ($events instanceof IteratorAggregate) {
             $this->events = $events;
         } elseif (is_array($events)) {

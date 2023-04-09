@@ -20,10 +20,11 @@ final class HandleRoute implements MessageSubscriber
 {
     use DetachMessageListener;
 
-    public function __construct(private readonly RouteLocator $routeLocator,
-                                private readonly MessageProducer $messageProducer,
-                                private readonly ProducerUnity $producerUnity)
-    {
+    public function __construct(
+        private readonly RouteLocator $routeLocator,
+        private readonly MessageProducer $messageProducer,
+        private readonly ProducerUnity $producerUnity
+    ) {
     }
 
     public function attachToReporter(MessageTracker $tracker): void

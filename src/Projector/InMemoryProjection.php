@@ -14,9 +14,10 @@ final class InMemoryProjection implements ProjectionModel
 
     private ?string $lockedUntil = null;
 
-    private function __construct(private readonly string $name,
-                                 private string $status)
-    {
+    private function __construct(
+        private readonly string $name,
+        private string $status
+    ) {
     }
 
     public static function create(string $name, string $status): self

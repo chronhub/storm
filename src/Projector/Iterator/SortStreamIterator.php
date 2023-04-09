@@ -17,8 +17,10 @@ final class SortStreamIterator implements Iterator
 
     public readonly array $originalIteratorOrder;
 
-    public function __construct(array $streamNames, StreamEventIterator ...$iterators)
-    {
+    public function __construct(
+        array $streamNames,
+        StreamEventIterator ...$iterators
+    ) {
         foreach ($iterators as $key => $iterator) {
             $this->iterators[$key][0] = $iterator;
             $this->iterators[$key][1] = $streamNames[$key];

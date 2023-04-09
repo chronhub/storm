@@ -13,10 +13,11 @@ final class CastReadModel implements ReadModelCasterInterface
 {
     private ?string $currentStreamName = null;
 
-    public function __construct(private readonly ReadModelProjector $projector,
-                                private readonly SystemClock $clock,
-                                ?string &$currentStreamName)
-    {
+    public function __construct(
+        private readonly ReadModelProjector $projector,
+        private readonly SystemClock $clock,
+        ?string &$currentStreamName
+    ) {
         $this->currentStreamName = &$currentStreamName;
     }
 
