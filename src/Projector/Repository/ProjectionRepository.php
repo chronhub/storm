@@ -29,7 +29,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     {
         return $this->provider->createProjection(
             $this->streamName,
-            $this->subscription->status->value
+            $this->subscription->currentStatus()->value
         );
     }
 
@@ -47,7 +47,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
             return false;
         }
 
-        $this->subscription->status = $idleProjection;
+        $this->subscription->setStatus($idleProjection);
 
         return true;
     }
@@ -67,7 +67,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
             return false;
         }
 
-        $this->subscription->status = $runningStatus;
+        $this->subscription->setStatus($runningStatus);
 
         return true;
     }
@@ -90,7 +90,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         return $this->updateProjection([
             'position' => $this->serializer->encode($this->subscription->streamPosition()->all()),
             'state' => $this->serializer->encode($this->subscription->state()->get()),
-            'status' => $this->subscription->status->value,
+            'status' => $this->subscription->currentStatus()->value,
         ]);
     }
 
@@ -156,7 +156,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
             return false;
         }
 
-        $this->subscription->status = $runningProjection;
+        $this->subscription->setStatus($runningProjection);
 
         return true;
     }
@@ -186,7 +186,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
             return false;
         }
 
-        $this->subscription->status = $idleProjection;
+        $this->subscription->setStatus($idleProjection);
 
         return true;
     }

@@ -55,9 +55,7 @@ final readonly class ProjectQuery implements QueryProjector
 
      protected function getCaster(): Caster
      {
-         return new CastQuery(
-             $this, $this->subscription->clock(), $this->subscription->currentStreamName
-         );
+         return new CastQuery($this, $this->subscription->clock(), $this->subscription->currentStreamName);
      }
 
      private function activities(): array

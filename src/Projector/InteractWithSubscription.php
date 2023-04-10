@@ -19,11 +19,11 @@ use function is_array;
 
 trait InteractWithSubscription
 {
-    public ?string $currentStreamName = null;
-
     public readonly bool $isPersistent;
 
-    public ProjectionStatus $status = ProjectionStatus::IDLE;
+    public ?string $currentStreamName = null;
+
+    protected ProjectionStatus $status = ProjectionStatus::IDLE;
 
     protected ContextInterface $context;
 
@@ -59,6 +59,16 @@ trait InteractWithSubscription
                 $this->state->put($state);
             }
         }
+    }
+
+    public function currentStatus(): ProjectionStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(ProjectionStatus $status): void
+    {
+        $this->status = $status;
     }
 
     public function context(): ContextReader

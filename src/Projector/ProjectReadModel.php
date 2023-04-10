@@ -35,8 +35,6 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     protected function getCaster(): ReadModelCasterInterface
     {
-        return new CastReadModel(
-            $this, $this->subscription->clock(), $this->subscription->currentStreamName
-        );
+        return new CastReadModel($this, $this->subscription->clock(), $this->subscription->currentStreamName);
     }
 }

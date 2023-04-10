@@ -55,9 +55,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     protected function getCaster(): EmitterCasterInterface
     {
-        return new CastEmitter(
-            $this, $this->subscription->clock(), $this->subscription->currentStreamName
-        );
+        return new CastEmitter($this, $this->subscription->clock(), $this->subscription->currentStreamName);
     }
 
     /**

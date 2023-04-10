@@ -24,7 +24,7 @@ abstract readonly class EventProcessor
             pcntl_signal_dispatch();
         }
 
-        // set the current stream handled
+        // set the current stream handled by reference
         $streamName = $subscription->currentStreamName;
 
         // for a persistent projection, we check if position match our internal cache
@@ -63,18 +63,20 @@ abstract readonly class EventProcessor
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription, ProjectionManagement $projection): void
+    final protected function persistWhenCounterIsReached(
+        PersistentSubscriptionInterface $subscription,
+        ProjectionManagement $projection): void
     {
         if ($subscription->eventCounter()->isReached()) {
             $projection->store();
 
             $subscription->eventCounter()->reset();
 
-            $subscription->status = $projection->disclose();
+            $subscription->setStatus($projection->disclose());
 
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($subscription->status, $keepProjectionRunning, true)) {
+            if (! in_array($subscription->currentStatus(), $keepProjectionRunning, true)) {
                 $subscription->sprint()->stop();
             }
         }
