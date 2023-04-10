@@ -11,44 +11,44 @@ use Iterator;
 
 final class StreamEventIterator implements Iterator
 {
-    private ?DomainEvent $currentEvent = null;
+    private ?DomainEvent $event = null;
 
-    private int|false $currentPosition = 0;
+    private int|false $position = 0;
 
-    public function __construct(private readonly Generator $eventStreams)
+    public function __construct(private readonly Generator $streamEvents)
     {
         $this->next();
     }
 
     public function current(): ?DomainEvent
     {
-        return $this->currentEvent;
+        return $this->event;
     }
 
     public function next(): void
     {
-        $this->currentEvent = $this->eventStreams->current();
+        $this->event = $this->streamEvents->current();
 
-        if ($this->currentEvent instanceof DomainEvent) {
-            $position = (int) $this->currentEvent->header(EventHeader::INTERNAL_POSITION);
+        if ($this->event instanceof DomainEvent) {
+            $position = (int) $this->event->header(EventHeader::INTERNAL_POSITION);
 
-            $this->currentPosition = $position;
+            $this->position = $position;
         } else {
-            $this->currentPosition = false;
-            $this->currentEvent = null;
+            $this->position = false;
+            $this->event = null;
         }
 
-        $this->eventStreams->next();
+        $this->streamEvents->next();
     }
 
     public function key(): false|int
     {
-        return $this->currentPosition;
+        return $this->position;
     }
 
     public function valid(): bool
     {
-        return $this->currentEvent !== null;
+        return $this->event !== null;
     }
 
     public function rewind(): void
