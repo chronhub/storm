@@ -42,10 +42,12 @@ final readonly class ProcessArrayEvent extends EventProcessor
 
     private function determineEventHandler(DomainEvent $event): ?callable
     {
+        $eventClass = $event::class;
+
         if ($this->messageAlias) {
-            return $this->eventHandlers[$this->messageAlias->classToAlias($event::class)];
+            $eventClass = $this->messageAlias->classToAlias($eventClass);
         }
 
-        return $this->eventHandlers[$event::class] ?? null;
+        return $this->eventHandlers[$eventClass] ?? null;
     }
 }
