@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Support\Bridge;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
@@ -24,13 +23,13 @@ final class HandleTransactionalDomainCommand implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (): void {
+        $this->messageListeners[] = $tracker->onDispatch(function (): void {
             if ($this->chronicler instanceof TransactionalEventableChronicler) {
                 $this->chronicler->beginTransaction();
             }
         }, OnDispatchPriority::START_TRANSACTION->value);
 
-        $this->messageListeners[] = $tracker->watch(Reporter::FINALIZE_EVENT, function (MessageStory $story): void {
+        $this->messageListeners[] = $tracker->onFinalize(function (MessageStory $story): void {
             if ($this->chronicler instanceof TransactionalEventableChronicler && $this->chronicler->inTransaction()) {
                 $story->hasException()
                     ? $this->chronicler->rollbackTransaction()

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Reporter\Subscribers;
 
-use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
@@ -19,7 +18,7 @@ final class ConsumeQuery implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, static function (MessageStory $story): void {
+        $this->messageListeners[] = $tracker->onDispatch(static function (MessageStory $story): void {
             $consumer = $story->consumers()->current();
 
             if ($consumer === null) {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Reporter\Subscribers;
 
 use Chronhub\Storm\Contracts\Message\MessageFactory;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
@@ -22,7 +21,7 @@ final class MakeMessage implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
+        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
             $message = ($this->messageFactory)($story->pullTransientMessage());
 
             $story->withMessage($message);

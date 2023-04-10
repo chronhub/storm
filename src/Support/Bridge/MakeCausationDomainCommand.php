@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Chronicler\StreamSubscriber;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
@@ -32,7 +31,7 @@ final class MakeCausationDomainCommand implements MessageSubscriber, StreamSubsc
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
+        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
             $command = $story->message()->event();
 
             if ($command instanceof DomainCommand) {
@@ -40,7 +39,7 @@ final class MakeCausationDomainCommand implements MessageSubscriber, StreamSubsc
             }
         }, 1000);
 
-        $this->messageListeners[] = $tracker->watch(Reporter::FINALIZE_EVENT, function (): void {
+        $this->messageListeners[] = $tracker->onFinalize(function (): void {
             $this->currentCommand = null;
         }, 1000);
     }

@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Routing;
 
 use Chronhub\Storm\Contracts\Producer\MessageProducer;
 use Chronhub\Storm\Contracts\Producer\ProducerUnity;
-use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Routing\RouteLocator;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
@@ -29,7 +28,7 @@ final class HandleRoute implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
+        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
             $message = $story->message();
 
             $isSync = $this->producerUnity->isSync($message);
