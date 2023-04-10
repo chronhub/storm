@@ -65,7 +65,7 @@ final readonly class PointInTime implements SystemClock
     public function toDateTimeImmutable(string|DateTimeImmutable $pointInTime): DateTimeImmutable
     {
         if ($pointInTime instanceof DateTimeImmutable) {
-            $pointInTime = $pointInTime->format(self::DATE_TIME_FORMAT);
+            return $pointInTime;
         }
 
         $fromFormat = DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);

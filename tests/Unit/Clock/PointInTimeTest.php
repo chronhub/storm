@@ -9,16 +9,13 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use DateInterval;
 use DomainException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use function date_default_timezone_get;
 use function microtime;
 use function usleep;
 
-// todo tests
 #[CoversClass(PointInTime::class)]
 final class PointInTimeTest extends UnitTestCase
 {
-    #[Test]
     public function testInstance(): void
     {
         $clock = new PointInTime();
@@ -89,9 +86,69 @@ final class PointInTimeTest extends UnitTestCase
     {
         $clock = new PointInTime();
 
-        $isGreater = $clock->isGreaterThan($clock->now(), $clock->now()->sub(new DateInterval('PT1S')));
+        $isGreater = $clock->isGreaterThanNow($clock->now()->add(new DateInterval('PT1S')));
 
         $this->assertTrue($isGreater);
+    }
+
+    public function testGivenPointInTimeIsLessThanNow(): void
+    {
+        $clock = new PointInTime();
+
+        $isGreater = $clock->isGreaterThanNow($clock->now()->sub(new DateInterval('PT1S')));
+
+        $this->assertFalse($isGreater);
+    }
+
+    public function testGivenIntervalSubWithNowIsGreaterThanGivenTime(): void
+    {
+        $clock = new PointInTime();
+
+        $isGreater = $clock->isNowSubGreaterThan('PT1S', $clock->now()->sub(new DateInterval('PT2S')));
+
+        $this->assertTrue($isGreater);
+    }
+
+    public function testToDateTimeImmutable(): void
+    {
+        $clock = new PointInTime();
+        $now = $clock->now();
+
+        $toDatetime = $clock->toDateTimeImmutable($now);
+
+        $this->assertEquals($now, $toDatetime);
+        $this->assertSame($now, $toDatetime);
+    }
+
+    public function testToDateTimeImmutableFromString(): void
+    {
+        $clock = new PointInTime();
+        $now = $clock->now();
+
+        $toDatetime = $clock->toDateTimeImmutable($now->format($clock->getFormat()));
+
+        $this->assertEquals($now, $toDatetime);
+    }
+
+    public function testExceptionRaisedWithInvalidDatetime(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid date time format: invalid date time');
+
+        $clock = new PointInTime();
+
+        $clock->toDateTimeImmutable('invalid date time');
+    }
+
+    public function testFormatGivenTime(): void
+    {
+        $clock = new PointInTime();
+        $nowString = $clock->now()->format($clock::DATE_TIME_FORMAT);
+
+        $toDatetime = $clock->toDateTimeImmutable($nowString);
+
+        $this->assertSame($nowString, $clock->format($toDatetime));
+        $this->assertSame($nowString, $clock->format($toDatetime->format($clock::DATE_TIME_FORMAT)));
     }
 
     public function testItSerializeDatetimeWithGivenToFormat(): void
