@@ -21,8 +21,8 @@ final readonly class ProjectQuery implements QueryProjector
     public function __construct(
        protected Subscription $subscription,
        protected ContextInterface $context,
-       private Chronicler $chronicler)
-    {
+       private Chronicler $chronicler
+    ) {
     }
 
      public function run(bool $inBackground): void

@@ -83,7 +83,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
     {
         $projection = $this->retrieve($projectionName);
 
-        if (! $projection instanceof ProjectionModel) {
+        if (! $projection instanceof InMemoryProjection) {
             return false;
         }
 

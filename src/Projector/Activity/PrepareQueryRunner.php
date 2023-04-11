@@ -15,9 +15,9 @@ final class PrepareQueryRunner
         if (! $this->isInitialized) {
             $this->isInitialized = true;
 
-            $subscription->streamPosition()->watch(
-                $subscription->context()->queries()
-            );
+            $queries = $subscription->context()->queries();
+
+            $subscription->streamPosition()->watch($queries);
         }
 
         return $next($subscription);
