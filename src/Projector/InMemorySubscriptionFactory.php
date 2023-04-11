@@ -17,8 +17,8 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
     public function createSubscriptionManagement(
         EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
         string $streamName,
-        ?ReadModel $readModel): ProjectionManagement
-    {
+        ?ReadModel $readModel
+    ): ProjectionManagement {
         $repository = $this->createRepository($subscription, $streamName);
 
         $adapter = new InMemoryRepository($repository);

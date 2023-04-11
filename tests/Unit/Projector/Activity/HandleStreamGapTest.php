@@ -34,11 +34,11 @@ final class HandleStreamGapTest extends UnitTestCase
         $this->subscription->expects($this->once())->method('gap')->willReturn($this->gapDetector);
         $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(false);
 
-        $handleStreamGap = new HandleStreamGap($this->repository);
+        $handleStreamGap = new HandleStreamGap();
 
         $next = fn ($subscription) => true;
 
-        $handleStreamGap($this->subscription, $next);
+        $handleStreamGap($this->subscription, $this->repository, $next);
 
         $this->assertTrue(true);
     }
@@ -50,11 +50,11 @@ final class HandleStreamGapTest extends UnitTestCase
         $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(true);
         $this->gapDetector->expects($this->once())->method('sleep');
 
-        $handleStreamGap = new HandleStreamGap($this->repository);
+        $handleStreamGap = new HandleStreamGap();
 
         $next = fn ($subscription) => true;
 
-        $handleStreamGap($this->subscription, $next);
+        $handleStreamGap($this->subscription, $this->repository, $next);
 
         $this->assertTrue(true);
     }

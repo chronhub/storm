@@ -21,9 +21,9 @@ trait InteractWithPersistentProjection
     {
         $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
 
-        $project = new RunProjection($this->activities(), $this->repository);
+        $project = new RunProjection($this->activities());
 
-        $project($this->subscription);
+        $project($this->subscription, $this->repository);
     }
 
     public function stop(): void
@@ -57,13 +57,13 @@ trait InteractWithPersistentProjection
     protected function activities(): array
     {
         return [
-            new PreparePersistentRunner($this->repository),
-            new HandleStreamEvent(new LoadStreams($this->chronicler), $this->repository),
-            new HandleStreamGap($this->repository),
-            new PersistOrUpdateLock($this->repository),
+            new PreparePersistentRunner(),
+            new HandleStreamEvent(new LoadStreams($this->chronicler)),
+            new HandleStreamGap(),
+            new PersistOrUpdateLock(),
             new ResetEventCounter(),
             new DispatchSignal(),
-            new UpdateStatusAndPositions($this->repository),
+            new UpdateStatusAndPositions(),
             new StopWhenRunningOnce($this),
         ];
     }

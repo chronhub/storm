@@ -44,11 +44,11 @@ final class PersistOrUpdateLockTest extends UnitTestCase
         $this->subscription->expects($this->never())->method('option');
         $this->option->expects($this->never())->method('getSleep');
 
-        $persistOrUpdateLock = new PersistOrUpdateLock($this->repository);
+        $persistOrUpdateLock = new PersistOrUpdateLock();
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $next);
+        $persistOrUpdateLock($this->subscription, $this->repository, $next);
 
         $this->assertTrue(true);
     }
@@ -65,11 +65,11 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $this->assertTrue($this->eventCounter->isReset());
 
-        $persistOrUpdateLock = new PersistOrUpdateLock($this->repository);
+        $persistOrUpdateLock = new PersistOrUpdateLock();
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $next);
+        $persistOrUpdateLock($this->subscription, $this->repository, $next);
 
         $this->assertTrue(true);
     }
@@ -87,11 +87,11 @@ final class PersistOrUpdateLockTest extends UnitTestCase
         $this->eventCounter->increment();
         $this->assertFalse($this->eventCounter->isReset());
 
-        $persistOrUpdateLock = new PersistOrUpdateLock($this->repository);
+        $persistOrUpdateLock = new PersistOrUpdateLock();
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $next);
+        $persistOrUpdateLock($this->subscription, $this->repository, $next);
 
         $this->assertTrue(true);
     }

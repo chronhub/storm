@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentProjector;
+use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final readonly class StopWhenRunningOnce
@@ -13,12 +14,12 @@ final readonly class StopWhenRunningOnce
     {
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, ?ProjectionManagement $repository, callable $next): callable|bool
     {
         if (! $subscription->sprint()->inBackground() && $subscription->sprint()->inProgress()) {
             $this->projector->stop();
         }
 
-        return $next($subscription);
+        return $next($subscription, $repository);
     }
 }

@@ -9,9 +9,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 
 trait RemoteStatusDiscovery
 {
-    public function __construct(protected readonly ProjectionManagement $repository)
-    {
-    }
+    protected ?ProjectionManagement $repository;
 
     protected function recoverProjectionStatus(bool $isFirstExecution, bool $shouldKeepRunning): bool
     {

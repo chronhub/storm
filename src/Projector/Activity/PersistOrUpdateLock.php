@@ -10,25 +10,21 @@ use function usleep;
 
 final readonly class PersistOrUpdateLock
 {
-    public function __construct(private ProjectionManagement $repository)
-    {
-    }
-
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, ?ProjectionManagement $repository, callable $next): callable|bool
     {
         if (! $subscription->gap()->hasGap()) {
             $subscription->eventCounter()->isReset()
-                ? $this->sleepBeforeUpdateLock($subscription->option()->getSleep())
-                : $this->repository->store();
+                ? $this->sleepBeforeUpdateLock($repository, $subscription->option()->getSleep())
+                : $repository->store();
         }
 
-        return $next($subscription);
+        return $next($subscription, $repository);
     }
 
-    private function sleepBeforeUpdateLock(int $sleep): void
+    private function sleepBeforeUpdateLock(ProjectionManagement $repository, int $sleep): void
     {
         usleep(microseconds: $sleep);
 
-        $this->repository->renew();
+        $repository->renew();
     }
 }

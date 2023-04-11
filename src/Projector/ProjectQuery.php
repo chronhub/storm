@@ -32,9 +32,9 @@ final readonly class ProjectQuery implements QueryProjector
 
          $this->subscription->sprint()->continue();
 
-         $project = new RunProjection($this->activities(), null);
+         $project = new RunProjection($this->activities());
 
-         $project($this->subscription);
+         $project($this->subscription, null);
      }
 
      public function stop(): void
@@ -63,7 +63,7 @@ final readonly class ProjectQuery implements QueryProjector
      {
          return [
              new PrepareQueryRunner(),
-             new HandleStreamEvent(new LoadStreams($this->chronicler), null),
+             new HandleStreamEvent(new LoadStreams($this->chronicler)),
              new DispatchSignal(),
          ];
      }

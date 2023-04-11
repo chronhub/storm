@@ -9,18 +9,17 @@ use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 
 final readonly class HandleStreamGap
 {
-    public function __construct(private ProjectionManagement $repository)
-    {
-    }
-
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
-    {
+    public function __invoke(
+        PersistentSubscriptionInterface $subscription,
+        ProjectionManagement $repository,
+        callable $next,
+    ): callable|bool {
         if ($subscription->gap()->hasGap()) {
             $subscription->gap()->sleep();
 
-            $this->repository->store();
+            $repository->store();
         }
 
-        return $next($subscription);
+        return $next($subscription, $repository);
     }
 }
