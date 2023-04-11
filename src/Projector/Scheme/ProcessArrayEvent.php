@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use function is_callable;
 
-final readonly class ProcessArrayEvent extends EventProcessor
+final readonly class ProcessArrayEvent extends AbstractEventProcessor
 {
     public function __construct(
         private array $eventHandlers,

@@ -14,7 +14,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use function in_array;
 use function pcntl_signal_dispatch;
 
-abstract readonly class EventProcessor
+abstract readonly class AbstractEventProcessor
 {
     final protected function preProcess(Subscription $subscription,
                                         DomainEvent $event,

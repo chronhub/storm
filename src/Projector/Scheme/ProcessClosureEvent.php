@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
-final readonly class ProcessClosureEvent extends EventProcessor
+final readonly class ProcessClosureEvent extends AbstractEventProcessor
 {
     public function __construct(private Closure $eventHandlers)
     {
