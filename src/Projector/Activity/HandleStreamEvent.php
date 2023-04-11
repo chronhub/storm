@@ -10,7 +10,6 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Stream\StreamName;
@@ -18,13 +17,17 @@ use Closure;
 use function array_keys;
 use function array_values;
 use function gc_collect_cycles;
-use function property_exists;
 
-final readonly class HandleStreamEvent
+final class HandleStreamEvent
 {
+    /**
+     * @var null|callable
+     */
+    private $eventProcessor = null;
+
     public function __construct(
-        private Chronicler $chronicler,
-        private ?ProjectionManagement $repository
+        private readonly Chronicler $chronicler,
+        private readonly ?ProjectionManagement $repository
     ) {
     }
 
@@ -35,19 +38,14 @@ final readonly class HandleStreamEvent
             $subscription->context()->queryFilter()
         );
 
-        $eventProcessor = $subscription->context()->eventHandlers();
+        if ($this->eventProcessor === null) {
+            $this->eventProcessor = $subscription->context()->eventHandlers();
+        }
 
         foreach ($streams as $eventPosition => $event) {
-            /**
-             * @codeCoverageIgnore
-             */
-            if (! property_exists($subscription, 'currentStreamName')) {
-                throw new InvalidArgumentException('Subscription must have a property called currentStreamName');
-            }
-
             $subscription->currentStreamName = $streams->streamName();
 
-            $eventHandled = $eventProcessor($subscription, $event, $eventPosition, $this->repository);
+            $eventHandled = ($this->eventProcessor)($subscription, $event, $eventPosition, $this->repository);
 
             if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
                 gc_collect_cycles();
