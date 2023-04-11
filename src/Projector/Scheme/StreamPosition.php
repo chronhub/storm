@@ -54,6 +54,9 @@ final class StreamPosition implements JsonSerializable
         return $this->container[$streamName] + 1 === $position;
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function all(): array
     {
         return $this->container->toArray();
