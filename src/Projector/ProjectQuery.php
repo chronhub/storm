@@ -11,6 +11,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
+use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 use Chronhub\Storm\Projector\Scheme\CastQuery;
 
@@ -62,7 +63,7 @@ final readonly class ProjectQuery implements QueryProjector
      {
          return [
              new PrepareQueryRunner(),
-             new HandleStreamEvent($this->chronicler, null),
+             new HandleStreamEvent(new LoadStreams($this->chronicler), null),
              new DispatchSignal(),
          ];
      }

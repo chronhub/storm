@@ -4,18 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
-use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
-use Chronhub\Storm\Stream\StreamName;
 use Closure;
-use function array_keys;
-use function array_values;
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
@@ -26,17 +17,14 @@ final class HandleStreamEvent
     private $eventProcessor = null;
 
     public function __construct(
-        private readonly Chronicler $chronicler,
+        private readonly LoadStreams $loadStreams,
         private readonly ?ProjectionManagement $repository
     ) {
     }
 
     public function __invoke(Subscription $subscription, Closure $next): callable|bool
     {
-        $streams = $this->retrieveStreams(
-            $subscription->streamPosition()->all(),
-            $subscription->context()->queryFilter()
-        );
+        $streams = $this->loadStreams->loadFrom($subscription);
 
         if ($this->eventProcessor === null) {
             $this->eventProcessor = $subscription->context()->eventHandlers();
@@ -57,26 +45,5 @@ final class HandleStreamEvent
         gc_collect_cycles();
 
         return $next($subscription);
-    }
-
-    private function retrieveStreams(array $streamPositions, QueryFilter $queryFilter): SortStreamIterator
-    {
-        $streams = [];
-
-        foreach ($streamPositions as $streamName => $position) {
-            if ($queryFilter instanceof ProjectionQueryFilter) {
-                $queryFilter->setCurrentPosition($position + 1);
-            }
-
-            try {
-                $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
-
-                $streams[$streamName] = new StreamEventIterator($events);
-            } catch (StreamNotFound) {
-                continue;
-            }
-        }
-
-        return new SortStreamIterator(array_keys($streams), ...array_values($streams));
     }
 }

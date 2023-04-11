@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
+use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
@@ -57,7 +58,7 @@ trait InteractWithPersistentProjection
     {
         return [
             new PreparePersistentRunner($this->repository),
-            new HandleStreamEvent($this->chronicler, $this->repository),
+            new HandleStreamEvent(new LoadStreams($this->chronicler), $this->repository),
             new HandleStreamGap($this->repository),
             new PersistOrUpdateLock($this->repository),
             new ResetEventCounter(),
