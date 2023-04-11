@@ -14,9 +14,9 @@ final class UpdateStatusAndPositions
     {
         $this->recoverProjectionStatus(false, $subscription->sprint()->inBackground());
 
-        $subscription->streamPosition()->watch(
-            $subscription->context()->queries()
-        );
+        $queries = $subscription->context()->queries();
+
+        $subscription->streamPosition()->watch($queries);
 
         return $next($subscription);
     }

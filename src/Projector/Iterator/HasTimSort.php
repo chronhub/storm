@@ -11,6 +11,11 @@ use DateTimeZone;
 use Iterator;
 use function min;
 
+/**
+ * Dummy version of Prooph TimSort.
+ *
+ * @see https://github.com/prooph/event-store/blob/ff213c26c366af90a57d369595734b6ca202f687/src/StreamIterator/TimSort.php
+ */
 trait HasTimSort
 {
     private int $timSortRun = 32;
@@ -51,10 +56,10 @@ trait HasTimSort
             return true === $bValid;
         }
 
-        return $this->toTime($a->current()) > $this->toTime($b->current());
+        return $this->toDateTime($a->current()) > $this->toDateTime($b->current());
     }
 
-    private function toTime(DomainEvent $message): DateTimeImmutable
+    private function toDateTime(DomainEvent $message): DateTimeImmutable
     {
         $eventTime = $message->header(Header::EVENT_TIME);
 

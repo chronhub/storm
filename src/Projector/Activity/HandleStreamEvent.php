@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Stream\StreamName;
@@ -17,6 +18,7 @@ use Closure;
 use function array_keys;
 use function array_values;
 use function gc_collect_cycles;
+use function property_exists;
 
 final readonly class HandleStreamEvent
 {
@@ -36,6 +38,13 @@ final readonly class HandleStreamEvent
         $eventProcessor = $subscription->context()->eventHandlers();
 
         foreach ($streams as $eventPosition => $event) {
+            /**
+             * @codeCoverageIgnore
+             */
+            if (! property_exists($subscription, 'currentStreamName')) {
+                throw new InvalidArgumentException('Subscription must have a property called currentStreamName');
+            }
+
             $subscription->currentStreamName = $streams->streamName();
 
             $eventHandled = $eventProcessor($subscription, $event, $eventPosition, $this->repository);

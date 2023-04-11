@@ -62,7 +62,7 @@ abstract readonly class AbstractAggregateRepository implements AggregateReposito
 
         $firstEvent = reset($events);
 
-        if (! $firstEvent) {
+        if (! $firstEvent instanceof DomainEvent) {
             return;
         }
 

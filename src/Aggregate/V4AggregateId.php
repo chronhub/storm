@@ -12,11 +12,9 @@ final class V4AggregateId implements AggregateIdentity
     use HasAggregateIdentity;
 
     /**
-     * Create new instance of aggregate id
-     *
-     * @return static|AggregateIdentity
+     * Create new instance of aggregate identity
      */
-    public static function create(): V4AggregateId|AggregateIdentity
+    public static function create(): self
     {
         return new V4AggregateId(Uuid::v4());
     }
