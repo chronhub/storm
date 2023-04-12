@@ -16,7 +16,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(SingleStreamPerAggregate::class)]
 final class SingleStreamPerAggregateTest extends UnitTestCase
@@ -67,7 +66,6 @@ final class SingleStreamPerAggregateTest extends UnitTestCase
         $this->assertFalse($streamProducer->isFirstCommit($event));
     }
 
-    #[Test]
     public function testStreamProducerIsAlwaysAutoIncremented(): void
     {
         $streamName = new StreamName('some_stream_name');

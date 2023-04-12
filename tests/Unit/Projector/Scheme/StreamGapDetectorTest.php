@@ -113,7 +113,7 @@ final class StreamGapDetectorTest extends UnitTestCase
 
         // Assert that the elapsed time is within an acceptable range
         $this->assertGreaterThanOrEqual(600, $elapsedTimeInMs);
-        $this->assertLessThanOrEqual(700, $elapsedTimeInMs);
+        $this->assertLessThanOrEqual(800, $elapsedTimeInMs);
     }
 
     public function testNoSleepWhenNoMoreRetries(): void

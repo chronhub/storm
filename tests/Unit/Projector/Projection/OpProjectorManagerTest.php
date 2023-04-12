@@ -24,6 +24,7 @@ use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\ProjectEmitter;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
@@ -35,6 +36,9 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(ProjectorManager::class)]
+#[CoversClass(AbstractSubscriptionFactory::class)]
+#[CoversClass(InMemorySubscriptionFactory::class)]
+#[CoversClass(ProjectEmitter::class)]
 final class OpProjectorManagerTest extends UnitTestCase
 {
     private SystemClock $clock;
@@ -185,7 +189,6 @@ final class OpProjectorManagerTest extends UnitTestCase
 
     public function testDeleteProjectionWithEmittedEvents(): void
     {
-        // $this->markTestSkipped('TODO: fix this test');
         $this->assertFalse($this->projectionProvider->exists('amount'));
         $this->assertFalse($this->eventStreamProvider->hasRealStreamName('link_to_amount'));
 

@@ -67,7 +67,7 @@ final class InteractWithTrackerTest extends UnitTestCase
         $this->assertEquals(['init' => 1], $story->message()->event()->content);
     }
 
-    public function TestSpyOnEvent(): void
+    public function TestWatchOnEvent(): void
     {
         $story = new Draft('dispatch');
 

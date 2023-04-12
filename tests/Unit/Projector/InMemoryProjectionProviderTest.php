@@ -11,9 +11,11 @@ use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(InMemoryProjectionProvider::class)]
 final class InMemoryProjectionProviderTest extends UnitTestCase
 {
     private InMemoryProjectionProvider $projectionProvider;
@@ -37,10 +39,33 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     {
         $this->projectionProvider->createProjection('projection1', 'status1');
 
+        $this->assertTrue($this->projectionProvider->updateProjection(
+            'projection1',
+            [
+                'state' => 'count:1',
+                'position' => 'foo:1',
+                'status' => 'running',
+                'locked_until' => '2023-04-03 15:00:00',
+            ]
+        ));
+
+        $projection = $this->projectionProvider->retrieve('projection1');
+
+        $this->assertSame('count:1', $projection->state());
+        $this->assertSame('foo:1', $projection->position());
+        $this->assertSame('running', $projection->status());
+        $this->assertSame('2023-04-03 15:00:00', $projection->lockedUntil());
+    }
+
+    public function testExceptionRaisedOnUpdateProjectionWithInvalidField(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->projectionProvider->createProjection('projection1', 'status1');
+
         $this->assertTrue($this->projectionProvider->updateProjection('projection1', ['state' => 'state1']));
         $this->assertFalse($this->projectionProvider->updateProjection('projection2', ['state' => 'state1']));
 
-        $this->expectException(InvalidArgumentException::class);
         $this->projectionProvider->updateProjection('projection1', ['invalid_field' => 'value']);
     }
 

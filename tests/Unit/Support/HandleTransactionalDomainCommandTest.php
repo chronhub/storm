@@ -80,7 +80,6 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[Test]
     public function testRollbackTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn(true);
@@ -99,7 +98,6 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
         $tracker->disclose($context);
     }
 
-    #[Test]
     public function testDoesNotAffectTransaction(): void
     {
         $mock = $this->createMock(Chronicler::class);

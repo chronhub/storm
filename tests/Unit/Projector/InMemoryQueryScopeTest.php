@@ -14,11 +14,13 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use Illuminate\Support\Collection;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use function array_filter;
 use function count;
 use function iterator_to_array;
 
+#[CoversClass(InMemoryQueryScope::class)]
 final class InMemoryQueryScopeTest extends UnitTestCase
 {
     #[DataProvider('provideCurrentPosition')]

@@ -6,7 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(Sprint::class)]
 final class SprintTest extends UnitTestCase
 {
     public function testInstance(): void

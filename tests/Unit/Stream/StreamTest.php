@@ -13,7 +13,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(Stream::class)]
 final class StreamTest extends UnitTestCase
@@ -38,7 +37,6 @@ final class StreamTest extends UnitTestCase
         $this->assertCount(1, $events);
     }
 
-    #[Test]
     public function testGenerateStreamEvents(): void
     {
         $events = $this->provideGenerator();

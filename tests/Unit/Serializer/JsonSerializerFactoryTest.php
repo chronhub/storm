@@ -13,7 +13,6 @@ use Chronhub\Storm\Serializer\JsonSerializerFactory;
 use Chronhub\Storm\Serializer\MessagingSerializer;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
@@ -79,7 +78,6 @@ final class JsonSerializerFactoryTest extends UnitTestCase
         $factory->createMessageSerializer(null, UidNormalizer::class, new DateIntervalNormalizer());
     }
 
-    #[Test]
     public function testMergeStreamSerializerNormalizers(): void
     {
         $this->container->expects($this->exactly(2))

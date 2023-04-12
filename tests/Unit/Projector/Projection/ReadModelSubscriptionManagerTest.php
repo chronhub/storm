@@ -23,6 +23,7 @@ use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectorManager;
+use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
@@ -30,7 +31,12 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(ProjectorManager::class)]
+#[CoversClass(AbstractSubscriptionFactory::class)]
+#[CoversClass(InMemorySubscriptionFactory::class)]
+#[CoversClass(ProjectReadModel::class)]
 final class ReadModelSubscriptionManagerTest extends UnitTestCase
 {
     private SystemClock $clock;

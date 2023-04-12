@@ -21,6 +21,7 @@ use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectorManager;
+use Chronhub\Storm\Projector\ProjectQuery;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
@@ -28,8 +29,13 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(ProjectorManager::class)]
+#[CoversClass(AbstractSubscriptionFactory::class)]
+#[CoversClass(InMemorySubscriptionFactory::class)]
+#[CoversClass(ProjectQuery::class)]
 final class QuerySubscriptionManagerTest extends UnitTestCase
 {
     private SystemClock $clock;

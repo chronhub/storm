@@ -31,7 +31,11 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(ProjectorManager::class)]
+#[CoversClass(AbstractSubscriptionFactory::class)]
+#[CoversClass(InMemorySubscriptionFactory::class)]
 final class EmitterSubscriptionManagerTest extends UnitTestCase
 {
     private SystemClock $clock;

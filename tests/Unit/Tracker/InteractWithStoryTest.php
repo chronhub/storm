@@ -9,13 +9,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\InteractWithStory;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(InteractWithStory::class)]
 class InteractWithStoryTest extends UnitTestCase
 {
-    #[Test]
-    public function it_assert_instance(): void
+    public function testInstance(): void
     {
         $story = new StoryStub(null);
 
@@ -25,16 +23,14 @@ class InteractWithStoryTest extends UnitTestCase
         $this->assertNull($story->exception());
     }
 
-    #[Test]
-    public function it_assert_instance_with_event(): void
+    public function testInstanceWithEvent(): void
     {
         $story = new StoryStub('foo');
 
         $this->assertSame('foo', $story->getCurrentEvent());
     }
 
-    #[Test]
-    public function it_override_event(): void
+    public function testOverrideEvent(): void
     {
         $story = new StoryStub('foo');
 
@@ -45,8 +41,7 @@ class InteractWithStoryTest extends UnitTestCase
         $this->assertSame('bar', $story->currentEvent());
     }
 
-    #[Test]
-    public function it_set_exception(): void
+    public function testException(): void
     {
         $story = new StoryStub('foo');
 
@@ -59,8 +54,7 @@ class InteractWithStoryTest extends UnitTestCase
         $this->assertEquals($exception, $story->exception());
     }
 
-    #[Test]
-    public function it_reset_exception(): void
+    public function testResetException(): void
     {
         $story = new StoryStub('foo');
 
@@ -78,8 +72,7 @@ class InteractWithStoryTest extends UnitTestCase
         $this->assertNull($story->exception());
     }
 
-    #[Test]
-    public function it_stop_event(): void
+    public function testStopPropagationOfEvent(): void
     {
         $story = new StoryStub('foo');
 

@@ -11,11 +11,13 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\InMemoryRepository;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use Throwable;
 
+#[CoversClass(InMemoryRepository::class)]
 final class InMemoryRepositoryTest extends UnitTestCase
 {
     private ProjectionRepositoryInterface|MockObject $repository;

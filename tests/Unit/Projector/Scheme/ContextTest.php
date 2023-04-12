@@ -12,7 +12,9 @@ use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Unit\Projector\Stubs\CasterStub;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(Context::class)]
 final class ContextTest extends UnitTestCase
 {
     private Context $context;

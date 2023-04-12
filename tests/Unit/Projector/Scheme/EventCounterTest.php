@@ -7,7 +7,9 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(EventCounter::class)]
 final class EventCounterTest extends UnitTestCase
 {
     public function testIncrementCounter(): void

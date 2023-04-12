@@ -28,4 +28,9 @@ final class PreparePersistentRunner
 
         return $next($subscription);
     }
+
+    public function isInitialized(): bool
+    {
+        return $this->isInitialized;
+    }
 }

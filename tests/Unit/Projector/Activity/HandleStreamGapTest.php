@@ -8,8 +8,10 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(HandleStreamGap::class)]
 final class HandleStreamGapTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;

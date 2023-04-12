@@ -8,8 +8,10 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use RuntimeException;
 
+#[CoversClass(ProjectionFailed::class)]
 final class ProjectionFailedTest extends UnitTestCase
 {
     private string $streamName;

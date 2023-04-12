@@ -9,7 +9,9 @@ use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(StreamEventIterator::class)]
 class StreamEventIteratorTest extends UnitTestCase
 {
     public function testEmptyGenerator(): void

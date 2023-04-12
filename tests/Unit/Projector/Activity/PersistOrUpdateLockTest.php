@@ -10,8 +10,10 @@ use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(PersistOrUpdateLock::class)]
 final class PersistOrUpdateLockTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;

@@ -33,7 +33,12 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
+#[CoversClass(ProjectorManager::class)]
+#[CoversClass(AbstractSubscriptionFactory::class)]
+#[CoversClass(InMemorySubscriptionFactory::class)]
 final class ReadProjectorManagerTest extends UnitTestCase
 {
     private SystemClock $clock;
@@ -72,19 +77,19 @@ final class ReadProjectorManagerTest extends UnitTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state) use ($manager): array {
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
-                UnitTestCase::assertTrue($manager->exists('amount'));
-                UnitTestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
+                TestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                TestCase::assertTrue($manager->exists('amount'));
+                TestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
 
                 if ($state['count'] === 0) {
-                    UnitTestCase::assertEquals([], $manager->stateOf('amount'));
-                    UnitTestCase::assertEquals([], $manager->streamPositionsOf('amount'));
-                    UnitTestCase::assertEquals(['amount'], $manager->filterNamesByAscendantOrder('foo', 'bar', 'amount'));
+                    TestCase::assertEquals([], $manager->stateOf('amount'));
+                    TestCase::assertEquals([], $manager->streamPositionsOf('amount'));
+                    TestCase::assertEquals(['amount'], $manager->filterNamesByAscendantOrder('foo', 'bar', 'amount'));
                 }
 
                 if ($state['count'] === 1) {
-                    UnitTestCase::assertEquals(['count' => 1], $manager->stateOf('amount'));
-                    UnitTestCase::assertEquals(['balance' => 1], $manager->streamPositionsOf('amount'));
+                    TestCase::assertEquals(['count' => 1], $manager->stateOf('amount'));
+                    TestCase::assertEquals(['balance' => 1], $manager->streamPositionsOf('amount'));
 
                     $manager->stop('amount');
 

@@ -11,9 +11,11 @@ use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use function array_keys;
 use function array_values;
 
+#[CoversClass(SortStreamIterator::class)]
 final class SortStreamIteratorTest extends UnitTestCase
 {
     public function testInstance(): void
