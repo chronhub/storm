@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -15,19 +14,18 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 final class PersistOrUpdateLockTest extends UnitTestCase
 {
-    private ProjectionManagement|MockObject $repository;
-
     private PersistentSubscriptionInterface|MockObject $subscription;
 
     private StreamGapDetector|MockObject $gapDetector;
 
     private EventCounter $eventCounter;
 
+    private ProjectionOption|MockObject $option;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(ProjectionManagement::class);
         $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
         $this->gapDetector = $this->createMock(StreamGapDetector::class);
         $this->option = $this->createMock(ProjectionOption::class);
@@ -36,8 +34,8 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
     public function testItHasGapAndKeepToNextActivity(): void
     {
-        $this->repository->expects($this->never())->method('store');
-        $this->repository->expects($this->never())->method('renew');
+        $this->subscription->expects($this->never())->method('store');
+        $this->subscription->expects($this->never())->method('renew');
         $this->subscription->expects($this->once())->method('gap')->willReturn($this->gapDetector);
         $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(true);
         $this->subscription->expects($this->never())->method('eventCounter');
@@ -48,15 +46,15 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $this->repository, $next);
+        $persistOrUpdateLock($this->subscription, $next);
 
         $this->assertTrue(true);
     }
 
     public function testNoGapAndCounterIsReset(): void
     {
-        $this->repository->expects($this->never())->method('store');
-        $this->repository->expects($this->once())->method('renew');
+        $this->subscription->expects($this->never())->method('store');
+        $this->subscription->expects($this->once())->method('renew');
         $this->subscription->expects($this->once())->method('gap')->willReturn($this->gapDetector);
         $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(false);
         $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
@@ -69,15 +67,15 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $this->repository, $next);
+        $persistOrUpdateLock($this->subscription, $next);
 
         $this->assertTrue(true);
     }
 
     public function testNoGapAndCounterIsNotReset(): void
     {
-        $this->repository->expects($this->once())->method('store');
-        $this->repository->expects($this->never())->method('renew');
+        $this->subscription->expects($this->once())->method('store');
+        $this->subscription->expects($this->never())->method('renew');
         $this->subscription->expects($this->once())->method('gap')->willReturn($this->gapDetector);
         $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(false);
         $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
@@ -91,7 +89,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $next = fn ($subscription) => true;
 
-        $persistOrUpdateLock($this->subscription, $this->repository, $next);
+        $persistOrUpdateLock($this->subscription, $next);
 
         $this->assertTrue(true);
     }

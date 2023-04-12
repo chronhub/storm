@@ -30,25 +30,31 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
     public function testCreateProjection(): void
     {
-        $this->repository->expects(self::once())->method('create')->willReturn(true);
+        $this->repository
+            ->expects($this->once())
+            ->method('create')
+            ->with(ProjectionStatus::RUNNING)
+            ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->create());
+        $this->assertTrue($connectionProvider->create(ProjectionStatus::RUNNING));
     }
 
     public function testQueryFailureRaisedWhenCreateProjectionFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('create')
+            ->with(ProjectionStatus::RUNNING)
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->create();
+            $connectionProvider->create(ProjectionStatus::RUNNING);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -61,43 +67,50 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to create projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects(self::once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('create')
+            ->with(ProjectionStatus::RUNNING)
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->create();
+        $connectionProvider->create(ProjectionStatus::RUNNING);
     }
 
     /***/
     public function testStopProjection(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('stop')
+            ->with(['bar' => 1], ['foo'])
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->stop());
+        $this->assertTrue($connectionProvider->stop(['bar' => 1], ['foo']));
     }
 
     public function testQueryFailureRaisedWhenStopProjectionFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('stop')
+            ->with(['bar' => 1], ['foo'])
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->stop();
+            $connectionProvider->stop(['bar' => 1], ['foo']);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -110,23 +123,27 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to stop projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('stop')
+            ->with(['bar' => 1], ['foo'])
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->stop();
+        $connectionProvider->stop(['bar' => 1], ['foo']);
     }
 
     /***/
     public function testStartAgainProjection(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('startAgain')
             ->willReturn(true);
 
@@ -139,7 +156,8 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('startAgain')
             ->willThrowException($this->someException);
 
@@ -159,7 +177,8 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to restart projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
@@ -175,27 +194,31 @@ final class InMemoryRepositoryTest extends UnitTestCase
     /***/
     public function testPersistProjection(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('persist')
+            ->with(['bar' => 1], ['foo'])
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->persist());
+        $this->assertTrue($connectionProvider->persist(['bar' => 1], ['foo']));
     }
 
     public function testQueryFailureRaisedWhenPersistProjection(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('persist')
+            ->with(['bar' => 1], ['foo'])
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->persist();
+            $connectionProvider->persist(['bar' => 1], ['foo']);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -208,43 +231,50 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to persist projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('persist')
+            ->with(['bar' => 1], ['foo'])
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->persist();
+        $connectionProvider->persist(['bar' => 1], ['foo']);
     }
 
     /***/
     public function testResetProjection(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('reset')
+            ->with(['bar' => 1], ['foo'], ProjectionStatus::RUNNING)
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->reset());
+        $this->assertTrue($connectionProvider->reset(['bar' => 1], ['foo'], ProjectionStatus::RUNNING));
     }
 
     public function testQueryFailureRaisedWhenResetProjectionFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('reset')
+            ->with(['bar' => 1], ['foo'], ProjectionStatus::RUNNING)
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->reset();
+            $connectionProvider->reset(['bar' => 1], ['foo'], ProjectionStatus::RUNNING);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -257,47 +287,47 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to reset projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('reset')
+            ->with(['bar' => 1], ['foo'], ProjectionStatus::RUNNING)
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->reset();
+        $connectionProvider->reset(['bar' => 1], ['foo'], ProjectionStatus::RUNNING);
     }
 
-    /***/
-    #[DataProvider('provideBoolean')]
-    public function testDeleteProjection(bool $withEmittedEvents): void
+    public function testDeleteProjection(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('delete')
-            ->with($withEmittedEvents)
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->delete($withEmittedEvents));
+        $this->assertTrue($connectionProvider->delete());
     }
 
-    #[DataProvider('provideBoolean')]
-    public function testQueryFailureRaisedWhenDeleteProjectionFailed(bool $withEmittedEvents): void
+    public function testQueryFailureRaisedWhenDeleteProjectionFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('delete')
-            ->with($withEmittedEvents)
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->delete($withEmittedEvents);
+            $connectionProvider->delete();
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -305,29 +335,30 @@ final class InMemoryRepositoryTest extends UnitTestCase
         }
     }
 
-    #[DataProvider('provideBoolean')]
-    public function testExceptionRaisedWhenDeleteProjectionFailed(bool $withEmittedEvents): void
+    public function testExceptionRaisedWhenDeleteProjectionFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to delete projection for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('delete')
-            ->with($withEmittedEvents)
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->delete($withEmittedEvents);
+        $connectionProvider->delete();
     }
 
-    public function it_acquire_lock(): void
+    public function testAcquireLock(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects(self::once())
             ->method('acquireLock')
             ->willReturn(true);
 
@@ -340,7 +371,8 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('acquireLock')
             ->willThrowException($this->someException);
 
@@ -360,11 +392,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(ProjectionAlreadyRunning::class);
         $this->expectExceptionMessage('Acquiring lock failed for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('acquireLock')
             ->willReturn(false);
 
@@ -373,30 +407,33 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $connectionProvider->acquireLock();
     }
 
-    /***/
     public function testUpdateLock(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('updateLock')
+            ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->updateLock());
+        $this->assertTrue($connectionProvider->updateLock(['foo' => 10, 'bar' => 25]));
     }
 
     public function testQueryFailureRaisedWhenUpdateLockFailed(): void
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('updateLock')
+            ->with(['foo' => 110, 'bar' => 251])
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->updateLock();
+            $connectionProvider->updateLock(['foo' => 110, 'bar' => 251]);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -409,22 +446,26 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to update projection lock for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('updateLock')
+            ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->updateLock();
+        $connectionProvider->updateLock(['foo' => 10, 'bar' => 25]);
     }
 
     public function testReleaseLock(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('releaseLock')
             ->willReturn(true);
 
@@ -437,7 +478,8 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->expectException(InMemoryProjectionFailed::class);
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('releaseLock')
             ->willThrowException($this->someException);
 
@@ -457,11 +499,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $this->expectException(InMemoryProjectionFailed::class);
         $this->expectExceptionMessage('Unable to release projection lock for stream name: some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('some_stream_name');
 
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('releaseLock')
             ->willReturn(false);
 
@@ -472,30 +516,42 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
     public function testLoadProjectionStatus(): void
     {
-        $this->repository->expects(self::once())->method('loadStatus')->willReturn(ProjectionStatus::RUNNING);
+        $this->repository
+            ->expects($this->once())
+            ->method('loadStatus')
+            ->willReturn(ProjectionStatus::RUNNING);
 
-        $this->assertEquals(ProjectionStatus::RUNNING, (new InMemoryRepository($this->repository))->loadStatus());
+        $this->assertEquals(
+            ProjectionStatus::RUNNING,
+            (new InMemoryRepository($this->repository))->loadStatus()
+        );
     }
 
-    #[DataProvider('provideBoolean')]
-    public function testLoadProjectionState(bool $success): void
+    public function testLoadProjectionState(): void
     {
-        $this->repository->expects(self::once())->method('loadState')->willReturn($success);
+        $this->repository
+            ->expects($this->once())
+            ->method('loadState')
+            ->willReturn(['stream_positions', 'projection_state']);
 
-        $this->assertEquals($success, (new InMemoryRepository($this->repository))->loadState());
+        $this->assertEquals(
+            ['stream_positions', 'projection_state'],
+            (new InMemoryRepository($this->repository))->loadState()
+        );
     }
 
     #[DataProvider('provideBoolean')]
     public function testCheckProjectionExists(bool $projectionExists): void
     {
-        $this->repository->expects(self::once())->method('exists')->willReturn($projectionExists);
+        $this->repository->expects($this->once())->method('exists')->willReturn($projectionExists);
 
         $this->assertEquals($projectionExists, (new InMemoryRepository($this->repository))->exists());
     }
 
     public function testGetProjectionName(): void
     {
-        $this->repository->expects(self::once())
+        $this->repository
+            ->expects($this->once())
             ->method('projectionName')
             ->willReturn('foo');
 
