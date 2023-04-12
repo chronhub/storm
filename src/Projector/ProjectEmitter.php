@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -26,7 +25,6 @@ final readonly class ProjectEmitter implements EmitterProjector
     public function __construct(
       protected EmitterSubscriptionInterface $subscription,
       protected ContextInterface $context,
-      protected ProjectionManagement $repository,
       protected Chronicler $chronicler,
       protected string $streamName)
     {

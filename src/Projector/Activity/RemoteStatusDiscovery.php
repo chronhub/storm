@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
 trait RemoteStatusDiscovery
 {
-    protected ?ProjectionManagement $repository;
+    protected ?PersistentSubscriptionInterface $subscription;
 
     protected function recoverProjectionStatus(bool $isFirstExecution, bool $shouldKeepRunning): bool
     {
         $statuses = $this->getStatuses($isFirstExecution, $shouldKeepRunning);
 
-        $statusFn = $statuses[$this->repository->disclose()->value] ?? null;
+        $statusFn = $statuses[$this->subscription->disclose()->value] ?? null;
 
         return $statusFn ? $statusFn() : false;
     }
@@ -23,20 +23,20 @@ trait RemoteStatusDiscovery
     private function markAsStop(bool $isFirstExecution): bool
     {
         if ($isFirstExecution) {
-            $this->repository->boundState();
+            $this->subscription->boundState();
         }
 
-        $this->repository->close();
+        $this->subscription->close();
 
         return $isFirstExecution;
     }
 
     private function markAsReset(bool $isFirstExecution, bool $shouldRestart): bool
     {
-        $this->repository->revise();
+        $this->subscription->revise();
 
         if (! $isFirstExecution && $shouldRestart) {
-            $this->repository->restart();
+            $this->subscription->restart();
         }
 
         return false;
@@ -44,7 +44,7 @@ trait RemoteStatusDiscovery
 
     private function markForDeletion(bool $isFirstExecution, bool $shouldDiscardEvents): bool
     {
-        $this->repository->discard($shouldDiscardEvents);
+        $this->subscription->discard($shouldDiscardEvents);
 
         return $isFirstExecution;
     }

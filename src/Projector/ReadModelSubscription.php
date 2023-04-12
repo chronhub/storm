@@ -6,36 +6,62 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
-final class ReadModelSubscription implements ReadModelSubscriptionInterface
+final class ReadModelSubscription extends AbstractPersistentSubscription implements ReadModelSubscriptionInterface
 {
-    use InteractWithSubscription;
-
     public function __construct(
-        protected readonly ProjectionOption $option,
-        protected readonly StreamPosition $streamPosition,
-        protected readonly EventCounter $eventCounter,
-        protected readonly StreamGapDetector $gap,
-        protected readonly SystemClock $clock
+        ProjectionRepositoryInterface $repository,
+        ProjectionOption $option,
+        StreamPosition $streamPosition,
+        EventCounter $eventCounter,
+        StreamGapDetector $gap,
+        SystemClock $clock,
+        private readonly ReadModel $readModel,
     ) {
-        $this->state = new ProjectionState();
-        $this->sprint = new Sprint();
-        $this->isPersistent = true;
+       parent::__construct($repository, $option, $streamPosition, $eventCounter, $gap, $clock);
     }
 
-    public function eventCounter(): EventCounter
+    public function rise(): void
     {
-        return $this->eventCounter;
+        $this->mountProjection();
+
+        if (! $this->readModel->isInitialized()) {
+            $this->readModel->initialize();
+        }
+
+        $this->discoverStreams();
     }
 
-    public function gap(): StreamGapDetector
+    public function store(): void
     {
-        return $this->gap;
+        parent::store();
+
+        $this->readModel->persist();
+    }
+
+    public function revise(): void
+    {
+        parent::revise();
+
+        $this->readModel->reset();
+    }
+
+    public function discard(bool $withEmittedEvents): void
+    {
+        $this->repository->delete();
+
+        if ($withEmittedEvents) {
+            $this->readModel->down();
+        }
+
+        $this->sprint()->stop();
+
+        $this->resetProjectionState();
     }
 }

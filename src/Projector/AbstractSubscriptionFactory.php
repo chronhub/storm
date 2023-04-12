@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
@@ -50,45 +49,45 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    public function createEmitterSubscription(array $options = []): EmitterSubscriptionInterface
+    public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
     {
         $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
         return new EmitterSubscription(
+            $this->createSubscriptionManagement($streamName, $projectionOption),
             $projectionOption,
-            $this->createStreamPosition(),
+            $streamPosition,
             $this->createEventCounter($projectionOption),
             $this->createGapDetector($streamPosition, $projectionOption),
-            $this->clock
+            $this->clock,
+            $this->chronicler,
         );
     }
 
-    public function createReadModelSubscription(array $options = []): ReadModelSubscriptionInterface
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
     {
         $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
         return new ReadModelSubscription(
+            $this->createSubscriptionManagement($streamName, $projectionOption),
             $projectionOption,
             $streamPosition,
             $this->createEventCounter($projectionOption),
             $this->createGapDetector($streamPosition, $projectionOption),
-            $this->clock
+            $this->clock,
+            $readModel
         );
     }
 
-    abstract public function createSubscriptionManagement(
-        EmitterSubscriptionInterface|ReadModelSubscriptionInterface $subscription,
-        string $streamName,
-        ?ReadModel $readModel): ProjectionManagement;
+    abstract public function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
-    protected function createRepository(Subscription $subscription, string $streamName): ProjectionRepositoryInterface
+    protected function createRepository(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
     {
         return new ProjectionRepository(
-            $subscription,
             $this->projectionProvider,
-            $this->createLockManager($subscription->option()),
+            $this->createLockManager($options),
             $this->jsonSerializer,
             $streamName
         );

@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -45,14 +44,14 @@ abstract readonly class AbstractEventProcessor
         return true;
     }
 
-    final protected function afterProcess(Subscription $subscription, ?array $state, ?ProjectionManagement $repository): bool
+    final protected function afterProcess(Subscription $subscription, ?array $state): bool
     {
         if ($state) {
             $subscription->state()->put($state);
         }
 
-        if ($repository && $subscription instanceof PersistentSubscriptionInterface) {
-            $this->persistWhenCounterIsReached($subscription, $repository);
+        if ($subscription instanceof PersistentSubscriptionInterface) {
+            $this->persistWhenCounterIsReached($subscription);
         }
 
         return $subscription->sprint()->inProgress();
@@ -63,16 +62,14 @@ abstract readonly class AbstractEventProcessor
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    final protected function persistWhenCounterIsReached(
-        PersistentSubscriptionInterface $subscription,
-        ProjectionManagement $projection): void
+    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription): void
     {
         if ($subscription->eventCounter()->isReached()) {
-            $projection->store();
+            $subscription->store();
 
             $subscription->eventCounter()->reset();
 
-            $subscription->setStatus($projection->disclose());
+            $subscription->setStatus($subscription->disclose());
 
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 

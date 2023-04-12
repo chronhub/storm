@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 
@@ -14,10 +13,10 @@ final readonly class RunProjection
     {
     }
 
-    public function __invoke(Subscription $subscription, ?ProjectionManagement $repository): void
+    public function __invoke(Subscription $subscription): void
     {
          $this->beginCycle(
-            $this->newWorkflow($subscription, $repository),
+            $this->newWorkflow($subscription),
             $subscription->sprint()->inBackground()
          );
     }
@@ -31,9 +30,9 @@ final readonly class RunProjection
         } while ($keepRunning && $inProgress);
     }
 
-    private function newWorkflow(Subscription $subscription, ?ProjectionManagement $repository): Workflow
+    private function newWorkflow(Subscription $subscription): Workflow
     {
-        $stub = new Workflow($subscription, $repository);
+        $stub = new Workflow($subscription);
 
         return $stub->through($this->activities);
     }

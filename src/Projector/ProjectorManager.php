@@ -32,12 +32,11 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
 
     public function emitter(string $streamName, array $options = []): EmitterProjector
     {
-        $subscription = $this->subscriptionFactory->createEmitterSubscription($options);
+        $subscription = $this->subscriptionFactory->createEmitterSubscription($streamName, $options);
 
         return new ProjectEmitter(
             $subscription,
             $this->subscriptionFactory->createContextBuilder(),
-            $this->subscriptionFactory->createSubscriptionManagement($subscription, $streamName, null),
             $this->subscriptionFactory->chronicler,
             $streamName
         );
@@ -45,12 +44,11 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
 
     public function readModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $subscription = $this->subscriptionFactory->createReadModelSubscription($options);
+        $subscription = $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options);
 
         return new ProjectReadModel(
             $subscription,
             $this->subscriptionFactory->createContextBuilder(),
-            $this->subscriptionFactory->createSubscriptionManagement($subscription, $streamName, $readModel),
             $this->subscriptionFactory->chronicler,
             $streamName,
             $readModel

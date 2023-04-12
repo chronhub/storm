@@ -34,7 +34,7 @@ final readonly class ProjectQuery implements QueryProjector
 
          $project = new RunProjection($this->activities());
 
-         $project($this->subscription, null);
+         $project($this->subscription);
      }
 
      public function stop(): void

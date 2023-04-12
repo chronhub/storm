@@ -18,10 +18,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function create(): bool
+    public function create(ProjectionStatus $status): bool
     {
         try {
-            $created = $this->repository->create();
+            $created = $this->repository->create($status);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -36,10 +36,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function stop(): bool
+    public function stop(array $streamPositions, array $state): bool
     {
         try {
-            $stopped = $this->repository->stop();
+            $stopped = $this->repository->stop($streamPositions, $state);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -72,10 +72,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function persist(): bool
+    public function persist(array $streamPositions, array $state): bool
     {
         try {
-            $persisted = $this->repository->persist();
+            $persisted = $this->repository->persist($streamPositions, $state);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -90,10 +90,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function reset(): bool
+    public function reset(array $streamPositions, array $state, ProjectionStatus $currentStatus): bool
     {
         try {
-            $reset = $this->repository->reset();
+            $reset = $this->repository->reset($streamPositions, $state, $currentStatus);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -108,10 +108,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function delete(bool $withEmittedEvents): bool
+    public function delete(): bool
     {
         try {
-            $deleted = $this->repository->delete($withEmittedEvents);
+            $deleted = $this->repository->delete();
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -144,10 +144,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function updateLock(): bool
+    public function updateLock(array $streamPositions): bool
     {
         try {
-            $updated = $this->repository->updateLock();
+            $updated = $this->repository->updateLock($streamPositions);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -177,7 +177,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         return true;
     }
 
-    public function loadState(): bool
+    public function loadState(): array
     {
         return $this->repository->loadState();
     }

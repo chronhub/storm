@@ -23,22 +23,22 @@ trait InteractWithPersistentProjection
 
         $project = new RunProjection($this->activities());
 
-        $project($this->subscription, $this->repository);
+        $project($this->subscription);
     }
 
     public function stop(): void
     {
-        $this->repository->close();
+        $this->subscription->close();
     }
 
     public function reset(): void
     {
-        $this->repository->revise();
+        $this->subscription->revise();
     }
 
     public function delete(bool $withEmittedEvents): void
     {
-        $this->repository->discard($withEmittedEvents);
+        $this->subscription->discard($withEmittedEvents);
     }
 
     public function getState(): array

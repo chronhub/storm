@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Closure;
@@ -19,10 +19,8 @@ final class Workflow
      */
     private array $activities;
 
-    public function __construct(
-        private readonly Subscription $subscription,
-        private readonly ?ProjectionManagement $repository
-    ) {
+    public function __construct(private readonly Subscription $subscription)
+    {
     }
 
     public function through(array $activities): self
@@ -40,50 +38,52 @@ final class Workflow
             $this->prepareDestination($destination)
         );
 
-        return $process($this->subscription, $this->repository);
+        return $process($this->subscription);
     }
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return function (Subscription $subscription, ?ProjectionManagement $repository) use ($destination) {
+        return function (Subscription $subscription) use ($destination) {
             if (! $subscription->sprint()->inProgress()) {
-                $this->tryReleaseLock($repository);
+                $this->tryReleaseLock($subscription);
             }
 
-            return $destination($subscription, $repository);
+            return $destination($subscription);
         };
     }
 
     private function carry(): Closure
     {
         return function ($stack, $activity) {
-            return function (Subscription $subscription, ?ProjectionManagement $repository) use ($stack, $activity) {
+            return function (Subscription $subscription) use ($stack, $activity) {
                 try {
-                    return $activity($subscription, $repository, $stack);
+                    return $activity($subscription, $stack);
                 } catch (Throwable $exception) {
-                    $this->handleException($exception, $repository);
+                    $this->handleException($exception, $subscription);
                 }
             };
         };
     }
 
-    private function handleException(Throwable $exception, ?ProjectionManagement $repository): void
+    private function handleException(Throwable $exception, Subscription $subscription): void
     {
         if ($exception instanceof ProjectionAlreadyRunning) {
             throw $exception;
         }
 
-        $this->tryReleaseLock($repository);
+        $this->tryReleaseLock($subscription);
 
         throw $exception;
     }
 
-    private function tryReleaseLock(?ProjectionManagement $repository): void
+    private function tryReleaseLock(Subscription $subscription): void
     {
-        try {
-            $repository?->freed();
-        } catch (Throwable) {
-            // failed silently
+        if ($subscription instanceof PersistentSubscriptionInterface) {
+            try {
+                $subscription->freed();
+            } catch (Throwable) {
+                // failed silently
+            }
         }
     }
 }

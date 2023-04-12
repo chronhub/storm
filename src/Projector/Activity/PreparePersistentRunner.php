@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 
 final class PreparePersistentRunner
 {
@@ -13,10 +12,10 @@ final class PreparePersistentRunner
 
     private bool $isInitialized = false;
 
-    public function __invoke(PersistentSubscriptionInterface $subscription, ?ProjectionManagement $repository, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if (! $this->isInitialized) {
-            $this->repository = $repository;
+            $this->subscription = $subscription;
 
             $this->isInitialized = true;
 
@@ -24,9 +23,9 @@ final class PreparePersistentRunner
                 return true;
             }
 
-            $this->repository->rise();
+            $this->subscription->rise();
         }
 
-        return $next($subscription, $repository);
+        return $next($subscription);
     }
 }

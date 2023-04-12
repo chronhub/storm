@@ -4,41 +4,51 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Stream\StreamName;
 
-final class EmitterSubscription implements EmitterSubscriptionInterface
+final class EmitterSubscription extends AbstractPersistentSubscription implements EmitterSubscriptionInterface
 {
-    use InteractWithSubscription;
-
     private bool $streamFixed = false;
 
     public function __construct(
-        protected readonly ProjectionOption $option,
-        protected readonly StreamPosition $streamPosition,
-        protected readonly EventCounter $eventCounter,
-        protected readonly StreamGapDetector $gap,
-        protected readonly SystemClock $clock
+        ProjectionRepositoryInterface $repository,
+        ProjectionOption $option,
+        StreamPosition $streamPosition,
+        EventCounter $eventCounter,
+        StreamGapDetector $gap,
+        SystemClock $clock,
+        private readonly Chronicler $chronicler
     ) {
-        $this->state = new ProjectionState();
-        $this->sprint = new Sprint();
-        $this->isPersistent = true;
+        parent::__construct($repository, $option, $streamPosition, $eventCounter, $gap, $clock);
     }
 
-    public function eventCounter(): EventCounter
+    public function revise(): void
     {
-        return $this->eventCounter;
+        parent::revise();
+
+        $this->deleteStream();
     }
 
-    public function gap(): StreamGapDetector
+    public function discard(bool $withEmittedEvents): void
     {
-        return $this->gap;
+        $this->repository->delete();
+
+        if ($withEmittedEvents) {
+            $this->deleteStream();
+        }
+
+        $this->sprint()->stop();
+
+        $this->resetProjectionState();
     }
 
     public function isJoined(): bool
@@ -54,5 +64,16 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     public function disjoin(): void
     {
         $this->streamFixed = false;
+    }
+
+    private function deleteStream(): void
+    {
+        try {
+            $this->chronicler->delete(new StreamName($this->projectionName()));
+        } catch (StreamNotFound) {
+            //fail silently
+        }
+
+        $this->disjoin();
     }
 }

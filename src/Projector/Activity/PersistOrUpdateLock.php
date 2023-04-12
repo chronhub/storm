@@ -5,26 +5,25 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionManagement;
 use function usleep;
 
 final readonly class PersistOrUpdateLock
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, ?ProjectionManagement $repository, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if (! $subscription->gap()->hasGap()) {
             $subscription->eventCounter()->isReset()
-                ? $this->sleepBeforeUpdateLock($repository, $subscription->option()->getSleep())
-                : $repository->store();
+                ? $this->sleepBeforeUpdateLock($subscription->option()->getSleep())
+                : $subscription->store();
         }
 
-        return $next($subscription, $repository);
+        return $next($subscription);
     }
 
-    private function sleepBeforeUpdateLock(ProjectionManagement $repository, int $sleep): void
+    private function sleepBeforeUpdateLock(PersistentSubscriptionInterface $subscription, int $sleep): void
     {
         usleep(microseconds: $sleep);
 
-        $repository->renew();
+        $subscription->renew();
     }
 }
