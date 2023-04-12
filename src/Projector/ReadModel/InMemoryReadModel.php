@@ -11,6 +11,8 @@ final class InMemoryReadModel implements ReadModel
 {
     use InteractWithStack;
 
+    private bool $initialized = false;
+
     /**
      * @var array<string, array>
      */
@@ -18,11 +20,12 @@ final class InMemoryReadModel implements ReadModel
 
     public function initialize(): void
     {
+        $this->initialized = true;
     }
 
     public function isInitialized(): bool
     {
-        return true;
+        return $this->initialized;
     }
 
     public function reset(): void

@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Repository\InMemoryRepository;
 
 final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
 {
-    public function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
+    protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
     {
         $repository = $this->createRepository($streamName, $options);
 

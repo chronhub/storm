@@ -28,6 +28,7 @@ use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
 final class QuerySubscriptionManagerTest extends UnitTestCase
 {
@@ -62,29 +63,30 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
         $this->feedEventStore(1);
 
-        $liveSubscription = $manager->query();
+        $subscription = $manager->query();
 
-        $liveSubscription
+        $subscription
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
-            ->whenAny(function (SomeEvent $event): void {
+            ->whenAny(function (DomainEvent $event): void {
                 /** @var QueryCaster $this */
-                UnitTestCase::assertInstanceOf(QueryCaster::class, $this);
-                UnitTestCase::assertSame('balance', $this->streamName());
-                UnitTestCase::assertInstanceOf(SystemClock::class, $this->clock());
+                TestCase::assertSame($event::class, SomeEvent::class);
+                TestCase::assertInstanceOf(QueryCaster::class, $this);
+                TestCase::assertSame('balance', $this->streamName());
+                TestCase::assertInstanceOf(SystemClock::class, $this->clock());
             })
             ->run(false);
     }
 
-    public function testLiveSubscription(): void
+    public function testQuerySubscription(): void
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->query();
+        $subscription = $manager->query();
 
-        $liveSubscription
+        $subscription
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
@@ -95,18 +97,18 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             })
             ->run(false);
 
-        $this->assertEquals(10, $liveSubscription->getState()['count']);
+        $this->assertEquals(10, $subscription->getState()['count']);
     }
 
-    public function testStopLiveSubscription(): void
+    public function testStopQuerySubscription(): void
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->query();
+        $subscription = $manager->query();
 
-        $liveSubscription
+        $subscription
             ->initialize(fn (): array => ['count' => 0])
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
@@ -122,7 +124,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             })
             ->run(false);
 
-        $this->assertEquals(5, $liveSubscription->getState()['count']);
+        $this->assertEquals(5, $subscription->getState()['count']);
     }
 
     public function testQueryFilter(): void
@@ -132,7 +134,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             public function apply(): callable
             {
                 return static function (DomainEvent $event): ?DomainEvent {
-                    $internalPosition = (int)$event->header(EventHeader::INTERNAL_POSITION);
+                    $internalPosition = (int) $event->header(EventHeader::INTERNAL_POSITION);
 
                     return ($internalPosition > 7) ? $event : null;
                 };
@@ -148,9 +150,9 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
         $this->feedEventStore(10);
 
-        $liveSubscription = $manager->query();
+        $subscription = $manager->query();
 
-        $liveSubscription
+        $subscription
             ->initialize(fn (): array => ['event_version' => []])
             ->withQueryFilter($queryFilter)
             ->fromStreams('balance')
@@ -161,7 +163,33 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             })
             ->run(false);
 
-        $this->assertEquals([10, 9, 8], $liveSubscription->getState()['event_version']);
+        $this->assertEquals([10, 9, 8], $subscription->getState()['event_version']);
+    }
+
+    public function testResetQuerySubscription(): void
+    {
+        $manager = new ProjectorManager($this->createSubscriptionFactory());
+
+        $this->feedEventStore(10);
+
+        $subscription = $manager->query();
+
+        $subscription
+            ->initialize(fn (): array => ['count' => 0])
+            ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
+            ->fromStreams('balance')
+            ->whenAny(function (SomeEvent $event, array $state): array {
+                $state['count']++;
+
+                return $state;
+            })
+            ->run(false);
+
+        $this->assertEquals(10, $subscription->getState()['count']);
+
+        $subscription->reset();
+
+        $this->assertEquals(0, $subscription->getState()['count']);
     }
 
     private function createSubscriptionFactory(): AbstractSubscriptionFactory

@@ -81,7 +81,7 @@ abstract class AbstractSubscriptionFactory
         );
     }
 
-    abstract public function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
+    abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
     protected function createRepository(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
     {

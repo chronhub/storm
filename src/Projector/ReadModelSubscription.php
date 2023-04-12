@@ -24,7 +24,11 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
         SystemClock $clock,
         private readonly ReadModel $readModel,
     ) {
-       parent::__construct($repository, $option, $streamPosition, $eventCounter, $gap, $clock);
+       parent::__construct($option, $streamPosition, $clock);
+
+       $this->repository = $repository;
+       $this->eventCounter = $eventCounter;
+       $this->gap = $gap;
     }
 
     public function rise(): void
@@ -54,7 +58,7 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete();
+        $this->repository->delete(); // todo propagate $withEmittedEvents as info
 
         if ($withEmittedEvents) {
             $this->readModel->down();

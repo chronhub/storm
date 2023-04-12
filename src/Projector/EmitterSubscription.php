@@ -28,7 +28,11 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
         SystemClock $clock,
         private readonly Chronicler $chronicler
     ) {
-        parent::__construct($repository, $option, $streamPosition, $eventCounter, $gap, $clock);
+        parent::__construct($option, $streamPosition, $clock);
+
+        $this->repository = $repository;
+        $this->eventCounter = $eventCounter;
+        $this->gap = $gap;
     }
 
     public function revise(): void

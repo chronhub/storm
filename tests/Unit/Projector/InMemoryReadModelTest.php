@@ -23,9 +23,9 @@ final class InMemoryReadModelTest extends UnitTestCase
         $this->assertEmpty($this->readModel->getContainer());
     }
 
-    public function testAlreadyInitialized(): void
+    public function testInitialized(): void
     {
-        $this->assertTrue($this->readModel->isInitialized());
+        $this->assertFalse($this->readModel->isInitialized());
 
         $this->readModel->initialize();
 

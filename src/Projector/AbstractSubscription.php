@@ -8,19 +8,20 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Closure;
 use function is_array;
 
-trait InteractWithSubscription
+abstract class AbstractSubscription implements Subscription
 {
-    public readonly bool $isPersistent;
-
     public ?string $currentStreamName = null;
 
     protected ProjectionStatus $status = ProjectionStatus::IDLE;
@@ -31,11 +32,20 @@ trait InteractWithSubscription
 
     protected readonly Sprint $sprint;
 
+    public function __construct(
+        protected readonly ProjectionOption $option,
+        protected readonly StreamPosition $streamPosition,
+        protected readonly SystemClock $clock,
+    ) {
+        $this->state = new ProjectionState();
+        $this->sprint = new Sprint();
+    }
+
     public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void
     {
         $this->context = $context;
 
-        if ($this->isPersistent && ! $this->context->queryFilter() instanceof ProjectionQueryFilter) {
+        if ($this instanceof PersistentSubscriptionInterface && ! $this->context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new InvalidArgumentException('Persistent subscription require a projection query filter');
         }
 
