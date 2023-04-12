@@ -21,9 +21,9 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     ) {
     }
 
-    public function create(ProjectionStatus $currentStatus): bool
+    public function create(ProjectionStatus $status): bool
     {
-        return $this->provider->createProjection($this->streamName, $currentStatus->value);
+        return $this->provider->createProjection($this->streamName, $status->value);
     }
 
     public function stop(array $streamPositions, array $state): bool

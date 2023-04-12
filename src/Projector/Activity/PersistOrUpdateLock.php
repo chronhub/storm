@@ -13,16 +13,16 @@ final readonly class PersistOrUpdateLock
     {
         if (! $subscription->gap()->hasGap()) {
             $subscription->eventCounter()->isReset()
-                ? $this->sleepBeforeUpdateLock($subscription->option()->getSleep())
+                ? $this->sleepBeforeUpdateLock($subscription)
                 : $subscription->store();
         }
 
         return $next($subscription);
     }
 
-    private function sleepBeforeUpdateLock(PersistentSubscriptionInterface $subscription, int $sleep): void
+    private function sleepBeforeUpdateLock(PersistentSubscriptionInterface $subscription): void
     {
-        usleep(microseconds: $sleep);
+        usleep(microseconds: $subscription->option()->getSleep());
 
         $subscription->renew();
     }
