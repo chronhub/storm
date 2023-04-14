@@ -13,7 +13,7 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Contracts\Projector\QueryCaster;
+use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
@@ -75,9 +75,9 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (DomainEvent $event): void {
-                /** @var QueryCaster $this */
+                /** @var QueryCasterInterface $this */
                 TestCase::assertSame($event::class, SomeEvent::class);
-                TestCase::assertInstanceOf(QueryCaster::class, $this);
+                TestCase::assertInstanceOf(QueryCasterInterface::class, $this);
                 TestCase::assertSame('balance', $this->streamName());
                 TestCase::assertInstanceOf(SystemClock::class, $this->clock());
             })
@@ -119,7 +119,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var QueryCaster $this */
+                /** @var QueryCasterInterface $this */
                 $state['count']++;
 
                 if ($state['count'] === 5) {

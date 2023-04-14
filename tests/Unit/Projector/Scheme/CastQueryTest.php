@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Projector\QueryCaster;
+use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -30,7 +30,7 @@ class CastQueryTest extends UnitTestCase
         $streamName = null;
         $caster = new CastQuery($this->projector, $this->clock, $streamName);
 
-        $this->assertInstanceOf(QueryCaster::class, $caster);
+        $this->assertInstanceOf(QueryCasterInterface::class, $caster);
         $this->assertNull($caster->streamName());
         $this->assertSame($this->clock, $caster->clock());
     }

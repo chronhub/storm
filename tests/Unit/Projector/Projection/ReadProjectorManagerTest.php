@@ -17,7 +17,7 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
-use Chronhub\Storm\Contracts\Projector\QueryCaster;
+use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
@@ -123,7 +123,7 @@ final class ReadProjectorManagerTest extends UnitTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var QueryCaster $this */
+                /** @var QueryCasterInterface $this */
                 $state['count']++;
 
                 if ($state['count'] === 2) {
