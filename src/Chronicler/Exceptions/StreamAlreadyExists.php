@@ -11,6 +11,8 @@ class StreamAlreadyExists extends RuntimeException
 {
     public static function withStreamName(StreamName $streamName): self
     {
-        return new self(sprintf('Stream name %s already exists', $streamName));
+        return new self(
+            sprintf('Stream %s already exists', $streamName)
+        );
     }
 }
