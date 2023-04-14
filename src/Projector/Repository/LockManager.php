@@ -11,7 +11,7 @@ use DateTimeImmutable;
  * @property int<0,max> $lockTimeoutMs The duration for which a lock is valid, in milliseconds
  * @property int<0,max> $lockThreshold The duration after which a lock should be refreshed, in milliseconds
  */
-final class LockManager
+class LockManager
 {
     private ?DateTimeImmutable $lastLock = null;
 
