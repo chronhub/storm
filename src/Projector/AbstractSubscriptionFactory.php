@@ -51,34 +51,32 @@ abstract class AbstractSubscriptionFactory
 
     public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
     {
-        $projectionOption = $this->createOption($options);
-        $streamPosition = $this->createStreamPosition();
+        $args = $this->createPersistentSubscription($streamName, null, $options);
 
-        return new EmitterSubscription(
-            $this->createSubscriptionManagement($streamName, $projectionOption),
-            $projectionOption,
-            $streamPosition,
-            $this->createEventCounter($projectionOption),
-            $this->createGapDetector($streamPosition, $projectionOption),
-            $this->clock,
-            $this->chronicler,
-        );
+        return new EmitterSubscription(...$args);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
     {
+        $args = $this->createPersistentSubscription($streamName, $readModel, $options);
+
+        return new ReadModelSubscription(...$args);
+    }
+
+    protected function createPersistentSubscription(string $streamName, ?ReadModel $readModel, array $options = []): array
+    {
         $projectionOption = $this->createOption($options);
         $streamPosition = $this->createStreamPosition();
 
-        return new ReadModelSubscription(
+        return [
             $this->createSubscriptionManagement($streamName, $projectionOption),
             $projectionOption,
             $streamPosition,
             $this->createEventCounter($projectionOption),
             $this->createGapDetector($streamPosition, $projectionOption),
             $this->clock,
-            $readModel
-        );
+            $readModel ?? $this->chronicler,
+        ];
     }
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
