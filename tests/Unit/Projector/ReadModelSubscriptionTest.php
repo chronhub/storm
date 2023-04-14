@@ -6,11 +6,15 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Projector\AbstractPersistentSubscription;
+use Chronhub\Storm\Projector\AbstractSubscription;
 use Chronhub\Storm\Projector\ReadModelSubscription;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(AbstractSubscription::class)]
+#[CoversClass(AbstractPersistentSubscription::class)]
 #[CoversClass(ReadModelSubscription::class)]
 final class ReadModelSubscriptionTest extends PersistentSubscriptionTestCase
 {
