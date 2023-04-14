@@ -8,10 +8,13 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Projector\EmitterSubscription;
 use Chronhub\Storm\Stream\StreamName;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(EmitterSubscription::class)]
 final class EmitterSubscriptionTest extends PersistentSubscriptionTestCase
 {
     private Chronicler|MockObject $chronicler;

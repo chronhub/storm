@@ -6,13 +6,11 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\AbstractPersistentSubscription;
 use Chronhub\Storm\Projector\ReadModelSubscription;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(AbstractPersistentSubscription::class)]
 #[CoversClass(ReadModelSubscription::class)]
 final class ReadModelSubscriptionTest extends PersistentSubscriptionTestCase
 {
@@ -25,10 +23,14 @@ final class ReadModelSubscriptionTest extends PersistentSubscriptionTestCase
         $this->readModel = $this->createMock(ReadModel::class);
     }
 
-    public function testRiseReadModel(): void
+    #[DataProvider('provideBoolean')]
+    public function testRiseReadModel(bool $isInitialized): void
     {
-        $this->readModel->expects($this->once())->method('isInitialized')->willReturn(false);
-        $this->readModel->expects($this->once())->method('initialize');
+        $this->readModel->expects($this->once())->method('isInitialized')->willReturn($isInitialized);
+
+        $isInitialized
+            ? $this->readModel->expects($this->never())->method('initialize')
+            : $this->readModel->expects($this->once())->method('initialize');
 
         $this->testRise();
     }
