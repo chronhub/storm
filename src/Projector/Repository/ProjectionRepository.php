@@ -28,7 +28,9 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function stop(array $streamPositions, array $state): bool
     {
-        $this->persist($streamPositions, $state);
+        if (! $this->persist($streamPositions, $state)) {
+            return false;
+        }
 
         $idleProjection = ProjectionStatus::IDLE;
 
@@ -110,8 +112,8 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     {
         if ($this->lockManager->tryUpdate()) {
             return $this->updateProjection([
-                'locked_until' => $this->lockManager->increment(),
                 'position' => $this->serializer->encode($streamPositions),
+                'locked_until' => $this->lockManager->increment(),
             ]);
         }
 
