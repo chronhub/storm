@@ -69,12 +69,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testRise(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 0]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
         $subscription->compose($context, $this->caster, false);
@@ -99,12 +94,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testStore(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 10]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext(10);
 
         $this->position->bind('stream_name', 25);
 
@@ -121,12 +111,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testClose(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 10]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext(10);
 
         $this->position->bind('stream_name', 25);
 
@@ -149,12 +134,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testRestart(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 10]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext(10);
 
         $this->position->bind('stream_name', 25);
 
@@ -174,12 +154,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testBoundState(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 0]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
         $subscription->compose($context, $this->caster, false);
@@ -199,11 +174,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testRenew(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
         $subscription->compose($context, $this->caster, false);
@@ -223,11 +194,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     public function testFreed(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
         $subscription->setStatus(ProjectionStatus::RUNNING);
@@ -243,11 +210,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     #[DataProvider('provideProjectionStatus')]
     public function testDisclose(ProjectionStatus $status): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
+        $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
         $subscription->setStatus(ProjectionStatus::RUNNING);
@@ -282,14 +245,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     protected function testRevise(): void
     {
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 0]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
-
-        $this->position->bind('stream_name', 25);
+        $context = $this->defineContext();
 
         $this->repository
             ->expects($this->once())
@@ -310,14 +266,8 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     protected function testDiscard(bool $withEmittedEvent): void
     {
         $caster = $this->createMock(ReadModelCasterInterface::class);
-        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
 
-        $context = new Context();
-        $context->initialize(fn (): array => ['counter' => 0]);
-        $context->fromAll();
-        $context->withQueryFilter($queryFilter);
-
-        $this->position->bind('stream_name', 25);
+        $context = $this->defineContext();
 
         $this->repository->expects($this->once())->method('delete');
 
@@ -345,6 +295,18 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         yield [ProjectionStatus::RESETTING];
         yield [ProjectionStatus::DELETING];
         yield [ProjectionStatus::DELETING_WITH_EMITTED_EVENTS];
+    }
+
+    protected function defineContext(int $counter = 0): Context
+    {
+        $queryFilter = $this->createMock(ProjectionQueryFilter::class);
+
+        $context = new Context();
+        $context->initialize(fn (): array => ['counter' => $counter]);
+        $context->fromAll();
+        $context->withQueryFilter($queryFilter);
+
+        return $context;
     }
 
     protected function newSubscription(): PersistentSubscriptionInterface
