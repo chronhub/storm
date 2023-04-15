@@ -150,7 +150,7 @@ final class ProcessClosurePersistentEventTest extends UnitTestCase
         $this->assertTrue($this->subscription->eventCounter()->isReset());
         $this->subscription->eventCounter()->increment();
 
-        $this->subscription->sprint()->continue(); // preprocess will return true
+        $this->subscription->sprint()->continue();
         $this->subscription->state()->put(['count' => 1]);
 
         $this->repository
@@ -194,7 +194,7 @@ final class ProcessClosurePersistentEventTest extends UnitTestCase
         $this->assertTrue($this->subscription->eventCounter()->isReset());
         $this->subscription->eventCounter()->increment();
 
-        $this->subscription->sprint()->continue(); // preprocess will return true
+        $this->subscription->sprint()->continue();
         $this->subscription->state()->put(['count' => 1]);
 
         $this->repository
@@ -239,7 +239,7 @@ final class ProcessClosurePersistentEventTest extends UnitTestCase
         $this->assertTrue($this->subscription->eventCounter()->isReset());
         $this->subscription->eventCounter()->increment();
 
-        $this->subscription->sprint()->continue(); // preprocess will return true
+        $this->subscription->sprint()->continue();
         $this->subscription->state()->put(['count' => 1]);
 
         $this->repository

@@ -33,6 +33,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(ProjectEmitter::class)] //todo uncover and test
 #[CoversClass(ProjectorManager::class)]
 #[CoversClass(AbstractSubscriptionFactory::class)]
 #[CoversClass(InMemorySubscriptionFactory::class)]
