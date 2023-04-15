@@ -63,6 +63,10 @@ trait HasTimSort
     {
         $eventTime = $message->header(Header::EVENT_TIME);
 
+        if ($eventTime instanceof DateTimeImmutable) {
+            return $eventTime;
+        }
+
         return new DateTimeImmutable($eventTime, new DateTimeZone('UTC'));
     }
 }
