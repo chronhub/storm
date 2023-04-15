@@ -26,8 +26,8 @@ final readonly class ProjectEmitter implements EmitterProjector
       protected EmitterSubscriptionInterface $subscription,
       protected ContextInterface $context,
       protected Chronicler $chronicler,
-      protected string $streamName)
-    {
+      protected string $streamName
+    ) {
         $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
     }
 

@@ -11,32 +11,70 @@ use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
 
 interface PersistentSubscriptionInterface extends Subscription
 {
+    /**
+     * Start the persistent subscription and resume the projection.
+     */
     public function rise(): void;
 
+    /**
+     * Stop the persistent subscription and stop the projection.
+     */
     public function close(): void;
 
+    /**
+     * Restart the projection.
+     */
     public function restart(): void;
 
     /**
+     * Retrieve the current state and positions of the projection.
+     *
      * @throws ProjectionNotFound
      */
     public function boundState(): void;
 
+    /**
+     * Get the current status of the projection.
+     */
     public function disclose(): ProjectionStatus;
 
+    /**
+     * Persist the current state and positions of the projection.
+     */
     public function store(): void;
 
+    /**
+     * Reset the state and position of the projection.
+     */
     public function revise(): void;
 
+    /**
+     * Delete the projection with or without emitted events.
+     */
     public function discard(bool $withEmittedEvents): void;
 
+    /**
+     * Update projection lock and stream positions.
+     */
     public function renew(): void;
 
+    /**
+     * Release the projection lock.
+     */
     public function freed(): void;
 
+    /**
+     * Get the projection name.
+     */
     public function projectionName(): string;
 
+    /**
+     * Get the event counter instance.
+     */
     public function eventCounter(): EventCounter;
 
+    /**
+     * Get the stream gap detector instance.
+     */
     public function gap(): StreamGapDetector;
 }

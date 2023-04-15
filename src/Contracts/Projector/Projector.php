@@ -6,11 +6,23 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 interface Projector
 {
+    /**
+     * Set the projection run in background.
+     */
     public function run(bool $inBackground): void;
 
+    /**
+     * Stop the projection.
+     */
     public function stop(): void;
 
+    /**
+     * Reset the projection.
+     */
     public function reset(): void;
 
+    /**
+     * Get the projection state.
+     */
     public function getState(): array;
 }
