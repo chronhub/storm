@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Auth;
+namespace Chronhub\Storm\Support\Auth;
 
 use Chronhub\Storm\Contracts\Auth\AuthorizeMessage;
 use Chronhub\Storm\Contracts\Message\Header;

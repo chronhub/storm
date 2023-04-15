@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Unit\Auth;
+namespace Chronhub\Storm\Tests\Unit\Support\Auth;
 
-use Chronhub\Storm\Auth\GuardQueryOnFinalize;
-use Chronhub\Storm\Auth\UnauthorizedException;
 use Chronhub\Storm\Contracts\Auth\AuthorizeMessage;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\Message;
+use Chronhub\Storm\Support\Auth\GuardQueryOnFinalize;
+use Chronhub\Storm\Support\Auth\UnauthorizedException;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;

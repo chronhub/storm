@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Auth;
+namespace Chronhub\Storm\Support\Auth;
 
 use RuntimeException;
 
