@@ -71,7 +71,7 @@ final class StreamPosition implements JsonSerializable
     {
         $streams = match (key($queries)) {
             'all' => $this->eventStreamProvider->allWithoutInternal(),
-            'categories' => $this->eventStreamProvider->filterByCategories($queries['categories']),
+            'categories' => $this->eventStreamProvider->filterByAscendantCategories($queries['categories']),
             default => $this->handleStreamNames($queries['names'] ?? []),
         };
 

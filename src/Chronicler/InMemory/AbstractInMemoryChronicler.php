@@ -67,7 +67,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 
     public function filterStreamNames(StreamName ...$streamNames): array
     {
-        $filteredStreamNames = $this->eventStreamProvider->filterByStreams($streamNames);
+        $filteredStreamNames = $this->eventStreamProvider->filterByAscendantStreams($streamNames);
 
         return array_map(
             static fn (string $streamName): StreamName => new StreamName($streamName),
@@ -77,7 +77,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 
     public function filterCategoryNames(string ...$categoryNames): array
     {
-        return $this->eventStreamProvider->filterByCategories($categoryNames);
+        return $this->eventStreamProvider->filterByAscendantCategories($categoryNames);
     }
 
     public function hasStream(StreamName $streamName): bool

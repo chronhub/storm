@@ -24,7 +24,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         $this->eventStreams = new Collection();
     }
 
-    public function createStream(string $streamName, ?string $tableName, ?string $category = null): bool
+    public function createStream(string $streamName, ?string $streamTable, ?string $category = null): bool
     {
         if ($this->eventStreams->has($streamName)) {
             return false;
@@ -46,7 +46,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         return true;
     }
 
-    public function filterByStreams(array $streamNames): array
+    public function filterByAscendantStreams(array $streamNames): array
     {
         foreach ($streamNames as &$streamName) {
             if ($streamName instanceof StreamName) {
@@ -56,14 +56,14 @@ final readonly class InMemoryEventStream implements EventStreamProvider
 
         return $this->eventStreams->filter(
             static fn (?string $category, string $streamName) => is_null($category) && in_array($streamName, $streamNames, true)
-        )->keys()->toArray();
+        )->sortKeys()->keys()->toArray();
     }
 
-    public function filterByCategories(array $categoryNames): array
+    public function filterByAscendantCategories(array $categoryNames): array
     {
         return $this->eventStreams->filter(
             static fn (?string $category) => is_string($category) && in_array($category, $categoryNames, true)
-        )->keys()->toArray();
+        )->sortKeys()->keys()->toArray();
     }
 
     public function allWithoutInternal(): array

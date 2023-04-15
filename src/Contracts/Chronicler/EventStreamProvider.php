@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Chronicler;
 
+use Chronhub\Storm\Stream\StreamName;
+
 interface EventStreamProvider
 {
     /**
      * Create new stream
      *
      * @param non-empty-string      $streamName
-     * @param non-empty-string|null $tableName
      * @param non-empty-string|null $category
      */
-    public function createStream(string $streamName, ?string $tableName, ?string $category = null): bool;
+    public function createStream(string $streamName, ?string $streamTable, ?string $category = null): bool;
 
     /**
      * Delete stream by name
@@ -23,9 +24,10 @@ interface EventStreamProvider
     public function deleteStream(string $streamName): bool;
 
     /**
-     * @return array{string}
+     * @param  array<string|StreamName> $streamNames
+     * @return array<string>
      */
-    public function filterByStreams(array $streamNames): array;
+    public function filterByAscendantStreams(array $streamNames): array;
 
     /**
      * Filter categories by names
@@ -33,7 +35,7 @@ interface EventStreamProvider
      * @param  array<string> $categoryNames
      * @return array<string>
      */
-    public function filterByCategories(array $categoryNames): array;
+    public function filterByAscendantCategories(array $categoryNames): array;
 
     /**
      * Filter streams without internal streams which start with dollar sign "$"

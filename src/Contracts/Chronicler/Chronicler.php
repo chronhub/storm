@@ -24,6 +24,8 @@ interface Chronicler extends ReadOnlyChronicler
     public function amend(Stream $stream): void;
 
     /**
+     * Delete the given event stream.
+     *
      * @throws StreamNotFound
      */
     public function delete(StreamName $streamName): void;

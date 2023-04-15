@@ -8,13 +8,11 @@ use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(InMemoryEventStream::class)]
 final class InMemoryEventStreamTest extends UnitTestCase
 {
-    #[Test]
-    public function it_create_new_event_stream(): void
+    public function testCreateStream(): void
     {
         $eventStream = new InMemoryEventStream();
 
@@ -26,8 +24,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertTrue($eventStream->hasRealStreamName('balance'));
     }
 
-    #[Test]
-    public function it_return_false_when_event_stream_already_exists_on_create(): void
+    public function testReturnFalseWhenStreamAlreadyExists(): void
     {
         $eventStream = new InMemoryEventStream();
 
@@ -41,8 +38,7 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertFalse($eventStream->createStream('balance', null, 'operation'));
     }
 
-    #[Test]
-    public function it_create_new_event_stream_with_category(): void
+    public function testCreateCategory(): void
     {
         $eventStream = new InMemoryEventStream();
 
@@ -51,11 +47,10 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertTrue($created);
         $this->assertTrue($eventStream->hasRealStreamName('add'));
 
-        $this->assertEquals(['add'], $eventStream->filterByCategories(['operation']));
+        $this->assertEquals(['add'], $eventStream->filterByAscendantCategories(['operation']));
     }
 
-    #[Test]
-    public function it_filter_by_event_streams_by_string_or_instance_of_stream_name(): void
+    public function testFilterByAscendantStreamNames(): void
     {
         $eventStream = new InMemoryEventStream();
 
@@ -63,18 +58,31 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $eventStream->createStream('add', null);
 
         $this->assertEquals(
-            ['subtract', 'add'],
-            $eventStream->filterByStreams([new StreamName('subtract'), 'add'])
+            ['add', 'subtract'],
+            $eventStream->filterByAscendantStreams([new StreamName('subtract'), 'add'])
         );
 
         $this->assertEquals(
-            ['subtract', 'add'],
-            $eventStream->filterByStreams(['subtract', new StreamName('add'), ' balance'])
+            ['add', 'subtract'],
+            $eventStream->filterByAscendantStreams(['subtract', new StreamName('add'), ' balance', 'foo'])
         );
     }
 
-    #[Test]
-    public function it_filter_all_streams_without_internal(): void
+    public function testFilterCategoriesByAscendantStreamNames(): void
+    {
+        $eventStream = new InMemoryEventStream();
+
+        $eventStream->createStream('subtract', null, 'op');
+        $eventStream->createStream('add', null, 'op');
+        $eventStream->createStream('divide', null, 'op');
+
+        $this->assertEquals(
+            ['add', 'divide', 'subtract'],
+            $eventStream->filterByAscendantCategories(['subtract', 'add', 'op', 'foo', 'divide'])
+        );
+    }
+
+    public function testFilterAllStreamWithoutInternal(): void
     {
         $eventStream = new InMemoryEventStream();
 
@@ -88,14 +96,14 @@ final class InMemoryEventStreamTest extends UnitTestCase
         $this->assertEquals(['subtract', 'add'], $eventStream->allWithoutInternal());
     }
 
-    #[Test]
-    public function it_delete_event_stream(): void
+    public function testDeleteStream(): void
     {
         $eventStream = new InMemoryEventStream();
 
         $this->assertFalse($eventStream->hasRealStreamName('balance'));
         $this->assertFalse($eventStream->deleteStream('balance'));
 
+        /** @phpstan-ignore-next-line  */
         $created = $eventStream->createStream('balance', '');
 
         $this->assertTrue($created);

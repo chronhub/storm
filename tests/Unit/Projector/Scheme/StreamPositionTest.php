@@ -59,7 +59,7 @@ final class StreamPositionTest extends UnitTestCase
     public function testDiscoverCategoryStreams(): void
     {
         $this->eventStreamProvider->expects($this->once())
-            ->method('filterByCategories')
+            ->method('filterByAscendantCategories')
             ->with(['account', 'customer'])
             ->willReturn(['customer-123', 'account-123']);
 
