@@ -10,6 +10,8 @@ use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use DateTimeImmutable;
+use DateTimeZone;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use function array_keys;
@@ -24,11 +26,11 @@ final class SortStreamIteratorTest extends UnitTestCase
 
         $iterator = new SortStreamIterator(array_keys($streams), ...array_values($streams));
 
-        $this->assertEquals(3, $iterator->numberOfIterators);
+        $this->assertSame(3, $iterator->numberOfIterators);
 
-        $this->assertEquals('stream_1', $iterator->originalIteratorOrder[0][1]);
-        $this->assertEquals('stream_2', $iterator->originalIteratorOrder[1][1]);
-        $this->assertEquals('stream_3', $iterator->originalIteratorOrder[2][1]);
+        $this->assertSame('stream_1', $iterator->originalIteratorOrder[0][1]);
+        $this->assertSame('stream_2', $iterator->originalIteratorOrder[1][1]);
+        $this->assertSame('stream_3', $iterator->originalIteratorOrder[2][1]);
     }
 
     public function testAssertValid(): void
@@ -51,13 +53,15 @@ final class SortStreamIteratorTest extends UnitTestCase
             $count++;
 
             if ($count === 1) {
-                $this->assertEquals('stream_3', $iterator->streamName());
-                $this->assertEquals('2019-05-10T10:18:19.388500', $event->header(Header::EVENT_TIME));
+                $this->assertSame('stream_3', $iterator->streamName());
+                $this->assertEquals(
+                    new DateTimeImmutable('2019-05-10T10:18:19.388500', new DateTimeZone('UTC')),
+                    $event->header(Header::EVENT_TIME));
             }
 
             if ($count === 9) {
-                $this->assertEquals('stream_1', $iterator->streamName());
-                $this->assertEquals('2019-05-10T10:18:19.388520', $event->header(Header::EVENT_TIME));
+                $this->assertSame('stream_1', $iterator->streamName());
+                $this->assertSame('2019-05-10T10:18:19.388520', $event->header(Header::EVENT_TIME));
             }
         }
     }
@@ -140,11 +144,17 @@ final class SortStreamIteratorTest extends UnitTestCase
         $events = [
             SomeEvent::fromContent([])
                 ->withHeader(EventHeader::INTERNAL_POSITION, 1)
-                ->withHeader(Header::EVENT_TIME, '2019-05-10T10:18:19.388500'),
+                ->withHeader(
+                    Header::EVENT_TIME,
+                    new DateTimeImmutable('2019-05-10T10:18:19.388500', new DateTimeZone('UTC'))
+                ),
 
             SomeEvent::fromContent([])
                 ->withHeader(EventHeader::INTERNAL_POSITION, 3)
-                ->withHeader(Header::EVENT_TIME, '2019-05-10T10:18:19.388503'),
+                ->withHeader(
+                    Header::EVENT_TIME,
+                    new DateTimeImmutable('2019-05-10T10:18:19.388503', new DateTimeZone('UTC'))
+                ),
         ];
 
         foreach ($events as $event) {
