@@ -21,14 +21,15 @@ final class NameReporterService implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
-            $message = $story->message();
+        $this->messageListeners[] = $tracker->onDispatch(
+            function (MessageStory $story): void {
+                $message = $story->message();
 
-            if ($message->hasNot(Header::REPORTER_ID)) {
-                $story->withMessage(
-                    $message->withHeader(Header::REPORTER_ID, $this->serviceId)
-                );
-            }
+                if ($message->hasNot(Header::REPORTER_ID)) {
+                    $story->withMessage(
+                        $message->withHeader(Header::REPORTER_ID, $this->serviceId)
+                    );
+                }
         }, OnDispatchPriority::MESSAGE_FACTORY->value - 1);
     }
 }

@@ -28,26 +28,27 @@ final class HandleRoute implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
-            $message = $story->message();
+        $this->messageListeners[] = $tracker->onDispatch(
+            function (MessageStory $story): void {
+                $message = $story->message();
 
-            $isSync = $this->producerUnity->isSync($message);
+                $isSync = $this->producerUnity->isSync($message);
 
-            if (! $isSync) {
-                $queueOptions = $this->routeLocator->onQueue($message);
+                if (! $isSync) {
+                    $queueOptions = $this->routeLocator->onQueue($message);
 
-                if (is_array($queueOptions) && count($queueOptions) > 0) {
-                    $message = $message->withHeader('queue', $queueOptions);
+                    if (is_array($queueOptions) && count($queueOptions) > 0) {
+                        $message = $message->withHeader('queue', $queueOptions);
+                    }
                 }
-            }
 
-            $dispatchedMessage = $this->messageProducer->produce($message);
+                $dispatchedMessage = $this->messageProducer->produce($message);
 
-            $story->withMessage($dispatchedMessage);
+                $story->withMessage($dispatchedMessage);
 
-            if ($isSync) {
-                $story->withConsumers($this->routeLocator->route($dispatchedMessage));
-            }
+                if ($isSync) {
+                    $story->withConsumers($this->routeLocator->route($dispatchedMessage));
+                }
         }, OnDispatchPriority::ROUTE->value);
     }
 }

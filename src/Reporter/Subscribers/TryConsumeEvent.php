@@ -19,24 +19,25 @@ final class TryConsumeEvent implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(static function (MessageStory $story): void {
-            $exceptions = [];
+        $this->messageListeners[] = $tracker->onDispatch(
+            static function (MessageStory $story): void {
+                $exceptions = [];
 
-            foreach ($story->consumers() as $consumer) {
-                try {
-                    $consumer($story->message()->event());
-                } catch (Throwable $exception) {
-                    $exceptions[] = $exception;
+                foreach ($story->consumers() as $consumer) {
+                    try {
+                        $consumer($story->message()->event());
+                    } catch (Throwable $exception) {
+                        $exceptions[] = $exception;
+                    }
                 }
-            }
 
-            $story->markHandled(true);
+                $story->markHandled(true);
 
-            if (count($exceptions) > 0) {
-                $story->withRaisedException(
-                    MessageCollectedException::fromExceptions(...$exceptions)
-                );
-            }
+                if (count($exceptions) > 0) {
+                    $story->withRaisedException(
+                        MessageCollectedException::fromExceptions(...$exceptions)
+                    );
+                }
         }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

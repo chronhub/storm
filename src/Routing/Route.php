@@ -25,7 +25,9 @@ class Route implements JsonSerializable
     public function __construct(private readonly string $name)
     {
         if (! class_exists($this->name)) {
-            throw new RoutingViolation(sprintf('Message name must be a valid class name, got %s', $this->name));
+            throw new RoutingViolation(
+                sprintf('Message name must be a valid class name, got %s', $this->name)
+            );
         }
     }
 
@@ -45,11 +47,9 @@ class Route implements JsonSerializable
 
     public function onQueue(array $queueOptions = []): static
     {
-        if (count($queueOptions) === 0) {
-            return $this;
+        if (count($queueOptions) > 0) {
+            $this->queue = $queueOptions;
         }
-
-        $this->queue = $queueOptions;
 
         return $this;
     }

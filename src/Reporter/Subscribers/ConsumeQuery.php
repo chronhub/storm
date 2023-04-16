@@ -18,26 +18,27 @@ final class ConsumeQuery implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(static function (MessageStory $story): void {
-            $consumer = $story->consumers()->current();
+        $this->messageListeners[] = $tracker->onDispatch(
+            static function (MessageStory $story): void {
+                $consumer = $story->consumers()->current();
 
-            if ($consumer === null) {
-                $story->markHandled(false);
+                if ($consumer === null) {
+                    $story->markHandled(false);
 
-                return;
-            }
+                    return;
+                }
 
-            $deferred = new Deferred();
+                $deferred = new Deferred();
 
-            try {
-                $consumer($story->message()->event(), $deferred);
-            } catch (Throwable $exception) {
-                $deferred->reject($exception);
-            } finally {
-                $story->withPromise($deferred->promise());
+                try {
+                    $consumer($story->message()->event(), $deferred);
+                } catch (Throwable $exception) {
+                    $deferred->reject($exception);
+                } finally {
+                    $story->withPromise($deferred->promise());
 
-                $story->markHandled(true);
-            }
+                    $story->markHandled(true);
+                }
         }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

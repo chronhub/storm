@@ -79,9 +79,10 @@ abstract class Group implements JsonSerializable
      */
     private array $rules = [];
 
-    public function __construct(public readonly string $name,
-                                public readonly RouteCollection $routes)
-    {
+    public function __construct(
+        public readonly string $name,
+        public readonly RouteCollection $routes
+    ) {
     }
 
     public function reporterId(): ?string
@@ -105,7 +106,9 @@ abstract class Group implements JsonSerializable
     {
         if (! is_a($reporterConcrete, Reporter::class, true)) {
             throw new RoutingViolation(
-                sprintf('Reporter concrete class %s must be an instance of %s', $reporterConcrete, Reporter::class)
+                sprintf('Reporter concrete class %s must be an instance of %s',
+                    $reporterConcrete, Reporter::class
+                )
             );
         }
 

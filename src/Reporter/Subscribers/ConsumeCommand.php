@@ -17,16 +17,17 @@ final class ConsumeCommand implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(static function (MessageStory $story): void {
-            $messageHandler = $story->consumers()->current();
+        $this->messageListeners[] = $tracker->onDispatch(
+            static function (MessageStory $story): void {
+                $messageHandler = $story->consumers()->current();
 
-            if ($messageHandler) {
-                $messageHandler($story->message()->event());
-            }
+                if ($messageHandler) {
+                    $messageHandler($story->message()->event());
+                }
 
-            if ($messageHandler !== null || $story->message()->header(Header::EVENT_DISPATCHED) === true) {
-                $story->markHandled(true);
-            }
+                if ($messageHandler !== null || $story->message()->header(Header::EVENT_DISPATCHED) === true) {
+                    $story->markHandled(true);
+                }
         }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

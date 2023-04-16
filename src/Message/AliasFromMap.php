@@ -8,9 +8,6 @@ use Chronhub\Storm\Contracts\Message\MessageAlias;
 use InvalidArgumentException;
 use function class_exists;
 
-/**
- * @deprecated
- */
 final readonly class AliasFromMap implements MessageAlias
 {
     public function __construct(private iterable $map)

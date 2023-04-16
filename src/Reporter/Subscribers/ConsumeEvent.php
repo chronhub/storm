@@ -16,13 +16,14 @@ final class ConsumeEvent implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(static function (MessageStory $story): void {
-            foreach ($story->consumers() as $consumer) {
-                $consumer($story->message()->event());
-            }
+        $this->messageListeners[] = $tracker->onDispatch(
+            static function (MessageStory $story): void {
+                foreach ($story->consumers() as $consumer) {
+                    $consumer($story->message()->event());
+                }
 
-            // Event handlers can be empty
-            $story->markHandled(true);
+                // Event handlers can be empty
+                $story->markHandled(true);
         }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

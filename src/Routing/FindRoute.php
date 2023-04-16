@@ -20,10 +20,11 @@ use function method_exists;
 
 final readonly class FindRoute implements RouteLocator
 {
-    public function __construct(private Group $group,
-                                private MessageAlias $messageAlias,
-                                private ContainerInterface $container)
-    {
+    public function __construct(
+        private Group $group,
+        private MessageAlias $messageAlias,
+        private ContainerInterface $container
+    ) {
     }
 
     public function route(Message $message): Collection

@@ -21,10 +21,11 @@ final class MakeMessage implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
-            $message = ($this->messageFactory)($story->pullTransientMessage());
+        $this->messageListeners[] = $tracker->onDispatch(
+            function (MessageStory $story): void {
+                $message = ($this->messageFactory)($story->pullTransientMessage());
 
-            $story->withMessage($message);
+                $story->withMessage($message);
         }, OnDispatchPriority::MESSAGE_FACTORY->value);
     }
 }
