@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Message;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use InvalidArgumentException;
 use function class_exists;
+use function sprintf;
 
 final readonly class AliasFromMap implements MessageAlias
 {
@@ -27,13 +28,13 @@ final readonly class AliasFromMap implements MessageAlias
     private function determineAlias(string $eventClass): string
     {
         if (! class_exists($eventClass)) {
-            throw new InvalidArgumentException("Event class $eventClass does not exists");
+            throw new InvalidArgumentException(sprintf('Event class %s does not exists', $eventClass));
         }
 
         if ($alias = $this->map[$eventClass] ?? null) {
             return $alias;
         }
 
-        throw new InvalidArgumentException("Event class $eventClass not found in alias map");
+        throw new MessageAliasNotFound(sprintf('Event class %s not found in alias map', $eventClass));
     }
 }
