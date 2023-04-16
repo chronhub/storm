@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
+use Chronhub\Storm\Support\HasEnumStrings;
+
 enum ProjectionStatus: string
 {
+    use HasEnumStrings;
+
     case RUNNING = 'running';
 
     case STOPPING = 'stopping';
