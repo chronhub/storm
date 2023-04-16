@@ -41,7 +41,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function updateProjection(string $projectionName, array $data): bool
     {
-        $this->assertFillable($data, $projectionName);
+        $this->assertFieldsExist($data, $projectionName);
 
         $projection = $this->retrieve($projectionName);
 
@@ -124,7 +124,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->clock->isGreaterThan($currentTime, $projection->lockedUntil());
     }
 
-    private function assertFillable(array $data, string $name): void
+    private function assertFieldsExist(array $data, string $name): void
     {
         foreach (array_keys($data) as $key) {
             if (! in_array($key, $this->fillable, true)) {
