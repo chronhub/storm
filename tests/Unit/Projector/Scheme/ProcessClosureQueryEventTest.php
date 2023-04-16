@@ -102,6 +102,8 @@ final class ProcessClosureQueryEventTest extends UnitTestCase
 
     private function newProcess(): ProcessClosureEvent
     {
+        $this->assertEquals(ProjectionStatus::IDLE, $this->subscription->currentStatus());
+
         return new ProcessClosureEvent(function (DomainEvent $event, array $state): array {
             $state['count']++;
 
