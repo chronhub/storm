@@ -26,23 +26,23 @@ final class GuardCommand implements MessageSubscriber
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->onDispatch(function (MessageStory $story): void {
-            $message = $story->message();
+        $this->messageListeners[] = $tracker->onDispatch(
+            function (MessageStory $story): void {
+                $message = $story->message();
 
-            $messageName = $this->messageAlias->classToAlias($message->header(Header::EVENT_TYPE));
+                $messageName = $this->messageAlias->classToAlias($message->header(Header::EVENT_TYPE));
 
-            // note:
-            // we do not restrict command authorization to DomainCommand
-            // as dev can use command bus to dispatch and authorize naked command,
-            // we just pass the current class as context to the authorization service
-            if ($this->authorization->isNotGranted($messageName, $message, GuardCommand::class)) {
-                $story->stop(true);
+                // note:
+                // we do not restrict command authorization to DomainCommand
+                // as dev can use command bus to dispatch and authorize naked command,
+                // we just pass the current class as context to the authorization service
+                if ($this->authorization->isNotGranted($messageName, $message, GuardCommand::class)) {
+                    $story->stop(true);
 
-                throw new UnauthorizedException(
-                    sprintf('Unauthorized command %s', $messageName)
-                );
-            }
-
+                    throw new UnauthorizedException(
+                        sprintf('Unauthorized command %s', $messageName)
+                    );
+                }
         }, OnDispatchPriority::GUARD_COMMAND->value);
     }
 }
