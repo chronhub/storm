@@ -141,7 +141,6 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $connectionProvider->stop(['bar' => 1], ['foo']);
     }
 
-    /***/
     public function testStartAgainProjection(): void
     {
         $this->repository
@@ -193,7 +192,6 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $connectionProvider->startAgain();
     }
 
-    /***/
     public function testPersistProjection(): void
     {
         $this->repository
@@ -249,7 +247,6 @@ final class InMemoryRepositoryTest extends UnitTestCase
         $connectionProvider->persist(['bar' => 1], ['foo']);
     }
 
-    /***/
     public function testResetProjection(): void
     {
         $this->repository

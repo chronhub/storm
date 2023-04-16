@@ -4,31 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
-use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
-use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
-use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
+use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
-use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
-use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectQuery;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -36,29 +23,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AbstractSubscriptionFactory::class)]
 #[CoversClass(InMemorySubscriptionFactory::class)]
 #[CoversClass(ProjectQuery::class)]
-final class QuerySubscriptionManagerTest extends UnitTestCase
+final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCase
 {
-    private SystemClock $clock;
-
-    private EventStreamProvider $eventStreamProvider;
-
-    private ProjectionProvider $projectionProvider;
-
-    private Chronicler $eventStore;
-
     private StreamName $streamName;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->clock = new PointInTime();
-        $this->eventStreamProvider = new InMemoryEventStream();
-        $this->projectionProvider = new InMemoryProjectionProvider($this->clock);
-        $this->eventStore = new StandaloneInMemoryChronicler(
-            $this->eventStreamProvider,
-            new DetermineStreamCategory()
-        );
 
         $this->streamName = new StreamName('balance');
     }
@@ -67,7 +38,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $this->feedEventStore(1);
+        $this->feedEventStore($this->streamName, V4AggregateId::create(), 1);
 
         $subscription = $manager->query();
 
@@ -88,7 +59,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $this->feedEventStore(10);
+        $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
         $subscription = $manager->query();
 
@@ -110,7 +81,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $this->feedEventStore(10);
+        $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
         $subscription = $manager->query();
 
@@ -154,7 +125,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
 
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $this->feedEventStore(10);
+        $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
         $subscription = $manager->query();
 
@@ -176,7 +147,7 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $this->feedEventStore(10);
+        $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
         $subscription = $manager->query();
 
@@ -196,37 +167,5 @@ final class QuerySubscriptionManagerTest extends UnitTestCase
         $subscription->reset();
 
         $this->assertEquals(0, $subscription->getState()['count']);
-    }
-
-    private function createSubscriptionFactory(): AbstractSubscriptionFactory
-    {
-        return new InMemorySubscriptionFactory(
-            $this->eventStore,
-            $this->projectionProvider,
-            $this->eventStreamProvider,
-            new InMemoryQueryScope(),
-            $this->clock,
-            new AliasFromClassName(),
-            new ProjectorJsonSerializer(),
-            new InMemoryProjectionOption(),
-        );
-    }
-
-    private function feedEventStore(int $expectedEvents): void
-    {
-        $this->eventStreamProvider->createStream($this->streamName->name, null);
-
-        $streamEvents = [];
-
-        $i = 1;
-        while ($i !== $expectedEvents + 1) {
-            $streamEvents[] = SomeEvent::fromContent(['amount' => $i])->withHeader(
-                EventHeader::AGGREGATE_VERSION, $i
-            );
-
-            $i++;
-        }
-
-        $this->eventStore->amend(new Stream($this->streamName, $streamEvents));
     }
 }

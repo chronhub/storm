@@ -7,6 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -32,7 +34,17 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     public function testCreateProjection(string $status): void
     {
         $this->assertTrue($this->projectionProvider->createProjection('projection1', $status));
-        $this->assertFalse($this->projectionProvider->createProjection('projection1', $status));
+    }
+
+    #[DataProvider('provideStatus')]
+    public function testExceptionRaisedWhenCreateProjection(string $status): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Projection projection1 already exists');
+
+        $this->assertTrue($this->projectionProvider->createProjection('projection1', $status));
+
+        $this->projectionProvider->createProjection('projection1', $status);
     }
 
     public function testUpdateProjection(): void
@@ -64,13 +76,13 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->projectionProvider->createProjection('projection1', 'status1');
 
         $this->assertTrue($this->projectionProvider->updateProjection('projection1', ['state' => 'state1']));
-        $this->assertFalse($this->projectionProvider->updateProjection('projection2', ['state' => 'state1']));
 
         $this->projectionProvider->updateProjection('projection1', ['invalid_field' => 'value']);
     }
 
     public function testDeleteProjection(): void
     {
+        $this->expectException(ProjectionNotFound::class);
         $this->assertFalse($this->projectionProvider->exists('projection1'));
 
         $this->projectionProvider->createProjection('projection1', 'status1');
@@ -78,7 +90,8 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->assertTrue($this->projectionProvider->exists('projection1'));
 
         $this->assertTrue($this->projectionProvider->deleteProjection('projection1'));
-        $this->assertFalse($this->projectionProvider->deleteProjection('projection2'));
+
+        $this->projectionProvider->deleteProjection('projection2');
     }
 
     public function testAcquireLock(): void
@@ -86,7 +99,15 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $this->projectionProvider->createProjection('projection1', 'status1');
 
         $this->assertTrue($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2', '2023-04-03 15:00:00'));
-        $this->assertFalse($this->projectionProvider->acquireLock('projection2', 'status2', 'locked_until2', '2023-04-03 15:00:00'));
+    }
+
+    public function testExceptionRaisedWhenAcquireLockOnProjectionNotFound(): void
+    {
+        $this->expectException(ProjectionNotFound::class);
+
+        $this->projectionProvider->createProjection('projection1', 'status1');
+
+        $this->projectionProvider->acquireLock('projection2', 'status2', 'locked_until2', '2023-04-03 15:00:00');
     }
 
     public function testDoesNotAcquireLockWhenCurrentTimeIsGreaterThanLock(): void

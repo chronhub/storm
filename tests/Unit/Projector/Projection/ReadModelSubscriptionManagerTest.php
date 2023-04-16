@@ -5,29 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
-use Chronhub\Storm\Chronicler\InMemory\StandaloneInMemoryChronicler;
-use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
-use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
-use Chronhub\Storm\Projector\InMemoryQueryScope;
 use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
-use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
-use Chronhub\Storm\Stream\DetermineStreamCategory;
-use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -37,17 +22,16 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(AbstractSubscriptionFactory::class)]
 #[CoversClass(InMemorySubscriptionFactory::class)]
 #[CoversClass(ProjectReadModel::class)]
-final class ReadModelSubscriptionManagerTest extends UnitTestCase
+final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTestCase
 {
-    private SystemClock $clock;
-
-    private EventStreamProvider $eventStreamProvider;
-
-    private ProjectionProvider $projectionProvider;
-
-    private Chronicler $eventStore;
-
     private StreamName $streamName;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->streamName = new StreamName('balance');
+    }
 
     public function testInstance(): void
     {
@@ -60,7 +44,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 1;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
         $this->assertSame('read_balance', $projection->getStreamName());
@@ -102,7 +86,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
 
@@ -149,7 +133,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
 
@@ -202,7 +186,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
 
@@ -255,7 +239,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
 
@@ -308,7 +292,7 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $aggregateId = V4AggregateId::create();
         $expectedEvents = 10;
 
-        $this->feedEventStore($aggregateId, $expectedEvents);
+        $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->readModel('read_balance', $readModel);
 
@@ -347,54 +331,5 @@ final class ReadModelSubscriptionManagerTest extends UnitTestCase
         $this->assertEmpty($readModel->getContainer());
         $this->assertTrue($this->eventStore->hasStream($this->streamName));
         $this->assertFalse($this->projectionProvider->exists('read_balance'));
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->clock = new PointInTime();
-        $this->eventStreamProvider = new InMemoryEventStream();
-        $this->projectionProvider = new InMemoryProjectionProvider($this->clock);
-        $this->eventStore = new StandaloneInMemoryChronicler(
-            $this->eventStreamProvider,
-            new DetermineStreamCategory()
-        );
-
-        $this->streamName = new StreamName('balance');
-    }
-
-    private function createSubscriptionFactory(): AbstractSubscriptionFactory
-    {
-        return new InMemorySubscriptionFactory(
-            $this->eventStore,
-            $this->projectionProvider,
-            $this->eventStreamProvider,
-            new InMemoryQueryScope(),
-            $this->clock,
-            new AliasFromClassName(),
-            new ProjectorJsonSerializer(),
-            new InMemoryProjectionOption(),
-        );
-    }
-
-    private function feedEventStore(AggregateIdentity $aggregateId, int $expectedEvents): void
-    {
-        $this->eventStreamProvider->createStream($this->streamName->name, null);
-
-        $streamEvents = [];
-
-        $i = 1;
-        while ($i !== $expectedEvents + 1) {
-            $streamEvents[] = SomeEvent::fromContent(['amount' => $i])
-                ->withHeader(Header::EVENT_TIME, $this->clock->now()->format($this->clock->getFormat()))
-                ->withHeader(EventHeader::AGGREGATE_ID, $aggregateId->toString())
-                ->withHeader(EventHeader::AGGREGATE_ID_TYPE, $aggregateId::class)
-                ->withHeader(EventHeader::AGGREGATE_VERSION, $i);
-
-            $i++;
-        }
-
-        $this->eventStore->amend(new Stream($this->streamName, $streamEvents));
     }
 }

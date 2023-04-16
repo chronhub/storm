@@ -8,6 +8,8 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Illuminate\Support\Collection;
 use function array_key_exists;
 use function array_keys;
@@ -31,7 +33,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
     public function createProjection(string $projectionName, string $status): bool
     {
         if ($this->exists($projectionName)) {
-            return false;
+            throw new RuntimeException(sprintf('Projection %s already exists', $projectionName));
         }
 
         $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $status));
@@ -65,13 +67,13 @@ final class InMemoryProjectionProvider implements ProjectionProvider
             return true;
         }
 
-        return false;
+        throw ProjectionNotFound::withName($projectionName);
     }
 
     public function deleteProjection(string $projectionName): bool
     {
         if (! $this->projections->has($projectionName)) {
-            return false;
+            throw ProjectionNotFound::withName($projectionName);
         }
 
         $this->projections->forget($projectionName);
@@ -84,7 +86,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         $projection = $this->retrieve($projectionName);
 
         if (! $projection instanceof InMemoryProjection) {
-            return false;
+            throw ProjectionNotFound::withName($projectionName);
         }
 
         if ($this->shouldUpdateLock($projection, $datetime)) {

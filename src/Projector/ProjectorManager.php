@@ -131,10 +131,6 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
                 ['status' => $projectionStatus->value]
             );
         } catch (Throwable $exception) {
-            //fixMe
-            // repository should throw ProjectionNotFound if projection does not exist
-            // and raised exception if update failed
-            // or keep encapsulation and handled previous exception
             throw ProjectionFailed::failedOnUpdateStatus($projectionName, $projectionStatus, $exception);
         }
 
