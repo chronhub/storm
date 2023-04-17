@@ -14,8 +14,6 @@ interface SystemClock extends ClockInterface
 
     public function format(string|DateTimeImmutable $pointInTime): string;
 
-    public function getFormat(): string;
-
     /**
      * Compare now datetime greater than given point in time.
      */
@@ -30,4 +28,6 @@ interface SystemClock extends ClockInterface
      * Compare now datetime subtracted by interval with given point in time.
      */
     public function isNowSubGreaterThan(string|DateInterval $interval, string|DateTimeImmutable $pointInTime): bool;
+
+    public function getFormat(): string;
 }

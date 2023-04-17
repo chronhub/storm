@@ -133,13 +133,13 @@ abstract readonly class AbstractAggregateRepository implements AggregateReposito
     }
 
     /**
-     * @return array{DomainEvent}
+     * @return array{DomainEvent}|array
      */
     protected function releaseDecoratedEvents(AggregateRoot $aggregateRoot): array
     {
         $events = $aggregateRoot->releaseEvents();
 
-        if (count($events) === 0) {
+        if (! reset($events)) {
             return [];
         }
 

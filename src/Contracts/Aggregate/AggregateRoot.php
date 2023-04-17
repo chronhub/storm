@@ -10,12 +10,12 @@ use Generator;
 interface AggregateRoot
 {
     /**
-     * @param Generator<int, DomainEvent> $events
+     * @param Generator<DomainEvent> $events
      */
     public static function reconstitute(AggregateIdentity $aggregateId, Generator $events): ?static;
 
     /**
-     * @return array{DomainEvent}
+     * @return array{DomainEvent}|array
      */
     public function releaseEvents(): array;
 

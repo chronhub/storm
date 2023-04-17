@@ -26,7 +26,7 @@ final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler i
     protected bool $inTransaction = false;
 
     /**
-     * @var array<DomainEvent>
+     * @var array<DomainEvent>|array
      */
     protected array $unpublishedEvents = [];
 
