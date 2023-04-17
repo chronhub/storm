@@ -15,17 +15,15 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 
 final class HasDomainTest extends UnitTestCase
 {
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_test_domain_content(Reporting $domain): void
+    public function testDomainTypeContent(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
 
-        $this->assertEquals(['name' => 'steph bug'], $domain->toContent());
+        $this->assertEquals(['foo' => 'bar'], $domain->toContent());
 
         if ($domain instanceof DomainCommand) {
             $this->assertEquals(DomainType::COMMAND, $domain->type());
@@ -41,8 +39,7 @@ final class HasDomainTest extends UnitTestCase
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_add_header_and_return_new_instance_of_domain(Reporting $domain): void
+    public function testAddHeaderAndReturnNewInstance(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
 
@@ -57,12 +54,11 @@ final class HasDomainTest extends UnitTestCase
         $this->assertNull($cloned->header('unknown header'));
         $this->assertEquals('steph bug', $cloned->header('name'));
         $this->assertEquals(['name' => 'steph bug'], $cloned->headers());
-        $this->assertEquals(['name' => 'steph bug'], $cloned->toContent());
+        $this->assertEquals(['foo' => 'bar'], $cloned->toContent());
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_add_headers_and_return_new_domain_instance(Reporting $domain): void
+    public function testAddManyHeadersAndReturnNewInstance(Reporting $domain): void
     {
         $this->assertEmpty($domain->headers());
 
@@ -77,12 +73,12 @@ final class HasDomainTest extends UnitTestCase
         $this->assertNull($cloned->header('unknown'));
         $this->assertEquals('steph bug', $cloned->header('name'));
         $this->assertEquals(['name' => 'steph bug'], $cloned->headers());
-        $this->assertEquals(['name' => 'steph bug'], $cloned->toContent());
+        $this->assertEquals(['foo' => 'bar'], $cloned->toContent());
     }
 
     public static function provideDomain(): Generator
     {
-        $content = ['name' => 'steph bug'];
+        $content = ['foo' => 'bar'];
 
         yield [SomeCommand::fromContent($content)];
         yield [SomeEvent::fromContent($content)];

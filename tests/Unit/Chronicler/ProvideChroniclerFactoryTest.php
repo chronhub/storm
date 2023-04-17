@@ -19,12 +19,23 @@ use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 #[CoversClass(ProvideChroniclerFactory::class)]
 final class ProvideChroniclerFactoryTest extends UnitTestCase
 {
+    private ContainerInterface|MockObject $container;
+
+    private Closure $containerAsClosure;
+
+    protected function setUp(): void
+    {
+        $this->container = $this->createMock(ContainerInterface::class);
+        $this->containerAsClosure = fn (): ContainerInterface => $this->container;
+    }
+
     public function testExceptionRaisedWhenEventStoreGivenIsAlreadyADecorator(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -32,25 +43,13 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
 
         $chronicler = $this->createMock(EventableChronicler::class);
 
-        $container = $this->createMock(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $container;
+        $factory = $this->newChroniclerFactory($chronicler, function (Chronicler|MockObject $chronicler): Chronicler {
+            /** @var ChroniclerFactory $this */
+            /** @phpstan-ignore-next-line  */
+            return $this->decorateChronicler($chronicler, null);
+        });
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
-
-            public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
-                return $this->decorateChronicler($this->chronicler, null);
-            }
-        };
-
-        $provider->createEventStore('foo', []);
+        $factory->createEventStore('foo', []);
     }
 
     public function testExceptionRaisedWhenStreamTrackerMissing(): void
@@ -59,89 +58,70 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
         $this->expectExceptionMessage('Unable to decorate chronicler');
 
         $chronicler = $this->createMock(Chronicler::class);
-        $container = $this->createMock(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $container;
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $factory = $this->newChroniclerFactory($chronicler, function (Chronicler|MockObject $chronicler): Chronicler {
+            /** @var ChroniclerFactory $this */
+            /** @phpstan-ignore-next-line  */
+            return $this->decorateChronicler($chronicler, null);
+        });
 
-            public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
-                return $this->decorateChronicler($this->chronicler, null);
-            }
-        };
-
-        $provider->createEventStore('foo', []);
+        $factory->createEventStore('foo', []);
     }
 
     public function testTrackerIdResolvedFromIoc(): void
     {
         $chronicler = $this->createMock(Chronicler::class);
-        $container = $this->createMock(ContainerInterface::class);
 
-        $container->expects($this->once())->method('get')->with('tracker.stream.default')->willReturn(new TrackStream());
-        $containerAsClosure = fn (): ContainerInterface => $container;
+        $this->container
+            ->expects($this->once())
+            ->method('get')
+            ->with('tracker.stream.default')
+            ->willReturn(new TrackStream());
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $factory = $this->newChroniclerFactory(
+            $chronicler,
+            function (Chronicler|MockObject $chronicler, array $config): Chronicler {
+                /** @var ChroniclerFactory $this */
 
-            public function __construct(Closure $containerAsClosure, private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
+                /** @phpstan-ignore-next-line */
                 $streamTracker = $this->resolveStreamTracker($config);
 
                 TestCase::assertEquals(TrackStream::class, $streamTracker::class);
 
-                return $this->decorateChronicler($this->chronicler, $streamTracker);
-            }
-        };
+                /** @phpstan-ignore-next-line */
+                return $this->decorateChronicler($chronicler, $streamTracker);
+        });
 
-        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.default']]);
+        $chronicler = $factory->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.default']]);
 
         $this->assertEquals(EventChronicler::class, $chronicler::class);
     }
 
     public function testTransactionalTrackerIdResolvedFromIoc(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())->method('get')->with('tracker.stream.transactional')->willReturn(new TrackTransactionalStream());
-
-        $containerAsClosure = fn (): ContainerInterface => $container;
+        $this->container
+            ->expects($this->once())
+            ->method('get')
+            ->with('tracker.stream.transactional')
+            ->willReturn(new TrackTransactionalStream());
 
         $chronicler = $this->createMock(TransactionalChronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $factory = $this->newChroniclerFactory(
+            $chronicler,
+            function (Chronicler|MockObject $chronicler, array $config): Chronicler {
+                /** @var ChroniclerFactory $this */
 
-            public function __construct(Closure $containerAsClosure,
-                                        private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
+                /** @phpstan-ignore-next-line */
                 $streamTracker = $this->resolveStreamTracker($config);
 
                 TestCase::assertEquals(TrackTransactionalStream::class, $streamTracker::class);
 
-                return $this->decorateChronicler($this->chronicler, $streamTracker);
-            }
-        };
+                /** @phpstan-ignore-next-line */
+                return $this->decorateChronicler($chronicler, $streamTracker);
+        });
 
-        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
+        $chronicler = $factory->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
 
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
@@ -151,36 +131,26 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
-        $container = $this->createMock(ContainerInterface::class);
-
-        $container->expects($this->once())
+        $this->container->expects($this->once())
             ->method('get')
             ->with('tracker.stream.transactional')
             ->willReturn(new TrackTransactionalStream());
 
-        $containerAsClosure = fn (): ContainerInterface => $container;
-
         $chronicler = $this->createMock(Chronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $provider = $this->newChroniclerFactory(
+            $chronicler,
+            function (Chronicler|MockObject $chronicler, array $config): Chronicler {
+                /** @var ChroniclerFactory $this */
 
-            public function __construct(Closure $containerAsClosure,
-                                        private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
+                /** @phpstan-ignore-next-line */
                 $streamTracker = $this->resolveStreamTracker($config);
 
                 TestCase::assertEquals(TrackTransactionalStream::class, $streamTracker::class);
 
-                return $this->decorateChronicler($this->chronicler, $streamTracker);
-            }
-        };
+                /** @phpstan-ignore-next-line */
+                return $this->decorateChronicler($chronicler, $streamTracker);
+            });
 
         $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
 
@@ -192,37 +162,29 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
 
-        $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())
+        $this->container->expects($this->once())
             ->method('get')
             ->with('tracker.stream.not_transactional')
             ->willReturn(new TrackStream());
 
-        $containerAsClosure = fn (): ContainerInterface => $container;
-
         $chronicler = $this->createMock(TransactionalChronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $factory = $this->newChroniclerFactory(
+            $chronicler,
+            function (Chronicler|MockObject $chronicler, array $config): Chronicler {
+                /** @var ChroniclerFactory $this */
 
-            public function __construct(Closure $containerAsClosure,
-                                        private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
+                /** @phpstan-ignore-next-line */
                 $streamTracker = $this->resolveStreamTracker($config);
 
                 TestCase::assertEquals(TrackStream::class, $streamTracker::class);
 
-                return $this->decorateChronicler($this->chronicler, $streamTracker);
+                /** @phpstan-ignore-next-line */
+                return $this->decorateChronicler($chronicler, $streamTracker);
             }
-        };
+        );
 
-        $chronicler = $provider->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.not_transactional']]);
+        $chronicler = $factory->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.not_transactional']]);
 
         $this->assertEquals(TransactionalEventChronicler::class, $chronicler::class);
     }
@@ -248,43 +210,36 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
             }
         };
 
-        $container = $this->createMock(ContainerInterface::class);
-        $container
+        $this->container
             ->method('get')
             ->willReturnMap([
                 ['tracker.stream.default', $tracker],
                 ['stream.subscribers.no_op', $noOpStreamSubscriber],
             ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $container;
-
         $chronicler = $this->createMock(Chronicler::class);
 
-        $provider = new class($containerAsClosure, $chronicler) implements ChroniclerFactory
-        {
-            use ProvideChroniclerFactory;
+        $factory = $this->newChroniclerFactory(
+            $chronicler,
+            function (Chronicler|MockObject $chronicler, array $config): Chronicler {
+                /** @var ChroniclerFactory $this */
 
-            public function __construct(Closure $containerAsClosure,
-                                        private readonly Chronicler $chronicler)
-            {
-                $this->container = $containerAsClosure();
-            }
-
-            public function createEventStore(string $name, array $config): Chronicler
-            {
+                /** @phpstan-ignore-next-line */
                 $streamTracker = $this->resolveStreamTracker($config);
 
                 TestCase::assertEquals(TrackStream::class, $streamTracker::class);
 
-                $chronicler = $this->decorateChronicler($this->chronicler, $streamTracker);
+                /** @phpstan-ignore-next-line */
+                $chronicler = $this->decorateChronicler($chronicler, $streamTracker);
 
+                /** @phpstan-ignore-next-line */
                 $this->attachStreamSubscribers($chronicler, $config['tracking']['subscribers'] ?? []);
 
                 return $chronicler;
             }
-        };
+        );
 
-        $provider->createEventStore('foo', [
+        $factory->createEventStore('foo', [
             'tracking' => [
                 'tracker_id' => 'tracker.stream.default',
                 'subscribers' => [
@@ -297,5 +252,31 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
         $noOpStreamSubscribers = $tracker->listeners()->filter(fn (Listener $listener): bool => $listener->name() === 'foo');
 
         $this->assertCount(2, $noOpStreamSubscribers);
+    }
+
+    private function newChroniclerFactory(Chronicler $chronicler, callable $callback): ChroniclerFactory
+    {
+        $containerAsClosure = $this->containerAsClosure;
+
+        return new class($containerAsClosure, $chronicler, $callback) implements ChroniclerFactory
+        {
+            use ProvideChroniclerFactory;
+
+            private Closure $callback;
+
+            public function __construct(
+                Closure $containerAsClosure,
+                public readonly Chronicler $chronicler,
+                callable $callback
+            ) {
+                $this->container = $containerAsClosure();
+                $this->callback = Closure::bind($callback, $this, self::class);
+            }
+
+            public function createEventStore(string $name, array $config): Chronicler
+            {
+                return ($this->callback)($this->chronicler, $config, $name);
+            }
+        };
     }
 }

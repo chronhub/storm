@@ -13,7 +13,6 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 
@@ -26,15 +25,14 @@ class EventTimeTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->clock = $this->createMock(SystemClock::class);
         $this->now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
     }
 
-    #[Test]
-    public function it_set_event_id_to_message_headers(): void
+    public function testAddEventTimeToHeader(): void
     {
-        $this->clock->expects($this->once())
+        $this->clock
+            ->expects($this->once())
             ->method('now')
             ->willReturn($this->now);
 
@@ -48,11 +46,10 @@ class EventTimeTest extends UnitTestCase
 
         $this->assertArrayHasKey(Header::EVENT_TIME, $decoratedMessage->headers());
 
-        $this->assertEquals($this->now, $decoratedMessage->header(Header::EVENT_TIME));
+        $this->assertSame($this->now, $decoratedMessage->header(Header::EVENT_TIME));
     }
 
-    #[Test]
-    public function it_does_not_set_event_time_to_message_headers_if_already_exists(): void
+    public function testDoesNotAddEventTimeHeaderIfAlreadyExists(): void
     {
         $pastEventTime = $this->now->sub(new DateInterval('PT1H'));
 

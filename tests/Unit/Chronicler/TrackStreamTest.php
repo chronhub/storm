@@ -12,15 +12,13 @@ use Chronhub\Storm\Tracker\InteractWithStory;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(TrackStream::class)]
 #[CoversClass(InteractWithStory::class)]
 final class TrackStreamTest extends UnitTestCase
 {
     #[DataProvider('provideEventName')]
-    #[Test]
-    public function it_create_new_story(?string $eventName = null): void
+    public function testNewStoryInstance(?string $eventName = null): void
     {
         $tracker = new TrackStream();
 
@@ -31,8 +29,7 @@ final class TrackStreamTest extends UnitTestCase
         $this->assertTrue($tracker->listeners()->isEmpty());
     }
 
-    #[Test]
-    public function it_stop_propagation_of_story(): void
+    public function testStopPropagationOfStory(): void
     {
         $tracker = new TrackStream();
 

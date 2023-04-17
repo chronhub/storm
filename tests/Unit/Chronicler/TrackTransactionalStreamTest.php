@@ -9,13 +9,11 @@ use Chronhub\Storm\Chronicler\TrackTransactionalStream;
 use Chronhub\Storm\Chronicler\TransactionalEventDraft;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(TrackTransactionalStream::class)]
 class TrackTransactionalStreamTest extends UnitTestCase
 {
-    #[Test]
-    public function it_create_new_story(): void
+    public function testNewStory(): void
     {
         $tracker = new TrackTransactionalStream();
 
@@ -28,8 +26,7 @@ class TrackTransactionalStreamTest extends UnitTestCase
         $this->assertTrue($tracker->listeners()->isEmpty());
     }
 
-    #[Test]
-    public function it_disclose_transactional_story(): void
+    public function testDiscloseTransactionalStory(): void
     {
         $tracker = new TrackTransactionalStream();
 

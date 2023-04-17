@@ -6,14 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Chronhub\Storm\Message\UniqueIdV4;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV4;
 
 final class UniqueIdV4Test extends UnitTestCase
 {
-    #[Test]
-    public function it_can_be_generated(): void
+    public function testGenerateStringUniqueId(): void
     {
         $generator = new UniqueIdV4();
 
@@ -26,8 +24,7 @@ final class UniqueIdV4Test extends UnitTestCase
         $this->assertInstanceOf(UuidV4::class, $instance);
     }
 
-    #[Test]
-    public function it_can_be_serialized(): void
+    public function testSerializeInstance(): void
     {
         $generator = new UniqueIdV4();
 

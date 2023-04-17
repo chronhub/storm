@@ -23,15 +23,17 @@ use function sprintf;
 
 #[CoversClass(InMemoryChroniclerFactory::class)]
 #[CoversClass(ProvideChroniclerFactory::class)]
-final class InMemoryChroniclerProviderTest extends UnitTestCase
+final class InMemoryChroniclerFactoryTest extends UnitTestCase
 {
     private MockObject|ContainerInterface $container;
 
+    private InMemoryChroniclerFactory $factory;
+
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->container = $this->createMock(ContainerInterface::class);
+        $containerAsClosure = fn (): ContainerInterface => $this->container;
+        $this->factory = new InMemoryChroniclerFactory($containerAsClosure);
     }
 
     public function testStandaloneInstance(): void
@@ -42,16 +44,12 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ->with(StreamCategory::class)
             ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
         $config = ['standalone' => []];
-        $chronicler = $provider->createEventStore('standalone', $config);
+        $chronicler = $this->factory->createEventStore('standalone', $config);
 
         $this->assertEquals(StandaloneInMemoryChronicler::class, $chronicler::class);
-        $this->assertEquals($chronicler, $provider->createEventStore('standalone', $config));
-        $this->assertNotSame($chronicler, $provider->createEventStore('standalone', $config));
+        $this->assertEquals($chronicler, $this->factory->createEventStore('standalone', $config));
+        $this->assertNotSame($chronicler, $this->factory->createEventStore('standalone', $config));
     }
 
     public function testTransactionalInstance(): void
@@ -62,16 +60,12 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ->with(StreamCategory::class)
             ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
         $config = ['transactional' => []];
-        $chronicler = $provider->createEventStore('transactional', $config);
+        $chronicler = $this->factory->createEventStore('transactional', $config);
 
         $this->assertEquals(TransactionalInMemoryChronicler::class, $chronicler::class);
-        $this->assertEquals($chronicler, $provider->createEventStore('transactional', $config));
-        $this->assertNotSame($chronicler, $provider->createEventStore('transactional', $config));
+        $this->assertEquals($chronicler, $this->factory->createEventStore('transactional', $config));
+        $this->assertNotSame($chronicler, $this->factory->createEventStore('transactional', $config));
     }
 
     public function testEventableInstance(): void
@@ -83,10 +77,6 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
                 [TrackStream::class, new TrackStream()],
             ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
         $config = [
             'tracking' => [
                 'tracker_id' => TrackStream::class,
@@ -94,12 +84,12 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ],
         ];
 
-        $chronicler = $provider->createEventStore('eventable', $config);
+        $chronicler = $this->factory->createEventStore('eventable', $config);
 
         $this->assertInstanceOf(EventableChronicler::class, $chronicler);
         $this->assertEquals(StandaloneInMemoryChronicler::class, $chronicler->innerChronicler()::class);
-        $this->assertEquals($chronicler, $provider->createEventStore('eventable', $config));
-        $this->assertNotSame($chronicler, $provider->createEventStore('eventable', $config));
+        $this->assertEquals($chronicler, $this->factory->createEventStore('eventable', $config));
+        $this->assertNotSame($chronicler, $this->factory->createEventStore('eventable', $config));
     }
 
     public function testTransactionalEventableInstance(): void
@@ -111,10 +101,6 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
                 [TrackTransactionalStream::class, new TrackTransactionalStream()],
             ]);
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
         $config = [
             'tracking' => [
                 'tracker_id' => TrackTransactionalStream::class,
@@ -122,13 +108,13 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
             ],
         ];
 
-        $chronicler = $provider->createEventStore('transactional_eventable', $config);
+        $chronicler = $this->factory->createEventStore('transactional_eventable', $config);
 
         $this->assertInstanceOf(TransactionalEventableChronicler::class, $chronicler);
         $this->assertInstanceOf(EventableChronicler::class, $chronicler);
         $this->assertEquals(TransactionalInMemoryChronicler::class, $chronicler->innerChronicler()::class);
-        $this->assertEquals($chronicler, $provider->createEventStore('transactional_eventable', $config));
-        $this->assertNotSame($chronicler, $provider->createEventStore('transactional_eventable', $config));
+        $this->assertEquals($chronicler, $this->factory->createEventStore('transactional_eventable', $config));
+        $this->assertNotSame($chronicler, $this->factory->createEventStore('transactional_eventable', $config));
     }
 
     public function testExceptionRaisedWhenDriverIsNotDefined(): void
@@ -138,12 +124,7 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $config = ['tracking' => []];
 
-        $this->container = $this->createMock(ContainerInterface::class);
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
-        $provider->createEventStore('foo', $config);
+        $this->factory->createEventStore('foo', $config);
     }
 
     public function testExceptionRaisedWhenExpectEventableInstanceWithNoTracker(): void
@@ -157,18 +138,13 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $config = ['tracking' => []];
 
-        $this->container = $this->createMock(ContainerInterface::class);
         $this->container
             ->expects($this->any())
             ->method('get')
             ->with(StreamCategory::class)
             ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
-        $provider->createEventStore('eventable', $config);
+        $this->factory->createEventStore('eventable', $config);
     }
 
     public function testExceptionRaisedWhenExpectTransactionalEventableInstanceWithNoTracker(): void
@@ -182,17 +158,12 @@ final class InMemoryChroniclerProviderTest extends UnitTestCase
 
         $config = ['tracking' => []];
 
-        $this->container = $this->createMock(ContainerInterface::class);
         $this->container
             ->expects($this->any())
             ->method('get')
             ->with(StreamCategory::class)
             ->willReturn(new DetermineStreamCategory());
 
-        $containerAsClosure = fn (): ContainerInterface => $this->container;
-
-        $provider = new InMemoryChroniclerFactory($containerAsClosure);
-
-        $provider->createEventStore('transactional_eventable', $config);
+        $this->factory->createEventStore('transactional_eventable', $config);
     }
 }

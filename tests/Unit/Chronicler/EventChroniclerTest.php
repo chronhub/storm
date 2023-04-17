@@ -23,7 +23,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(EventChronicler::class)]
@@ -37,8 +36,6 @@ class EventChroniclerTest extends UnitTestCase
 
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->chronicler = $this->createMock(Chronicler::class);
         $this->tracker = new TrackStream();
         $this->stream = new Stream(new StreamName('foo'), [
@@ -46,7 +43,6 @@ class EventChroniclerTest extends UnitTestCase
         ]);
     }
 
-    #[Test]
     public function testFirstCommitStream(): void
     {
         $this->chronicler->expects($this->once())->method('firstCommit')->with($this->stream);
@@ -62,7 +58,6 @@ class EventChroniclerTest extends UnitTestCase
         $eventStore->firstCommit($this->stream);
     }
 
-    #[Test]
     public function testExceptionRaisedOnFirstCommit(): void
     {
         $this->expectException(StreamAlreadyExists::class);
@@ -96,7 +91,6 @@ class EventChroniclerTest extends UnitTestCase
         $eventStore->amend($this->stream);
     }
 
-    #[Test]
     public function testExceptionRaisedOnAmendStream(): void
     {
         $this->expectException(StreamNotFound::class);

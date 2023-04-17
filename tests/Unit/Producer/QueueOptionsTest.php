@@ -6,12 +6,10 @@ namespace Chronhub\Storm\Tests\Unit\Producer;
 
 use Chronhub\Storm\Producer\QueueOptions;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 final class QueueOptionsTest extends UnitTestCase
 {
-    #[Test]
-    public function it_assert_default_properties(): void
+    public function testInstance(): void
     {
         $queueFactory = new QueueOptions();
 
@@ -24,8 +22,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertNull($queueFactory->backoff);
     }
 
-    #[Test]
-    public function it_can_override_some_arguments_by_passing_associative_array(): void
+    public function testOverrideQueueOptionsWithArray(): void
     {
         $queueFactory = new QueueOptions(...[
             'connection' => 'redis',
@@ -46,8 +43,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertEquals(5, $queueFactory->backoff);
     }
 
-    #[Test]
-    public function it_can_override_some_arguments_with_promoted_arguments(): void
+    public function testOverrideQueueOptionsWithPromotion(): void
     {
         $queueFactory = new QueueOptions(name: 'default', tries: 2, maxExceptions: 4);
 
@@ -61,8 +57,7 @@ final class QueueOptionsTest extends UnitTestCase
         $this->assertNull($queueFactory->backoff);
     }
 
-    #[Test]
-    public function it_return_associative_array(): void
+    public function testJsonSerialize(): void
     {
         $queueFactory = new QueueOptions(...[
             'connection' => 'redis',

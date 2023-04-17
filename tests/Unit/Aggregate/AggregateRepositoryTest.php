@@ -11,7 +11,6 @@ use Chronhub\Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRepository as Repository;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -312,7 +311,6 @@ final class AggregateRepositoryTest extends UnitTestCase
         $aggregateRoot = AggregateRootStub::create($this->someIdentity, ...$events);
 
         $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
-
         $this->streamProducer->expects($this->never())->method('toStream');
         $this->streamProducer->expects($this->never())->method('isFirstCommit');
         $this->chronicler->expects($this->never())->method('firstCommit');
@@ -457,7 +455,7 @@ final class AggregateRepositoryTest extends UnitTestCase
         return 4;
     }
 
-    private function createAggregateRepository(?MessageDecorator $messageDecorator = null): Repository
+    private function createAggregateRepository(?MessageDecorator $messageDecorator = null): AggregateRepository
     {
         return new AggregateRepository(
             $this->chronicler,

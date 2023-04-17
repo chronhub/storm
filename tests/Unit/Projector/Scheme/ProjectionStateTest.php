@@ -44,6 +44,10 @@ final class ProjectionStateTest extends UnitTestCase
     {
         $state = new ProjectionState();
 
+        $state->put(['foo' => 'bar']);
+
+        $this->assertSame(['foo' => 'bar'], $state->get());
+
         $state->put([]);
 
         $this->assertSame([], $state->get());

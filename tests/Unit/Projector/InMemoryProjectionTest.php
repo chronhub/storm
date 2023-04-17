@@ -65,9 +65,13 @@ class InMemoryProjectionTest extends UnitTestCase
         $projection = InMemoryProjection::create('projection', 'running');
 
         $this->assertSame('running', $projection->status());
+
         $projection->setLockedUntil('datetime');
+
         $this->assertSame('datetime', $projection->lockedUntil());
+
         $projection->setLockedUntil(null);
+
         $this->assertNull($projection->lockedUntil());
     }
 }

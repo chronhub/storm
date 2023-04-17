@@ -16,7 +16,7 @@ final class ProcessClosurePersistentEventTest extends ProcessPersistentEventTest
 {
     protected function newProcess(): ProcessClosureEvent
     {
-        // process does tamper with the subscription state only if it persists
+        // process does tamper with the subscription status only if it persists
         $this->assertEquals(ProjectionStatus::IDLE, $this->subscription->currentStatus());
 
         return new ProcessClosureEvent(function (DomainEvent $event, array $state): array {

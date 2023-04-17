@@ -11,15 +11,13 @@ use Generator;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 
 #[CoversClass(QueryFailure::class)]
 final class QueryFailureTest extends UnitTestCase
 {
     #[DataProvider('provideException')]
-    #[Test]
-    public function it_wrap_exception_given(Exception $exception): never
+    public function testExceptionWrapped(Exception $exception): never
     {
         $this->expectException(QueryFailure::class);
         $this->expectExceptionMessage('A query exception occurred: foo');

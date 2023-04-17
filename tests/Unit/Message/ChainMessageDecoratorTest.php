@@ -10,13 +10,11 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(ChainMessageDecorator::class)]
 final class ChainMessageDecoratorTest extends UnitTestCase
 {
-    #[Test]
-    public function it_decorate_message(): void
+    public function testDecorateMessage(): void
     {
         $decorator = new class implements MessageDecorator
         {
@@ -35,11 +33,10 @@ final class ChainMessageDecoratorTest extends UnitTestCase
         $decoratedMessage = $chain->decorate($message);
 
         $this->assertNotSame($message, $decoratedMessage);
-        $this->assertEquals(['some' => 'header'], $decoratedMessage->headers());
+        $this->assertSame(['some' => 'header'], $decoratedMessage->headers());
     }
 
-    #[Test]
-    public function it_decorate_message_with_many_decorators(): void
+    public function testDecorateMessageWithManyDecorators(): void
     {
         $decorator1 = new class implements MessageDecorator
         {
@@ -66,6 +63,6 @@ final class ChainMessageDecoratorTest extends UnitTestCase
         $decoratedMessage = $chain->decorate($message);
 
         $this->assertNotSame($message, $decoratedMessage);
-        $this->assertEquals(['some' => 'header', 'another' => 'header'], $decoratedMessage->headers());
+        $this->assertSame(['some' => 'header', 'another' => 'header'], $decoratedMessage->headers());
     }
 }

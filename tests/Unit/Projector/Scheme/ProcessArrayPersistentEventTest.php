@@ -84,7 +84,7 @@ final class ProcessArrayPersistentEventTest extends ProcessPersistentEventTestCa
             },
         ];
 
-        // process does tamper with the subscription state only if it persists
+        // process does tamper with the subscription status only if it persists
         $this->assertEquals(ProjectionStatus::IDLE, $this->subscription->currentStatus());
 
         return new ProcessArrayEvent($eventHandlers, null);

@@ -11,15 +11,15 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use function array_filter;
 use function array_map;
 use function array_values;
 
 class RetrieveAllInMemoryQueryFilterTest extends UnitTestCase
 {
-    #[Test]
-    public function it_can_be_instantiated(): void
+    public function testInstance(): void
     {
         $filter = new RetrieveAllInMemoryQueryFilter(
             $this->createMock(AggregateIdentity::class),
@@ -29,8 +29,7 @@ class RetrieveAllInMemoryQueryFilterTest extends UnitTestCase
         $this->assertInstanceOf(InMemoryQueryFilter::class, $filter);
     }
 
-    #[Test]
-    public function it_filter_events_per_aggregate_id(): void
+    public function testFilterEventsPerAggregateId(): void
     {
         $expectedAggregateId = V4AggregateId::create();
 
@@ -54,25 +53,20 @@ class RetrieveAllInMemoryQueryFilterTest extends UnitTestCase
         ], array_values(array_map(fn (SomeEvent $event) => $event->content, $filteredEvents)));
     }
 
-    #[Test]
-    public function it_access_sort_ascendant_direction(): void
+    #[DataProvider('provideDirection')]
+    public function testGetSorting(string $sorting): void
     {
         $filter = new RetrieveAllInMemoryQueryFilter(
             $this->createMock(AggregateIdentity::class),
-            'asc'
+            $sorting
         );
 
-        $this->assertEquals('asc', $filter->orderBy());
+        $this->assertEquals($sorting, $filter->orderBy());
     }
 
-    #[Test]
-    public function it_access_sort_descendant_direction(): void
+    public static function provideDirection(): Generator
     {
-        $filter = new RetrieveAllInMemoryQueryFilter(
-            $this->createMock(AggregateIdentity::class),
-            'desc'
-        );
-
-        $this->assertEquals('desc', $filter->orderBy());
+        yield ['asc'];
+        yield ['desc'];
     }
 }

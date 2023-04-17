@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Chronicler\InMemory;
 
 use Chronhub\Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
@@ -101,7 +102,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
             ->filter($query->apply());
 
         if ($streamEvents->isEmpty()) {
-            throw StreamNotFound::withStreamName($streamName);
+            throw NoStreamEventReturn::withStreamName($streamName);
         }
 
         yield from $streamEvents;

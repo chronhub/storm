@@ -40,13 +40,10 @@ final class EventPublisherSubscriberTest extends UnitTestCase
      */
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->eventPublisher = $this->createMock(EventPublisher::class);
     }
 
-    #[Test]
-    public function it_publish_events_on_first_commit_with_no_transactional_chronicler(): void
+    public function testMarshallEventsWithStandaloneChroniclerOnFirstCommit(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -60,7 +57,8 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $this->eventPublisher->expects($this->never())->method('record');
 
-        $this->eventPublisher->expects($this->once())
+        $this->eventPublisher
+            ->expects($this->once())
             ->method('publish')
             ->with($this->equalTo(new Collection([$event])));
 
@@ -70,8 +68,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_publish_events_on_first_commit_with_eventable_chronicler(): void
+    public function testMarshallEventsWithEventableChroniclerOnFirstCommit(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -84,7 +81,8 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $eventChronicler = new EventChronicler($chronicler, $streamTracker);
 
         $this->eventPublisher->expects($this->never())->method('record');
-        $this->eventPublisher->expects($this->once())
+        $this->eventPublisher
+            ->expects($this->once())
             ->method('publish')
             ->with($this->equalTo(new Collection([$event])));
 
@@ -94,8 +92,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_does_not_publish_events_on_first_commit_with_eventable_chronicler_on_stream_already_exists(): void
+    public function testDoesNotPublishEventsWithEventableChroniclerOnFirstCommitOnStreamAlreadyExistsException(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -117,8 +114,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_publish_events_on_amend_with_eventable_chronicler(): void
+    public function testPublishEventsOnPersistEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -141,8 +137,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_does_not_publish_events_on_amend_with_eventable_chronicler_on_stream_not_found(): void
+    public function testDoesNotPublishOnStreamNotFoundExceptionWhenDispatchPersistEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -164,8 +159,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_does_not_publish_events_on_amend_with_eventable_chronicler_on_concurrency(): void
+    public function testDoesNotPublishOnConcurrencyExceptionWhenDispatchPersistEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -187,8 +181,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_publish_events_on_persist_not_in_transaction(): void
+    public function testPublishEventsNotInTransactionWhenDispatchPersistEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -216,8 +209,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_record_events_on_first_commit_in_transaction(): void
+    public function testRecordEventsInTransactionWhenDispatchFirstCommitEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -244,8 +236,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_record_events_on_persist_in_transaction(): void
+    public function testRecordEventsInTransactionWhenDispatchPersistEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -273,8 +264,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_publish_events_on_commit_transaction(): void
+    public function testPublishEventWhenDispatchCommitTransactionEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -299,7 +289,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
     }
 
     #[Test]
-    public function it_flush_pending_events_on_rollback_transaction(): void
+    public function testFlushPendingEventsWhenDispatchRollbackTransactionEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
         $stream = new Stream(new StreamName('baz'), [$event]);
@@ -323,8 +313,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
-    public function it_detach_stream_subscribers(): void
+    public function testDetachStreamSubscribers(): void
     {
         $streamTracker = new TrackTransactionalStream();
         $this->assertCount(0, $streamTracker->listeners());

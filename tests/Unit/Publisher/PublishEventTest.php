@@ -12,7 +12,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use function iterator_count;
@@ -27,21 +26,17 @@ final class PublishEventTest extends UnitTestCase
      */
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->reporter = $this->createMock(ReportEvent::class);
     }
 
-    #[Test]
-    public function it_can_be_instantiated(): void
+    public function testInstance(): void
     {
         $publisher = new PublishEvent($this->reporter);
 
         $this->assertCountPendingEvents(0, $publisher);
     }
 
-    #[Test]
-    public function it_record_events(): void
+    public function testRecordEvents(): void
     {
         $this->reporter->expects($this->never())->method('relay');
 
@@ -59,8 +54,7 @@ final class PublishEventTest extends UnitTestCase
         }
     }
 
-    #[Test]
-    public function it_record_many_events(): void
+    public function testRecordManyEvents(): void
     {
         $this->reporter->expects($this->never())->method('relay');
 
@@ -80,8 +74,7 @@ final class PublishEventTest extends UnitTestCase
         $this->assertCountPendingEvents(4, $publisher);
     }
 
-    #[Test]
-    public function it_record_events_in_order_they_arrived(): void
+    public function testRecordEventsFirstIn(): void
     {
         $this->reporter->expects($this->never())->method('relay');
 
@@ -107,8 +100,7 @@ final class PublishEventTest extends UnitTestCase
         }
     }
 
-    #[Test]
-    public function it_pull_and_flush_pending_events(): void
+    public function testPullAndFlushPendingEvents(): void
     {
         $this->reporter->expects($this->never())->method('relay');
 
@@ -132,8 +124,7 @@ final class PublishEventTest extends UnitTestCase
         $this->assertCountPendingEvents(0, $publisher);
     }
 
-    #[Test]
-    public function it_publish_events(): void
+    public function testPublishEvents(): void
     {
         $this->reporter->expects($this->exactly(10))->method('relay');
 
@@ -153,8 +144,7 @@ final class PublishEventTest extends UnitTestCase
         $publisher->publish($publisher->pull());
     }
 
-    #[Test]
-    public function it_flush_pending_events(): void
+    public function testFlushPendingEvents(): void
     {
         $this->reporter->expects($this->never())->method('relay');
 

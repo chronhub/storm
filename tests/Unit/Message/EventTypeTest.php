@@ -9,14 +9,12 @@ use Chronhub\Storm\Message\Decorator\EventType;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 #[CoversClass(EventType::class)]
 final class EventTypeTest extends UnitTestCase
 {
-    #[Test]
-    public function it_set_event_type_to_message_headers(): void
+    public function testAddEventTypeToHeader(): void
     {
         $messageDecorator = new EventType();
 
@@ -28,11 +26,10 @@ final class EventTypeTest extends UnitTestCase
 
         $this->assertArrayHasKey(Header::EVENT_TYPE, $decoratedMessage->headers());
 
-        $this->assertEquals(stdClass::class, $decoratedMessage->header(Header::EVENT_TYPE));
+        $this->assertSame(stdClass::class, $decoratedMessage->header(Header::EVENT_TYPE));
     }
 
-    #[Test]
-    public function it_does_not_set_event_id_to_message_headers_if_already_exists(): void
+    public function testDoesNotAddEventTypeToHeaderIfAlreadyExists(): void
     {
         $messageDecorator = new EventType();
 
@@ -40,6 +37,6 @@ final class EventTypeTest extends UnitTestCase
 
         $decoratedMessage = $messageDecorator->decorate($message);
 
-        $this->assertEquals('some_event_type', $decoratedMessage->header(Header::EVENT_TYPE));
+        $this->assertSame('some_event_type', $decoratedMessage->header(Header::EVENT_TYPE));
     }
 }

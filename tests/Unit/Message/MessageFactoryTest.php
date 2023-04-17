@@ -14,18 +14,26 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 
 final class MessageFactoryTest extends UnitTestCase
 {
-    #[Test]
-    public function it_create_message_from_array(): void
+    private MessageSerializer|MockObject $messageSerializer;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->messageSerializer = $this->createMock(MessageSerializer::class);
+    }
+
+    public function testCreateMessageFromArray(): void
     {
         $expectedMessage = new Message(SomeCommand::fromContent(['foo' => 'bar']));
 
-        $this->messageSerializer->expects($this->once())
+        $this->messageSerializer
+            ->expects($this->once())
             ->method('deserializePayload')
             ->with(['foo' => 'bar'])
             ->willReturn($expectedMessage->event());
@@ -35,10 +43,10 @@ final class MessageFactoryTest extends UnitTestCase
         $message = $factory(['foo' => 'bar']);
 
         $this->assertEquals($expectedMessage, $message);
+        $this->assertNotSame($expectedMessage, $message);
     }
 
-    #[Test]
-    public function it_create_message_from_object(): void
+    public function testCreateMessageFromObject(): void
     {
         $expectedMessage = new Message(new stdClass());
 
@@ -48,22 +56,22 @@ final class MessageFactoryTest extends UnitTestCase
         $message = $factory($expectedMessage);
 
         $this->assertEquals($expectedMessage, $message);
+        $this->assertNotSame($expectedMessage, $message);
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_create_message_from_domain_instance(Reporting $domain): void
+    public function testCreateMessageFromDomainInstance(Reporting $domain): void
     {
         $factory = new MessageFactory($this->messageSerializer);
 
         $message = $factory($domain);
 
         $this->assertEquals($domain, $message->event());
+        $this->assertNotSame($domain, $message->event());
     }
 
     #[DataProvider('provideDomain')]
-    #[Test]
-    public function it_create_message_from_event_instance_with_headers(Reporting $domain): void
+    public function testCreateMessageFromEvenInstanceWithHeaders(Reporting $domain): void
     {
         $expectedEvent = $domain->withHeader('some', 'header');
 
@@ -72,6 +80,7 @@ final class MessageFactoryTest extends UnitTestCase
         $message = $factory($expectedEvent);
 
         $this->assertEquals($expectedEvent, $message->event());
+        $this->assertNotSame($expectedEvent, $message->event());
         $this->assertEquals($expectedEvent->headers(), $message->event()->headers());
     }
 
@@ -82,14 +91,5 @@ final class MessageFactoryTest extends UnitTestCase
         yield [SomeCommand::fromContent($content)];
         yield [SomeEvent::fromContent($content)];
         yield [SomeQuery::fromContent($content)];
-    }
-
-    private MessageSerializer|MockObject $messageSerializer;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->messageSerializer = $this->createMock(MessageSerializer::class);
     }
 }

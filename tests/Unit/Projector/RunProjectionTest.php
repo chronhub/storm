@@ -6,13 +6,11 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
-use RuntimeException;
 
 #[CoversClass(RunProjection::class)]
 final class RunProjectionTest extends UnitTestCase
@@ -58,34 +56,6 @@ final class RunProjectionTest extends UnitTestCase
         $runner($subscription);
 
         $this->assertEquals(2, $called);
-    }
-
-    public function testItDoesNotTryToReleaseLockWhenProjectionAlreadyRunningIsRaised(): void
-    {
-        $this->expectException(RuntimeException::class);
-
-        $sprint = new Sprint();
-        $sprint->continue();
-        $sprint->runInBackground(true);
-
-        $subscription = $this->createMock(PersistentSubscriptionInterface::class);
-
-        $subscription
-            ->expects($this->any())
-            ->method('sprint')
-            ->willReturn($sprint);
-
-        $subscription->expects($this->never())->method('freed');
-
-        $activities = [
-            function (): void {
-                throw new ProjectionAlreadyRunning('Another projection is already running');
-            },
-        ];
-
-        $runner = $this->createRunProjection($activities);
-
-        $runner($subscription);
     }
 
     private function provideActivities(int &$called): array

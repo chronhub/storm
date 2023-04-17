@@ -7,12 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 use Chronhub\Storm\Message\HasConstructableContent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 final class HasConstructableContentTest extends UnitTestCase
 {
-    #[Test]
-    public function it_construct_with_empty_content(): void
+    public function testInstance(): void
     {
         $someContent = $this->newInstance();
 
@@ -20,8 +18,7 @@ final class HasConstructableContentTest extends UnitTestCase
         $this->assertEmpty($someContent->content);
     }
 
-    #[Test]
-    public function it_construct_with_content(): void
+    public function testInstanceWithContent(): void
     {
         $someContent = $this->newInstance(['name' => 'steph bug']);
 
@@ -29,17 +26,15 @@ final class HasConstructableContentTest extends UnitTestCase
         $this->assertEquals(['name' => 'steph bug'], $someContent->content);
     }
 
-    #[Test]
-    public function it_instantiate_with_content(): void
+    public function testStaticInstance(): void
     {
-        $someContent = $this->newInstance([])::fromContent(['name' => 'steph bug']);
+        $someContent = $this->newInstance()::fromContent(['name' => 'steph bug']);
 
         $this->assertEquals(['name' => 'steph bug'], $someContent->toContent());
         $this->assertEquals(['name' => 'steph bug'], $someContent->content);
     }
 
-    #[Test]
-    public function it_return_new_instance_from_static_call(): void
+    public function testStaticInstanceReturnNewInstance(): void
     {
         $someDomain = (new SomeEvent(['name' => 'steph bug']))->withHeaders(['foo' => 'bar']);
 

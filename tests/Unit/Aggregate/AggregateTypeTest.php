@@ -17,6 +17,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
+use function sprintf;
 
 #[CoversClass(AggregateType::class)]
 final class AggregateTypeTest extends UnitTestCase
@@ -40,7 +41,9 @@ final class AggregateTypeTest extends UnitTestCase
     public function testExceptionRaisedWhenAggregateIsNotSubclassOfRoot(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Class '.stdClass::class.' must inherit from '.AnotherAggregateRootStub::class);
+        $this->expectExceptionMessage(sprintf(
+            'Class %s must inherit from %s', stdClass::class, AnotherAggregateRootStub::class)
+        );
 
         new AggregateType(AnotherAggregateRootStub::class, [stdClass::class]);
     }
@@ -48,7 +51,9 @@ final class AggregateTypeTest extends UnitTestCase
     public function testAggregateIsNotSupported(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Aggregate root '.AnotherAggregateRootStub::class.' class is not supported');
+        $this->expectExceptionMessage(
+            sprintf('Aggregate root %s class is not supported', AnotherAggregateRootStub::class)
+        );
 
         $aggregateType = new AggregateType(AggregateRootStub::class, [AggregateRootChildStub::class]);
 

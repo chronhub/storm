@@ -22,7 +22,7 @@ final class AliasFromMapTest extends UnitTestCase
 
         $messageAlias = new AliasFromMap($map);
 
-        $this->assertEquals('message_alias', $messageAlias->classToAlias($event::class));
+        $this->assertSame('message_alias', $messageAlias->classToAlias($event::class));
     }
 
     public function testReturnAliasFromEventInstance(): void
@@ -33,7 +33,7 @@ final class AliasFromMapTest extends UnitTestCase
 
         $messageAlias = new AliasFromMap($map);
 
-        $this->assertEquals('message_alias', $messageAlias->instanceToAlias($event));
+        $this->assertSame('message_alias', $messageAlias->instanceToAlias($event));
     }
 
     public function testExceptionRaisedWhenEventGivenIsNotFqn(): void
@@ -43,6 +43,7 @@ final class AliasFromMapTest extends UnitTestCase
 
         $messageAlias = new AliasFromMap([]);
 
+        /** @phpstan-ignore-next-line */
         $messageAlias->classToAlias('invalid_event');
     }
 

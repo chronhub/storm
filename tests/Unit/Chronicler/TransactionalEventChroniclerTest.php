@@ -16,8 +16,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(TransactionalEventChronicler::class)]
@@ -27,9 +25,6 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
 
     private TransactionalStreamTracker $tracker;
 
-    /**
-     * @throws Exception
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -38,14 +33,14 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $this->tracker = new TrackTransactionalStream();
     }
 
-    #[Test]
-    public function it_dispatch_begin_transaction_event(): void
+    public function testDispatchBeginTransactionEvent(): void
     {
         $this->chronicler->expects($this->once())->method('beginTransaction');
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT, $story->currentEvent());
             });
@@ -53,8 +48,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->beginTransaction();
     }
 
-    #[Test]
-    public function it_dispatch_begin_transaction_event_and_raised_exception_if_transaction_already_started(): void
+    public function testTransactionAlreadyStartedRaisedWhenDispatchBeginTransactionEvent(): void
     {
         $this->expectException(TransactionAlreadyStarted::class);
 
@@ -63,9 +57,10 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
             ->method('beginTransaction')
             ->willThrowException(new TransactionAlreadyStarted('foo'));
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT, $story->currentEvent());
 
@@ -75,14 +70,14 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->beginTransaction();
     }
 
-    #[Test]
-    public function it_dispatch_commit_transaction_event(): void
+    public function testDispatchCommitTransactionEvent(): void
     {
         $this->chronicler->expects($this->once())->method('commitTransaction');
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT, $story->currentEvent());
             });
@@ -90,8 +85,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->commitTransaction();
     }
 
-    #[Test]
-    public function it_dispatch_commit_transaction_event_and_raise_exception_if_exception_not_started(): void
+    public function testTransactionNotStartedRaisedWhenDispatchCommitTransactionEvent(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
@@ -100,9 +94,10 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
             ->method('commitTransaction')
             ->willThrowException(new TransactionNotStarted());
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT, $story->currentEvent());
 
@@ -112,14 +107,14 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->commitTransaction();
     }
 
-    #[Test]
-    public function it_dispatch_rollback_transaction_event(): void
+    public function testDispatchRollbackTransactionEvent(): void
     {
         $this->chronicler->expects($this->once())->method('rollbackTransaction');
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT, $story->currentEvent());
             });
@@ -127,8 +122,7 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
         $instance->rollbackTransaction();
     }
 
-    #[Test]
-    public function it_dispatch_rollback_transaction_event_and_raise_exception_if_exception_not_started(): void
+    public function testTransactionNotStartedRaisedWhenDispatchRollbackTransactionEvent(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
@@ -137,9 +131,10 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
             ->method('rollbackTransaction')
             ->willThrowException(new TransactionNotStarted());
 
-        $instance = $this->chroniclerInstance();
+        $instance = $this->newChronicler();
 
-        $this->tracker->watch(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT,
+        $this->tracker->watch(
+            TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT,
             function (TransactionalStreamStory $story): void {
                 $this->assertEquals(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT, $story->currentEvent());
 
@@ -150,26 +145,24 @@ final class TransactionalEventChroniclerTest extends UnitTestCase
     }
 
     #[DataProvider('provideBoolean')]
-    #[Test]
-    public function it_check_if_in_transaction(bool $inTransaction): void
+    public function testCheckInTransaction(bool $inTransaction): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn($inTransaction);
 
-        $this->assertEquals($inTransaction, $this->chroniclerInstance()->inTransaction());
+        $this->assertEquals($inTransaction, $this->newChronicler()->inTransaction());
     }
 
     #[DataProvider('provideBoolean')]
-    #[Test]
-    public function it_handle_full_transaction(bool $bool): void
+    public function testFullyTransactional(bool $bool): void
     {
         $callback = static fn (): bool => $bool;
 
         $this->chronicler->expects($this->once())->method('transactional')->with($callback)->willReturn($bool);
 
-        $this->assertEquals($bool, $this->chroniclerInstance()->transactional($callback));
+        $this->assertEquals($bool, $this->newChronicler()->transactional($callback));
     }
 
-    private function chroniclerInstance(): TransactionalEventChronicler
+    private function newChronicler(): TransactionalEventChronicler
     {
         return new TransactionalEventChronicler($this->chronicler, $this->tracker);
     }

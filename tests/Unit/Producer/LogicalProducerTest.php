@@ -15,15 +15,13 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use ValueError;
 
 final class LogicalProducerTest extends UnitTestCase
 {
     #[DataProvider('provideSyncMessage')]
-    #[Test]
-    public function it_assert_message_is_sync(Message $message): void
+    public function testMessageIsSync(Message $message): void
     {
         $unity = new LogicalProducer();
 
@@ -31,8 +29,7 @@ final class LogicalProducerTest extends UnitTestCase
     }
 
     #[DataProvider('provideAsyncMessage')]
-    #[Test]
-    public function it_assert_message_is_async(Message $message): void
+    public function testMessageIsASync(Message $message): void
     {
         $unity = new LogicalProducer();
 
@@ -40,8 +37,7 @@ final class LogicalProducerTest extends UnitTestCase
     }
 
     #[DataProvider('provideInvalidEventDispatchedHeader')]
-    #[Test]
-    public function it_raise_exception_when_event_dispatched_header_is_invalid(?array $headers): void
+    public function testExceptionRaisedWhenEventDispatchedHeaderIsInvalid(?array $headers): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid producer event header: "__event_dispatched" is required and must be a boolean');
@@ -52,8 +48,7 @@ final class LogicalProducerTest extends UnitTestCase
     }
 
     #[DataProvider('provideInvalidEventStrategyHeader')]
-    #[Test]
-    public function it_raise_exception_when_event_strategy_header_is_invalid(array $headers): void
+    public function testExceptionRaisedWhenEventStrategyHeaderIsInvalid(array $headers): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid producer event header: "__event_strategy" is required and must be a string');
@@ -63,8 +58,7 @@ final class LogicalProducerTest extends UnitTestCase
         $unity->isSync(new Message(new SomeEvent([]), $headers));
     }
 
-    #[Test]
-    public function it_raise_exception_when_event_strategy_header_is_not_part_of_producer_strategy(): void
+    public function testExceptionRaisedDoesNotBelongToEnumStrategy(): void
     {
         $this->expectException(ValueError::class);
         $this->expectExceptionMessage('"invalid_strategy" is not a valid backing value for enum');

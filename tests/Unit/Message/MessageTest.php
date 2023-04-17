@@ -133,7 +133,7 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals($headers, $clonedEvent->headers());
     }
 
-    public function testWithHeaderAddsHeader()
+    public function testMergeHeaders()
     {
         $event = new SomeEvent([]);
         $headers = ['foo' => 'bar'];
@@ -147,7 +147,7 @@ final class MessageTest extends UnitTestCase
         $this->assertEquals($headers + $newHeader, $newMessage->headers());
     }
 
-    public function testWithHeadersReplacesHeaders()
+    public function testOverrideHeaders()
     {
         $event = new SomeEvent([]);
         $headers = ['foo' => 'bar'];
@@ -195,7 +195,7 @@ final class MessageTest extends UnitTestCase
         yield [new class()
         {
             //
-        }, ];
+        }];
         yield [(static fn (): bool => true)(...)];
     }
 }

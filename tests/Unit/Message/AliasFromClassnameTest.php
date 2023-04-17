@@ -9,39 +9,36 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(AliasFromClassName::class)]
 final class AliasFromClassnameTest extends UnitTestCase
 {
-    #[Test]
-    public function it_return_event_class_from_event_string(): void
+    public function testInstanceFromStringClass(): void
     {
         $event = SomeCommand::fromContent(['name' => 'steph']);
 
         $messageAlias = new AliasFromClassName();
 
-        $this->assertEquals($event::class, $messageAlias->classToAlias($event::class));
+        $this->assertSame($event::class, $messageAlias->classToAlias($event::class));
     }
 
-    #[Test]
-    public function it_raise_exception_when_event_class_string_does_not_exists(): void
+    public function testInstanceFromObject(): void
+    {
+        $event = SomeCommand::fromContent(['name' => 'steph']);
+
+        $messageAlias = new AliasFromClassname();
+
+        $this->assertSame($event::class, $messageAlias->instanceToAlias($event));
+    }
+
+    public function testExceptionRaisedWhenGivenClassIsNotFqn(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Event class invalid_event does not exists');
 
         $messageAlias = new AliasFromClassname();
 
+        /** @phpstan-ignore-next-line */
         $messageAlias->classToAlias('invalid_event');
-    }
-
-    #[Test]
-    public function it_return_event_class_from_event_object(): void
-    {
-        $event = SomeCommand::fromContent(['name' => 'steph']);
-
-        $messageAlias = new AliasFromClassname();
-
-        $this->assertEquals($event::class, $messageAlias->instanceToAlias($event));
     }
 }

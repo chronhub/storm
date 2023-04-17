@@ -19,10 +19,8 @@ use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use function array_merge;
-use function random_bytes;
 
 #[CoversClass(TransactionalInMemoryChronicler::class)]
 #[CoversClass(AbstractInMemoryChronicler::class)]
@@ -34,8 +32,6 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->streamName = new StreamName('operation');
 
         $this->chronicler = new TransactionalInMemoryChronicler(
@@ -44,8 +40,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function it_can_be_constructed(): void
+    public function testInstance(): void
     {
         $this->assertFalse($this->chronicler->hasStream($this->streamName));
         $this->assertEmpty($this->chronicler->getStreams());
@@ -53,8 +48,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    #[Test]
-    public function it_first_commit_in_transaction(): void
+    public function testFirstCommitInTransaction(): void
     {
         $this->assertEmpty($this->chronicler->getStreams());
         $this->assertEmpty($this->chronicler->cachedStreams());
@@ -90,8 +84,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    #[Test]
-    public function it_raise_exception_if_stream_already_exists(): void
+    public function testStreamAlreadyExistOnFirstCommitInTransaction(): void
     {
         $this->expectException(StreamAlreadyExists::class);
 
@@ -104,16 +97,14 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->firstCommit(new Stream($this->streamName));
     }
 
-    #[Test]
-    public function it_raise_exception_on_first_commit_when_transaction_not_started(): void
+    public function testTransactionNotStartedOnFirstCommitInTransaction(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
         $this->chronicler->firstCommit(new Stream($this->streamName));
     }
 
-    #[Test]
-    public function it_persist_in_transaction(): void
+    public function testAmendStreamInTransaction(): void
     {
         $this->assertEmpty($this->chronicler->getStreams());
         $this->assertEmpty($this->chronicler->cachedStreams());
@@ -155,8 +146,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(array_merge($events, $amendEvents), $this->chronicler->unpublishedEvents());
     }
 
-    #[Test]
-    public function it_raise_exception_if_stream_not_found_on_persist_when_stream_not_in_event_stream_provider_and_not_in_cache(): void
+    public function testStreamNotFoundRaisedOnAmendWhenCommitTransaction(): void
     {
         $this->expectException(StreamNotFound::class);
 
@@ -170,8 +160,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->commitTransaction();
     }
 
-    #[Test]
-    public function it_raise_exception_if_transaction_not_started_on_persist(): void
+    public function testTransactionNotStartedRaisedOnAmendWhenCommitTransaction(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
@@ -182,8 +171,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->amend(new Stream($this->streamName));
     }
 
-    #[Test]
-    public function it_pull_events_to_be_published(): void
+    public function testPullUnpublishedEvents(): void
     {
         $events = $this->generateEvent(10, 0);
 
@@ -204,8 +192,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertCount(0, $this->chronicler->unpublishedEvents());
     }
 
-    #[Test]
-    public function it_handle_job_fully_transactional(): void
+    public function testFullTransactional(): void
     {
         $result = $this->chronicler->transactional(function (TransactionalInMemoryChronicler $chronicler): int {
             $this->assertEmpty($chronicler->getStreams());
@@ -228,8 +215,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertEquals(42, $result);
     }
 
-    #[Test]
-    public function it_handle_job_fully_transactional_and_rollback_transaction_on_exception(): void
+    public function testRollbackTransactionWhenExceptionRaisedOnFullTransactional(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('something went wrong');
@@ -252,8 +238,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->assertFalse($this->chronicler->inTransaction());
     }
 
-    #[Test]
-    public function it_raise_exception_when_transaction_already_started_when_begin(): void
+    public function testTransactionAlreadyStarted(): void
     {
         $this->expectException(TransactionAlreadyStarted::class);
 
@@ -261,16 +246,14 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
         $this->chronicler->beginTransaction();
     }
 
-    #[Test]
-    public function it_raise_exception_when_transaction_not_started_when_commit(): void
+    public function testTransactionNotStartedOnCommit(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
         $this->chronicler->commitTransaction();
     }
 
-    #[Test]
-    public function it_raise_exception_when_transaction_not_started_when_rollback(): void
+    public function testTransactionNotStartedOnRollback(): void
     {
         $this->expectException(TransactionNotStarted::class);
 
@@ -290,7 +273,7 @@ final class TransactionalInMemoryChroniclerTest extends UnitTestCase
                 EventHeader::AGGREGATE_ID => $aggregateId,
             ];
 
-            $events[] = (new SomeEvent(['password' => random_bytes(16)]))->withHeaders($headers);
+            $events[] = (new SomeEvent(['foo' => 'bar']))->withHeaders($headers);
 
             $v++;
         }

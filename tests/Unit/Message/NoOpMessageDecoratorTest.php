@@ -11,14 +11,12 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 final class NoOpMessageDecoratorTest extends UnitTestCase
 {
     #[DataProvider('provideEvent')]
-    #[Test]
-    public function it_return_same_message(object $event): void
+    public function testReturnSameMessageInstance(object $event): void
     {
         $message = new Message($event);
 

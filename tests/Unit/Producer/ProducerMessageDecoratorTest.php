@@ -12,13 +12,11 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 
 final class ProducerMessageDecoratorTest extends UnitTestCase
 {
     #[DataProvider('provideProducerStrategy')]
-    #[Test]
-    public function it_decorate_message_with_event_strategy_and_dispatched_headers(ProducerStrategy $producerStrategy): void
+    public function testDecorateMessageWithDispatchedAndStrategyEventHeaders(ProducerStrategy $producerStrategy): void
     {
         $message = new Message(SomeCommand::fromContent(['name' => 'steph bug']));
 

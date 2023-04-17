@@ -11,7 +11,6 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Producer\ProduceMessage;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -30,12 +29,12 @@ final class ProduceMessageTest extends UnitTestCase
         $this->queue = $this->createMock(MessageQueue::class);
     }
 
-    #[Test]
-    public function it_produce_message_sync(): void
+    public function testProduceMessageSync(): void
     {
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
 
-        $this->unity->expects($this->once())
+        $this->unity
+            ->expects($this->once())
             ->method('isSync')
             ->with($message)
             ->willReturn(true);
@@ -49,17 +48,18 @@ final class ProduceMessageTest extends UnitTestCase
         $this->assertTrue($dispatchedMessage->header(Header::EVENT_DISPATCHED));
     }
 
-    #[Test]
-    public function it_produce_message_async(): void
+    public function testProduceMessageAsync(): void
     {
         $message = new Message(SomeCommand::fromContent(['foo' => 'bar']), [Header::EVENT_DISPATCHED => false]);
 
-        $this->unity->expects($this->once())
+        $this->unity
+            ->expects($this->once())
             ->method('isSync')
             ->with($message)
             ->willReturn(false);
 
-        $this->queue->expects($this->once())
+        $this->queue
+            ->expects($this->once())
             ->method('toQueue')
             ->with($this->callback(function (Message $message): bool {
                 $this->assertTrue($message->header(Header::EVENT_DISPATCHED));
