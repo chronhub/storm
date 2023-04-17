@@ -28,8 +28,8 @@ final class ProvideEvents
             static function (StreamStory $story) use ($chronicler): void {
                 try {
                     $chronicler->firstCommit($story->promise());
-                } catch (StreamAlreadyExists $exception) {
-                    $story->withRaisedException($exception);
+                } catch (StreamAlreadyExists $streamAlreadyExists) {
+                    $story->withRaisedException($streamAlreadyExists);
                 }
             }
         );
@@ -50,8 +50,8 @@ final class ProvideEvents
             static function (StreamStory $story) use ($chronicler): void {
                 try {
                     $chronicler->delete($story->promise());
-                } catch (StreamNotFound $exception) {
-                    $story->withRaisedException($exception);
+                } catch (StreamNotFound $streamNotFound) {
+                    $story->withRaisedException($streamNotFound);
                 }
             }
         );
@@ -68,8 +68,8 @@ final class ProvideEvents
                         $newStream = new Stream($streamName, $streamEvents);
 
                         $story->deferred(static fn (): Stream => $newStream);
-                    } catch (StreamNotFound $exception) {
-                        $story->withRaisedException($exception);
+                    } catch (StreamNotFound $streamNotFound) {
+                        $story->withRaisedException($streamNotFound);
                     }
                 }
             );
@@ -86,8 +86,8 @@ final class ProvideEvents
                     $newStream = new Stream($streamName, $streamEvents);
 
                     $story->deferred(static fn (): Stream => $newStream);
-                } catch (StreamNotFound $exception) {
-                    $story->withRaisedException($exception);
+                } catch (StreamNotFound $streamNotFound) {
+                    $story->withRaisedException($streamNotFound);
                 }
             }
         );
@@ -120,16 +120,17 @@ final class ProvideEvents
         );
     }
 
-    public static function withTransactionalEvent(TransactionalChronicler $chronicler,
-                                                  TransactionalStreamTracker $tracker): void
-    {
+    public static function withTransactionalEvent(
+        TransactionalChronicler $chronicler,
+        TransactionalStreamTracker $tracker
+    ): void {
         $tracker->watch(
             TransactionalEventableChronicler::BEGIN_TRANSACTION_EVENT,
             static function (TransactionalStreamStory $story) use ($chronicler): void {
                 try {
                     $chronicler->beginTransaction();
-                } catch (TransactionAlreadyStarted $exception) {
-                    $story->withRaisedException($exception);
+                } catch (TransactionAlreadyStarted $transactionAlreadyStarted) {
+                    $story->withRaisedException($transactionAlreadyStarted);
                 }
             }
         );
@@ -139,8 +140,8 @@ final class ProvideEvents
             static function (TransactionalStreamStory $story) use ($chronicler): void {
                 try {
                     $chronicler->commitTransaction();
-                } catch (TransactionNotStarted $exception) {
-                    $story->withRaisedException($exception);
+                } catch (TransactionNotStarted $transactionNotStarted) {
+                    $story->withRaisedException($transactionNotStarted);
                 }
             }
         );
@@ -150,8 +151,8 @@ final class ProvideEvents
             static function (TransactionalStreamStory $story) use ($chronicler): void {
                 try {
                     $chronicler->rollbackTransaction();
-                } catch (TransactionNotStarted $exception) {
-                    $story->withRaisedException($exception);
+                } catch (TransactionNotStarted $transactionNotStarted) {
+                    $story->withRaisedException($transactionNotStarted);
                 }
             }
         );

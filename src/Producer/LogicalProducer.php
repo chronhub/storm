@@ -22,11 +22,7 @@ final class LogicalProducer implements ProducerUnity
             return true;
         }
 
-        if ($strategy === ProducerStrategy::PER_MESSAGE->value && ! $message->event() instanceof AsyncMessage) {
-            return true;
-        }
-
-        return false;
+        return $strategy === ProducerStrategy::PER_MESSAGE->value && ! $message->event() instanceof AsyncMessage;
     }
 
     /**

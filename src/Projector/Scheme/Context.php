@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
-use function count;
 use function is_array;
 
 final class Context implements ContextInterface
@@ -24,7 +23,7 @@ final class Context implements ContextInterface
 
     public function initialize(Closure $initCallback): self
     {
-        if ($this->initCallback !== null) {
+        if ($this->initCallback instanceof Closure) {
             throw new InvalidArgumentException('Projection already initialized');
         }
 
@@ -35,7 +34,7 @@ final class Context implements ContextInterface
 
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
-        if ($this->queryFilter !== null) {
+        if ($this->queryFilter instanceof QueryFilter) {
             throw new InvalidArgumentException('Projection query filter already set');
         }
 
@@ -109,7 +108,7 @@ final class Context implements ContextInterface
 
     public function queries(): array
     {
-        if (count($this->queries) === 0) {
+        if ($this->queries === []) {
             throw new InvalidArgumentException('Projection streams all|names|categories not set');
         }
 
@@ -118,7 +117,7 @@ final class Context implements ContextInterface
 
     public function queryFilter(): QueryFilter
     {
-        if ($this->queryFilter === null) {
+        if (! $this->queryFilter instanceof QueryFilter) {
             throw new InvalidArgumentException('Projection query filter not set');
         }
 
@@ -159,7 +158,7 @@ final class Context implements ContextInterface
 
     private function assertQueriesNotSet(): void
     {
-        if (count($this->queries) > 0) {
+        if ($this->queries !== []) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
         }
     }

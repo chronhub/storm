@@ -14,7 +14,7 @@ final class StreamCache implements JsonSerializable
     /**
      * @var array<int, string|null>
      */
-    private array $container;
+    private array $container = [];
 
     private int $position = -1;
 

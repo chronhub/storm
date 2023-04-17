@@ -105,7 +105,7 @@ class LockManager
      */
     private function shouldUpdateLock(DateTimeImmutable $dateTime): bool
     {
-        if ($this->lastLock === null || $this->lockThreshold === 0) {
+        if (! $this->lastLock instanceof DateTimeImmutable || $this->lockThreshold === 0) {
             return true;
         }
 

@@ -18,6 +18,9 @@ use function usleep;
 
 final readonly class PointInTime implements SystemClock
 {
+    /**
+     * @var string
+     */
     final public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
 
     private DateTimeZone $timezone;

@@ -10,8 +10,14 @@ use React\Promise\PromiseInterface;
 
 interface Reporter
 {
+    /**
+     * @var string
+     */
     public const DISPATCH_EVENT = 'dispatch_event';
 
+    /**
+     * @var string
+     */
     public const FINALIZE_EVENT = 'finalize_event';
 
     /**

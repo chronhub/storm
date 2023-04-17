@@ -53,7 +53,7 @@ trait HasTimSort
         $bValid = $b->valid();
 
         if (! $aValid || ! $bValid) {
-            return true === $bValid;
+            return $bValid;
         }
 
         return $this->toDateTime($a->current()) > $this->toDateTime($b->current());

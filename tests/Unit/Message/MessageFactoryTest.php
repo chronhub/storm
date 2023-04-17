@@ -21,10 +21,8 @@ final class MessageFactoryTest extends UnitTestCase
 {
     private MessageSerializer|MockObject $messageSerializer;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
-        parent::setUp();
-
         $this->messageSerializer = $this->createMock(MessageSerializer::class);
     }
 

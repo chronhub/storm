@@ -44,7 +44,7 @@ final readonly class ProcessArrayEvent extends AbstractEventProcessor
     {
         $eventName = $event::class;
 
-        if ($this->messageAlias) {
+        if ($this->messageAlias instanceof MessageAlias) {
             try {
                 $eventName = $this->messageAlias->classToAlias($eventName);
             } catch (MessageAliasNotFound) {

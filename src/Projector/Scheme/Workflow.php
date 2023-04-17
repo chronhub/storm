@@ -54,14 +54,12 @@ final class Workflow
 
     private function carry(): Closure
     {
-        return function ($stack, $activity) {
-            return function (Subscription $subscription) use ($stack, $activity) {
-                try {
-                    return $activity($subscription, $stack);
-                } catch (Throwable $exception) {
-                    $this->handleException($exception, $subscription);
-                }
-            };
+        return fn ($stack, $activity) => function (Subscription $subscription) use ($stack, $activity) {
+            try {
+                return $activity($subscription, $stack);
+            } catch (Throwable $exception) {
+                $this->handleException($exception, $subscription);
+            }
         };
     }
 

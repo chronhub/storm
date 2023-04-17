@@ -63,11 +63,7 @@ trait InteractWithTracker
                     return false;
                 }
 
-                if ($callback && true === $callback($story)) {
-                    return false;
-                }
-
-                return true;
+                return ! ($callback && true === $callback($story));
             });
     }
 }

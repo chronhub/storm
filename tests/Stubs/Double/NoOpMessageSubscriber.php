@@ -12,14 +12,15 @@ final class NoOpMessageSubscriber implements MessageSubscriber
 {
     use DetachMessageListener;
 
-    public function __construct(public readonly string $eventName,
-                                public readonly int $priority)
-    {
+    public function __construct(
+        public readonly string $eventName,
+        public readonly int $priority
+    ) {
     }
 
     public function attachToReporter(MessageTracker $tracker): void
     {
-        $this->messageListeners[] = $tracker->watch($this->eventName, function (): void {
+        $this->messageListeners[] = $tracker->watch($this->eventName, static function (): void {
             //
         }, $this->priority);
     }

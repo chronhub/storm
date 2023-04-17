@@ -11,8 +11,14 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 final readonly class ProjectorJsonSerializer implements JsonSerializer
 {
+    /**
+     * @var int
+     */
     final public const ENCODE_OPTIONS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_FORCE_OBJECT;
 
+    /**
+     * @var int
+     */
     final public const DECODE_OPTIONS = JSON_BIGINT_AS_STRING | JSON_OBJECT_AS_ARRAY;
 
     public JsonEncoder $json;

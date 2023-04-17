@@ -178,7 +178,7 @@ abstract class Group implements JsonSerializable
     {
         $producerStrategy = ProducerStrategy::tryFrom($strategy);
 
-        if ($producerStrategy === null) {
+        if (! $producerStrategy instanceof ProducerStrategy) {
             throw new RoutingViolation('Invalid message producer key: unknown_strategy');
         }
 

@@ -11,7 +11,6 @@ use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Reporter\Exceptions\MessageCollectedException;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Throwable;
-use function count;
 
 final class TryConsumeEvent implements MessageSubscriber
 {
@@ -33,7 +32,7 @@ final class TryConsumeEvent implements MessageSubscriber
 
                 $story->markHandled(true);
 
-                if (count($exceptions) > 0) {
+                if ($exceptions !== []) {
                     $story->withRaisedException(
                         MessageCollectedException::fromExceptions(...$exceptions)
                     );

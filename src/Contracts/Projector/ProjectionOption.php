@@ -8,20 +8,44 @@ use JsonSerializable;
 
 interface ProjectionOption extends JsonSerializable
 {
+    /**
+     * @var string
+     */
     public const SIGNAL = 'signal';
 
+    /**
+     * @var string
+     */
     public const CACHE_SIZE = 'cacheSize';
 
+    /**
+     * @var string
+     */
     public const TIMEOUT = 'timeout';
 
+    /**
+     * @var string
+     */
     public const SLEEP = 'sleep';
 
+    /**
+     * @var string
+     */
     public const LOCKOUT = 'lockout';
 
+    /**
+     * @var string
+     */
     public const BLOCK_SIZE = 'blockSize';
 
+    /**
+     * @var string
+     */
     public const RETRIES = 'retries';
 
+    /**
+     * @var string
+     */
     public const DETECTION_WINDOWS = 'detectionWindows';
 
     public function getSignal(): bool;
@@ -52,7 +76,7 @@ interface ProjectionOption extends JsonSerializable
     public function getLockout(): int;
 
     /**
-     * @return array{int, int<0, max>}
+     * @return array{int, int<0, max>}|array
      */
     public function getRetries(): array;
 

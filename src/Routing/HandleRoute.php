@@ -12,7 +12,6 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
-use function count;
 use function is_array;
 
 final class HandleRoute implements MessageSubscriber
@@ -37,7 +36,7 @@ final class HandleRoute implements MessageSubscriber
                 if (! $isSync) {
                     $queueOptions = $this->routeLocator->onQueue($message);
 
-                    if (is_array($queueOptions) && count($queueOptions) > 0) {
+                    if (is_array($queueOptions) && $queueOptions !== []) {
                         $message = $message->withHeader('queue', $queueOptions);
                     }
                 }

@@ -8,7 +8,6 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use JsonSerializable;
 use function array_merge;
 use function class_exists;
-use function count;
 use function sprintf;
 
 class Route implements JsonSerializable
@@ -47,7 +46,7 @@ class Route implements JsonSerializable
 
     public function onQueue(array $queueOptions = []): static
     {
-        if (count($queueOptions) > 0) {
+        if ($queueOptions !== []) {
             $this->queue = $queueOptions;
         }
 

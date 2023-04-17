@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Message;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use InvalidArgumentException;
 use RuntimeException;
-use function count;
 
 final class Message
 {
@@ -29,8 +28,8 @@ final class Message
         }
 
         $expectedHeaders = match (true) {
-            count($event->headers()) === 0, $event->headers() === $headers => $headers,
-            count($headers) === 0 => $event->headers(),
+            $event->headers() === [], $event->headers() === $headers => $headers,
+            $headers === [] => $event->headers(),
             default => throw new RuntimeException('Invalid headers consistency for event class '.$event::class)
         };
 

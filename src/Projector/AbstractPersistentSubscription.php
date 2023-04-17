@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
-use function count;
 use function is_array;
 
 abstract class AbstractPersistentSubscription extends AbstractSubscription implements PersistentSubscriptionInterface
@@ -66,7 +65,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
         $this->streamPosition->discover($streamPositions);
 
-        if (is_array($state) && count($state) > 0) {
+        if (is_array($state) && $state !== []) {
             $this->state->put($state);
         }
     }

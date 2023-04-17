@@ -42,7 +42,7 @@ abstract readonly class AbstractAggregateRepository implements AggregateReposito
 
         $aggregateRoot = $this->reconstituteAggregateRoot($aggregateId);
 
-        if ($aggregateRoot) {
+        if ($aggregateRoot instanceof AggregateRoot) {
             $this->aggregateCache->put($aggregateRoot);
         }
 
@@ -100,7 +100,7 @@ abstract readonly class AbstractAggregateRepository implements AggregateReposito
     ): Generator {
         $streamName = $this->streamProducer->toStreamName($aggregateId);
 
-        if ($queryFilter) {
+        if ($queryFilter instanceof QueryFilter) {
             return $this->chronicler->retrieveFiltered($streamName, $queryFilter);
         }
 

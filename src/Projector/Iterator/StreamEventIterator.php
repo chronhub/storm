@@ -30,9 +30,7 @@ final class StreamEventIterator implements Iterator
         $this->event = $this->streamEvents->current();
 
         if ($this->event instanceof DomainEvent) {
-            $position = (int) $this->event->header(EventHeader::INTERNAL_POSITION);
-
-            $this->position = $position;
+            $this->position = (int) $this->event->header(EventHeader::INTERNAL_POSITION);
         } else {
             $this->position = false;
             $this->event = null;
@@ -48,7 +46,7 @@ final class StreamEventIterator implements Iterator
 
     public function valid(): bool
     {
-        return $this->event !== null;
+        return $this->event instanceof DomainEvent;
     }
 
     public function rewind(): void
