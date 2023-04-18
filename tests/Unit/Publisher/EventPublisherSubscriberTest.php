@@ -24,8 +24,6 @@ use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use function count;
 use function is_countable;
@@ -35,10 +33,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 {
     private EventPublisher|MockObject $eventPublisher;
 
-    /**
-     * @throws Exception
-     */
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->eventPublisher = $this->createMock(EventPublisher::class);
     }
@@ -50,7 +45,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(Chronicler::class);
         $eventChronicler = new EventChronicler($chronicler, $streamTracker);
@@ -75,7 +70,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::FIRST_COMMIT_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(EventableChronicler::class);
         $eventChronicler = new EventChronicler($chronicler, $streamTracker);
@@ -121,7 +116,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(EventableChronicler::class);
         $eventChronicler = new EventChronicler($chronicler, $streamTracker);
@@ -144,7 +139,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
         $streamStory->withRaisedException(new StreamNotFound('stream not found'));
 
         $chronicler = $this->createMock(EventableChronicler::class);
@@ -166,7 +161,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
         $streamStory->withRaisedException(new ConcurrencyException('concurrency exception'));
 
         $chronicler = $this->createMock(EventableChronicler::class);
@@ -188,7 +183,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackTransactionalStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(TransactionalEventableChronicler::class);
 
@@ -243,7 +238,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackTransactionalStream();
         $streamStory = $streamTracker->newStory(EventableChronicler::PERSIST_STREAM_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(TransactionalEventableChronicler::class);
         $chronicler->expects($this->once())->method('amend')->with($stream);
@@ -271,7 +266,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackTransactionalStream();
         $streamStory = $streamTracker->newStory(TransactionalEventableChronicler::COMMIT_TRANSACTION_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(TransactionalEventableChronicler::class);
         $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);
@@ -288,7 +283,6 @@ final class EventPublisherSubscriberTest extends UnitTestCase
         $streamTracker->disclose($streamStory);
     }
 
-    #[Test]
     public function testFlushPendingEventsWhenDispatchRollbackTransactionEvent(): void
     {
         $event = SomeEvent::fromContent(['foo' => 'bar']);
@@ -296,7 +290,7 @@ final class EventPublisherSubscriberTest extends UnitTestCase
 
         $streamTracker = new TrackTransactionalStream();
         $streamStory = $streamTracker->newStory(TransactionalEventableChronicler::ROLLBACK_TRANSACTION_EVENT);
-        $streamStory->deferred(fn (): Stream => $stream);
+        $streamStory->deferred(static fn (): Stream => $stream);
 
         $chronicler = $this->createMock(TransactionalEventableChronicler::class);
         $eventChronicler = new TransactionalEventChronicler($chronicler, $streamTracker);

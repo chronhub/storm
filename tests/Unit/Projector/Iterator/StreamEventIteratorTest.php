@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
@@ -39,7 +40,7 @@ class StreamEventIteratorTest extends UnitTestCase
         while ($iterator->valid()) {
             $iterator->next();
 
-            if ($iterator->current() !== null) {
+            if ($iterator->current() instanceof DomainEvent) {
                 $lastEvent = $iterator->current();
             }
         }

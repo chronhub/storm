@@ -49,7 +49,7 @@ final class SortStreamIteratorTest extends UnitTestCase
         $iterator = new SortStreamIterator(array_keys($streams), ...array_values($streams));
 
         $count = 0;
-        foreach ($iterator as $position => $event) {
+        foreach ($iterator as $event) {
             $count++;
 
             if ($count === 1) {

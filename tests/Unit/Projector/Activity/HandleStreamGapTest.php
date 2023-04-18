@@ -20,8 +20,6 @@ final class HandleStreamGapTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
         $this->gapDetector = $this->createMock(StreamGapDetector::class);
     }
@@ -34,7 +32,7 @@ final class HandleStreamGapTest extends UnitTestCase
 
         $handleStreamGap = new HandleStreamGap();
 
-        $next = fn ($subscription) => true;
+        $next = static fn ($subscription) => true;
 
         $handleStreamGap($this->subscription, $next);
 
@@ -50,7 +48,7 @@ final class HandleStreamGapTest extends UnitTestCase
 
         $handleStreamGap = new HandleStreamGap();
 
-        $next = fn ($subscription) => true;
+        $next = static fn ($subscription) => true;
 
         $handleStreamGap($this->subscription, $next);
 

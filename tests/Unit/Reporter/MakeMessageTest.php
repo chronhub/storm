@@ -13,7 +13,6 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(MakeMessage::class)]
@@ -21,10 +20,7 @@ final class MakeMessageTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
-    /**
-     * @throws Exception
-     */
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }

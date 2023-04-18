@@ -58,8 +58,6 @@ abstract class InMemoryProjectorManagerTestCase extends UnitTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->clock = new PointInTime();
         $this->eventStreamProvider = new InMemoryEventStream();
         $this->projectionProvider = new InMemoryProjectionProvider($this->clock);

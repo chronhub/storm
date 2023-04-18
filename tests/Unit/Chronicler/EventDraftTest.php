@@ -29,7 +29,7 @@ final class EventDraftTest extends UnitTestCase
     {
         $draft = new EventDraft(null);
 
-        $draft->deferred(fn (): mixed => $value);
+        $draft->deferred(static fn (): mixed => $value);
 
         $this->assertSame($value, $draft->promise());
     }

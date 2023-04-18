@@ -362,7 +362,7 @@ class EventChroniclerTest extends UnitTestCase
 
                 $this->assertEquals($story->promise(), $this->stream);
 
-                $story->deferred(fn () => $alteredStream);
+                $story->deferred(static fn () => $alteredStream);
             }, 100);
 
         $eventStore->firstCommit($this->stream);
@@ -388,7 +388,7 @@ class EventChroniclerTest extends UnitTestCase
 
                 $this->assertEquals($story->promise(), $stream);
 
-                $story->deferred(fn () => $alteredStream);
+                $story->deferred(static fn () => $alteredStream);
             }, 100);
 
         $eventStore->unsubscribe($streamSubscriber);

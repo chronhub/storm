@@ -29,7 +29,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use function iterator_to_array;
@@ -52,10 +51,7 @@ final class AggregateRepositoryTest extends UnitTestCase
 
     private string $identityString = '9ef864f7-43e2-48c8-9944-639a2d927a06';
 
-    /**
-     * @throws Exception
-     */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -143,7 +139,7 @@ final class AggregateRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('retrieveAll')
             ->with($this->streamName, $this->someIdentity)
-            ->willReturnCallback(fn (): Generator => yield from []);
+            ->willReturnCallback(static fn (): Generator => yield from []);
 
         $stub = $this->createAggregateRepository();
 
@@ -175,7 +171,7 @@ final class AggregateRepositoryTest extends UnitTestCase
         $this->chronicler->expects($this->once())
             ->method('retrieveFiltered')
             ->with($this->streamName, $queryFilter)
-            ->will($this->returnCallback(function () use ($events) {
+            ->will($this->returnCallback(static function () use ($events) {
                 yield $events[0];
                 yield $events[1];
 
@@ -346,7 +342,7 @@ final class AggregateRepositoryTest extends UnitTestCase
                         EventHeader::AGGREGATE_VERSION => $position + 1,
                     ];
 
-                    if ($messageDecorator) {
+                    if ($messageDecorator instanceof MessageDecorator) {
                         $expectedHeaders['some'] = 'header';
                     }
 
@@ -404,7 +400,7 @@ final class AggregateRepositoryTest extends UnitTestCase
                         EventHeader::AGGREGATE_VERSION => $position + 1,
                     ];
 
-                    if ($messageDecorator) {
+                    if ($messageDecorator instanceof MessageDecorator) {
                         $expectedHeaders['some'] = 'header';
                     }
 

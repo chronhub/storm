@@ -88,7 +88,7 @@ class HandleStreamEventTest extends UnitTestCase
 
         $this->subscription->compose($context, $caster, false);
 
-        $next = fn (Subscription $subscription) => true;
+        $next = static fn (Subscription $subscription) => true;
 
         $activity = new HandleStreamEvent($this->loader);
 
@@ -142,7 +142,7 @@ class HandleStreamEventTest extends UnitTestCase
 
         $this->subscription->compose($context, $caster, false);
 
-        $next = fn (Subscription $subscription) => true;
+        $next = static fn (Subscription $subscription) => true;
 
         $activity = new HandleStreamEvent($this->loader);
 
@@ -160,7 +160,7 @@ class HandleStreamEventTest extends UnitTestCase
         {
            public function apply(): callable
            {
-              return fn ($event) => $event;
+              return static fn ($event) => $event;
            }
 
             public function orderBy(): string

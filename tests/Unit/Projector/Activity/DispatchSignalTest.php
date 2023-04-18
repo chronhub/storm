@@ -36,7 +36,7 @@ final class DispatchSignalTest extends UnitTestCase
 
         posix_kill(posix_getpid(), SIGTERM);
 
-        $activity($subscription, fn () => true);
+        $activity($subscription, static fn () => true);
 
         $this->assertSame($dispatchSignal, $called);
     }

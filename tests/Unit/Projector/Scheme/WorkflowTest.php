@@ -33,7 +33,9 @@ class WorkflowTest extends UnitTestCase
 
         $workflow = (new Workflow($subscription))->through($activities);
 
-        $inProgress = $workflow->process(fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+        $inProgress = $workflow->process(
+            static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        );
 
         $this->assertFalse($inProgress);
         $this->assertSame(2, $called);
@@ -54,7 +56,9 @@ class WorkflowTest extends UnitTestCase
 
         $workflow = (new Workflow($subscription))->through($activities);
 
-        $inProgress = $workflow->process(fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+        $inProgress = $workflow->process(
+            static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        );
 
         $this->assertFalse($inProgress);
         $this->assertSame(2, $called);
@@ -75,14 +79,16 @@ class WorkflowTest extends UnitTestCase
         $subscription->expects($this->once())->method('freed');
 
         $activities = [
-            function (): void {
+            static function (): void {
                 throw new RuntimeException('error');
             },
         ];
 
         $workflow = (new Workflow($subscription))->through($activities);
 
-        $workflow->process(fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+        $workflow->process(
+            static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        );
     }
 
     public function testRaiseOriginalExceptionWhenReleaseLockRaiseException(): void
@@ -101,14 +107,16 @@ class WorkflowTest extends UnitTestCase
         $subscription->expects($this->once())->method('freed')->willThrowException($silentException);
 
         $activities = [
-            function (): void {
+            static function (): void {
                 throw new RuntimeException('error');
             },
         ];
 
         $workflow = (new Workflow($subscription))->through($activities);
 
-        $workflow->process(fn (Subscription $subscription): bool => $subscription->sprint()->inProgress());
+        $workflow->process(
+            static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        );
     }
 
     public function testItDoesNotTryToReleaseLockWhenProjectionAlreadyRunningIsRaised(): void
@@ -126,7 +134,7 @@ class WorkflowTest extends UnitTestCase
         $subscription->expects($this->never())->method('freed');
 
         $activities = [
-            function (): void {
+            static function (): void {
                 throw new ProjectionAlreadyRunning('Another projection is already running');
             },
         ];

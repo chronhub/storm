@@ -46,7 +46,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $persistOrUpdateLock = new PersistOrUpdateLock();
 
-        $next = fn ($subscription) => true;
+        $next = static fn ($subscription) => true;
 
         $persistOrUpdateLock($this->subscription, $next);
 
@@ -67,7 +67,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $persistOrUpdateLock = new PersistOrUpdateLock();
 
-        $next = fn ($subscription) => true;
+        $next = static fn ($subscription) => true;
 
         $persistOrUpdateLock($this->subscription, $next);
 
@@ -89,7 +89,7 @@ final class PersistOrUpdateLockTest extends UnitTestCase
 
         $persistOrUpdateLock = new PersistOrUpdateLock();
 
-        $next = fn ($subscription) => true;
+        $next = static fn ($subscription) => true;
 
         $persistOrUpdateLock($this->subscription, $next);
 

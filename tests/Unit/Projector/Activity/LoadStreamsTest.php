@@ -64,7 +64,7 @@ class LoadStreamsTest extends UnitTestCase
         $this->chronicler
             ->expects($this->once())
             ->method('retrieveFiltered')
-            ->willReturnCallback(function (): Generator {
+            ->willReturnCallback(static function (): Generator {
                 yield SomeEvent::fromContent(['foo' => 'bar']);
 
                 return 1;
@@ -107,7 +107,7 @@ class LoadStreamsTest extends UnitTestCase
         $this->chronicler
             ->expects($this->once())
             ->method('retrieveFiltered')
-            ->willReturnCallback(function (): Generator {
+            ->willReturnCallback(static function (): Generator {
                 yield SomeEvent::fromContent(['foo' => 'bar']);
                 yield SomeEvent::fromContent(['baz' => 'bar']);
 

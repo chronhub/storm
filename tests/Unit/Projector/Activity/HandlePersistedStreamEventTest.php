@@ -108,7 +108,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
 
         $this->subscription->compose($context, $caster, false);
 
-        $next = fn (Subscription $subscription) => true;
+        $next = static fn (Subscription $subscription) => true;
 
         $activity = new HandleStreamEvent($this->loader);
 
