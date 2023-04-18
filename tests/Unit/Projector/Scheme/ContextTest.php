@@ -44,6 +44,16 @@ final class ContextTest extends UnitTestCase
         $this->context->initialize($initCallback);
     }
 
+    public function testExceptionRaisedWhenClosureIsStatic(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Static closure is not allowed');
+
+        $initCallback = static fn (): array => [];
+
+        $this->context->initialize($initCallback);
+    }
+
     /**
      * @test
      */
@@ -53,7 +63,7 @@ final class ContextTest extends UnitTestCase
         {
             public function apply(): callable
             {
-                return fn () => [];
+                return static fn () => [];
             }
         };
 
@@ -68,7 +78,7 @@ final class ContextTest extends UnitTestCase
         {
             public function apply(): callable
             {
-                return fn () => [];
+                return static fn () => [];
             }
         };
 
@@ -169,6 +179,26 @@ final class ContextTest extends UnitTestCase
         $this->expectExceptionMessage('Projection event handlers already set');
 
         $this->context->whenAny($eventHandlers);
+    }
+
+    public function testExceptionRaisedWhenSetEventHandlerAsStaticClosure(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Static closure is not allowed');
+
+        $eventHandlers = static fn () => [];
+
+        $this->context->whenAny($eventHandlers);
+    }
+
+    public function testExceptionRaisedWhenSetEventHandlersAsStaticClosure(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Static closure is not allowed');
+
+        $eventHandlers = ['foo' => static fn () => []];
+
+        $this->context->when($eventHandlers);
     }
 
     public function testExceptionRaisedWhenEventHandlersNotSet()

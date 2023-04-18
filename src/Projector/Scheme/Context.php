@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
+use ReflectionFunction;
 use function is_array;
 
 final class Context implements ContextInterface
@@ -26,6 +27,8 @@ final class Context implements ContextInterface
         if ($this->initCallback instanceof Closure) {
             throw new InvalidArgumentException('Projection already initialized');
         }
+
+        $this->assertNotStaticClosure($initCallback);
 
         $this->initCallback = $initCallback;
 
@@ -74,6 +77,10 @@ final class Context implements ContextInterface
     {
         $this->assertEventHandlersNotSet();
 
+        foreach ($eventHandlers as $eventHandler) {
+            $this->assertNotStaticClosure($eventHandler);
+        }
+
         $this->eventHandlers = $eventHandlers;
 
         return $this;
@@ -82,6 +89,8 @@ final class Context implements ContextInterface
     public function whenAny(callable $eventHandler): self
     {
         $this->assertEventHandlersNotSet();
+
+        $this->assertNotStaticClosure($eventHandler);
 
         $this->eventHandlers = $eventHandler;
 
@@ -130,10 +139,10 @@ final class Context implements ContextInterface
     public function castEventHandlers(Caster $caster): void
     {
         if ($this->eventHandlers instanceof Closure) {
-            $this->eventHandlers = Closure::bind($this->eventHandlers, $caster);
+            $this->eventHandlers = Closure::bind($this->eventHandlers, $caster, Caster::class);
         } else {
             foreach ($this->eventHandlers as &$eventHandler) {
-                $eventHandler = Closure::bind($eventHandler, $caster);
+                $eventHandler = Closure::bind($eventHandler, $caster, Caster::class);
             }
         }
     }
@@ -144,7 +153,7 @@ final class Context implements ContextInterface
     public function castInitCallback(Caster $caster): array
     {
         if ($this->initCallback instanceof Closure) {
-            $callback = Closure::bind($this->initCallback, $caster);
+            $callback = Closure::bind($this->initCallback, $caster, Caster::class);
 
             $result = $callback();
 
@@ -167,6 +176,15 @@ final class Context implements ContextInterface
     {
         if ($this->eventHandlers !== null) {
             throw new InvalidArgumentException('Projection event handlers already set');
+        }
+    }
+
+    private function assertNotStaticClosure(Closure $callback): void
+    {
+        $reflection = new ReflectionFunction($callback);
+
+        if ($reflection->isStatic()) {
+            throw new InvalidArgumentException('Static closure is not allowed');
         }
     }
 }
