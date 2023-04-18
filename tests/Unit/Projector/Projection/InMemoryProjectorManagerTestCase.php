@@ -67,7 +67,7 @@ abstract class InMemoryProjectorManagerTestCase extends UnitTestCase
         );
     }
 
-    protected function createSubscriptionFactory(): InMemorySubscriptionFactory
+    protected function createSubscriptionFactory($projectorOptions = []): InMemorySubscriptionFactory
     {
         return new InMemorySubscriptionFactory(
             $this->eventStore,
@@ -77,7 +77,7 @@ abstract class InMemoryProjectorManagerTestCase extends UnitTestCase
             $this->clock,
             new AliasFromClassName(),
             new ProjectorJsonSerializer(),
-            new InMemoryProjectionOption(),
+           $projectorOptions !== [] ? $projectorOptions : new InMemoryProjectionOption(),
         );
     }
 }

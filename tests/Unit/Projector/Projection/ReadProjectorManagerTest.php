@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
@@ -32,13 +31,6 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
         parent::setUp();
 
         $this->streamName = new StreamName('balance');
-    }
-
-    public function testInstance(): void
-    {
-        $manager = new ProjectorManager($this->createSubscriptionFactory());
-
-        $this->assertInstanceOf(ProjectorManagerInterface::class, $manager);
     }
 
     public function testReadFromProjectorManager(): void

@@ -48,18 +48,17 @@ final class SortStreamIteratorTest extends UnitTestCase
 
         $iterator = new SortStreamIterator(array_keys($streams), ...array_values($streams));
 
-        $count = 0;
-        foreach ($iterator as $event) {
-            $count++;
+        $this->assertSame(1, $iterator->key());
 
-            if ($count === 1) {
+        foreach ($iterator as $key => $event) {
+            if ($key === 0) {
                 $this->assertSame('stream_3', $iterator->streamName());
                 $this->assertEquals(
                     new DateTimeImmutable('2019-05-10T10:18:19.388500', new DateTimeZone('UTC')),
                     $event->header(Header::EVENT_TIME));
             }
 
-            if ($count === 9) {
+            if ($key === 8) {
                 $this->assertSame('stream_1', $iterator->streamName());
                 $this->assertSame('2019-05-10T10:18:19.388520', $event->header(Header::EVENT_TIME));
             }
