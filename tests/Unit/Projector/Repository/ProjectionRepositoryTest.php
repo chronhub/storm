@@ -13,12 +13,14 @@ use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Repository\ProjectionRepository;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use function json_decode;
 use function json_encode;
 
-class ProjectionRepositoryTest extends UnitTestCase
+#[CoversClass(ProjectionRepository::class)]
+final class ProjectionRepositoryTest extends UnitTestCase
 {
     private ProjectionProvider|MockObject $provider;
 
@@ -54,9 +56,7 @@ class ProjectionRepositoryTest extends UnitTestCase
         $this->json
             ->expects($this->exactly(2))
             ->method('encode')
-            ->will($this->returnCallback(function ($value) {
-                return json_encode($value);
-            }));
+            ->will($this->returnCallback(fn ($value): string => json_encode($value)));
 
         $this->lock
             ->expects($this->once())
@@ -153,9 +153,7 @@ class ProjectionRepositoryTest extends UnitTestCase
         $this->json
             ->expects($this->exactly(2))
             ->method('encode')
-            ->will($this->returnCallback(function ($value) {
-                return json_encode($value);
-            }));
+            ->will($this->returnCallback(fn ($value): string => json_encode($value)));
 
         $this->provider
             ->expects($this->once())
@@ -204,9 +202,7 @@ class ProjectionRepositoryTest extends UnitTestCase
         $this->json
             ->expects($this->exactly(2))
             ->method('decode')
-            ->will($this->returnCallback(function ($value) {
-                return json_decode($value, true);
-            }));
+            ->will($this->returnCallback(fn ($value): array => json_decode($value, true)));
 
         $result = $this->newRepository()->loadState();
 

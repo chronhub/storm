@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(CastQuery::class)]
-class CastQueryTest extends UnitTestCase
+final class CastQueryTest extends UnitTestCase
 {
     private PointInTime $clock;
 

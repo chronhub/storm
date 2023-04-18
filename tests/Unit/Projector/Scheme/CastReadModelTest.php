@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(CastReadModel::class)]
-class CastReadModelTest extends UnitTestCase
+final class CastReadModelTest extends UnitTestCase
 {
     private PointInTime $clock;
 

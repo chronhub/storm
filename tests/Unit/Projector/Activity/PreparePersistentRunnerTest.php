@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(PreparePersistentRunner::class)]
-class PreparePersistentRunnerTest extends UnitTestCase
+final class PreparePersistentRunnerTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;
 

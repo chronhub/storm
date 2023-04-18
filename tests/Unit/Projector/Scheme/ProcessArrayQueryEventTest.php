@@ -24,11 +24,13 @@ use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;
 
+#[CoversClass(ProcessArrayEvent::class)]
 final class ProcessArrayQueryEventTest extends UnitTestCase
 {
     private Subscription $subscription;

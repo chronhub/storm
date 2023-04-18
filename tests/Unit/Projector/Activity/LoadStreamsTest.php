@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(LoadStreams::class)]
-class LoadStreamsTest extends UnitTestCase
+final class LoadStreamsTest extends UnitTestCase
 {
     private Subscription|MockObject $subscription;
 

@@ -9,7 +9,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(InMemoryProjectionOption::class)]
-class InMemoryProjectionOptionTest extends UnitTestCase
+final class InMemoryProjectionOptionTest extends UnitTestCase
 {
     public function testInstance(): void
     {

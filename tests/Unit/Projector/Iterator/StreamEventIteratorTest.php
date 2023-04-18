@@ -13,7 +13,7 @@ use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(StreamEventIterator::class)]
-class StreamEventIteratorTest extends UnitTestCase
+final class StreamEventIteratorTest extends UnitTestCase
 {
     public function testEmptyGenerator(): void
     {

@@ -12,8 +12,10 @@ use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
+#[CoversClass(RefreshProjection::class)]
 final class RefreshProjectionTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;

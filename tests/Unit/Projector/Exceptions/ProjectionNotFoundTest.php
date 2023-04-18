@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Exceptions;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-class ProjectionNotFoundTest extends UnitTestCase
+#[CoversClass(ProjectionNotFound::class)]
+final class ProjectionNotFoundTest extends UnitTestCase
 {
     public function testException(): void
     {

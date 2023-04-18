@@ -12,7 +12,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(StopWhenRunningOnce::class)]
-class StopWhenRunningOnceTest extends UnitTestCase
+final class StopWhenRunningOnceTest extends UnitTestCase
 {
     public function testExplicitlyStopProjectionWhileNotRunningInBackground(): void
     {

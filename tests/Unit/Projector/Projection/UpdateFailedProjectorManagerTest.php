@@ -7,8 +7,10 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectorManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Throwable;
 
+#[CoversClass(ProjectorManager::class)]
 final class UpdateFailedProjectorManagerTest extends InMemoryProjectorManagerTestCase
 {
     public function testExceptionRaisedOnStopWhenUpdateFailed(): void

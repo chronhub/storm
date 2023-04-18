@@ -16,8 +16,10 @@ use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Tests\Unit\Projector\Stubs\SubscriptionStub;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
+#[CoversClass(AbstractSubscription::class)]
 final class SubscriptionTest extends UnitTestCase
 {
     private DefaultProjectionOption $options;

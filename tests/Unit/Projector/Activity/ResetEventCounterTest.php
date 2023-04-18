@@ -8,8 +8,10 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-class ResetEventCounterTest extends UnitTestCase
+#[CoversClass(ResetEventCounter::class)]
+final class ResetEventCounterTest extends UnitTestCase
 {
     public function testActivity(): void
     {

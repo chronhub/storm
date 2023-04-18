@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(RemoteStatusDiscovery::class)]
-class RemoteStatusDiscoveryTest extends UnitTestCase
+final class RemoteStatusDiscoveryTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;
 

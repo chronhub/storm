@@ -11,7 +11,9 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(ProcessArrayEvent::class)]
 final class ProcessArrayPersistentEventTest extends ProcessPersistentEventTestCase
 {
     public function testPersistPositionAndStateWhenCounterIsReachedAndEventNotFound(): void

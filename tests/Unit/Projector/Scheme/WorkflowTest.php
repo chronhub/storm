@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use RuntimeException;
 
 #[CoversClass(Workflow::class)]
-class WorkflowTest extends UnitTestCase
+final class WorkflowTest extends UnitTestCase
 {
     public function testQueryWorkflow(): void
     {

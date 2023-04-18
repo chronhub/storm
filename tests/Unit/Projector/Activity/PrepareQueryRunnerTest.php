@@ -10,8 +10,10 @@ use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-class PrepareQueryRunnerTest extends UnitTestCase
+#[CoversClass(PrepareQueryRunner::class)]
+final class PrepareQueryRunnerTest extends UnitTestCase
 {
     public function testInvoke(): void
     {

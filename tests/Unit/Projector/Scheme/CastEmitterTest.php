@@ -10,9 +10,11 @@ use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class CastEmitterTest extends UnitTestCase
+#[CoversClass(CastEmitter::class)]
+final class CastEmitterTest extends UnitTestCase
 {
     private PointInTime $clock;
 
