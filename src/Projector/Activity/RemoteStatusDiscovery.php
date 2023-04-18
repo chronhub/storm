@@ -11,7 +11,7 @@ trait RemoteStatusDiscovery
 {
     protected ?PersistentSubscriptionInterface $subscription;
 
-    protected function recoverProjectionStatus(bool $isFirstExecution, bool $shouldKeepRunning): bool
+    protected function discloseProjectionStatus(bool $isFirstExecution, bool $shouldKeepRunning): bool
     {
         $statuses = $this->getStatuses($isFirstExecution, $shouldKeepRunning);
 
