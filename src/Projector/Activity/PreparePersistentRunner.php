@@ -19,7 +19,7 @@ final class PreparePersistentRunner
 
             $this->isInitialized = true;
 
-            if ($this->recoverProjectionStatus(true, $subscription->sprint()->inBackground())) {
+            if ($this->discloseProjectionStatus(true, $subscription->sprint()->inBackground())) {
                 return true;
             }
 

@@ -11,9 +11,9 @@ use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
+use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
-use Chronhub\Storm\Projector\Activity\UpdateStatusAndPositions;
 
 trait InteractWithPersistentProjection
 {
@@ -63,7 +63,7 @@ trait InteractWithPersistentProjection
             new PersistOrUpdateLock(),
             new ResetEventCounter(),
             new DispatchSignal(),
-            new UpdateStatusAndPositions(),
+            new RefreshProjection(),
             new StopWhenRunningOnce($this),
         ];
     }

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
-final class UpdateStatusAndPositions
+final class RefreshProjection
 {
     use RemoteStatusDiscovery;
 
@@ -14,7 +14,7 @@ final class UpdateStatusAndPositions
     {
         $this->subscription ??= $subscription;
 
-        $this->recoverProjectionStatus(false, $subscription->sprint()->inBackground());
+        $this->discloseProjectionStatus(false, $subscription->sprint()->inBackground());
 
         $queries = $subscription->context()->queries();
 
