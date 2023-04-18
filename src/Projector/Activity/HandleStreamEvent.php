@@ -13,7 +13,7 @@ final class HandleStreamEvent
     /**
      * @var null|callable
      */
-    private $eventProcessor = null;
+    private $eventProcessor;
 
     public function __construct(private readonly LoadStreams $loadStreams)
     {
