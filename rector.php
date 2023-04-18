@@ -25,4 +25,10 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::CODE_QUALITY,
         SetList::CODING_STYLE,
     ]);
+
+    $rectorConfig->skip([
+        \Rector\CodingStyle\Rector\ClassMethod\UnSpreadOperatorRector::class,
+        \Rector\Php54\Rector\Array_\LongArrayToShortArrayRector::class,
+        \Rector\CodingStyle\Rector\PostInc\PostIncDecToPreIncDecRector::class,
+    ]);
 };

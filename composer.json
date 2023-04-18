@@ -22,11 +22,11 @@
   },
   "require-dev": {
     "ext-posix": "*",
-    "laravel/pint": "^1.8",
+    "laravel/pint": "^v1.8",
     "nunomaduro/larastan": "^2.5",
     "nunomaduro/phpinsights": "dev-master",
     "orchestra/testbench": "^8.x-dev",
-    "phpstan/phpstan": "^1.10",
+    "phpstan/phpstan": "^1.10.x-dev",
     "phpunit/phpunit": "^10.0",
     "rector/rector": "dev-main",
     "roave/security-advisories": "dev-latest"
