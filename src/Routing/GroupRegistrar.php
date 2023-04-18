@@ -10,7 +10,6 @@ use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Illuminate\Support\Collection;
 use function array_merge;
-use function sprintf;
 
 final class GroupRegistrar implements Registrar
 {
@@ -72,22 +71,17 @@ final class GroupRegistrar implements Registrar
 
     private function mergeGroup(Group $group): Group
     {
-        $domainType = $group->getType();
-        $groupName = $group->name;
+        $type = $group->getType()->value;
+        $name = $group->name;
 
-        $this->assertUniqueDomainTypeAndName($domainType, $groupName);
-
-        $this->groups->put($domainType->value, array_merge($this->groups[$domainType->value], [$groupName => $group]));
-
-        return $group;
-    }
-
-    private function assertUniqueDomainTypeAndName(DomainType $domainType, string $name): void
-    {
-        if (isset($this->groups[$domainType->value][$name])) {
+        if (isset($this->groups[$type][$name])) {
             throw new RoutingViolation(
-                sprintf('Group %s already exists with name %s', $domainType->value, $name)
+                "Group $type already exists with name $name"
             );
         }
+
+        $this->groups->put($type, array_merge($this->groups[$type], [$name => $group]));
+
+        return $group;
     }
 }

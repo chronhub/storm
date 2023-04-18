@@ -30,9 +30,6 @@ trait HasConstructableReporter
         return $this->tracker;
     }
 
-    /**
-     * Relay message
-     */
     protected function relayMessage(MessageStory $story): void
     {
         try {

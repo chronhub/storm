@@ -51,16 +51,21 @@ abstract class AbstractSubscriptionFactory
 
     public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
     {
-        $args = $this->createPersistentSubscription($streamName, null, $options);
+        $arguments = $this->createPersistentSubscription($streamName, null, $options);
 
-        return new EmitterSubscription(...$args);
+        return new EmitterSubscription(...$arguments);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
     {
-        $args = $this->createPersistentSubscription($streamName, $readModel, $options);
+        $arguments = $this->createPersistentSubscription($streamName, $readModel, $options);
 
-        return new ReadModelSubscription(...$args);
+        return new ReadModelSubscription(...$arguments);
+    }
+
+    public function createContextBuilder(): Context
+    {
+        return new Context();
     }
 
     protected function createPersistentSubscription(string $streamName, ?ReadModel $readModel, array $options = []): array
@@ -123,10 +128,5 @@ abstract class AbstractSubscriptionFactory
     protected function createEventCounter(ProjectionOption $options): EventCounter
     {
         return new EventCounter($options->getBlockSize());
-    }
-
-    public function createContextBuilder(): Context
-    {
-        return new Context();
     }
 }

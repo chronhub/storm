@@ -11,7 +11,6 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use function is_int;
-use function sprintf;
 
 final class InMemoryQueryScope implements ProjectionQueryScope
 {
@@ -27,7 +26,7 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
                 if ($position <= 0) {
                      throw new InvalidArgumentException(
-                         sprintf('Position must be greater than 0, current is %d', $position)
+                         "Position must be greater than 0, current is $position"
                      );
                 }
 
@@ -36,7 +35,7 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
                     if (! is_int($internalPosition)) {
                         throw new InvalidArgumentException(
-                            sprintf('Internal position header must return an integer, current is %s', $internalPosition)
+                            "Internal position header must return an integer, current is $internalPosition"
                         );
                     }
 
