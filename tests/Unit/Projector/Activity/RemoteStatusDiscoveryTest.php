@@ -128,7 +128,7 @@ class RemoteStatusDiscoveryTest extends UnitTestCase
 
             public function recover(bool $isFirstExecution, bool $shouldKeepRunning): bool
             {
-                return $this->recoverProjectionStatus($isFirstExecution, $shouldKeepRunning);
+                return $this->discloseProjectionStatus($isFirstExecution, $shouldKeepRunning);
             }
         };
     }
