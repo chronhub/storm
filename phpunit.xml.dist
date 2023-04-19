@@ -14,16 +14,12 @@
       <directory>./tests/Unit/</directory>
     </testsuite>
   </testsuites>
+
   <coverage>
     <include>
       <directory suffix=".php">./src</directory>
     </include>
   </coverage>
 
-  <source filterDeprecations="true" filterNotices="true" filterWarnings="true">
-    <include>
-      <directory suffix=".php">./src</directory>
-    </include>
-  </source>
 </phpunit>
 
