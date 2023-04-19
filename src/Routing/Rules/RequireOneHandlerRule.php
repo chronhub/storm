@@ -10,7 +10,6 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Routing\Route;
 use function count;
-use function sprintf;
 
 final readonly class RequireOneHandlerRule implements RoutingRule
 {
@@ -36,9 +35,9 @@ final readonly class RequireOneHandlerRule implements RoutingRule
 
         $routes->each(static function (Route $route) use ($group): void {
             if (count($route->getHandlers()) !== 1) {
-                $message = 'Group type %s and name %s require one route handler only for message %s';
-
-                throw new RoutingViolation(sprintf($message, $group->getType()->value, $group->name, $route->getName()));
+                throw new RoutingViolation(
+                    "Group type {$group->getType()->value} and name {$group->name} require one route handler only for message {$route->getName()}"
+                );
             }
         });
     }

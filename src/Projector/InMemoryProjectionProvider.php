@@ -131,7 +131,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         foreach (array_keys($data) as $key) {
             if (! in_array($key, $this->fillable, true)) {
                 throw new InvalidArgumentException(
-                    sprintf('Invalid projection field %s for projection %s', $key, $name)
+                    "Invalid projection field $key for projection $name"
                 );
             }
         }

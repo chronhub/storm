@@ -78,6 +78,14 @@ class Route implements JsonSerializable
         return $this->queue;
     }
 
+    /**
+     * @return array{
+     *     "message_name": string,
+     *     "original_message_name": string,
+     *     "message_handlers": array<int, string|object>,
+     *     "queue_options": array
+     * }
+     */
     public function jsonSerialize(): array
     {
         return [

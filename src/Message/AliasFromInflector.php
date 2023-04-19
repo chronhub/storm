@@ -11,7 +11,6 @@ use function class_exists;
 use function ctype_lower;
 use function mb_strtolower;
 use function preg_replace;
-use function sprintf;
 use function str_replace;
 use function ucwords;
 
@@ -20,7 +19,7 @@ final class AliasFromInflector implements MessageAlias
     public function classToAlias(string $eventClass): string
     {
         if (! class_exists($eventClass)) {
-            throw new InvalidArgumentException(sprintf('Event class %s does not exists', $eventClass));
+            throw new InvalidArgumentException("Event class $eventClass does not exists");
         }
 
         return $this->produceAlias($eventClass);
