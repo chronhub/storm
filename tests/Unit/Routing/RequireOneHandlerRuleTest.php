@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use Chronhub\Storm\Message\AliasFromClassName;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\CollectRoutes;
-use Chronhub\Storm\Routing\CommandGroup;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
-use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -56,7 +55,7 @@ final class RequireOneHandlerRuleTest extends UnitTestCase
 
     public static function provideGroup(): Generator
     {
-        yield [new CommandGroup('command', new CollectRoutes(new AliasFromClassName()))];
-        yield [new QueryGroup('query', new CollectRoutes(new AliasFromClassName()))];
+        yield [new Group(DomainType::COMMAND, 'command', new CollectRoutes(new AliasFromClassName()))];
+        yield [new Group(DomainType::QUERY, 'command', new CollectRoutes(new AliasFromClassName()))];
     }
 }

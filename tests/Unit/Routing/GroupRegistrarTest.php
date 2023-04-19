@@ -6,11 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Routing;
 
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Reporter\DomainType;
-use Chronhub\Storm\Routing\CommandGroup;
-use Chronhub\Storm\Routing\EventGroup;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
+use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Routing\GroupRegistrar;
-use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -34,13 +32,19 @@ final class GroupRegistrarTest extends UnitTestCase
     public function testGroupInstanceWithDomainType(): void
     {
         $commandGroup = $this->registrar->make(DomainType::COMMAND, 'default');
-        $this->assertInstanceOf(CommandGroup::class, $commandGroup);
+        $this->assertInstanceOf(Group::class, $commandGroup);
+        $this->assertEquals(DomainType::COMMAND, $commandGroup->getType());
+        $this->assertEquals(DomainType::COMMAND, $commandGroup->domainType);
 
         $eventGroup = $this->registrar->make(DomainType::EVENT, 'default');
-        $this->assertInstanceOf(EventGroup::class, $eventGroup);
+        $this->assertInstanceOf(Group::class, $eventGroup);
+        $this->assertEquals(DomainType::EVENT, $eventGroup->getType());
+        $this->assertEquals(DomainType::EVENT, $eventGroup->domainType);
 
         $queryGroup = $this->registrar->make(DomainType::QUERY, 'default');
-        $this->assertInstanceOf(QueryGroup::class, $queryGroup);
+        $this->assertInstanceOf(Group::class, $queryGroup);
+        $this->assertEquals(DomainType::QUERY, $queryGroup->getType());
+        $this->assertEquals(DomainType::QUERY, $queryGroup->domainType);
 
         $this->assertNotSame($this->registrar->all(), $this->registrar->all());
         $this->assertCount(3, $this->registrar->all());
@@ -49,13 +53,13 @@ final class GroupRegistrarTest extends UnitTestCase
     public function testGroupInstanceWithGroupMethod(): void
     {
         $commandGroup = $this->registrar->makeCommand('default');
-        $this->assertInstanceOf(CommandGroup::class, $commandGroup);
+        $this->assertInstanceOf(Group::class, $commandGroup);
 
         $eventGroup = $this->registrar->makeEvent('default');
-        $this->assertInstanceOf(EventGroup::class, $eventGroup);
+        $this->assertInstanceOf(Group::class, $eventGroup);
 
         $queryGroup = $this->registrar->makeQuery('default');
-        $this->assertInstanceOf(QueryGroup::class, $queryGroup);
+        $this->assertInstanceOf(Group::class, $queryGroup);
 
         $this->assertNotSame($this->registrar->all(), $this->registrar->all());
         $this->assertCount(3, $this->registrar->all());

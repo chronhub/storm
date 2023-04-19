@@ -8,30 +8,34 @@ use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Message\NoOpMessageDecorator;
 use Chronhub\Storm\Producer\ProducerStrategy;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Reporter\ReportCommand;
 use Chronhub\Storm\Routing\CollectRoutes;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
+use Chronhub\Storm\Routing\Rules\RequireAtLeastOneRoute;
 use Chronhub\Storm\Routing\Rules\RequireOneHandlerRule;
 use Chronhub\Storm\Tests\Stubs\Double\NoOpMessageSubscriber;
-use Chronhub\Storm\Tests\Stubs\GroupStub;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(Group::class)]
 final class GroupTest extends UnitTestCase
 {
-    private GroupStub $group;
+    private CollectRoutes $routes;
 
     protected function setUp(): void
     {
-        $this->group = new GroupStub('default', new CollectRoutes(new AliasFromClassName()));
+        $this->routes = new CollectRoutes(new AliasFromClassName());
     }
 
-    public function testGroupInstance(): void
+    #[DataProvider('provideDomainType')]
+    public function testGroupInstance(DomainType $domainType): void
     {
-        $group = $this->group;
+        $group = new Group($domainType, 'default', $this->routes);
 
         $this->assertNull($group->reporterConcrete());
         $this->assertNull($group->reporterId());
@@ -44,9 +48,10 @@ final class GroupTest extends UnitTestCase
         $this->assertEmpty($group->rules());
     }
 
-    public function testPropertiesSetter(): void
+    #[DataProvider('provideDomainType')]
+    public function testPropertiesSetter(DomainType $domainType): void
     {
-        $group = $this->group;
+        $group = new Group($domainType, 'default', $this->routes);
 
         $group
             ->withReporterConcrete(ReportCommand::class)
@@ -73,46 +78,59 @@ final class GroupTest extends UnitTestCase
         $this->assertCount(2, $group->subscribers());
     }
 
-    public function testExceptionRaisedWhenReporterConcreteIsNotInstanceOfReporting(): void
+    #[DataProvider('provideDomainType')]
+    public function testExceptionRaisedWhenReporterConcreteIsNotInstanceOfReporting(DomainType $domainType): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Reporter concrete class reporter.command.default must be an instance of '.Reporter::class);
 
-        $group = $this->group;
-
+        $group = new Group($domainType, 'default', $this->routes);
         $group->withReporterConcrete('reporter.command.default');
     }
 
-    public function testExceptionRaisedWhenProducerStrategyIsInvalid(): void
+    #[DataProvider('provideDomainType')]
+    public function testExceptionRaisedWhenProducerStrategyIsInvalid(DomainType $domainType): void
     {
         $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage('Invalid message producer key: unknown_strategy');
+        $this->expectExceptionMessage('Invalid message producer strategy unknown_strategy');
 
-        $this->group->withStrategy('unknown_strategy');
+        $group = new Group($domainType, 'default', $this->routes);
+        $group->withStrategy('unknown_strategy');
     }
 
-    public function testExceptionRaisedWhenProducerStrategyIsNotSet(): void
+    #[DataProvider('provideDomainType')]
+    public function testExceptionRaisedWhenProducerStrategyIsNotSet(DomainType $domainType): void
     {
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Producer strategy can not be null');
 
-        $this->group->strategy();
+        $group = new Group($domainType, 'default', $this->routes);
+        $group->strategy();
     }
 
-    public function testAddRule(): void
+    #[DataProvider('provideDomainType')]
+    public function testAddRules(DomainType $domainType): void
     {
-        $this->group->addRule(new RequireOneHandlerRule());
+        $group = new Group($domainType, 'default', $this->routes);
 
-        $this->assertCount(1, $this->group->rules());
+        $group->addRule(new RequireOneHandlerRule());
+
+        $this->assertCount(1, $group->rules());
+
+        $group->addRule(new RequireAtLeastOneRoute());
+
+        $this->assertCount(2, $group->rules());
     }
 
-    public function testItSerializeGroup(): void
+    #[DataProvider('provideDomainType')]
+    public function testItSerializeGroup(DomainType $domainType): void
     {
-        $group = $this->group;
+        $group = new Group($domainType, 'default', $this->routes);
+
         $group->withStrategy('sync');
 
         $this->assertEquals([
-            'command' => [
+            $domainType->value => [
                 'default' => [
                     'group' => [
                         'service_id' => null,
@@ -129,5 +147,12 @@ final class GroupTest extends UnitTestCase
                 ],
             ],
         ], $group->jsonSerialize());
+    }
+
+    public static function provideDomainType(): Generator
+    {
+        yield [DomainType::COMMAND];
+        yield [DomainType::QUERY];
+        yield [DomainType::EVENT];
     }
 }

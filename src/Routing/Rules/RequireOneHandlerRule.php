@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Routing\Rules;
 
 use Chronhub\Storm\Contracts\Routing\RoutingRule;
-use Chronhub\Storm\Routing\CommandGroup;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
-use Chronhub\Storm\Routing\QueryGroup;
 use Chronhub\Storm\Routing\Route;
 use function count;
 use function sprintf;
@@ -17,11 +16,12 @@ final readonly class RequireOneHandlerRule implements RoutingRule
 {
     public function enforce(Group $group): void
     {
-        if ($group instanceof CommandGroup) {
-            $this->assertRouteHandler($group);
-        }
+        $match = match ($group->getType()) {
+            DomainType::COMMAND, DomainType::QUERY => true,
+            default => false
+        };
 
-        if ($group instanceof QueryGroup) {
+        if ($match) {
             $this->assertRouteHandler($group);
         }
     }

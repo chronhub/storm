@@ -18,7 +18,6 @@ use Generator;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
@@ -43,7 +42,6 @@ final class HandleRouteTest extends UnitTestCase
         $this->producerUnity = $this->createMock(ProducerUnity::class);
     }
 
-    #[Test]
     public function testRouteHandleSync(): void
     {
         $tracker = new TrackMessage();
@@ -77,7 +75,6 @@ final class HandleRouteTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[Test]
     public function testRouteHandleAsync(): void
     {
         $tracker = new TrackMessage();

@@ -16,7 +16,7 @@ use JsonSerializable;
 use function array_merge;
 use function is_a;
 
-abstract class Group implements JsonSerializable
+final class Group implements JsonSerializable
 {
     /**
      * Reporter service id
@@ -79,6 +79,7 @@ abstract class Group implements JsonSerializable
     private array $rules = [];
 
     public function __construct(
+        public readonly DomainType $domainType,
         public readonly string $name,
         public readonly RouteCollection $routes
     ) {
@@ -176,7 +177,7 @@ abstract class Group implements JsonSerializable
         $producerStrategy = ProducerStrategy::tryFrom($strategy);
 
         if (! $producerStrategy instanceof ProducerStrategy) {
-            throw new RoutingViolation("Invalid message producer key: $strategy");
+            throw new RoutingViolation("Invalid message producer strategy $strategy");
         }
 
         $this->strategy = $producerStrategy;
@@ -245,5 +246,8 @@ abstract class Group implements JsonSerializable
         ];
     }
 
-    abstract public function getType(): DomainType;
+    public function getType(): DomainType
+    {
+        return $this->domainType;
+    }
 }

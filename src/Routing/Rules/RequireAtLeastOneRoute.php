@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Routing\Rules;
 use Chronhub\Storm\Contracts\Routing\RoutingRule;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
-use function sprintf;
 
 final readonly class RequireAtLeastOneRoute implements RoutingRule
 {
@@ -15,7 +14,7 @@ final readonly class RequireAtLeastOneRoute implements RoutingRule
     {
         if ($group->routes->getRoutes()->isEmpty()) {
             throw new RoutingViolation(
-                sprintf('Group type %s and name %s require at least one route', $group->getType()->value, $group->name)
+                "Group type {$group->getType()->value} and name $group->name require at least one route"
             );
         }
     }

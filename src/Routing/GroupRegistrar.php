@@ -62,11 +62,7 @@ final class GroupRegistrar implements Registrar
     {
         $routing = new CollectRoutes($this->messageAlias);
 
-        return match ($groupType) {
-            DomainType::COMMAND => new CommandGroup($name, $routing),
-            DomainType::EVENT => new EventGroup($name, $routing),
-            DomainType::QUERY => new QueryGroup($name, $routing)
-        };
+        return new Group($groupType, $name, $routing);
     }
 
     private function mergeGroup(Group $group): Group

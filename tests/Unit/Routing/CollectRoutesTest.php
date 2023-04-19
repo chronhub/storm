@@ -13,23 +13,16 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use function count;
-use function sprintf;
 
 #[CoversClass(CollectRoutes::class)]
 final class CollectRoutesTest extends UnitTestCase
 {
     private MockObject|MessageAlias $messageAlias;
 
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->messageAlias = $this->createMock(MessageAlias::class);
     }
 
@@ -64,7 +57,7 @@ final class CollectRoutesTest extends UnitTestCase
     public function testExceptionRaisedWithDuplicateRoute(): void
     {
         $this->expectException(RoutingViolation::class);
-        $this->expectExceptionMessage(sprintf('Message name already exists: %s', SomeCommand::class));
+        $this->expectExceptionMessage('Message name already exists '.SomeCommand::class);
 
         $this->messageAlias->expects($this->once())
             ->method('classToAlias')
