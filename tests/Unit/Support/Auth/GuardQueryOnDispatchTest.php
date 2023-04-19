@@ -14,11 +14,13 @@ use Chronhub\Storm\Support\Auth\UnauthorizedException;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
-class GuardQueryOnDispatchTest extends UnitTestCase
+#[CoversClass(GuardQueryOnDispatch::class)]
+final class GuardQueryOnDispatchTest extends UnitTestCase
 {
     private MessageAlias|MockObject $messageAlias;
 
@@ -115,7 +117,7 @@ class GuardQueryOnDispatchTest extends UnitTestCase
     {
         $data = null;
 
-        $promise->then(function (array $result) use (&$data) {
+        $promise->then(static function (array $result) use (&$data) {
             $data = $result;
         });
 

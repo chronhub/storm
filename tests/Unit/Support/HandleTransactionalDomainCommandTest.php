@@ -12,11 +12,12 @@ use Chronhub\Storm\Support\Bridge\HandleTransactionalDomainCommand;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 
-class HandleTransactionalDomainCommandTest extends UnitTestCase
+#[CoversClass(HandleTransactionalDomainCommand::class)]
+final class HandleTransactionalDomainCommandTest extends UnitTestCase
 {
     private Message $message;
 
@@ -61,7 +62,6 @@ class HandleTransactionalDomainCommandTest extends UnitTestCase
         $tracker->disclose($story);
     }
 
-    #[Test]
     public function testNoCommitMadeWhenNotInTransaction(): void
     {
         $this->chronicler->expects($this->once())->method('inTransaction')->willReturn(false);

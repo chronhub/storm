@@ -14,9 +14,11 @@ use Chronhub\Storm\Support\Auth\UnauthorizedException;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class GuardCommandTest extends UnitTestCase
+#[CoversClass(GuardCommand::class)]
+final class GuardCommandTest extends UnitTestCase
 {
     private MessageAlias|MockObject $messageAlias;
 

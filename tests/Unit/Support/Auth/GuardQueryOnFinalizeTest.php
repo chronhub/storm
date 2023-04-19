@@ -14,11 +14,13 @@ use Chronhub\Storm\Support\Auth\UnauthorizedException;
 use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use Throwable;
 
+#[CoversClass(GuardQueryOnFinalize::class)]
 class GuardQueryOnFinalizeTest extends UnitTestCase
 {
     private MessageAlias|MockObject $messageAlias;
@@ -95,7 +97,7 @@ class GuardQueryOnFinalizeTest extends UnitTestCase
         $tracker->disclose($story);
 
         $e = null;
-        $story->promise()->then(null, function (Throwable $exception) use (&$e) {
+        $story->promise()->then(null, static function (Throwable $exception) use (&$e) {
             $e = $exception;
         });
 
@@ -116,7 +118,7 @@ class GuardQueryOnFinalizeTest extends UnitTestCase
     {
         $data = null;
 
-        $promise->then(function (array $result) use (&$data) {
+        $promise->then(static function (array $result) use (&$data) {
             $data = $result;
         });
 

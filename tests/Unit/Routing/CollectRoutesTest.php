@@ -38,7 +38,8 @@ final class CollectRoutesTest extends UnitTestCase
 
     public function testAddRoute(): void
     {
-        $this->messageAlias->expects($this->once())
+        $this->messageAlias
+            ->expects($this->once())
             ->method('classToAlias')
             ->with(SomeCommand::class)
             ->willReturn('some-command');
@@ -59,7 +60,8 @@ final class CollectRoutesTest extends UnitTestCase
         $this->expectException(RoutingViolation::class);
         $this->expectExceptionMessage('Message name already exists '.SomeCommand::class);
 
-        $this->messageAlias->expects($this->once())
+        $this->messageAlias
+            ->expects($this->once())
             ->method('classToAlias')
             ->with(SomeCommand::class)
             ->willReturn('some-command');
@@ -75,7 +77,8 @@ final class CollectRoutesTest extends UnitTestCase
 
     public function testMatchRoute(): void
     {
-        $this->messageAlias->expects($this->any())
+        $this->messageAlias
+            ->expects($this->any())
             ->method('classToAlias')
             ->willReturnMap([[SomeCommand::class, SomeCommand::class], [AnotherCommand::class, AnotherCommand::class]]);
 
@@ -90,7 +93,8 @@ final class CollectRoutesTest extends UnitTestCase
 
     public function testMatchRouteWithMessageAlias(): void
     {
-        $this->messageAlias->expects($this->any())
+        $this->messageAlias
+            ->expects($this->any())
             ->method('classToAlias')
             ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 
@@ -120,7 +124,8 @@ final class CollectRoutesTest extends UnitTestCase
 
     public function testGetCloneRouteCollection(): void
     {
-        $this->messageAlias->expects($this->any())
+        $this->messageAlias
+            ->expects($this->any())
             ->method('classToAlias')
             ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 
@@ -135,7 +140,8 @@ final class CollectRoutesTest extends UnitTestCase
 
     public function testJsonSerializeRouteCollection(): void
     {
-        $this->messageAlias->expects($this->any())
+        $this->messageAlias
+            ->expects($this->any())
             ->method('classToAlias')
             ->willReturnMap([[SomeCommand::class, 'some-command'], [AnotherCommand::class, 'another-command']]);
 

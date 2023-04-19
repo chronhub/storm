@@ -11,9 +11,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Countable;
 use Generator;
 use IteratorAggregate;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Traversable;
 
+#[CoversClass(StreamEvents::class)]
 final class StreamEventsTest extends UnitTestCase
 {
     #[DataProvider('provideIterable')]

@@ -21,9 +21,11 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Chronhub\Storm\Tracker\TrackMessage;
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-class MakeCausationDomainCommandTest extends UnitTestCase
+#[CoversClass(MakeCausationDomainCommand::class)]
+final class MakeCausationDomainCommandTest extends UnitTestCase
 {
     #[DataProvider('provideStreamEventName')]
     public function testCorrelationHeaderAdded(string $streamEventName): void
