@@ -14,10 +14,6 @@ use Chronhub\Storm\Contracts\Chronicler\TransactionalEventableChronicler;
 use Chronhub\Storm\Contracts\Chronicler\TransactionalInMemoryChronicler as Transactional;
 use Chronhub\Storm\Contracts\Stream\StreamCategory;
 use Closure;
-use Illuminate\Support\Str;
-use function method_exists;
-use function sprintf;
-use function ucfirst;
 
 final class InMemoryChroniclerFactory implements ChroniclerFactory
 {
@@ -41,21 +37,13 @@ final class InMemoryChroniclerFactory implements ChroniclerFactory
 
     private function resolve(string $name, array $config): Chronicler
     {
-        // fixMe illuminate support is not part of composer dep
-        // either set it or make the fn
-        $driverMethod = 'create'.ucfirst(Str::camel($name.'Driver'));
-
-        /**
-         * @covers createStandaloneDriver
-         * @covers createTransactionalDriver
-         * @covers createEventableDriver
-         * @covers createTransactionalEventableDriver
-         */
-        if (method_exists($this, $driverMethod)) {
-            return $this->{$driverMethod}($config);
-        }
-
-        throw new InvalidArgumentException(sprintf('In memory chronicler provider %s is not defined', $name));
+        return match ($name) {
+            'standalone' => $this->createStandaloneDriver(),
+            'transactional' => $this->createTransactionalDriver(),
+            'eventable' => $this->createEventableDriver($config),
+            'transactional_eventable' => $this->createTransactionalEventableDriver($config),
+            default => throw new InvalidArgumentException("In memory chronicler provider $name is not defined")
+        };
     }
 
     private function createStandaloneDriver(): InMemoryChronicler
