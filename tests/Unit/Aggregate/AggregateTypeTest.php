@@ -51,9 +51,7 @@ final class AggregateTypeTest extends UnitTestCase
     public function testAggregateIsNotSupported(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            sprintf('Aggregate root %s class is not supported', AnotherAggregateRootStub::class)
-        );
+        $this->expectExceptionMessage('Aggregate given Chronhub\Storm\Tests\Stubs\AnotherAggregateRootStub is not supported');
 
         $aggregateType = new AggregateType(AggregateRootStub::class, [AggregateRootChildStub::class]);
 

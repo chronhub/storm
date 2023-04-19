@@ -11,9 +11,10 @@ use Chronhub\Storm\Reporter\DomainEvent;
 
 final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilter
 {
-    public function __construct(private AggregateIdentity $aggregateId,
-                                private string $direction)
-    {
+    public function __construct(
+        private AggregateIdentity $aggregateId,
+        private string $direction
+    ) {
     }
 
     public function apply(): callable

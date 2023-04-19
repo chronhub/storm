@@ -74,7 +74,7 @@ final readonly class AggregateType implements Type
     public function assertAggregateIsSupported(string $aggregate): void
     {
         if (! $this->isSupported($aggregate)) {
-            throw new InvalidArgumentException("Aggregate root $aggregate class is not supported");
+            throw new InvalidArgumentException("Aggregate given $aggregate is not supported");
         }
     }
 }

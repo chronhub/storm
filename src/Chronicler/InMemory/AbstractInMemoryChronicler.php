@@ -19,7 +19,6 @@ use Chronhub\Storm\Stream\StreamName;
 use Generator;
 use Illuminate\Support\Collection;
 use function array_map;
-use function sprintf;
 
 abstract class AbstractInMemoryChronicler implements InMemoryChronicler
 {
@@ -46,7 +45,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
     {
         if (! $queryFilter instanceof InMemoryQueryFilter) {
             throw new InvalidArgumentException(
-                sprintf('Query filter must be an instance of %s', InMemoryQueryFilter::class)
+                'Query filter must be an instance of '.InMemoryQueryFilter::class
             );
         }
 

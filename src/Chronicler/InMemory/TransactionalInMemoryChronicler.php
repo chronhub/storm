@@ -35,9 +35,10 @@ final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler i
      */
     protected Collection $cachedStreams;
 
-    public function __construct(EventStreamProvider $eventStreamProvider,
-                                StreamCategory $streamCategory)
-    {
+    public function __construct(
+        EventStreamProvider $eventStreamProvider,
+        StreamCategory $streamCategory
+    ) {
         parent::__construct($eventStreamProvider, $streamCategory);
 
         $this->cachedStreams = new Collection();

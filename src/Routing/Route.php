@@ -8,7 +8,6 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use JsonSerializable;
 use function array_merge;
 use function class_exists;
-use function sprintf;
 
 class Route implements JsonSerializable
 {
@@ -25,7 +24,7 @@ class Route implements JsonSerializable
     {
         if (! class_exists($this->name)) {
             throw new RoutingViolation(
-                sprintf('Message name must be a valid class name, got %s', $this->name)
+                'Message name must be a valid class name, got '.$this->name
             );
         }
     }

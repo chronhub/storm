@@ -75,9 +75,7 @@ final class GroupRegistrar implements Registrar
         $name = $group->name;
 
         if (isset($this->groups[$type][$name])) {
-            throw new RoutingViolation(
-                "Group $type already exists with name $name"
-            );
+            throw new RoutingViolation("Group $type already exists with name $name");
         }
 
         $this->groups->put($type, array_merge($this->groups[$type], [$name => $group]));

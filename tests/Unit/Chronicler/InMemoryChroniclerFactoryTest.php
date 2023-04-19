@@ -19,7 +19,6 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
-use function sprintf;
 
 #[CoversClass(InMemoryChroniclerFactory::class)]
 #[CoversClass(ProvideChroniclerFactory::class)]
@@ -132,9 +131,7 @@ final class InMemoryChroniclerFactoryTest extends UnitTestCase
         $expectedClass = StandaloneInMemoryChronicler::class;
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $expectedClass)
-        );
+        $this->expectExceptionMessage('Unable to decorate chronicler, stream tracker is not defined or invalid');
 
         $config = ['tracking' => []];
 
@@ -152,9 +149,7 @@ final class InMemoryChroniclerFactoryTest extends UnitTestCase
         $expectedClass = TransactionalInMemoryChronicler::class;
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $expectedClass)
-        );
+        $this->expectExceptionMessage('Unable to decorate chronicler, stream tracker is not defined or invalid');
 
         $config = ['tracking' => []];
 

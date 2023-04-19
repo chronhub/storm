@@ -16,7 +16,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use function is_string;
-use function sprintf;
 
 trait ProvideChroniclerFactory
 {
@@ -25,12 +24,14 @@ trait ProvideChroniclerFactory
     protected function decorateChronicler(Chronicler $chronicler, ?StreamTracker $tracker): EventableChronicler|TransactionalEventableChronicler
     {
         if ($chronicler instanceof EventableChronicler) {
-            throw new InvalidArgumentException('Unable to decorate a chronicler which is already decorated');
+            throw new InvalidArgumentException(
+                'Unable to decorate a chronicler which is already decorated'
+            );
         }
 
         if (! $tracker instanceof StreamTracker) {
             throw new InvalidArgumentException(
-                sprintf('Unable to decorate chronicler %s, stream tracker is not defined or invalid', $chronicler::class)
+                'Unable to decorate chronicler, stream tracker is not defined or invalid'
             );
         }
 
@@ -42,9 +43,9 @@ trait ProvideChroniclerFactory
             return new EventChronicler($chronicler, $tracker);
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'Invalid configuration to decorate chronicler from chronicler provider: %s', static::class
-        ));
+        throw new InvalidArgumentException(
+            'Invalid configuration to decorate chronicler from chronicler provider'
+        );
     }
 
     protected function resolveStreamTracker(array $config): ?StreamTracker

@@ -129,7 +129,7 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
     public function testExceptionRaisedWithIncompatibleEventStoreAndStreamTracker(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
+        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider');
 
         $this->container->expects($this->once())
             ->method('get')
@@ -160,7 +160,7 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
     public function testExceptionRaisedWithIncompatibleEventStoreAndStreamTracker_2(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider:');
+        $this->expectExceptionMessage('Invalid configuration to decorate chronicler from chronicler provider');
 
         $this->container->expects($this->once())
             ->method('get')

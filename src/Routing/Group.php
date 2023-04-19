@@ -15,7 +15,6 @@ use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use JsonSerializable;
 use function array_merge;
 use function is_a;
-use function sprintf;
 
 abstract class Group implements JsonSerializable
 {
@@ -46,7 +45,7 @@ abstract class Group implements JsonSerializable
     private ?string $handlerMethod = null;
 
     /**
-     * Message producer strategy key
+     * Message producer strategy
      */
     private ?ProducerStrategy $strategy = null;
 
@@ -106,9 +105,7 @@ abstract class Group implements JsonSerializable
     {
         if (! is_a($reporterConcrete, Reporter::class, true)) {
             throw new RoutingViolation(
-                sprintf('Reporter concrete class %s must be an instance of %s',
-                    $reporterConcrete, Reporter::class
-                )
+                'Reporter concrete class '.$reporterConcrete.' must be an instance of '.Reporter::class
             );
         }
 
@@ -179,7 +176,7 @@ abstract class Group implements JsonSerializable
         $producerStrategy = ProducerStrategy::tryFrom($strategy);
 
         if (! $producerStrategy instanceof ProducerStrategy) {
-            throw new RoutingViolation('Invalid message producer key: unknown_strategy');
+            throw new RoutingViolation("Invalid message producer key: $strategy");
         }
 
         $this->strategy = $producerStrategy;

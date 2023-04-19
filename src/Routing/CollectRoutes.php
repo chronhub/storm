@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Routing\RouteCollection;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Illuminate\Support\Collection;
-use function sprintf;
 
 final readonly class CollectRoutes implements RouteCollection
 {
@@ -22,7 +21,7 @@ final readonly class CollectRoutes implements RouteCollection
     public function addRoute(string $messageName): Route
     {
         if ($this->matchOriginal($messageName) instanceof Route) {
-            throw new RoutingViolation(sprintf('Message name already exists: %s', $messageName));
+            throw new RoutingViolation("Message name already exists $messageName");
         }
 
         $route = new Route($messageName);
