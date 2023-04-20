@@ -45,7 +45,6 @@ final class NameReporterServiceTest extends UnitTestCase
 
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
         $story->withMessage($message);
-
         $tracker->disclose($story);
 
         $this->assertEquals($serviceId, $story->message()->header(Header::REPORTER_ID));
@@ -59,10 +58,8 @@ final class NameReporterServiceTest extends UnitTestCase
         $subscriber->attachToReporter($tracker);
 
         $message = new Message(new stdClass(), [Header::REPORTER_ID => 'my_service_id']);
-
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
         $story->withMessage($message);
-
         $tracker->disclose($story);
 
         $this->assertEquals('my_service_id', $story->message()->header(Header::REPORTER_ID));

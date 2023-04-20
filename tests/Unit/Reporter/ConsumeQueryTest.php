@@ -15,11 +15,17 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RuntimeException;
-use Throwable;
 
 #[CoversClass(ConsumeQuery::class)]
 final class ConsumeQueryTest extends UnitTestCase
 {
+    private PromiseHandlerStub $promiseHandler;
+
+    protected function setUp(): void
+    {
+        $this->promiseHandler = new PromiseHandlerStub();
+    }
+
     public function testSubscriber(): void
     {
         $subscriber = new ConsumeQuery();
@@ -76,10 +82,9 @@ final class ConsumeQueryTest extends UnitTestCase
         $tracker->disclose($story);
 
         $this->assertTrue($story->isHandled());
-
         $this->assertInstanceOf(PromiseInterface::class, $story->promise());
 
-        $result = $this->handlePromise($story->promise());
+        $result = $this->promiseHandler->handlePromise($story->promise(), true);
 
         $this->assertEquals(42, $result);
     }
@@ -111,30 +116,9 @@ final class ConsumeQueryTest extends UnitTestCase
 
         $this->assertInstanceOf(PromiseInterface::class, $story->promise());
 
-        $result = $this->handlePromise($story->promise());
+        $result = $this->promiseHandler->handlePromise($story->promise(), false);
 
         $this->assertInstanceOf(RuntimeException::class, $result);
         $this->assertEquals('some exception', $result->getMessage());
-    }
-
-    private function handlePromise(PromiseInterface $promise): mixed
-    {
-        $exception = null;
-        $result = null;
-
-        $promise->then(
-            static function ($data) use (&$result): void {
-                $result = $data;
-            },
-            static function ($exc) use (&$exception): void {
-                $exception = $exc;
-            }
-        );
-
-        if ($exception instanceof Throwable) {
-            return $exception;
-        }
-
-        return $result;
     }
 }

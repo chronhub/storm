@@ -6,12 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Reporter;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Reporter\CommandReporter;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainCommand;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\ReportCommand;
@@ -23,7 +25,6 @@ use Chronhub\Storm\Tracker\TrackMessage;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 
@@ -33,33 +34,32 @@ final class ReportCommandTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
-    /**
-     * @throws Exception
-     */
+    private ReportCommand $reporter;
+
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->messageFactory = $this->createMock(MessageFactory::class);
+
+        $tracker = new TrackMessage();
+        $this->reporter = new ReportCommand($tracker);
+
+        $this->assertInstanceOf(CommandReporter::class, $this->reporter);
+        $this->assertEquals(DomainType::COMMAND, $this->reporter->getType());
+        $this->assertSame($tracker, $this->reporter->tracker());
+        $this->assertEmpty($this->reporter->tracker()->listeners());
     }
 
     public function testRelayCommand(): void
     {
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($command)
             ->willReturn(new Message($command));
 
-        $tracker = new TrackMessage();
-
-        $reporter = new ReportCommand($tracker);
-
-        $this->assertSame($tracker, $reporter->tracker());
-
         $messageHandled = false;
-
         $consumer = function (DomainCommand $dispatchedCommand) use (&$messageHandled): void {
             $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
 
@@ -72,9 +72,8 @@ final class ReportCommandTest extends UnitTestCase
             new ConsumeCommand(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($command);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($command);
 
         $this->assertTrue($messageHandled);
     }
@@ -84,19 +83,13 @@ final class ReportCommandTest extends UnitTestCase
         $commandAsArray = ['some' => 'command'];
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($commandAsArray)
             ->willReturn(new Message($command));
 
-        $tracker = new TrackMessage();
-
-        $reporter = new ReportCommand($tracker);
-
-        $this->assertSame($tracker, $reporter->tracker());
-
         $messageHandled = false;
-
         $consumer = function (DomainCommand $dispatchedCommand) use (&$messageHandled): void {
             $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
 
@@ -109,9 +102,8 @@ final class ReportCommandTest extends UnitTestCase
             new ConsumeCommand(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($commandAsArray);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($commandAsArray);
 
         $this->assertTrue($messageHandled);
     }
@@ -122,22 +114,19 @@ final class ReportCommandTest extends UnitTestCase
         $this->expectException(MessageNotHandled::class);
         $this->expectExceptionMessage("Message with name $messageName was not handled");
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($command)
             ->willReturn(new Message($command));
-
-        $tracker = new TrackMessage();
-        $reporter = new ReportCommand($tracker);
 
         $subscribers = [
             new MakeMessage($this->messageFactory),
             new ConsumeCommand(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($command);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($command);
     }
 
     public function testExceptionRaisedDuringDispatch(): void
@@ -149,13 +138,11 @@ final class ReportCommandTest extends UnitTestCase
 
         $command = SomeCommand::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($command)
             ->willReturn(new Message($command));
-
-        $tracker = new TrackMessage();
-        $reporter = new ReportCommand($tracker);
 
         $consumer = function (DomainCommand $dispatchedCommand) use ($exception): never {
             $this->assertInstanceOf(SomeCommand::class, $dispatchedCommand);
@@ -169,18 +156,16 @@ final class ReportCommandTest extends UnitTestCase
             new ConsumeCommand(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($command);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($command);
     }
 
     public static function provideCommand(): Generator
     {
-        yield [SomeCommand::fromContent(['name' => 'steph bug']), SomeCommand::class];
+        $event = SomeCommand::fromContent(['name' => 'steph bug']);
 
-        yield [SomeCommand::fromContent(['name' => 'steph bug'])
-            ->withHeader(Header::EVENT_TYPE, 'some.command'), 'some.command',
-        ];
+        yield [$event, SomeCommand::class];
+        yield [$event->withHeader(Header::EVENT_TYPE, 'some.command'), 'some.command'];
     }
 
     private function provideRouter(array $consumers): MessageSubscriber
@@ -202,8 +187,10 @@ final class ReportCommandTest extends UnitTestCase
 
             public function attachToReporter(MessageTracker $tracker): void
             {
-                $this->listeners[] = $tracker->watch(Reporter::DISPATCH_EVENT, function (MessageStory $story): void {
-                    $story->withConsumers($this->consumers);
+                $this->listeners[] = $tracker->watch(
+                    Reporter::DISPATCH_EVENT,
+                    function (MessageStory $story): void {
+                        $story->withConsumers($this->consumers);
                 }, OnDispatchPriority::ROUTE->value);
             }
         };

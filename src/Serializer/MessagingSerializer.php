@@ -11,7 +11,6 @@ use Chronhub\Storm\Contracts\Serializer\MessageSerializer;
 use Chronhub\Storm\Message\Message;
 use InvalidArgumentException;
 use Symfony\Component\Serializer\Serializer;
-use function sprintf;
 
 final readonly class MessagingSerializer implements MessageSerializer
 {
@@ -27,7 +26,7 @@ final readonly class MessagingSerializer implements MessageSerializer
 
         if (! $event instanceof Reporting) {
             throw new InvalidArgumentException(
-                sprintf('Message event %s must be an instance of Reporting to be serialized', $event::class)
+                'Message event '.$event::class.' must be an instance of Reporting to be serialized'
             );
         }
 

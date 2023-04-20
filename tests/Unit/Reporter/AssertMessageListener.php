@@ -11,10 +11,11 @@ use PHPUnit\Framework\TestCase;
 
 final class AssertMessageListener
 {
-    public static function isTrackedAndCanBeUntracked(MessageSubscriber $subscriber,
-                                                      string $eventName,
-                                                      int $priority): void
-    {
+    public static function isTrackedAndCanBeUntracked(
+        MessageSubscriber $subscriber,
+        string $eventName,
+        int $priority
+    ): void {
         $tracker = new TrackMessage();
 
         TestCase::assertEmpty($tracker->listeners());

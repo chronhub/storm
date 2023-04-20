@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Reporter;
 
 use Chronhub\Storm\Contracts\Message\MessageFactory;
+use Chronhub\Storm\Contracts\Reporter\QueryReporter;
 use Chronhub\Storm\Contracts\Reporter\Reporter;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainQuery;
+use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Reporter\Exceptions\MessageNotHandled;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\ReportQuery;
@@ -21,13 +23,10 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use React\Promise\Deferred;
-use React\Promise\PromiseInterface;
 use RuntimeException;
-use Throwable;
 
 #[CoversClass(ReportQuery::class)]
 #[CoversClass(MessageNotHandled::class)]
@@ -35,31 +34,33 @@ final class ReportQueryTest extends UnitTestCase
 {
     private MessageFactory|MockObject $messageFactory;
 
-    /**
-     * @throws Exception
-     */
+    private ReportQuery $reporter;
+
+    private PromiseHandlerStub $promiseHandler;
+
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->messageFactory = $this->createMock(MessageFactory::class);
+        $tracker = new TrackMessage();
+        $this->reporter = new ReportQuery($tracker);
+        $this->promiseHandler = new PromiseHandlerStub();
+
+        $this->assertSame($tracker, $this->reporter->tracker());
+        $this->assertEmpty($this->reporter->tracker()->listeners());
+        $this->assertInstanceOf(QueryReporter::class, $this->reporter);
+        $this->assertEquals(DomainType::QUERY, $this->reporter->getType());
     }
 
     public function testRelayQuery(): void
     {
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($query)
             ->willReturn(new Message($query));
 
-        $tracker = new TrackMessage();
-
-        $reporter = new ReportQuery($tracker);
-        $this->assertSame($tracker, $reporter->tracker());
-
         $messageHandled = false;
-
         $consumer = function (DomainQuery $dispatchedQuery, Deferred $promise) use (&$messageHandled): void {
             $this->assertInstanceOf(SomeQuery::class, $dispatchedQuery);
 
@@ -74,13 +75,13 @@ final class ReportQueryTest extends UnitTestCase
             new ConsumeQuery(),
         ];
 
-        $reporter->subscribe(...$subscribers);
+        $this->reporter->subscribe(...$subscribers);
 
-        $promise = $reporter->relay($query);
+        $promise = $this->reporter->relay($query);
 
         $this->assertTrue($messageHandled);
 
-        $this->assertEquals('steph bug', $this->handlePromise($promise));
+        $this->assertEquals('steph bug', $this->promiseHandler->handlePromise($promise, true));
     }
 
     public function testRelayQueryAsArray(): void
@@ -88,18 +89,13 @@ final class ReportQueryTest extends UnitTestCase
         $queryAsArray = ['some' => 'query'];
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($queryAsArray)
             ->willReturn(new Message($query));
 
-        $tracker = new TrackMessage();
-
-        $reporter = new ReportQuery($tracker);
-        $this->assertSame($tracker, $reporter->tracker());
-
         $messageHandled = false;
-
         $consumer = function (DomainQuery $dispatchedQuery, Deferred $promise) use (&$messageHandled): void {
             $this->assertInstanceOf(SomeQuery::class, $dispatchedQuery);
 
@@ -114,13 +110,11 @@ final class ReportQueryTest extends UnitTestCase
             new ConsumeQuery(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $promise = $reporter->relay($queryAsArray);
+        $this->reporter->subscribe(...$subscribers);
+        $promise = $this->reporter->relay($queryAsArray);
 
         $this->assertTrue($messageHandled);
-
-        $this->assertEquals('steph bug', $this->handlePromise($promise));
+        $this->assertEquals('steph bug', $this->promiseHandler->handlePromise($promise, true));
     }
 
     public function testExceptionRaisedWhenQueryNotHandled(): void
@@ -129,13 +123,11 @@ final class ReportQueryTest extends UnitTestCase
 
         $event = SomeQuery::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($event)
             ->willReturn(new Message($event));
-
-        $tracker = new TrackMessage();
-        $reporter = new ReportQuery($tracker);
 
         $assertMessageIsNotAcked = new class() implements MessageSubscriber
         {
@@ -163,9 +155,8 @@ final class ReportQueryTest extends UnitTestCase
             $assertMessageIsNotAcked,
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($event);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($event);
     }
 
     public function testExceptionRaisedDuringDispatch(): void
@@ -177,13 +168,11 @@ final class ReportQueryTest extends UnitTestCase
 
         $query = SomeQuery::fromContent(['name' => 'steph bug']);
 
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($query)
             ->willReturn(new Message($query));
-
-        $tracker = new TrackMessage();
-        $reporter = new ReportQuery($tracker);
 
         $consumer = function (DomainQuery $dispatchedQuery) use ($exception): never {
             $this->assertInstanceOf(SomeQuery::class, $dispatchedQuery);
@@ -197,9 +186,8 @@ final class ReportQueryTest extends UnitTestCase
             new ConsumeEvent(),
         ];
 
-        $reporter->subscribe(...$subscribers);
-
-        $reporter->relay($query);
+        $this->reporter->subscribe(...$subscribers);
+        $this->reporter->relay($query);
     }
 
     private function provideRouter(iterable $consumers): MessageSubscriber
@@ -226,26 +214,5 @@ final class ReportQueryTest extends UnitTestCase
                 }, OnDispatchPriority::ROUTE->value);
             }
         };
-    }
-
-    private function handlePromise(PromiseInterface $promise): mixed
-    {
-        $exception = null;
-        $result = null;
-
-        $promise->then(
-            static function ($data) use (&$result): void {
-                $result = $data;
-            },
-            static function ($exc) use (&$exception): void {
-                $exception = $exc;
-            }
-        );
-
-        if ($exception instanceof Throwable) {
-            return $exception;
-        }
-
-        return $result;
     }
 }

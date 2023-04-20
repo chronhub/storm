@@ -5,28 +5,24 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Publisher;
 
 use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
+use Chronhub\Storm\Contracts\Reporter\EventReporter;
 use Chronhub\Storm\Publisher\PublishEvent;
-use Chronhub\Storm\Reporter\ReportEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use function iterator_count;
 
 #[CoversClass(PublishEvent::class)]
 final class PublishEventTest extends UnitTestCase
 {
-    private ReportEvent|MockObject $reporter;
+    private EventReporter|MockObject $reporter;
 
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
-        $this->reporter = $this->createMock(ReportEvent::class);
+        $this->reporter = $this->createMock(EventReporter::class);
     }
 
     public function testInstance(): void
@@ -44,14 +40,7 @@ final class PublishEventTest extends UnitTestCase
 
         $this->assertCountPendingEvents(0, $publisher);
 
-        $i = 0;
-        while ($i !== 10) {
-            $publisher->record($this->provideEvents());
-
-            $i++;
-
-            $this->assertCountPendingEvents($i, $publisher);
-        }
+        $this->assertRecordEvents($publisher, 10);
     }
 
     public function testRecordManyEvents(): void
@@ -82,16 +71,9 @@ final class PublishEventTest extends UnitTestCase
 
         $this->assertCountPendingEvents(0, $publisher);
 
-        $i = 1;
-        while ($i !== 5) {
-            $event = [(new SomeEvent(['name' => 'steph bug']))->withHeader('no', $i)];
+        $this->assertRecordEvents($publisher, 5);
 
-            $publisher->record(new LazyCollection($event));
-
-            $i++;
-        }
-
-        $pendingEvents = $publisher->pull()->getIterator();
+        $pendingEvents = $publisher->pull();
 
         $out = 1;
         foreach ($pendingEvents as $event) {
@@ -108,14 +90,7 @@ final class PublishEventTest extends UnitTestCase
 
         $this->assertCountPendingEvents(0, $publisher);
 
-        $i = 0;
-        while ($i !== 5) {
-            $publisher->record($this->provideEvents());
-
-            $i++;
-
-            $this->assertCountPendingEvents($i, $publisher);
-        }
+        $this->assertRecordEvents($publisher, 5);
 
         $pendingEvents = $publisher->pull();
 
@@ -132,14 +107,7 @@ final class PublishEventTest extends UnitTestCase
 
         $this->assertCountPendingEvents(0, $publisher);
 
-        $i = 0;
-        while ($i !== 10) {
-            $publisher->record($this->provideEvents());
-
-            $i++;
-
-            $this->assertCountPendingEvents($i, $publisher);
-        }
+        $this->assertRecordEvents($publisher, 10);
 
         $publisher->publish($publisher->pull());
     }
@@ -152,23 +120,23 @@ final class PublishEventTest extends UnitTestCase
 
         $this->assertCountPendingEvents(0, $publisher);
 
-        $i = 0;
-        while ($i !== 4) {
-            $publisher->record($this->provideEvents());
-
-            $i++;
-
-            $this->assertCountPendingEvents($i, $publisher);
-        }
+        $this->assertRecordEvents($publisher, 4);
 
         $publisher->flush();
 
         $this->assertCountPendingEvents(0, $publisher);
     }
 
-    private function provideEvents(): LazyCollection
+    private function assertRecordEvents(PublishEvent $publisher, int $count): void
     {
-        return new LazyCollection([new SomeEvent(['name' => 'steph bug'])]);
+        $i = 1;
+        while ($i !== $count + 1) {
+            $publisher->record($this->provideEvents($i));
+
+            $this->assertCountPendingEvents($i, $publisher);
+
+            $i++;
+        }
     }
 
     private function assertCountPendingEvents(int $expectedCount, EventPublisher $publisher): void
@@ -176,5 +144,12 @@ final class PublishEventTest extends UnitTestCase
         $pendingEvents = ReflectionProperty::getProperty($publisher, 'pendingEvents');
 
         $this->assertEquals($expectedCount, $pendingEvents->count());
+    }
+
+    private function provideEvents(int $sequence): LazyCollection
+    {
+        $events = (new SomeEvent(['name' => 'steph']))->withHeader('no', $sequence);
+
+        return new LazyCollection([$events]);
     }
 }

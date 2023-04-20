@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Reporter;
+namespace Chronhub\Storm\Reporter\Concern;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Reporter\Reporter;

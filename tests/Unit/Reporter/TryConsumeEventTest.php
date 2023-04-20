@@ -16,6 +16,7 @@ use Chronhub\Storm\Tracker\TrackMessage;
 use PHPUnit\Framework\Attributes\CoversClass;
 use RuntimeException;
 
+#[CoversClass(MessageCollectedException::class)]
 #[CoversClass(TryConsumeEvent::class)]
 final class TryConsumeEventTest extends UnitTestCase
 {
@@ -39,7 +40,6 @@ final class TryConsumeEventTest extends UnitTestCase
         $event = SomeEvent::fromContent([]);
 
         $count = 0;
-
         $consumers = [
             function (DomainEvent $event): never {
                 $this->assertInstanceOf(SomeEvent::class, $event);
@@ -49,7 +49,7 @@ final class TryConsumeEventTest extends UnitTestCase
             function (DomainEvent $event) use (&$count): void {
                 $this->assertInstanceOf(SomeEvent::class, $event);
 
-                $count += 1;
+                $count++;
             },
             function (DomainEvent $event): never {
                 $this->assertInstanceOf(SomeEvent::class, $event);
@@ -59,7 +59,7 @@ final class TryConsumeEventTest extends UnitTestCase
             function (DomainEvent $event) use (&$count): void {
                 $this->assertInstanceOf(SomeEvent::class, $event);
 
-                $count += 1;
+                $count++;
             },
         ];
 
@@ -78,16 +78,12 @@ final class TryConsumeEventTest extends UnitTestCase
         $collectedException = $story->exception();
 
         $this->assertInstanceOf(MessageCollectedException::class, $collectedException);
-
         $this->assertCount(2, $collectedException->getExceptions());
-
         $this->assertEquals([
             new RuntimeException('first exception'),
             new RuntimeException('last exception'),
         ], $collectedException->getExceptions());
-
         $this->assertSame(2, $count);
-
         $this->assertTrue($story->isHandled());
     }
 }

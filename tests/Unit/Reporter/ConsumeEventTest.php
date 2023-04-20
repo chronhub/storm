@@ -81,7 +81,6 @@ final class ConsumeEventTest extends UnitTestCase
         $event = SomeEvent::fromContent([]);
 
         $count = 0;
-
         $consumers = [
             function (DomainEvent $event) use (&$count): void {
                 $this->assertInstanceOf(SomeEvent::class, $event);
@@ -139,7 +138,6 @@ final class ConsumeEventTest extends UnitTestCase
 
         $story->withMessage(new Message($event));
         $story->withConsumers($consumers);
-
         $tracker->disclose($story);
 
         $this->assertTrue($story->isHandled());

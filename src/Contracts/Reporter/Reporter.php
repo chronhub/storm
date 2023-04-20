@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Contracts\Reporter;
 
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
+use Chronhub\Storm\Reporter\DomainType;
 use React\Promise\PromiseInterface;
 
 interface Reporter
@@ -28,4 +29,6 @@ interface Reporter
     public function subscribe(MessageSubscriber ...$messageSubscribers): void;
 
     public function tracker(): MessageTracker;
+
+    public function getType(): DomainType;
 }

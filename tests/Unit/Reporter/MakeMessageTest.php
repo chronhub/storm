@@ -10,9 +10,13 @@ use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
 use Chronhub\Storm\Reporter\Subscribers\MakeMessage;
 use Chronhub\Storm\Tests\Stubs\Double\SomeCommand;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeQuery;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Chronhub\Storm\Tracker\TrackMessage;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(MakeMessage::class)]
@@ -36,49 +40,49 @@ final class MakeMessageTest extends UnitTestCase
         );
     }
 
-    public function testCreateMessage(): void
+    #[DataProvider('provideMessage')]
+    public function testCreateMessage(Message $message): void
     {
-        $message = new Message(new SomeCommand(['name' => 'steph bug']));
-
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
             ->with($message)
             ->willReturn($message);
 
         $tracker = new TrackMessage();
-
         $subscriber = new MakeMessage($this->messageFactory);
         $subscriber->attachToReporter($tracker);
-
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
-
         $story->withTransientMessage($message);
-
         $tracker->disclose($story);
 
-        $this->assertEquals($message, $story->message());
+        $this->assertSame($message, $story->message());
     }
 
-    public function tetCreateMessageFromArray(): void
+    #[DataProvider('provideMessage')]
+    public function testCreateMessageFromArray(Message $message): void
     {
-        $message = new Message(new SomeCommand(['some' => 'content']));
-
-        $this->messageFactory->expects($this->once())
+        $this->messageFactory
+            ->expects($this->once())
             ->method('__invoke')
-            ->with(['some' => 'content'])
+            ->with(['name' => 'steph bug'])
             ->willReturn($message);
 
         $tracker = new TrackMessage();
 
         $subscriber = new MakeMessage($this->messageFactory);
         $subscriber->attachToReporter($tracker);
-
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
-
-        $story->withTransientMessage(['some' => 'content']);
-
+        $story->withTransientMessage(['name' => 'steph bug']);
         $tracker->disclose($story);
 
-        $this->assertEquals($message, $story->message());
+        $this->assertSame($message, $story->message());
+    }
+
+    public static function provideMessage(): Generator
+    {
+        yield [new Message(new SomeCommand(['name' => 'steph bug']))];
+        yield [new Message(new SomeEvent(['name' => 'steph bug']))];
+        yield [new Message(new SomeQuery(['name' => 'steph bug']))];
     }
 }

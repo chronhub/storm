@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Publisher;
 
 use Chronhub\Storm\Contracts\Chronicler\EventPublisher;
-use Chronhub\Storm\Reporter\ReportEvent;
+use Chronhub\Storm\Contracts\Reporter\EventReporter;
 use Illuminate\Support\Collection;
 use function iterator_to_array;
 
@@ -13,7 +13,7 @@ final class PublishEvent implements EventPublisher
 {
     private Collection $pendingEvents;
 
-    public function __construct(private readonly ReportEvent $reporter)
+    public function __construct(private readonly EventReporter $reporter)
     {
         $this->pendingEvents = new Collection();
     }

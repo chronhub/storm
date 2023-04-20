@@ -77,7 +77,6 @@ final class ConsumeCommandTest extends UnitTestCase
         $tracker->disclose($story);
 
         $this->assertNull($story->consumers()->current());
-
         $this->assertTrue($story->isHandled());
     }
 
@@ -99,7 +98,6 @@ final class ConsumeCommandTest extends UnitTestCase
         $tracker->disclose($story);
 
         $this->assertNull($story->consumers()->current());
-
         $this->assertFalse($story->isHandled());
     }
 }
