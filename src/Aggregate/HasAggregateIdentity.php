@@ -20,6 +20,10 @@ trait HasAggregateIdentity
 
     public function equalsTo(AggregateIdentity $rootId): bool
     {
+        if (static::class !== $rootId::class) {
+            return false;
+        }
+
         return $this->identifier->equals($rootId->identifier);
     }
 
