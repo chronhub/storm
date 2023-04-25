@@ -31,6 +31,6 @@ trait ReconstituteAggregateFromSnapshot
             $self->apply($event);
         }
 
-        return $self->version() > 0 ? $self : null;
+        return $self;
     }
 }
