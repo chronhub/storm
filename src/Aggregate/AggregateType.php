@@ -19,9 +19,10 @@ final readonly class AggregateType implements Type
      * @param class-string        $concrete
      * @param array<class-string> $map
      */
-    public function __construct(private string $concrete,
-                                private array $map = [])
-    {
+    public function __construct(
+        private string $concrete,
+        private array $map = []
+    ) {
         if (! class_exists($concrete)) {
             throw new InvalidArgumentException('Aggregate root must be a valid class name');
         }

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Contracts\Aggregate;
 
 use Psr\Container\ContainerInterface;
 
+//fixMe do we need keep this interface or should be moved to integration?
 interface AggregateRepositoryManager
 {
     /**

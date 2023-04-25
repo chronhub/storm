@@ -6,25 +6,29 @@ namespace Chronhub\Storm\Snapshot;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRepositoryWithSnapshotting;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
+use Chronhub\Storm\Contracts\Aggregate\AggregateSnapshotQueryRepository;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotQueryScope;
 use Generator;
 use RuntimeException;
 
-class RestoreAggregate
+class RestoreAggregateSnapshot
 {
     public function __construct(
-        protected readonly AggregateRepositoryWithSnapshotting $aggregateRepository,
+        protected readonly AggregateSnapshotQueryRepository $aggregateRepository,
         protected readonly SnapshotQueryScope $snapshotQueryScope,
     ) {
     }
 
+    /**
+     * Restore aggregate from scratch.
+     *
+     * Stream event loader should either be limited,
+     * or use a chunked loader to avoid memory issues
+     */
     public function fromScratch(AggregateIdentity $aggregateId, string $aggregateType): ?AggregateRootWithSnapshotting
     {
         try {
-            // Stream event loader should either be limited
-            // or use the chunked loader to avoid memory issues
             $events = $this->getEventsFromHistory($aggregateId, 1, PHP_INT_MAX);
 
             /* @var AggregateRootWithSnapshotting $aggregateType */
@@ -36,7 +40,10 @@ class RestoreAggregate
         }
     }
 
-    public function fromSnapshot(Snapshot $lastSnapshot, int $eventVersion): ?AggregateRootWithSnapshotting
+    /**
+     * Restore aggregate from snapshot.
+     */
+    public function fromSnapshot(Snapshot $lastSnapshot, int $toVersion): ?AggregateRootWithSnapshotting
     {
         $aggregate = $lastSnapshot->aggregateRoot;
 
@@ -44,7 +51,7 @@ class RestoreAggregate
             $events = $this->getEventsFromHistory(
                 $aggregate->aggregateId(),
                 $lastSnapshot->lastVersion + 1,
-                $eventVersion + 1 //todo try PHP_INT_MAX
+                $toVersion + 1
             );
 
             return $aggregate->reconstituteFromSnapshotting($events);
@@ -53,12 +60,17 @@ class RestoreAggregate
         }
     }
 
+    /**
+     * Retrieve history of events from one version to another.
+     *
+     * @throws StreamNotFound
+     */
     private function getEventsFromHistory(AggregateIdentity $aggregateId, int $fromVersion, int $toVersion): Generator
     {
-        $filter = $this->snapshotQueryScope->matchAggregateBetweenIncludedVersion($aggregateId, $fromVersion, $toVersion);
+        $snapshotFilter = $this->snapshotQueryScope->matchAggregateBetweenIncludedVersion(
+            $aggregateId, $fromVersion, $toVersion
+        );
 
-        $streamName = $this->aggregateRepository->getStreamProducer()->toStreamName($aggregateId);
-
-        return yield from $this->aggregateRepository->getEventStore()->retrieveFiltered($streamName, $filter);
+        return yield from $this->aggregateRepository->retrieveHistory($aggregateId, $snapshotFilter);
     }
 }

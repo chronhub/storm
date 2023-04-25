@@ -9,9 +9,9 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Snapshot\InMemorySnapshotStore;
-use Chronhub\Storm\Snapshot\PersistEveryVersionSnapshotProvider;
-use Chronhub\Storm\Snapshot\RestoreAggregate;
+use Chronhub\Storm\Snapshot\RestoreAggregateSnapshot;
 use Chronhub\Storm\Snapshot\Snapshot;
+use Chronhub\Storm\Snapshot\VersioningSnapshotProvider;
 use Chronhub\Storm\Tests\Stubs\AggregateRootWithSnapshottingStub;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -20,10 +20,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(PersistEveryVersionSnapshotProvider::class)]
+#[CoversClass(VersioningSnapshotProvider::class)]
 final class PersistEveryVersionSnapshotProviderTest extends UnitTestCase
 {
-    private RestoreAggregate|MockObject $restoreAggregate;
+    private RestoreAggregateSnapshot|MockObject $restoreAggregate;
 
     private InMemorySnapshotStore $snapshotStore;
 
@@ -31,7 +31,7 @@ final class PersistEveryVersionSnapshotProviderTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->restoreAggregate = $this->createMock(RestoreAggregate::class);
+        $this->restoreAggregate = $this->createMock(RestoreAggregateSnapshot::class);
         $this->snapshotStore = new InMemorySnapshotStore();
         $this->aggregateId = V4AggregateId::fromString('de748856-e694-47ab-bb47-9c101bb95114');
     }
@@ -228,9 +228,9 @@ final class PersistEveryVersionSnapshotProviderTest extends UnitTestCase
         );
     }
 
-    private function newSnapshotProvider(int $everyVersion): PersistEveryVersionSnapshotProvider
+    private function newSnapshotProvider(int $everyVersion): VersioningSnapshotProvider
     {
-        return new PersistEveryVersionSnapshotProvider(
+        return new VersioningSnapshotProvider(
             $this->snapshotStore,
             $this->restoreAggregate,
             new PointInTime(),

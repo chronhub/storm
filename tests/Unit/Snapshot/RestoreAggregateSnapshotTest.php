@@ -8,13 +8,11 @@ use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Aggregate\AggregateRepositoryWithSnapshotting;
+use Chronhub\Storm\Contracts\Aggregate\AggregateSnapshotQueryRepository;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Chronicler\ReadOnlyChronicler;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotQueryScope;
-use Chronhub\Storm\Snapshot\RestoreAggregate;
+use Chronhub\Storm\Snapshot\RestoreAggregateSnapshot;
 use Chronhub\Storm\Snapshot\Snapshot;
-use Chronhub\Storm\Stream\SingleStreamPerAggregate;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\AggregateRootWithSnapshottingStub;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -23,12 +21,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 
-#[CoversClass(RestoreAggregate::class)]
-final class RestoreAggregateTest extends UnitTestCase
+#[CoversClass(RestoreAggregateSnapshot::class)]
+final class RestoreAggregateSnapshotTest extends UnitTestCase
 {
-    private ReadOnlyChronicler|MockObject $eventStore;
-
-    private AggregateRepositoryWithSnapshotting|MockObject $aggregateRepository;
+    private AggregateSnapshotQueryRepository|MockObject $queryRepository;
 
     private SnapshotQueryScope|MockObject $snapshotQueryScope;
 
@@ -38,17 +34,13 @@ final class RestoreAggregateTest extends UnitTestCase
 
     private StreamName $streamName;
 
-    private SingleStreamPerAggregate $streamProducer;
-
     protected function setUp(): void
     {
-        $this->eventStore = $this->createMock(ReadOnlyChronicler::class);
-        $this->aggregateRepository = $this->createMock(AggregateRepositoryWithSnapshotting::class);
+        $this->queryRepository = $this->createMock(AggregateSnapshotQueryRepository::class);
         $this->snapshotQueryScope = $this->createMock(SnapshotQueryScope::class);
         $this->queryFilter = $this->createMock(QueryFilter::class);
         $this->aggregateId = V4AggregateId::create();
         $this->streamName = new StreamName('customer');
-        $this->streamProducer = new SingleStreamPerAggregate($this->streamName);
     }
 
     public function testRestoreAggregateFromScratch(): void
@@ -59,20 +51,10 @@ final class RestoreAggregateTest extends UnitTestCase
             ->with($this->aggregateId, 1, PHP_INT_MAX)
             ->willReturn($this->queryFilter);
 
-        $this->aggregateRepository
+        $this->queryRepository
             ->expects($this->once())
-            ->method('getStreamProducer')
-            ->willReturn($this->streamProducer);
-
-        $this->aggregateRepository
-            ->expects($this->once())
-            ->method('getEventStore')
-            ->willReturn($this->eventStore);
-
-        $this->eventStore
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->with($this->streamName->toString(), $this->queryFilter)
+            ->method('retrieveHistory')
+            ->with($this->aggregateId, $this->queryFilter)
             ->willReturnCallback(static function () {
                 yield SomeEvent::fromContent(['foo' => 'bar']);
 
@@ -98,20 +80,10 @@ final class RestoreAggregateTest extends UnitTestCase
             ->with($this->aggregateId, 1, PHP_INT_MAX)
             ->willReturn($this->queryFilter);
 
-        $this->aggregateRepository
+        $this->queryRepository
             ->expects($this->once())
-            ->method('getStreamProducer')
-            ->willReturn($this->streamProducer);
-
-        $this->aggregateRepository
-            ->expects($this->once())
-            ->method('getEventStore')
-            ->willReturn($this->eventStore);
-
-        $this->eventStore
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->with($this->streamName->toString(), $this->queryFilter)
+            ->method('retrieveHistory')
+            ->with($this->aggregateId, $this->queryFilter)
             ->willReturnCallback(function (): void {
                 throw StreamNotFound::withStreamName($this->streamName);
             });
@@ -130,20 +102,10 @@ final class RestoreAggregateTest extends UnitTestCase
             ->with($this->aggregateId, 2, $eventVersion + 1)
             ->willReturn($this->queryFilter);
 
-        $this->aggregateRepository
+        $this->queryRepository
             ->expects($this->once())
-            ->method('getStreamProducer')
-            ->willReturn($this->streamProducer);
-
-        $this->aggregateRepository
-            ->expects($this->once())
-            ->method('getEventStore')
-            ->willReturn($this->eventStore);
-
-        $this->eventStore
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->with($this->streamName->toString(), $this->queryFilter)
+            ->method('retrieveHistory')
+            ->with($this->aggregateId, $this->queryFilter)
             ->willReturnCallback(static function () {
                 yield SomeEvent::fromContent(['foo' => 'bar']);
 
@@ -167,20 +129,10 @@ final class RestoreAggregateTest extends UnitTestCase
             ->with($this->aggregateId, 2, $eventVersion + 1)
             ->willReturn($this->queryFilter);
 
-        $this->aggregateRepository
+        $this->queryRepository
             ->expects($this->once())
-            ->method('getStreamProducer')
-            ->willReturn($this->streamProducer);
-
-        $this->aggregateRepository
-            ->expects($this->once())
-            ->method('getEventStore')
-            ->willReturn($this->eventStore);
-
-        $this->eventStore
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->with($this->streamName->toString(), $this->queryFilter)
+            ->method('retrieveHistory')
+            ->with($this->aggregateId, $this->queryFilter)
             ->willReturnCallback(function () {
                 throw StreamNotFound::withStreamName($this->streamName);
             });
@@ -206,10 +158,10 @@ final class RestoreAggregateTest extends UnitTestCase
         );
     }
 
-    private function newInstance(): RestoreAggregate
+    private function newInstance(): RestoreAggregateSnapshot
     {
-        return new RestoreAggregate(
-            $this->aggregateRepository,
+        return new RestoreAggregateSnapshot(
+            $this->queryRepository,
             $this->snapshotQueryScope
         );
     }

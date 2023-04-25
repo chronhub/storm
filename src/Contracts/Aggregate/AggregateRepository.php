@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Aggregate;
 
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-
-interface AggregateRepository
+interface AggregateRepository extends AggregateQueryRepository
 {
-    public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot;
-
-    public function retrieveFiltered(AggregateIdentity $aggregateId, QueryFilter $queryFilter): ?AggregateRoot;
-
+    /**
+     * Store unreleased events of aggregate.
+     */
     public function store(AggregateRoot $aggregateRoot): void;
 }

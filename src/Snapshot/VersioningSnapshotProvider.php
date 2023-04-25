@@ -12,13 +12,13 @@ use Chronhub\Storm\Contracts\Snapshot\SnapshotProvider;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotStore;
 use Chronhub\Storm\Reporter\DomainEvent;
 
-final class PersistEveryVersionSnapshotProvider implements SnapshotProvider
+final class VersioningSnapshotProvider implements SnapshotProvider
 {
     use ExtractAggregateIdFromHeader;
 
     public function __construct(
         private readonly SnapshotStore $snapshotStore,
-        private readonly RestoreAggregate $restoreAggregate,
+        private readonly RestoreAggregateSnapshot $restoreAggregate,
         private readonly SystemClock $clock,
         public readonly int $persistEveryVersion = 1000
     ) {
@@ -26,7 +26,9 @@ final class PersistEveryVersionSnapshotProvider implements SnapshotProvider
 
     public function store(DomainEvent $event): void
     {
-        [$aggregateId, $aggregateType, $aggregateVersion] = $this->extractHeaders($event);
+        $aggregateId = $this->extractAggregateId($event);
+        $aggregateType = $event->header(EventHeader::AGGREGATE_TYPE);
+        $aggregateVersion = (int) $event->header(EventHeader::AGGREGATE_VERSION);
 
         $aggregateRoot = $this->reconstituteAggregate($aggregateId, $aggregateType, $aggregateVersion);
 
@@ -58,7 +60,7 @@ final class PersistEveryVersionSnapshotProvider implements SnapshotProvider
         // Try to get the last snapshot for the aggregate from the snapshot store
         $lastSnapshot = $this->snapshotStore->get($aggregateType, $aggregateId->toString());
 
-        // If there is no snapshot, create a new aggregate and reconstitute it from events
+        // If there is no snapshot, create a new aggregate and reconstitute it from history
         if (! $lastSnapshot instanceof Snapshot) {
             return $this->restoreAggregate->fromScratch($aggregateId, $aggregateType);
         }
@@ -72,17 +74,5 @@ final class PersistEveryVersionSnapshotProvider implements SnapshotProvider
         // Reconstitute the aggregate from the last snapshot and the events that have occurred since then
         // using $version + $this->persistEveryVersion as the upper limit for the events to retrieve
         return $this->restoreAggregate->fromSnapshot($lastSnapshot, $eventVersion);
-    }
-
-    /**
-     * @return array{AggregateIdentity, class-string, positive-int}
-     */
-    private function extractHeaders(DomainEvent $event): array
-    {
-        return [
-            $this->extractAggregateId($event),
-            $event->header(EventHeader::AGGREGATE_TYPE),
-            (int) $event->header(EventHeader::AGGREGATE_VERSION),
-        ];
     }
 }
