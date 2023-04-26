@@ -65,7 +65,7 @@ class RestoreAggregateSnapshot
      *
      * @throws StreamNotFound
      */
-    private function getEventsFromHistory(AggregateIdentity $aggregateId, int $fromVersion, int $toVersion): Generator
+    protected function getEventsFromHistory(AggregateIdentity $aggregateId, int $fromVersion, int $toVersion): Generator
     {
         $snapshotFilter = $this->snapshotQueryScope->matchAggregateBetweenIncludedVersion(
             $aggregateId, $fromVersion, $toVersion
