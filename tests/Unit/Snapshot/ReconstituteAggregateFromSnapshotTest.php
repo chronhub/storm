@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Snapshot;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
 use Chronhub\Storm\Snapshot\ReconstituteAggregateFromSnapshot;
 use Chronhub\Storm\Tests\Stubs\AggregateRootWithSnapshottingStub;
@@ -54,14 +53,6 @@ final class ReconstituteAggregateFromSnapshotTest extends UnitTestCase
         $this->provideInvalidAggregate()->reconstituteFromSnapshotting($this->provideEmptyGenerator());
     }
 
-    public function testExceptionRaisedWithNoApplyMethod(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Method apply not found in aggregate root with snapshotting');
-
-        $this->provideNoApplyMethodAggregate()->reconstituteFromSnapshotting($this->provideEmptyGenerator());
-    }
-
     public function testExceptionRaisedWithZeroVersion(): void
     {
         $this->expectException(RuntimeException::class);
@@ -81,34 +72,10 @@ final class ReconstituteAggregateFromSnapshotTest extends UnitTestCase
         return new class
         {
            use ReconstituteAggregateFromSnapshot;
-        };
-    }
 
-    private function provideNoApplyMethodAggregate(): AggregateRootWithSnapshotting
-    {
-        return new class implements AggregateRootWithSnapshotting
-        {
-            use ReconstituteAggregateFromSnapshot;
-
-            public static function reconstitute(AggregateIdentity $aggregateId, Generator $events): null
-            {
-                return null;
-            }
-
-            public function releaseEvents(): array
-            {
-                return [];
-            }
-
-            public function aggregateId(): AggregateIdentity
-            {
-                return V4AggregateId::create();
-            }
-
-            public function version(): int
-            {
-               return 1;
-            }
+           protected function apply(object $event): void
+           {
+           }
         };
     }
 

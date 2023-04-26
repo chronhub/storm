@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Snapshot;
 
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Generator;
 use RuntimeException;
-use function method_exists;
 
 trait ReconstituteAggregateFromSnapshot
 {
@@ -23,14 +23,12 @@ trait ReconstituteAggregateFromSnapshot
             throw new RuntimeException('Aggregate version must be greater than zero');
         }
 
-        if (! method_exists($self, 'apply')) {
-            throw new RuntimeException('Method apply not found in aggregate root with snapshotting '.static::class);
-        }
-
         foreach ($events as $event) {
             $self->apply($event);
         }
 
         return $self;
     }
+
+    abstract protected function apply(DomainEvent $event): void;
 }
