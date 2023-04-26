@@ -20,10 +20,10 @@ use Generator;
 final readonly class AggregateSnapshotQuery implements AggregateSnapshotQueryRepository
 {
     public function __construct(
-        private AggregateQueryRepository $aggregateQuery,
         private AggregateType $aggregateType,
         private SnapshotStore $snapshotStore,
         private SnapshotQueryScope $snapshotQueryScope,
+        private AggregateQueryRepository $aggregateQuery,
     ) {
     }
 
