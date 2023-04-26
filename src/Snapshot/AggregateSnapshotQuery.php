@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Aggregate;
+namespace Chronhub\Storm\Snapshot;
 
 use Chronhub\Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
@@ -11,10 +11,10 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateQueryRepository;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
 use Chronhub\Storm\Contracts\Aggregate\AggregateSnapshotQueryRepository;
+use Chronhub\Storm\Contracts\Aggregate\AggregateType;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotQueryScope;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotStore;
-use Chronhub\Storm\Snapshot\Snapshot;
 use Generator;
 
 final readonly class AggregateSnapshotQuery implements AggregateSnapshotQueryRepository

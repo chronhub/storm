@@ -21,7 +21,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 #[CoversClass(VersioningSnapshotProvider::class)]
-final class PersistEveryVersionSnapshotProviderTest extends UnitTestCase
+final class VersioningSnapshotProviderTest extends UnitTestCase
 {
     private RestoreAggregateSnapshot|MockObject $restoreAggregate;
 
