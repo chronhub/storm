@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Message\Decorator;
+namespace Chronhub\Storm\Message;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Contracts\Message\UniqueId;
-use Chronhub\Storm\Message\Message;
 
 final readonly class EventId implements MessageDecorator
 {

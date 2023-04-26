@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 
+//checkMe move to support
 trait ExtractAggregateIdFromHeader
 {
     protected function extractAggregateId(DomainEvent $event): AggregateIdentity

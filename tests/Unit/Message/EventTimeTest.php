@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Message\Decorator\EventTime;
+use Chronhub\Storm\Message\EventTime;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use DateInterval;

@@ -18,13 +18,13 @@ trait HasAggregateIdentity
         return new static(Uuid::fromString($aggregateId));
     }
 
-    public function equalsTo(AggregateIdentity $rootId): bool
+    public function equalsTo(AggregateIdentity $otherAggregateId): bool
     {
-        if (static::class !== $rootId::class) {
+        if (static::class !== $otherAggregateId::class) {
             return false;
         }
 
-        return $this->identifier->equals($rootId->identifier);
+        return $this->identifier->equals($otherAggregateId->identifier);
     }
 
     public function toString(): string

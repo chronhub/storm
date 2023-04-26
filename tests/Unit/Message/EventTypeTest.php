@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Message;
 
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Message\Decorator\EventType;
+use Chronhub\Storm\Message\EventType;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;

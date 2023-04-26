@@ -24,7 +24,7 @@ interface AggregateQueryRepository
      *
      * Note that it should return a valid state of aggregate,
      * but it also can return incomplete or invalid aggregate depending on query filter.
-     * so it will never be cached.
+     * so it can not be cached.
      */
     public function retrieveFiltered(AggregateIdentity $aggregateId, QueryFilter $queryFilter): ?AggregateRoot;
 
