@@ -59,7 +59,7 @@ final readonly class GenericAggregateRepository implements AggregateRepository
 
         $events = $this->aggregateReleaser->releaseEvents($aggregateRoot);
 
-        if ($events === null) {
+        if ($events === null || $events === []) {
             return;
         }
 

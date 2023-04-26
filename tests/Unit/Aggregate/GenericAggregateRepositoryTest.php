@@ -23,12 +23,13 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use function iterator_to_array;
 
 #[CoversClass(GenericAggregateRepository::class)]
-final class AggregateRepositoryTest extends UnitTestCase
+final class GenericAggregateRepositoryTest extends UnitTestCase
 {
     private Chronicler|MockObject $chronicler;
 
@@ -74,7 +75,7 @@ final class AggregateRepositoryTest extends UnitTestCase
         $this->assertEquals($expectedAggregateRoot, $aggregateRoot);
     }
 
-    public function testReconstituteAggregateAndPutInCacheWhenCacheDoesNotHaveIt(): void
+    public function testReconstituteAggregateAndPutInCacheWhenRetrieve(): void
     {
         $expectedAggregate = $this->createMock(AggregateRoot::class);
 
@@ -223,7 +224,8 @@ final class AggregateRepositoryTest extends UnitTestCase
         $this->createAggregateRepository()->store($aggregateRoot);
     }
 
-    public function testDoesNotPersistWithNoStreamEvent(): void
+    #[DataProvider('provideNoReleasedEvents')]
+    public function testDoesNotPersistWithNoStreamEvent(?array $noEvents): void
     {
         $aggregateRoot = AggregateRootStub::create($this->someIdentity);
 
@@ -231,7 +233,7 @@ final class AggregateRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('releaseEvents')
             ->with($aggregateRoot)
-            ->willReturn(null);
+            ->willReturn($noEvents);
 
         $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
         $this->streamProducer->expects($this->never())->method('toStream');
@@ -356,6 +358,12 @@ final class AggregateRepositoryTest extends UnitTestCase
         $events = $repository->retrieveHistory($this->someIdentity, $queryFilter);
 
         $this->assertEquals($expectedEvents, iterator_to_array($events));
+    }
+
+    public static function provideNoReleasedEvents(): Generator
+    {
+        yield [null];
+        yield [[]];
     }
 
     private function provideFourDomainEvents(): Generator
