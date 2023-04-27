@@ -23,7 +23,6 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use function iterator_to_array;
@@ -224,8 +223,7 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
         $this->createAggregateRepository()->store($aggregateRoot);
     }
 
-    #[DataProvider('provideNoReleasedEvents')]
-    public function testDoesNotPersistWithNoStreamEvent(?array $noEvents): void
+    public function testDoesNotPersistWithNoStreamEvent(): void
     {
         $aggregateRoot = AggregateRootStub::create($this->someIdentity);
 
@@ -233,7 +231,7 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('releaseEvents')
             ->with($aggregateRoot)
-            ->willReturn($noEvents);
+            ->willReturn([]);
 
         $this->aggregateType->expects($this->once())->method('assertAggregateIsSupported')->with($aggregateRoot::class);
         $this->streamProducer->expects($this->never())->method('toStream');
@@ -358,12 +356,6 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
         $events = $repository->retrieveHistory($this->someIdentity, $queryFilter);
 
         $this->assertEquals($expectedEvents, iterator_to_array($events));
-    }
-
-    public static function provideNoReleasedEvents(): Generator
-    {
-        yield [null];
-        yield [[]];
     }
 
     private function provideFourDomainEvents(): Generator

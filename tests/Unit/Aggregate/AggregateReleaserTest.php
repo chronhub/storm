@@ -50,7 +50,7 @@ final class AggregateReleaserTest extends UnitTestCase
         }
     }
 
-    public function testReturnNullWhenNoEventToRelease(): void
+    public function testReturnEmptyArrayWhenNoEventToRelease(): void
     {
         $messageDecorator = $this->createMock(MessageDecorator::class);
         $messageDecorator->expects($this->never())->method('decorate');
@@ -65,7 +65,7 @@ final class AggregateReleaserTest extends UnitTestCase
 
         $events = $aggregateReleaser->releaseEvents($aggregateRoot);
 
-        $this->assertNull($events);
+        $this->assertEmpty($events);
     }
 
     public static function provideMessageDecorator(): Generator

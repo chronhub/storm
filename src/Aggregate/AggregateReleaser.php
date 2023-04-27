@@ -20,14 +20,14 @@ class AggregateReleaser
     }
 
     /**
-     * @return array<DomainEvent>|null
+     * @return array<DomainEvent>|array
      */
-    public function releaseEvents(AggregateRoot $aggregate): ?array
+    public function releaseEvents(AggregateRoot $aggregate): array
     {
         $events = $aggregate->releaseEvents();
 
         if (! reset($events)) {
-            return null;
+            return [];
         }
 
         $version = $aggregate->version() - count($events);
