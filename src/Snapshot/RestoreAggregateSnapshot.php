@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Snapshot;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRepositoryWithSnapshotting;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
-use Chronhub\Storm\Contracts\Aggregate\AggregateSnapshotQueryRepository;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotQueryScope;
 use Generator;
 use RuntimeException;
@@ -15,7 +15,7 @@ use RuntimeException;
 class RestoreAggregateSnapshot
 {
     public function __construct(
-        protected readonly AggregateSnapshotQueryRepository $aggregateRepository,
+        protected readonly AggregateRepositoryWithSnapshotting $aggregateRepository,
         protected readonly SnapshotQueryScope $snapshotQueryScope,
     ) {
     }
