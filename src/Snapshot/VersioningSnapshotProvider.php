@@ -67,12 +67,14 @@ final class VersioningSnapshotProvider implements SnapshotProvider
 
         // If the difference between the current version and the last version in the snapshot
         // is lower than the persistEveryVersion threshold, return null.
-        if (($this->persistEveryVersion + $lastSnapshot->lastVersion) > $eventVersion) {
+        $threshold = $eventVersion + $lastSnapshot->lastVersion;
+
+        if ($threshold > $eventVersion) {
             return null;
         }
 
         // Reconstitute the aggregate from the last snapshot and the events that have occurred since then
         // using $version + $this->persistEveryVersion as the upper limit for the events to retrieve
-        return $this->restoreAggregate->fromSnapshot($lastSnapshot, $eventVersion);
+        return $this->restoreAggregate->fromSnapshot($lastSnapshot, $threshold);
     }
 }
