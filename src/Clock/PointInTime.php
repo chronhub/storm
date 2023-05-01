@@ -12,7 +12,6 @@ use DomainException;
 use Symfony\Component\Clock\MonotonicClock;
 use function is_string;
 use function sleep;
-use function sprintf;
 use function strtoupper;
 use function usleep;
 
@@ -71,13 +70,7 @@ final readonly class PointInTime implements SystemClock
             return $pointInTime;
         }
 
-        $fromFormat = DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $pointInTime, $this->timezone);
-
-        if (! $fromFormat instanceof DateTimeImmutable) {
-            throw new DomainException(sprintf('Invalid date time format: %s', $pointInTime));
-        }
-
-        return $fromFormat;
+        return new DateTimeImmutable($pointInTime, $this->timezone);
     }
 
     public function format(string|DateTimeImmutable $pointInTime): string
