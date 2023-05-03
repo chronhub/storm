@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Unit\Snapshot;
+namespace Chronhub\Storm\Tests\Unit\Support;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Snapshot\ExtractAggregateIdFromHeader;
+use Chronhub\Storm\Support\ExtractAggregateIdFromHeader;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Error;

@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Snapshot;
+namespace Chronhub\Storm\Support;
 
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 
-//checkMe move to support
 trait ExtractAggregateIdFromHeader
 {
     protected function extractAggregateId(DomainEvent $event): AggregateIdentity

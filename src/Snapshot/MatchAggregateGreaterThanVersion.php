@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Support\ExtractAggregateIdFromHeader;
 
 final readonly class MatchAggregateGreaterThanVersion implements InMemoryQueryFilter
 {
