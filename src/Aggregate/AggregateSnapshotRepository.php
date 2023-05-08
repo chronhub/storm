@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Aggregate;
 
 use Chronhub\Storm\Chronicler\Exceptions\NoStreamEventReturn;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRepositoryWithSnapshotting;
@@ -82,6 +83,8 @@ final readonly class AggregateSnapshotRepository implements AggregateRepositoryW
         } catch (NoStreamEventReturn) {
             // no stream event return means that the aggregate is up-to-date
             return $aggregate;
+        } catch (StreamNotFound) {
+            return null;
         }
     }
 }
