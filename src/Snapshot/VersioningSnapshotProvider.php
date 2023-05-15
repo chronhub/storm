@@ -11,11 +11,11 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotProvider;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotStore;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractAggregateIdFromHeader;
+use Chronhub\Storm\Support\ExtractEventHeader;
 
 final class VersioningSnapshotProvider implements SnapshotProvider
 {
-    use ExtractAggregateIdFromHeader;
+    use ExtractEventHeader;
 
     public function __construct(
         private readonly SnapshotStore $snapshotStore,

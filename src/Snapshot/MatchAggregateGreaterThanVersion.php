@@ -8,11 +8,11 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractAggregateIdFromHeader;
+use Chronhub\Storm\Support\ExtractEventHeader;
 
 final readonly class MatchAggregateGreaterThanVersion implements InMemoryQueryFilter
 {
-    use ExtractAggregateIdFromHeader;
+    use ExtractEventHeader;
 
     public function __construct(
         private AggregateIdentity $aggregateId,
@@ -33,7 +33,7 @@ final readonly class MatchAggregateGreaterThanVersion implements InMemoryQueryFi
 
     private function match(DomainEvent $event): bool
     {
-        return $this->extractAggregateId($event)->equalsTo($this->aggregateId)
+        return $this->extractAggregateIdentity($event)->equalsTo($this->aggregateId)
             && (string) $event->header(EventHeader::AGGREGATE_TYPE) === $this->aggregateType
             && (int) $event->header(EventHeader::AGGREGATE_VERSION) > $this->aggregateVersion;
     }

@@ -7,11 +7,11 @@ namespace Chronhub\Storm\Chronicler\InMemory;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractAggregateIdFromHeader;
+use Chronhub\Storm\Support\ExtractEventHeader;
 
 final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilter
 {
-    use ExtractAggregateIdFromHeader;
+    use ExtractEventHeader;
 
     public function __construct(
         private AggregateIdentity $aggregateId,
@@ -22,7 +22,7 @@ final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilt
     public function apply(): callable
     {
         return function (DomainEvent $event): ?DomainEvent {
-            return $this->extractAggregateId($event)->equalsTo($this->aggregateId) ? $event : null;
+            return $this->extractAggregateIdentity($event)->equalsTo($this->aggregateId) ? $event : null;
         };
     }
 
