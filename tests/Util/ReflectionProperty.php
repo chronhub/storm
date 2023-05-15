@@ -14,8 +14,6 @@ final class ReflectionProperty
 
         $reflection = $reflectedClass->getProperty($property);
 
-        $reflection->setAccessible(true);
-
         return $reflection->getValue($object);
     }
 }
