@@ -23,12 +23,12 @@ use function iterator_to_array;
 
 final class TransactionalInMemoryChronicler extends AbstractInMemoryChronicler implements TransactionalChronicler, TransactionalInMemory
 {
-    protected bool $inTransaction = false;
+    private bool $inTransaction = false;
 
     /**
      * @var array<DomainEvent>|array
      */
-    protected array $unpublishedEvents = [];
+    private array $unpublishedEvents = [];
 
     /**
      * @var Collection{StreamName, array<DomainEvent>}
