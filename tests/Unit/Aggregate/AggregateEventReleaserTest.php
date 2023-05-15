@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Chronhub\Storm\Aggregate\AggregateReleaser;
+use Chronhub\Storm\Aggregate\AggregateEventReleaser;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
@@ -17,7 +17,7 @@ use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use function iterator_to_array;
 
-final class AggregateReleaserTest extends UnitTestCase
+final class AggregateEventReleaserTest extends UnitTestCase
 {
     #[DataProvider('provideMessageDecorator')]
     public function testReleaseAndDecorateEventHeaders(MessageDecorator $messageDecorator): void
@@ -29,7 +29,7 @@ final class AggregateReleaserTest extends UnitTestCase
 
         $this->assertEquals(4, $aggregateRoot->version());
 
-        $aggregateReleaser = new AggregateReleaser($messageDecorator);
+        $aggregateReleaser = new AggregateEventReleaser($messageDecorator);
 
         $events = $aggregateReleaser->releaseEvents($aggregateRoot);
 
@@ -61,7 +61,7 @@ final class AggregateReleaserTest extends UnitTestCase
 
         $this->assertEquals(0, $aggregateRoot->version());
 
-        $aggregateReleaser = new AggregateReleaser($messageDecorator);
+        $aggregateReleaser = new AggregateEventReleaser($messageDecorator);
 
         $events = $aggregateReleaser->releaseEvents($aggregateRoot);
 

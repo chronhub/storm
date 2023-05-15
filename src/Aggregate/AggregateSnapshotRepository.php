@@ -27,7 +27,7 @@ final readonly class AggregateSnapshotRepository implements AggregateRepositoryW
         protected StreamProducer $streamProducer,
         protected AggregateCache $aggregateCache,
         protected AggregateType $aggregateType,
-        protected AggregateReleaser $aggregateReleaser,
+        protected AggregateEventReleaser $aggregateReleaser,
         private SnapshotStore $snapshotStore,
         private SnapshotQueryScope $snapshotQueryScope //todo back to snapshot store
     ) {

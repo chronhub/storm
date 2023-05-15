@@ -13,7 +13,7 @@ use function array_map;
 use function count;
 use function reset;
 
-class AggregateReleaser
+class AggregateEventReleaser
 {
     public function __construct(protected readonly MessageDecorator $messageDecorator)
     {

@@ -21,7 +21,7 @@ final readonly class GenericAggregateRepository implements AggregateRepository
         protected StreamProducer $streamProducer,
         protected AggregateCache $aggregateCache,
         protected AggregateType $aggregateType,
-        protected AggregateReleaser $aggregateReleaser,
+        protected AggregateEventReleaser $aggregateReleaser,
     ) {
     }
 

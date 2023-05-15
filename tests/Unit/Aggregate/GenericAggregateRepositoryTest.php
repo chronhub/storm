@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Aggregate;
 
-use Chronhub\Storm\Aggregate\AggregateReleaser;
+use Chronhub\Storm\Aggregate\AggregateEventReleaser;
 use Chronhub\Storm\Aggregate\GenericAggregateRepository;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Aggregate\AggregateCache;
@@ -38,7 +38,7 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
 
     private AggregateCache|MockObject $aggregateCache;
 
-    private AggregateReleaser|MockObject $aggregateReleaser;
+    private AggregateEventReleaser|MockObject $aggregateReleaser;
 
     private AggregateQueryRepository|MockObject $queryRepository;
 
@@ -54,7 +54,7 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
         $this->streamProducer = $this->createMock(StreamProducer::class);
         $this->aggregateType = $this->createMock(AggregateType::class);
         $this->aggregateCache = $this->createMock(AggregateCache::class);
-        $this->aggregateReleaser = $this->createMock(AggregateReleaser::class);
+        $this->aggregateReleaser = $this->createMock(AggregateEventReleaser::class);
         $this->queryRepository = $this->createMock(AggregateQueryRepository::class);
         $this->someIdentity = V4AggregateId::fromString($this->identityString);
         $this->streamName = new StreamName('operation');
