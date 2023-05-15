@@ -80,9 +80,9 @@ class Route implements JsonSerializable
 
     /**
      * @return array{
-     *     "message_name": string,
-     *     "original_message_name": string,
-     *     "message_handlers": array<int, string|object>,
+     *     "message_name": string|class-string,
+     *     "original_message_name": class-string,
+     *     "message_handlers": array<int, string|class-string|object>,
      *     "queue_options": array
      * }
      */

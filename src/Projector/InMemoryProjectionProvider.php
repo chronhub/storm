@@ -14,7 +14,6 @@ use Illuminate\Support\Collection;
 use function array_key_exists;
 use function array_keys;
 use function in_array;
-use function sprintf;
 
 final class InMemoryProjectionProvider implements ProjectionProvider
 {
@@ -33,7 +32,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
     public function createProjection(string $projectionName, string $status): bool
     {
         if ($this->exists($projectionName)) {
-            throw new RuntimeException(sprintf('Projection %s already exists', $projectionName));
+            throw new RuntimeException("Projection $projectionName already exists");
         }
 
         $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $status));
