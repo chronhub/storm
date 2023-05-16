@@ -31,4 +31,9 @@ class Timer
 
         return $this->clock->isNowSubGreaterThan($this->interval, $this->now);
     }
+
+    public function getNow(): ?DateTimeImmutable
+    {
+        return $this->now;
+    }
 }
