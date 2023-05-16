@@ -32,7 +32,7 @@ class AggregateEventReleaser
 
         $version = $aggregate->version() - count($events);
 
-        return $this->releaseDecoratedEvents($aggregate, $version, $events);
+        return $this->decorateReleasedEvents($aggregate, $version, $events);
     }
 
     /**
@@ -40,7 +40,7 @@ class AggregateEventReleaser
      * @param  positive-int       $version
      * @return array<DomainEvent>
      */
-    protected function releaseDecoratedEvents(AggregateRoot $aggregate, int $version, array $events): array
+    protected function decorateReleasedEvents(AggregateRoot $aggregate, int $version, array $events): array
     {
         $headers = [
             EventHeader::AGGREGATE_ID => $aggregate->aggregateId()->toString(),
