@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Closure;
+use DateInterval;
 
 trait InteractWithContext
 {
@@ -54,6 +55,13 @@ trait InteractWithContext
     public function withQueryFilter(QueryFilter $queryFilter): static
     {
         $this->context->withQueryFilter($queryFilter);
+
+        return $this;
+    }
+
+    public function withTimer(int|string|DateInterval $interval): static
+    {
+        $this->context->until($interval);
 
         return $this;
     }

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Closure;
+use DateInterval;
 
 interface ContextInterface extends ContextReader
 {
@@ -15,13 +16,6 @@ interface ContextInterface extends ContextReader
      * @example $context->initialize(fn(): array => ['count' => 0]);
      */
     public function initialize(Closure $initCallback): self;
-
-    /**
-     * Sets the query filter to filter events.
-     * A Projection query filter is mandatory when
-     * the projection is persistent
-     */
-    public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
      * Sets the streams to fetch events from.
@@ -51,4 +45,18 @@ interface ContextInterface extends ContextReader
      * @example $context->whenAny(function(someEvent, array $state): array { ... });
      */
     public function whenAny(callable $eventHandler): self;
+
+    /**
+     * Sets the query filter to filter events.
+     * A Projection query filter is mandatory when
+     * the projection is persistent
+     */
+    public function withQueryFilter(QueryFilter $queryFilter): self;
+
+    /**
+     * Sets the timer interval to run the projection.
+     *
+     * @param DateInterval|string|int $interval int in seconds or valid string interval or DateInterval
+     */
+    public function until(DateInterval|string|int $interval): self;
 }

@@ -9,8 +9,13 @@ use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
+use DateInterval;
 use ReflectionFunction;
 use function is_array;
+use function is_int;
+use function is_string;
+use function sprintf;
+use function strtoupper;
 
 final class Context implements ContextInterface
 {
@@ -21,6 +26,8 @@ final class Context implements ContextInterface
     private ?Closure $initCallback = null;
 
     private array $queries = [];
+
+    private null|int|DateInterval $timer = null;
 
     public function initialize(Closure $initCallback): self
     {
@@ -44,6 +51,25 @@ final class Context implements ContextInterface
         $this->queryFilter = $queryFilter;
 
         return $this;
+    }
+
+    public function until(DateInterval|string|int $interval): ContextInterface
+    {
+        if ($this->timer !== null) {
+            throw new InvalidArgumentException('Projection timer already set');
+        }
+
+        if (is_int($interval)) {
+            $interval = new DateInterval(sprintf('PT%dS', $interval));
+        }
+
+        if (is_string($interval)) {
+            $interval = new DateInterval(strtoupper($interval));
+        }
+
+       $this->timer = $interval;
+
+       return $this;
     }
 
     public function fromStreams(string ...$streamNames): self
@@ -131,6 +157,11 @@ final class Context implements ContextInterface
         }
 
         return $this->queryFilter;
+    }
+
+    public function timer(): null|DateInterval
+    {
+        return $this->timer;
     }
 
     /**

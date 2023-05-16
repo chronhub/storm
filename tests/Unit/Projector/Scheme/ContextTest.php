@@ -12,7 +12,10 @@ use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Unit\Projector\Stubs\CasterStub;
 use Chronhub\Storm\Tests\UnitTestCase;
+use DateInterval;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(Context::class)]
 final class ContextTest extends UnitTestCase
@@ -181,6 +184,14 @@ final class ContextTest extends UnitTestCase
         $this->context->whenAny($eventHandlers);
     }
 
+    #[DataProvider('provideTimerInterval')]
+    public function testSetTimer(DateInterval|string|int $interval): void
+    {
+        $this->context->until($interval);
+
+        $this->assertEquals(10, $this->context->timer()->s);
+    }
+
     public function testExceptionRaisedWhenSetEventHandlerAsStaticClosure(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -215,6 +226,15 @@ final class ContextTest extends UnitTestCase
         $this->expectExceptionMessage('Projection query filter not set');
 
         $this->context->queryFilter();
+    }
+
+    public function testExceptionRaisedWhenTimerIsAlreadySet()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Projection timer already set');
+
+        $this->context->until(10);
+        $this->context->until('PT10S');
     }
 
     public function testCastClosureEventHandlers(): void
@@ -273,5 +293,12 @@ final class ContextTest extends UnitTestCase
         $this->assertSame($result, []);
 
         $this->assertNull($this->context->initCallback());
+    }
+
+    public static function provideTimerInterval(): Generator
+    {
+        yield [10];
+        yield ['pt10s'];
+        yield [new DateInterval('PT10S')];
     }
 }
