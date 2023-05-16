@@ -34,6 +34,11 @@ final readonly class PointInTime implements SystemClock
         return (new MonotonicClock($this->timezone))->now();
     }
 
+    public function nowToString(): string
+    {
+        return $this->now()->format(self::DATE_TIME_FORMAT);
+    }
+
     public function isGreaterThan(DateTimeImmutable|string $pointInTime, DateTimeImmutable|string $anotherPointInTime): bool
     {
         return $this->toDateTimeImmutable($pointInTime) > $this->toDateTimeImmutable($anotherPointInTime);
