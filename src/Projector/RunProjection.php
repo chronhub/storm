@@ -21,7 +21,7 @@ final readonly class RunProjection
          $this->beginCycle(
             $this->newWorkflow($subscription, $timer),
             $subscription->sprint()->inBackground(),
-             $timer
+            $timer
          );
     }
 

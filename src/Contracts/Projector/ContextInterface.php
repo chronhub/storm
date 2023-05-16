@@ -56,6 +56,9 @@ interface ContextInterface extends ContextReader
     /**
      * Sets the timer interval to run the projection.
      *
+     * Note that it could not stop projection at the exact time wanted
+     * as projection should stop gracefully
+     *
      * @param DateInterval|string|int $interval int in seconds or valid string interval or DateInterval
      */
     public function until(DateInterval|string|int $interval): self;
