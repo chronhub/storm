@@ -23,12 +23,12 @@ class Timer
         $this->now = $this->interval ? $this->clock->now() : null;
     }
 
-    public function isNotElapsed(): bool
+    public function isElapsed(): bool
     {
         if ($this->now === null) {
-            return true;
+            return false;
         }
 
-        return ! $this->clock->isNowSubGreaterThan($this->interval, $this->now);
+        return $this->clock->isNowSubGreaterThan($this->interval, $this->now);
     }
 }

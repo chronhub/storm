@@ -19,8 +19,11 @@ final class Workflow
      */
     private array $activities;
 
+    private Timer $timer;
+
     public function __construct(private readonly Subscription $subscription)
     {
+        $this->timer = new Timer($subscription->clock(), $subscription->context()->timer());
     }
 
     public function through(array $activities): self
@@ -32,6 +35,8 @@ final class Workflow
 
     public function process(Closure $destination): bool
     {
+        $this->timer->start();
+
         $process = array_reduce(
             array_reverse($this->activities),
             $this->carry(),
@@ -44,7 +49,7 @@ final class Workflow
     private function prepareDestination(Closure $destination): Closure
     {
         return function (Subscription $subscription) use ($destination) {
-            if (! $subscription->sprint()->inProgress()) {
+            if (! $subscription->sprint()->inProgress() || $this->timer->isElapsed()) {
                 $this->tryReleaseLock($subscription);
             }
 

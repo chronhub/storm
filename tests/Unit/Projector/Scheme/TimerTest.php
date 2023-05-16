@@ -25,11 +25,11 @@ final class TimerTest extends UnitTestCase
 
         $timer->start();
 
-        $this->assertTrue($timer->isNotElapsed());
+        $this->assertTrue($timer->isElapsed());
 
         $this->clock->sleep(2);
 
-        $this->assertFalse($timer->isNotElapsed());
+        $this->assertFalse($timer->isElapsed());
     }
 
     public function testTimeNeverElapsed(): void
@@ -38,11 +38,11 @@ final class TimerTest extends UnitTestCase
 
         $timer->start();
 
-        $this->assertTrue($timer->isNotElapsed());
+        $this->assertTrue($timer->isElapsed());
 
         $this->clock->sleep(2);
 
-        $this->assertTrue($timer->isNotElapsed());
+        $this->assertTrue($timer->isElapsed());
 
         $startedAt = ReflectionProperty::getProperty($timer, 'now');
 
