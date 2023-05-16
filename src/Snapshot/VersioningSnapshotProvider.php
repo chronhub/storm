@@ -27,7 +27,7 @@ final class VersioningSnapshotProvider implements SnapshotProvider
 
     public function store(DomainEvent $event): void
     {
-        $aggregateId = $this->extractAggregateId($event);
+        $aggregateId = $this->extractAggregateIdentity($event);
         $aggregateType = $event->header(EventHeader::AGGREGATE_TYPE);
         $aggregateVersion = (int) $event->header(EventHeader::AGGREGATE_VERSION);
 

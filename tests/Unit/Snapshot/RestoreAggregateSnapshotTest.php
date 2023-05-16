@@ -8,7 +8,7 @@ use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
-use Chronhub\Storm\Contracts\Aggregate\AggregateSnapshotQueryRepository;
+use Chronhub\Storm\Contracts\Aggregate\AggregateRepositoryWithSnapshotting;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotQueryScope;
 use Chronhub\Storm\Snapshot\RestoreAggregateSnapshot;
@@ -24,7 +24,7 @@ use RuntimeException;
 #[CoversClass(RestoreAggregateSnapshot::class)]
 final class RestoreAggregateSnapshotTest extends UnitTestCase
 {
-    private AggregateSnapshotQueryRepository|MockObject $queryRepository;
+    private AggregateRepositoryWithSnapshotting|MockObject $aggregateRepository;
 
     private SnapshotQueryScope|MockObject $snapshotQueryScope;
 
@@ -36,7 +36,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->queryRepository = $this->createMock(AggregateSnapshotQueryRepository::class);
+        $this->aggregateRepository = $this->createMock(AggregateRepositoryWithSnapshotting::class);
         $this->snapshotQueryScope = $this->createMock(SnapshotQueryScope::class);
         $this->queryFilter = $this->createMock(QueryFilter::class);
         $this->aggregateId = V4AggregateId::create();
@@ -51,7 +51,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
             ->with($this->aggregateId, 1, PHP_INT_MAX)
             ->willReturn($this->queryFilter);
 
-        $this->queryRepository
+        $this->aggregateRepository
             ->expects($this->once())
             ->method('retrieveHistory')
             ->with($this->aggregateId, $this->queryFilter)
@@ -80,7 +80,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
             ->with($this->aggregateId, 1, PHP_INT_MAX)
             ->willReturn($this->queryFilter);
 
-        $this->queryRepository
+        $this->aggregateRepository
             ->expects($this->once())
             ->method('retrieveHistory')
             ->with($this->aggregateId, $this->queryFilter)
@@ -102,7 +102,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
             ->with($this->aggregateId, 2, $eventVersion + 1)
             ->willReturn($this->queryFilter);
 
-        $this->queryRepository
+        $this->aggregateRepository
             ->expects($this->once())
             ->method('retrieveHistory')
             ->with($this->aggregateId, $this->queryFilter)
@@ -129,7 +129,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
             ->with($this->aggregateId, 2, $eventVersion + 1)
             ->willReturn($this->queryFilter);
 
-        $this->queryRepository
+        $this->aggregateRepository
             ->expects($this->once())
             ->method('retrieveHistory')
             ->with($this->aggregateId, $this->queryFilter)
@@ -161,7 +161,7 @@ final class RestoreAggregateSnapshotTest extends UnitTestCase
     private function newInstance(): RestoreAggregateSnapshot
     {
         return new RestoreAggregateSnapshot(
-            $this->queryRepository,
+            $this->aggregateRepository,
             $this->snapshotQueryScope
         );
     }

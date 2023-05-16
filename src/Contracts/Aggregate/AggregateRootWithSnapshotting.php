@@ -10,8 +10,7 @@ use Generator;
 interface AggregateRootWithSnapshotting extends AggregateRoot
 {
     /**
-     * @param  Generator<DomainEvent> $events
-     * @return $this|null
+     * @param Generator<DomainEvent> $events
      */
     public function reconstituteFromSnapshotting(Generator $events): ?static;
 }

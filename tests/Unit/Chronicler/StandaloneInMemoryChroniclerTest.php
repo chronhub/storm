@@ -393,6 +393,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
                 EventHeader::INTERNAL_POSITION => $currentVersion = ++$version,
                 EventHeader::AGGREGATE_VERSION => $currentVersion,
                 EventHeader::AGGREGATE_ID => $aggregateId->toString(),
+                EventHeader::AGGREGATE_ID_TYPE => $aggregateId::class,
             ];
 
             yield SomeEvent::fromContent(['password' => random_bytes(16)])->withHeaders($headers);

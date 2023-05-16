@@ -40,6 +40,10 @@ class RetrieveAllInMemoryQueryFilterTest extends UnitTestCase
             SomeEvent::fromContent(['count' => 3])->withHeader(EventHeader::AGGREGATE_ID, $expectedAggregateId->toString()),
         ];
 
+        foreach ($events as &$event) {
+            $event = $event->withHeader(EventHeader::AGGREGATE_ID_TYPE, $expectedAggregateId::class);
+        }
+
         $filter = new RetrieveAllInMemoryQueryFilter($expectedAggregateId, 'asc');
 
         $filteredEvents = array_filter($events, $filter->apply());

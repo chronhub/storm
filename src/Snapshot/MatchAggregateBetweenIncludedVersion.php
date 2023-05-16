@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Support\ExtractEventHeader;
+use DomainException;
 
 final readonly class MatchAggregateBetweenIncludedVersion implements InMemoryQueryFilter
 {
@@ -37,8 +38,12 @@ final readonly class MatchAggregateBetweenIncludedVersion implements InMemoryQue
             return false;
         }
 
-        $currentPosition = (int) $event->header(EventHeader::AGGREGATE_VERSION);
+        $eventVersion = (int) $event->header(EventHeader::AGGREGATE_VERSION);
 
-        return $currentPosition >= $this->fromVersion && $currentPosition <= $this->toVersion;
+        if ($eventVersion < 1) {
+            throw new DomainException("Aggregate version must be greater or equal than 1, current is $eventVersion");
+        }
+
+        return $eventVersion >= $this->fromVersion && $eventVersion <= $this->toVersion;
     }
 }

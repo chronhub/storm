@@ -28,6 +28,20 @@ trait ExtractEventHeader
         return $internalPosition;
     }
 
+    /**
+     * @return positive-int
+     */
+    protected function extractAggregateVersion(Message|Reporting $event): int
+    {
+        $aggregateVersion = $event->header(EventHeader::AGGREGATE_VERSION);
+
+        if (! is_int($aggregateVersion) || $aggregateVersion < 1) {
+            throw new DomainException('Aggregate version must be a positive integer');
+        }
+
+        return $aggregateVersion;
+    }
+
     protected function extractAggregateIdentity(Message|Reporting $event): AggregateIdentity
     {
         $aggregateId = $event->header(EventHeader::AGGREGATE_ID);

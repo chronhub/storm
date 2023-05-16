@@ -88,6 +88,13 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
             ->with($this->someIdentity)
             ->willReturn($expectedAggregate);
 
+        $stream = new Stream($this->streamName, []);
+        $this->streamProducer->expects($this->once())->method('toStreamName')->willReturn($this->streamName);
+        $this->streamProducer->expects($this->once())->method('toStream')->willReturn($stream);
+        $this->streamProducer->expects($this->once())->method('isFirstCommit')->willReturn(true);
+
+        $this->chronicler->expects($this->once())->method('firstCommit')->with($stream);
+
         $repository = $this->createAggregateRepository();
 
         $this->assertSame($expectedAggregate, $repository->retrieve($this->someIdentity));
@@ -378,7 +385,6 @@ final class GenericAggregateRepositoryTest extends UnitTestCase
             $this->aggregateCache,
             $this->aggregateType,
             $this->aggregateReleaser,
-            $this->queryRepository,
         );
     }
 }
