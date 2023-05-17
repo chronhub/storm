@@ -47,7 +47,8 @@ class StreamGapDetector
             return false;
         }
 
-        //fixMe log/dispatch event ?
+        // fixMe log/dispatch event ?
+        // bring an event dispatcher
         $this->gapDetected = true;
 
         return true;

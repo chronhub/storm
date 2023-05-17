@@ -242,7 +242,8 @@ class EventChroniclerTest extends UnitTestCase
         $queryFilter = $this->createMock(QueryFilter::class);
         $args = [$stream->name(), $queryFilter];
 
-        $this->chronicler->expects($this->once())
+        $this->chronicler
+            ->expects($this->once())
             ->method('retrieveFiltered')
             ->with(...$args);
 
@@ -262,7 +263,8 @@ class EventChroniclerTest extends UnitTestCase
     {
         $args = [new StreamName('foo'), new StreamName('bar'), new StreamName('baz')];
 
-        $this->chronicler->expects($this->once())
+        $this->chronicler
+            ->expects($this->once())
             ->method('filterStreamNames')
             ->with(...$args)
             ->will($this->returnValue([$args[0], $args[2]]));
@@ -284,7 +286,8 @@ class EventChroniclerTest extends UnitTestCase
     {
         $args = ['foo', 'bar', 'baz'];
 
-        $this->chronicler->expects($this->once())
+        $this->chronicler
+            ->expects($this->once())
             ->method('filterCategoryNames')
             ->with(...$args)
             ->will($this->returnValue([$args[0], $args[2]]));
@@ -307,7 +310,8 @@ class EventChroniclerTest extends UnitTestCase
     {
         $streamName = new StreamName('foo');
 
-        $this->chronicler->expects($this->once())
+        $this->chronicler
+            ->expects($this->once())
             ->method('hasStream')
             ->with($streamName)
             ->willReturn($streamExists);
