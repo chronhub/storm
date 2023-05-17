@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Tracker\StreamStory;
 use Chronhub\Storm\Contracts\Tracker\StreamTracker;
 use Chronhub\Storm\Tracker\InteractWithTracker;
 
-class TrackStream implements StreamTracker
+final class TrackStream implements StreamTracker
 {
     use InteractWithTracker;
 
