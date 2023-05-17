@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Reporter;
 
 enum OnFinalizePriority: int
 {
-    case FINALIZE_TRANSACTION = 1000;
+    case FINALIZE_TRANSACTION = 10000;
 
-    case GUARD_QUERY = 500;
+    case GUARD_QUERY = 5000;
 }
