@@ -8,6 +8,7 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Tests\UnitTestCase;
 use DateInterval;
 use DomainException;
+use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use function date_default_timezone_get;
 use function microtime;
@@ -132,12 +133,15 @@ final class PointInTimeTest extends UnitTestCase
 
     public function testExceptionRaisedWithInvalidDatetime(): void
     {
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Invalid date time format: invalid date time');
-
         $clock = new PointInTime();
 
-        $clock->toDateTimeImmutable('invalid date time');
+        try {
+            $clock->toDateTimeImmutable('invalid date time');
+        } catch (DomainException $e) {
+            $this->assertSame('Invalid point in time format: invalid date time', $e->getMessage());
+            $this->assertInstanceOf(Exception::class, $e->getPrevious());
+            $this->assertSame('Failed to parse time string (invalid date time) at position 0 (i): The timezone could not be found in the database', $e->getPrevious()->getMessage());
+        }
     }
 
     public function testFormatGivenTime(): void
