@@ -12,14 +12,17 @@ final class RefreshProjection
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        $this->subscription ??= $subscription;
-
-        $this->discloseProjectionStatus(false, $subscription->sprint()->inBackground());
+        $this->discloseProjectionStatus($subscription);
 
         $queries = $subscription->context()->queries();
 
         $subscription->streamPosition()->watch($queries);
 
         return $next($subscription);
+    }
+
+    public function isFirstExecution(): false
+    {
+        return false;
     }
 }

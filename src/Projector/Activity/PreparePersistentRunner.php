@@ -10,27 +10,25 @@ final class PreparePersistentRunner
 {
     use RemoteStatusDiscovery;
 
-    private bool $isInitialized = false;
+    private bool $isFirstExecution = true;
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        if (! $this->isInitialized) {
-            $this->subscription = $subscription;
+        if (! $this->isFirstExecution) {
+            $this->isFirstExecution = false;
 
-            $this->isInitialized = true;
-
-            if ($this->discloseProjectionStatus(true, $subscription->sprint()->inBackground())) {
+            if ($this->shouldStopOnDiscloseStatus($subscription)) {
                 return true;
             }
 
-            $this->subscription->rise();
+            $subscription->rise();
         }
 
         return $next($subscription);
     }
 
-    public function isInitialized(): bool
+    public function isFirstExecution(): bool
     {
-        return $this->isInitialized;
+        return $this->isFirstExecution;
     }
 }

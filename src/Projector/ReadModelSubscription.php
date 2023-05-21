@@ -58,7 +58,7 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete(); // todo propagate $withEmittedEvents as info
+        $this->repository->delete(); // todo propagate $withEmittedEvents as info for dispatcher
 
         if ($withEmittedEvents) {
             $this->readModel->down();

@@ -9,53 +9,58 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 
 trait RemoteStatusDiscovery
 {
-    protected ?PersistentSubscriptionInterface $subscription;
+    abstract public function isFirstExecution(): bool;
 
-    protected function discloseProjectionStatus(bool $isFirstExecution, bool $shouldKeepRunning): bool
+    protected function shouldStopOnDiscloseStatus(PersistentSubscriptionInterface $subscription): bool
     {
-        $statuses = $this->getStatuses($isFirstExecution, $shouldKeepRunning);
+        return $this->discloseProjectionStatus($subscription);
+    }
 
-        $statusFn = $statuses[$this->subscription->disclose()->value] ?? null;
+    protected function discloseProjectionStatus(PersistentSubscriptionInterface $subscription): bool
+    {
+        $statuses = $this->getStatuses($subscription);
+
+        $statusFn = $statuses[$subscription->disclose()->value] ?? null;
 
         return $statusFn ? $statusFn() : false;
     }
 
-    private function markAsStop(bool $isFirstExecution): bool
+    private function markAsStop(PersistentSubscriptionInterface $subscription): bool
     {
-        if ($isFirstExecution) {
-            $this->subscription->boundState();
+        if ($this->isFirstExecution()) {
+            $subscription->boundState();
         }
 
-        $this->subscription->close();
+        $subscription->close();
 
-        return $isFirstExecution;
+        return $this->isFirstExecution();
     }
 
-    private function markAsReset(bool $isFirstExecution, bool $shouldRestart): bool
+    private function markAsReset(PersistentSubscriptionInterface $subscription): bool
     {
-        $this->subscription->revise();
+        $subscription->revise();
 
-        if (! $isFirstExecution && $shouldRestart) {
-            $this->subscription->restart();
+        if (! $this->isFirstExecution() && $subscription->sprint()->inBackground()) {
+            $subscription->restart();
         }
 
         return false;
     }
 
-    private function markForDeletion(bool $isFirstExecution, bool $shouldDiscardEvents): bool
+    private function markForDeletion(PersistentSubscriptionInterface $subscription, bool $shouldDiscardEvents): bool
     {
-        $this->subscription->discard($shouldDiscardEvents);
+        $subscription->discard($shouldDiscardEvents);
 
-        return $isFirstExecution;
+        return $this->isFirstExecution();
     }
 
-    private function getStatuses(bool $isFirstExecution, bool $shouldKeepRunning): array
+    private function getStatuses(PersistentSubscriptionInterface $subscription): array
     {
         return [
-            ProjectionStatus::STOPPING->value => fn () => $this->markAsStop($isFirstExecution),
-            ProjectionStatus::RESETTING->value => fn () => $this->markAsReset($isFirstExecution, $shouldKeepRunning),
-            ProjectionStatus::DELETING->value => fn () => $this->markForDeletion($isFirstExecution, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => fn () => $this->markForDeletion($isFirstExecution, true),
+            ProjectionStatus::STOPPING->value => fn () => $this->markAsStop($subscription),
+            ProjectionStatus::RESETTING->value => fn () => $this->markAsReset($subscription),
+            ProjectionStatus::DELETING->value => fn () => $this->markForDeletion($subscription, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => fn () => $this->markForDeletion($subscription, true),
         ];
     }
 }
