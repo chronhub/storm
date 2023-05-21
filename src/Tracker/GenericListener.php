@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tracker;
 
 use Chronhub\Storm\Contracts\Tracker\Listener;
+use ReflectionFunction;
 
 final class GenericListener implements Listener
 {
@@ -21,11 +22,6 @@ final class GenericListener implements Listener
         $this->story = $story;
     }
 
-    public function callback(): callable
-    {
-        return $this->story;
-    }
-
     public function name(): string
     {
         return $this->eventName;
@@ -39,5 +35,12 @@ final class GenericListener implements Listener
     public function story(): callable
     {
         return $this->story;
+    }
+
+    public function origin(): string
+    {
+        $origin = new ReflectionFunction($this->story);
+
+       return $origin->getClosureScopeClass()->name;
     }
 }

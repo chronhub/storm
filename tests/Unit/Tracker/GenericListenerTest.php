@@ -27,7 +27,8 @@ final class GenericListenerTest extends UnitTestCase
         $this->assertEquals($event, $listener->name());
         $this->assertEquals(-100, $listener->eventPriority);
         $this->assertEquals(-100, $listener->priority());
-        $this->assertSame($story, $listener->callback());
+        $this->assertSame($story, $listener->story());
+        $this->assertSame(self::class, $listener->origin());
     }
 
     public static function provideEvent(): Generator

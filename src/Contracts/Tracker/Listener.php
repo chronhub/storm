@@ -14,4 +14,11 @@ interface Listener
      * @return callable(Story)
      */
     public function story(): callable;
+
+    /**
+     * Return scope class name
+     *
+     * @return class-string
+     */
+    public function origin(): string;
 }

@@ -52,6 +52,7 @@ final class MakeMessageTest extends UnitTestCase
         $tracker = new TrackMessage();
         $subscriber = new MakeMessage($this->messageFactory);
         $subscriber->attachToReporter($tracker);
+
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
         $story->withTransientMessage($message);
         $tracker->disclose($story);
