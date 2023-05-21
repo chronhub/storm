@@ -36,7 +36,7 @@ final readonly class RequireOneHandlerRule implements RoutingRule
         $routes->each(static function (Route $route) use ($group): void {
             if (count($route->getHandlers()) !== 1) {
                 throw new RoutingViolation(
-                    "Group type {$group->getType()->value} and name {$group->name} require one route handler only for message {$route->getName()}"
+                    "Group type {$group->getType()->value} and name $group->name require one route handler only for message {$route->getName()}"
                 );
             }
         });

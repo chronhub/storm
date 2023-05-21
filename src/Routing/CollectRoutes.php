@@ -42,7 +42,7 @@ final readonly class CollectRoutes implements RouteCollection
 
     public function matchOriginal(string $messageName): ?Route
     {
-        $byOriginalMessageName = static fn (Route $route): bool => ($messageName === $route->getOriginalName());
+        $byOriginalMessageName = static fn (Route $route): bool => $messageName === $route->getOriginalName();
 
         return $this->routes->filter($byOriginalMessageName)->first();
     }
