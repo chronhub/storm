@@ -26,6 +26,7 @@
     "nunomaduro/larastan": "^2.5",
     "nunomaduro/phpinsights": "dev-master",
     "orchestra/testbench": "^8.x-dev",
+    "pestphp/pest": "2.x-dev",
     "phpstan/phpstan": "^1.10.x-dev",
     "phpunit/phpunit": "^10.1",
     "rector/rector": "dev-main",
@@ -51,7 +52,8 @@
   "config": {
     "sort-packages": true,
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "pestphp/pest-plugin": true
     }
   },
   "minimum-stability": "dev"
