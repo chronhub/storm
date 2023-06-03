@@ -82,7 +82,7 @@ final class Workflow
             try {
                 $subscription->freed();
             } catch (Throwable) {
-                // failed silently
+                // fail silently
             }
         }
     }

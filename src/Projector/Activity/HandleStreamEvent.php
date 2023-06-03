@@ -21,7 +21,10 @@ final class HandleStreamEvent
 
     public function __invoke(Subscription $subscription, Closure $next): callable|bool
     {
-        $streams = $this->loadStreams->loadFrom($subscription);
+        $streams = $this->loadStreams->batch(
+            $subscription->streamPosition()->all(),
+            $subscription->context()->queryFilter()
+        );
 
         if ($this->eventProcessor === null) {
             $this->eventProcessor = $subscription->context()->eventHandlers();

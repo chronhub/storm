@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
 use Chronhub\Storm\Stream\StreamName;
@@ -20,11 +20,8 @@ final readonly class LoadStreams
     {
     }
 
-    public function loadFrom(Subscription $subscription): SortStreamIterator
+    public function batch(array $streamPositions, QueryFilter $queryFilter): SortStreamIterator
     {
-        $streamPositions = $subscription->streamPosition()->all();
-        $queryFilter = $subscription->context()->queryFilter();
-
         $streams = [];
 
         foreach ($streamPositions as $streamName => $position) {

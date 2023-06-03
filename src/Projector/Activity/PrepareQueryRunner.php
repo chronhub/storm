@@ -12,7 +12,7 @@ final class PrepareQueryRunner
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if (! $this->isInitialized) {
+        if ($this->isInitialized) {
             $this->isInitialized = true;
 
             $queries = $subscription->context()->queries();

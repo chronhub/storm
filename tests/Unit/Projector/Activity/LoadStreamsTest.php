@@ -72,7 +72,10 @@ final class LoadStreamsTest extends UnitTestCase
 
         $loadStreams = new LoadStreams($this->chronicler);
 
-        $iterator = $loadStreams->loadFrom($this->subscription);
+        $iterator = $loadStreams->batch(
+            $this->subscription->streamPosition()->all(),
+            $this->subscription->context()->queryFilter()
+        );
 
         $this->assertSame(SortStreamIterator::class, $iterator::class);
         $this->assertSame('foo', $iterator->streamName());
@@ -116,7 +119,7 @@ final class LoadStreamsTest extends UnitTestCase
 
         $loadStreams = new LoadStreams($this->chronicler);
 
-        $iterator = $loadStreams->loadFrom($this->subscription);
+        $iterator = $loadStreams->batch($this->subscription);
 
         $this->assertSame(SortStreamIterator::class, $iterator::class);
         $this->assertSame('foo', $iterator->streamName());
@@ -163,7 +166,7 @@ final class LoadStreamsTest extends UnitTestCase
 
         $loadStreams = new LoadStreams($this->chronicler);
 
-        $iterator = $loadStreams->loadFrom($this->subscription);
+        $iterator = $loadStreams->batch($this->subscription);
 
         $this->assertInstanceOf(SortStreamIterator::class, $iterator);
         $this->assertSame('bar', $iterator->streamName());
