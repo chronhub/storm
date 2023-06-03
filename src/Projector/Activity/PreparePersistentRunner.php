@@ -14,7 +14,7 @@ final class PreparePersistentRunner
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        if (! $this->isFirstExecution) {
+        if ($this->isFirstExecution) {
             $this->isFirstExecution = false;
 
             if ($this->shouldStopOnDiscloseStatus($subscription)) {
