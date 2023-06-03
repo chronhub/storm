@@ -6,11 +6,8 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Reporter\DomainEvent;
-use function in_array;
 use function pcntl_signal_dispatch;
 
 abstract readonly class AbstractEventProcessor
@@ -51,31 +48,9 @@ abstract readonly class AbstractEventProcessor
         }
 
         if ($subscription instanceof PersistentSubscriptionInterface) {
-            $this->persistWhenCounterIsReached($subscription);
+            $subscription->persistWhenThresholdIsReached();
         }
 
         return $subscription->sprint()->inProgress();
-    }
-
-    /**
-     * Persist events when we hit the threshold
-     *
-     * @see ProjectionOption::BLOCK_SIZE
-     */
-    final protected function persistWhenCounterIsReached(PersistentSubscriptionInterface $subscription): void
-    {
-        if ($subscription->eventCounter()->isReached()) {
-            $subscription->store();
-
-            $subscription->eventCounter()->reset();
-
-            $subscription->setStatus($subscription->disclose());
-
-            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
-
-            if (! in_array($subscription->currentStatus(), $keepProjectionRunning, true)) {
-                $subscription->sprint()->stop();
-            }
-        }
     }
 }

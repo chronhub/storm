@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotProvider;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotStore;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractEventHeader;
+use Chronhub\Storm\Reporter\ExtractEventHeader;
 
 final class VersioningSnapshotProvider implements SnapshotProvider
 {

@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractEventHeader;
+use Chronhub\Storm\Reporter\ExtractEventHeader;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use DomainException;

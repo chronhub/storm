@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 
 interface Tracker
 {
+    // todo change priority to 1
     public function watch(string $eventName, callable $story, int $priority = 0): Listener;
 
     public function disclose(Story $story): void;

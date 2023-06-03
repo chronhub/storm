@@ -10,6 +10,8 @@ use Illuminate\Support\Collection;
 
 trait InteractWithTracker
 {
+    // add listener aggregate
+    // we should be able to listen from all listeners
     private Collection $listeners;
 
     public function __construct()

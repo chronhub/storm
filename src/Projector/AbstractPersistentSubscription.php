@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use function in_array;
 use function is_array;
 
 abstract class AbstractPersistentSubscription extends AbstractSubscription implements PersistentSubscriptionInterface
@@ -28,6 +29,23 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
     public function store(): void
     {
         $this->repository->persist($this->streamPosition->all(), $this->state->get());
+    }
+
+    public function persistWhenThresholdIsReached(): void
+    {
+        if ($this->eventCounter->isReached()) {
+            $this->store();
+
+            $this->eventCounter()->reset();
+
+            $this->setStatus($this->disclose());
+
+            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
+
+            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
+                $this->sprint()->stop();
+            }
+        }
     }
 
     public function revise(): void

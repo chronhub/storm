@@ -44,6 +44,12 @@ interface PersistentSubscriptionInterface extends Subscription
     public function store(): void;
 
     /**
+     * Persist the current state and positions of the projection
+     * when threshold is reached.
+     */
+    public function persistWhenThresholdIsReached(): void;
+
+    /**
      * Reset the state and position of the projection.
      */
     public function revise(): void;

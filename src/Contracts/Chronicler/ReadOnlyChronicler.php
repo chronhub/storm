@@ -15,6 +15,7 @@ interface ReadOnlyChronicler
 {
     /**
      * Retrieve all events for the given stream and aggregate ID, in the specified direction.
+wip     * todo need to bring aggregate type inside method as agId is not sufficient
      *
      * @return Generator{DomainEvent}
      *

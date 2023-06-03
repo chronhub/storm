@@ -29,7 +29,7 @@ final readonly class ProcessArrayEvent extends AbstractEventProcessor
 
         if (! is_callable($eventHandler)) {
             if ($subscription instanceof PersistentSubscriptionInterface) {
-                $this->persistWhenCounterIsReached($subscription);
+                $subscription->persistWhenThresholdIsReached();
             }
 
             return $subscription->sprint()->inProgress();

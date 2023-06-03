@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Chronicler\InMemory;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Chronhub\Storm\Support\ExtractEventHeader;
+use Chronhub\Storm\Reporter\ExtractEventHeader;
 
 final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilter
 {

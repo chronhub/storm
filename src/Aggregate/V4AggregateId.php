@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Aggregate;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Symfony\Component\Uid\Uuid;
 
+// todo change name
 final class V4AggregateId implements AggregateIdentity
 {
     use HasAggregateIdentity;
