@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateInterval;
 use DateTimeImmutable;
 
@@ -21,11 +20,9 @@ class Timer
 
     public function start(): void
     {
-        if ($this->now !== null) {
-            throw new RuntimeException('Timer already started');
+        if ($this->interval && ! $this->now instanceof DateTimeImmutable) {
+            $this->now = $this->clock->now();
         }
-
-        $this->now = $this->interval ? $this->clock->now() : null;
     }
 
     public function isElapsed(): bool
