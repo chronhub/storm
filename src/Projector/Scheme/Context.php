@@ -14,8 +14,8 @@ use ReflectionFunction;
 use function is_array;
 use function is_int;
 use function is_string;
+use function mb_strtoupper;
 use function sprintf;
-use function strtoupper;
 
 final class Context implements ContextInterface
 {
@@ -64,7 +64,7 @@ final class Context implements ContextInterface
         }
 
         if (is_string($interval)) {
-            $interval = new DateInterval(strtoupper($interval));
+            $interval = new DateInterval(mb_strtoupper($interval));
         }
 
        $this->timer = $interval;
