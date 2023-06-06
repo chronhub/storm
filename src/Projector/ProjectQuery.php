@@ -30,11 +30,9 @@ final readonly class ProjectQuery implements QueryProjector
      {
          $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
 
-         $this->subscription->sprint()->continue();
+         $project = new RunProjection($this->subscription, $this->activities());
 
-         $project = new RunProjection();
-
-         $project($this->subscription, $this->activities());
+         $project->beginCycle();
      }
 
      public function stop(): void

@@ -9,20 +9,25 @@ use Chronhub\Storm\Projector\Scheme\Workflow;
 
 final readonly class RunProjection
 {
-    public function __invoke(Subscription $subscription, array $activities): void
-    {
-        $workflow = new Workflow($subscription);
-        $workflow->through($activities);
+    private Workflow $workflow;
 
-         $this->beginCycle($workflow, $subscription->sprint()->inBackground());
+    private bool $keepRunning;
+
+    public function __construct(
+       Subscription $subscription,
+       array $activities
+    ) {
+        $this->workflow = new Workflow($subscription);
+        $this->workflow->through($activities);
+        $this->keepRunning = $subscription->sprint()->inBackground();
     }
 
-    private function beginCycle(Workflow $workflow, bool $keepRunning): void
+    public function beginCycle(): void
     {
         do {
-            $inProgress = $workflow->process(
+            $inProgress = $this->workflow->process(
                 static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
             );
-        } while ($keepRunning && $inProgress);
+        } while ($this->keepRunning && $inProgress);
     }
 }

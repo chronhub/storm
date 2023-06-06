@@ -21,9 +21,9 @@ trait InteractWithPersistentProjection
     {
         $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
 
-        $project = new RunProjection();
+        $project = new RunProjection($this->subscription, $this->activities());
 
-        $project($this->subscription, $this->activities());
+        $project->beginCycle();
     }
 
     public function stop(): void
