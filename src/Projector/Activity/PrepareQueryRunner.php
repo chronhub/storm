@@ -8,12 +8,12 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 
 final class PrepareQueryRunner
 {
-    private bool $isInitialized = false;
+    private bool $isFirstExecution = true;
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if ($this->isInitialized) {
-            $this->isInitialized = true;
+        if ($this->isFirstExecution) {
+            $this->isFirstExecution = false;
 
             $queries = $subscription->context()->queries();
 
