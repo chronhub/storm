@@ -9,7 +9,10 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 interface ProjectionQueryScope
 {
     /**
-     * @throws InvalidArgumentException when position is less or equals than 0
+     * A projection query filter to get events from included position with limit.
+     * if limit is 0, PHP_INT_MAX would be used.
+     *
+     * @throws InvalidArgumentException when position is less than 0
      */
-    public function fromIncludedPosition(): ProjectionQueryFilter;
+    public function fromIncludedPosition(int $limit = 500): ProjectionQueryFilter;
 }

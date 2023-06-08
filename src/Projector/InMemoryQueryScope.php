@@ -12,7 +12,9 @@ use Chronhub\Storm\Reporter\ExtractEventHeader;
 
 final class InMemoryQueryScope implements ProjectionQueryScope
 {
-    public function fromIncludedPosition(): ProjectionQueryFilter
+    //fixMe: limit not used in in memory query scope
+    // unless we pass all events to the query scope
+    public function fromIncludedPosition(int $limit = 500): ProjectionQueryFilter
     {
         return new class() implements ProjectionQueryFilter, InMemoryQueryFilter
         {

@@ -99,6 +99,7 @@ final class Context implements ContextInterface
         return $this;
     }
 
+    // todo remove when any , not needed
     public function when(array $eventHandlers): self
     {
         $this->assertEventHandlersNotSet();
