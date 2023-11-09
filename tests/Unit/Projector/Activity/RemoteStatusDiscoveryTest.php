@@ -30,8 +30,8 @@ final class RemoteStatusDiscoveryTest extends UnitTestCase
         $this->subscription->expects($this->exactly(2))->method('disclose')->willReturn(ProjectionStatus::STOPPING);
 
        $firstExecution
-           ? $this->subscription->expects($this->exactly(2))->method('boundState')
-           : $this->subscription->expects($this->never())->method('boundState');
+           ? $this->subscription->expects($this->exactly(2))->method('refreshDetail')
+           : $this->subscription->expects($this->never())->method('refreshDetail');
 
          $this->subscription->expects($this->exactly(2))->method('close');
 

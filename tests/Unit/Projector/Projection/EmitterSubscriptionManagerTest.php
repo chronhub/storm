@@ -8,10 +8,10 @@ use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\ProjectEmitter;
 use Chronhub\Storm\Projector\ProjectorManager;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
+use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -38,9 +38,9 @@ final class EmitterSubscriptionManagerTest extends InMemoryProjectorManagerTestC
 
         $this->assertInstanceOf(ProjectorManagerInterface::class, $manager);
 
-        $projection = $manager->emitter('amount');
-        $this->assertEquals($projection, $manager->emitter('amount'));
-        $this->assertNotSame($projection, $manager->emitter('amount'));
+        $projection = $manager->newEmitter('amount');
+        $this->assertEquals($projection, $manager->newEmitter('amount'));
+        $this->assertNotSame($projection, $manager->newEmitter('amount'));
 
         $this->assertSame(ProjectEmitter::class, $projection::class);
     }
@@ -55,7 +55,7 @@ final class EmitterSubscriptionManagerTest extends InMemoryProjectorManagerTestC
 
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projection = $manager->emitter('amount');
+        $projection = $manager->newEmitter('amount');
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -92,7 +92,7 @@ final class EmitterSubscriptionManagerTest extends InMemoryProjectorManagerTestC
 
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projection = $manager->emitter('amount');
+        $projection = $manager->newEmitter('amount');
 
         $projection
             ->initialize(fn (): array => ['count' => 0])

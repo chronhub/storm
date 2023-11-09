@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Closure;
+
 use function usleep;
 
 final readonly class PersistOrUpdateLock
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
         if (! $subscription->gap()->hasGap()) {
             $subscription->eventCounter()->isReset()

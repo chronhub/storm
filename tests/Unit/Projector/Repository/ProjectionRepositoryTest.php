@@ -16,6 +16,7 @@ use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+
 use function json_decode;
 use function json_encode;
 
@@ -30,9 +31,9 @@ final class ProjectionRepositoryTest extends UnitTestCase
 
     protected function setUp(): void
     {
-       $this->provider = $this->createMock(ProjectionProvider::class);
-       $this->json = $this->createMock(JsonSerializer::class);
-       $this->lock = $this->createMock(LockManager::class);
+        $this->provider = $this->createMock(ProjectionProvider::class);
+        $this->json = $this->createMock(JsonSerializer::class);
+        $this->lock = $this->createMock(LockManager::class);
     }
 
     #[DataProvider('provideBoolean')]
@@ -190,7 +191,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
     public function testLoadState(): void
     {
         $model = $this->createMock(ProjectionModel::class);
-        $model->expects($this->once())->method('position')->willReturn('{"stream_name":1}');
+        $model->expects($this->once())->method('positions')->willReturn('{"stream_name":1}');
         $model->expects($this->once())->method('state')->willReturn('{"count":1}');
 
         $this->provider
@@ -204,7 +205,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
             ->method('decode')
             ->will($this->returnCallback(fn ($value): array => json_decode($value, true)));
 
-        $result = $this->newRepository()->loadState();
+        $result = $this->newRepository()->loadDetail();
 
         $this->assertSame([['stream_name' => 1], ['count' => 1]], $result);
     }
@@ -222,7 +223,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
 
         $this->json->expects($this->never())->method('decode');
 
-        $this->newRepository()->loadState();
+        $this->newRepository()->loadDetail();
     }
 
     #[DataProvider('provideProjectionStatus')]

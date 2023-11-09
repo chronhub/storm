@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 
 interface ProjectionRepositoryInterface
 {
@@ -20,12 +21,8 @@ interface ProjectionRepositoryInterface
 
     /**
      * Stops the projection and saves the stream positions and state.
-     *
-     * @param  array $streamPositions The stream positions to save.
-     * @param  array $state           The projection state to save.
-     * @return bool  True if the operation was successful, false otherwise.
      */
-    public function stop(array $streamPositions, array $state): bool;
+    public function stop(ProjectionDetail $projectionDetail): bool;
 
     /**
      * Starts the projection again after it has been stopped or reset.
@@ -36,22 +33,13 @@ interface ProjectionRepositoryInterface
 
     /**
      * Saves the stream positions and state.
-     *
-     * @param  array $streamPositions The stream positions to save.
-     * @param  array $state           The projection state to save.
-     * @return bool  True if the operation was successful, false otherwise.
      */
-    public function persist(array $streamPositions, array $state): bool;
+    public function persist(ProjectionDetail $projectionDetail): bool;
 
     /**
-     * Resets the projection to the specified stream positions and state.
-     *
-     * @param  array            $streamPositions The stream positions to reset the projection to.
-     * @param  array            $state           The projection state to reset to.
-     * @param  ProjectionStatus $currentStatus   The current projection status.
-     * @return bool             True if the operation was successful, false otherwise.
+     * Resets stream positions and state.
      */
-    public function reset(array $streamPositions, array $state, ProjectionStatus $currentStatus): bool;
+    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool;
 
     /**
      * Deletes the projection.
@@ -70,7 +58,9 @@ interface ProjectionRepositoryInterface
     public function acquireLock(): bool;
 
     /**
-     * Updates the lock for the projection.
+     * Updates the lock for the projection if no gap.
+     *
+     * todo we always return true
      *
      * @param  array $streamPositions The stream positions to update the lock with.
      * @return bool  True if the operation was successful, false otherwise.
@@ -94,11 +84,11 @@ interface ProjectionRepositoryInterface
     /**
      * Loads the projection state and stream positions.
      *
-     * @return array{array<string, int>, array} an array of the stream positions and an array of the state.
+     * @return ProjectionDetail
      *
      * @throws ProjectionNotFound If the projection cannot be found in the repository.
      */
-    public function loadState(): array;
+    public function loadDetail(): ProjectionDetail;
 
     /**
      * Checks if the projection exists.

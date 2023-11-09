@@ -8,11 +8,11 @@ use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
+use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -46,7 +46,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
         $this->assertSame('read_balance', $projection->getStreamName());
 
         $projection
@@ -88,7 +88,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -135,7 +135,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -188,7 +188,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -241,7 +241,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
@@ -294,7 +294,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
 
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
-        $projection = $manager->readModel('read_balance', $readModel);
+        $projection = $manager->newReadModel('read_balance', $readModel);
 
         $projection
             ->initialize(fn (): array => ['count' => 0])

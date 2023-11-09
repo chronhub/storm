@@ -12,19 +12,20 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Projector\EmitterSubscription;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;
@@ -58,7 +59,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             new DefaultProjectionOption(signal: true),
             $streamPosition,
             new EventCounter(2),
-            new StreamGapDetector($streamPosition, new PointInTime(), [10]),
+            new StreamGapManager($streamPosition, new PointInTime(), [10]),
             new PointInTime(),
             $this->chronicler
         );

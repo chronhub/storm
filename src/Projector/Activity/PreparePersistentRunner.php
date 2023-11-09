@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Closure;
 
 final class PreparePersistentRunner
 {
@@ -12,7 +13,7 @@ final class PreparePersistentRunner
 
     private bool $isFirstExecution = true;
 
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
         if ($this->isFirstExecution) {
             $this->isFirstExecution = false;

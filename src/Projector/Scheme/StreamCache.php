@@ -39,11 +39,6 @@ final class StreamCache implements JsonSerializable
         return in_array($streamName, $this->container, true);
     }
 
-    public function all(): array
-    {
-        return $this->container;
-    }
-
     public function jsonSerialize(): array
     {
         return $this->container;

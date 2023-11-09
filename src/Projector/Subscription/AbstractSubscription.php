@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\Caster;
@@ -14,15 +14,17 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Closure;
+
 use function is_array;
 
 abstract class AbstractSubscription implements Subscription
 {
-    public ?string $currentStreamName = null;
+    protected ?string $currentStreamName = null;
 
     protected ProjectionStatus $status = ProjectionStatus::IDLE;
 
@@ -69,6 +71,16 @@ abstract class AbstractSubscription implements Subscription
                 $this->state->put($state);
             }
         }
+    }
+
+    public function &currentStreamName(): ?string
+    {
+        return $this->currentStreamName;
+    }
+
+    public function setCurrentStreamName(string $streamName): void
+    {
+        $this->currentStreamName = &$streamName;
     }
 
     public function currentStatus(): ProjectionStatus

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 
 interface PersistentSubscriptionInterface extends Subscription
 {
@@ -17,7 +17,7 @@ interface PersistentSubscriptionInterface extends Subscription
     public function rise(): void;
 
     /**
-     * Stop the persistent subscription and stop the projection.
+     * Stop the persistent subscription and the projection.
      */
     public function close(): void;
 
@@ -31,7 +31,7 @@ interface PersistentSubscriptionInterface extends Subscription
      *
      * @throws ProjectionNotFound
      */
-    public function boundState(): void;
+    public function refreshDetail(): void;
 
     /**
      * Get the current status of the projection.
@@ -82,5 +82,5 @@ interface PersistentSubscriptionInterface extends Subscription
     /**
      * Get the stream gap detector instance.
      */
-    public function gap(): StreamGapDetector;
+    public function gap(): StreamGapManager;
 }

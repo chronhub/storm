@@ -8,7 +8,9 @@ interface ProjectionModel
 {
     public function name(): string;
 
-    public function position(): string;
+    public function positions(): string;
+
+    public function gaps(): string;
 
     public function state(): string;
 

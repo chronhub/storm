@@ -43,22 +43,13 @@ interface ProjectorFactory extends Projector
     public function fromAll(): static;
 
     /**
-     * Proxy method to set the event handlers as array to be called when an event is received.
+     * Proxy method to set the event handlers to be called when an event is received.
      *
      * @template T of Closure(TItem): void|Closure(TItem, array): array
      *
      * @param array<T> $eventsHandlers
      */
-    public function when(array $eventsHandlers): static;
-
-    /**
-     * Proxy method to set the event handlers as Closure to be called when an event is received.
-     *
-     * @template T of Closure(TItem): void|Closure(TItem, array): array
-     *
-     * @phpstan-param  T $eventsHandlers
-     */
-    public function whenAny(Closure $eventsHandlers): static;
+    public function when(array|Closure $eventsHandlers): static;
 
     /**
      * Proxy method to set the query filter to filter events.

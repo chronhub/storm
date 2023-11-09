@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,12 +16,12 @@ final class HandleStreamGapTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;
 
-    private StreamGapDetector|MockObject $gapDetector;
+    private StreamGapManager|MockObject $gapDetector;
 
     protected function setUp(): void
     {
         $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
-        $this->gapDetector = $this->createMock(StreamGapDetector::class);
+        $this->gapDetector = $this->createMock(StreamGapManager::class);
     }
 
     public function testItDoesNotDetectStreamGap(): void

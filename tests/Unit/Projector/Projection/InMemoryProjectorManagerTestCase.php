@@ -17,8 +17,8 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
@@ -77,7 +77,7 @@ abstract class InMemoryProjectorManagerTestCase extends UnitTestCase
             $this->clock,
             new AliasFromClassName(),
             new ProjectorJsonSerializer(),
-           $projectorOptions !== [] ? $projectorOptions : new InMemoryProjectionOption(),
+            $projectorOptions !== [] ? $projectorOptions : new InMemoryProjectionOption(),
         );
     }
 }

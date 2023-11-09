@@ -17,13 +17,13 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\EmitterSubscription;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
@@ -58,7 +58,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
             new InMemoryProjectionOption(),
             $streamPosition,
             new EventCounter(10),
-            new StreamGapDetector($streamPosition, new PointInTime(), [10]),
+            new StreamGapManager($streamPosition, new PointInTime(), [10]),
             new PointInTime(),
             $this->chronicler
         );

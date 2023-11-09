@@ -23,10 +23,10 @@ final readonly class ProjectEmitter implements EmitterProjector
     private StreamCache $streamCache;
 
     public function __construct(
-      protected EmitterSubscriptionInterface $subscription,
-      protected ContextInterface $context,
-      protected Chronicler $chronicler,
-      protected string $streamName
+        protected EmitterSubscriptionInterface $subscription,
+        protected ContextInterface $context,
+        protected Chronicler $chronicler,
+        protected string $streamName
     ) {
         $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
     }
@@ -54,7 +54,7 @@ final readonly class ProjectEmitter implements EmitterProjector
     protected function getCaster(): EmitterCasterInterface
     {
         return new CastEmitter(
-            $this, $this->subscription->clock(), $this->subscription->currentStreamName
+            $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
         );
     }
 
@@ -64,10 +64,10 @@ final readonly class ProjectEmitter implements EmitterProjector
      */
     private function persistIfStreamIsFirstCommit(StreamName $streamName): void
     {
-        if (! $this->subscription->isJoined() && ! $this->chronicler->hasStream($streamName)) {
+        if (! $this->subscription->isFixed() && ! $this->chronicler->hasStream($streamName)) {
             $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->subscription->join();
+            $this->subscription->fixe();
         }
     }
 

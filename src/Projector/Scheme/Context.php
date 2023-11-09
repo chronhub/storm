@@ -11,6 +11,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
 use DateInterval;
 use ReflectionFunction;
+
 use function is_array;
 use function is_int;
 use function is_string;
@@ -23,21 +24,21 @@ final class Context implements ContextInterface
 
     private ?QueryFilter $queryFilter = null;
 
-    private ?Closure $initCallback = null;
+    private ?Closure $initState = null;
 
     private array $queries = [];
 
     private null|int|DateInterval $timer = null;
 
-    public function initialize(Closure $initCallback): self
+    public function initialize(Closure $initState): self
     {
-        if ($this->initCallback instanceof Closure) {
+        if ($this->initState instanceof Closure) {
             throw new InvalidArgumentException('Projection already initialized');
         }
 
-        $this->assertNotStaticClosure($initCallback);
+        $this->assertNotStaticClosure($initState);
 
-        $this->initCallback = $initCallback;
+        $this->initState = $initState;
 
         return $this;
     }
@@ -67,9 +68,9 @@ final class Context implements ContextInterface
             $interval = new DateInterval(mb_strtoupper($interval));
         }
 
-       $this->timer = $interval;
+        $this->timer = $interval;
 
-       return $this;
+        return $this;
     }
 
     public function fromStreams(string ...$streamNames): self
@@ -99,13 +100,16 @@ final class Context implements ContextInterface
         return $this;
     }
 
-    // todo remove when any , not needed
-    public function when(array $eventHandlers): self
+    public function when(array|Closure $eventHandlers): self
     {
         $this->assertEventHandlersNotSet();
 
-        foreach ($eventHandlers as $eventHandler) {
-            $this->assertNotStaticClosure($eventHandler);
+        if (is_array($eventHandlers)) {
+            foreach ($eventHandlers as $eventHandler) {
+                $this->assertNotStaticClosure($eventHandler);
+            }
+        } else {
+            $this->assertNotStaticClosure($eventHandlers);
         }
 
         $this->eventHandlers = $eventHandlers;
@@ -113,20 +117,9 @@ final class Context implements ContextInterface
         return $this;
     }
 
-    public function whenAny(callable $eventHandler): self
-    {
-        $this->assertEventHandlersNotSet();
-
-        $this->assertNotStaticClosure($eventHandler);
-
-        $this->eventHandlers = $eventHandler;
-
-        return $this;
-    }
-
     public function initCallback(): ?Closure
     {
-        return $this->initCallback;
+        return $this->initState;
     }
 
     public function eventHandlers(): callable
@@ -160,7 +153,7 @@ final class Context implements ContextInterface
         return $this->queryFilter;
     }
 
-    public function timer(): null|DateInterval
+    public function timer(): ?DateInterval
     {
         return $this->timer;
     }
@@ -184,12 +177,12 @@ final class Context implements ContextInterface
      */
     public function castInitCallback(Caster $caster): array
     {
-        if ($this->initCallback instanceof Closure) {
-            $callback = Closure::bind($this->initCallback, $caster, Caster::class);
+        if ($this->initState instanceof Closure) {
+            $callback = Closure::bind($this->initState, $caster, Caster::class);
 
             $result = $callback();
 
-            $this->initCallback = $callback;
+            $this->initState = $callback;
 
             return $result;
         }

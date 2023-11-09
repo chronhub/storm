@@ -13,23 +13,23 @@ interface ProjectorManagerInterface
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function query(array $options = []): QueryProjector;
+    public function newQuery(array $options = []): QueryProjector;
 
     /**
      * Create a new stream event emitter projector.
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function emitter(string $streamName, array $options = []): EmitterProjector;
+    public function newEmitter(string $streamName, array $options = []): EmitterProjector;
 
     /**
      * Create a new stream event read model projector.
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function readModel(string $streamName,
-                              ReadModel $readModel,
-                              array $options = []): ReadModelProjector;
+    public function newReadModel(string $streamName,
+        ReadModel $readModel,
+        array $options = []): ReadModelProjector;
 
     /**
      * Stop the projection.

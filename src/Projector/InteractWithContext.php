@@ -38,16 +38,9 @@ trait InteractWithContext
         return $this;
     }
 
-    public function when(array $eventHandlers): static
+    public function when(array|Closure $eventHandlers): static
     {
         $this->context->when($eventHandlers);
-
-        return $this;
-    }
-
-    public function whenAny(Closure $eventsHandler): static
-    {
-        $this->context->whenAny($eventsHandler);
 
         return $this;
     }

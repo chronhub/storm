@@ -64,7 +64,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
         $projection = $this->projectionProvider->retrieve('projection1');
 
         $this->assertSame('count:1', $projection->state());
-        $this->assertSame('foo:1', $projection->position());
+        $this->assertSame('foo:1', $projection->positions());
         $this->assertSame('running', $projection->status());
         $this->assertSame('2023-04-03 15:00:00', $projection->lockedUntil());
     }

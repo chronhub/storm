@@ -13,7 +13,9 @@ use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
 use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
 use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
+use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
+use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentProjection
 {
@@ -21,7 +23,7 @@ trait InteractWithPersistentProjection
     {
         $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
 
-        $project = new RunProjection($this->subscription, $this->activities());
+        $project = new RunProjection($this->subscription, $this->newWorkflow());
 
         $project->beginCycle();
     }
@@ -51,12 +53,10 @@ trait InteractWithPersistentProjection
         return $this->streamName;
     }
 
-    /**
-     * @return array<callable>
-     */
-    protected function activities(): array
+    protected function newWorkflow(): Workflow
     {
-        return [
+        $activities = [
+            new RunUntil(),
             new PreparePersistentRunner(),
             new HandleStreamEvent(new LoadStreams($this->chronicler)),
             new HandleStreamGap(),
@@ -66,6 +66,8 @@ trait InteractWithPersistentProjection
             new RefreshProjection(),
             new StopWhenRunningOnce($this),
         ];
+
+        return new Workflow($this->subscription, $activities);
     }
 
     abstract protected function getCaster(): Caster;

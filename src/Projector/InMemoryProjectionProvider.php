@@ -11,18 +11,19 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Illuminate\Support\Collection;
+
 use function array_key_exists;
 use function array_keys;
 use function in_array;
 
 final class InMemoryProjectionProvider implements ProjectionProvider
 {
+    private const FIELDS = ['state', 'position', 'status', 'locked_until'];
+
     /**
      * @var Collection<string, InMemoryProjection>
      */
     private readonly Collection $projections;
-
-    private array $fillable = ['state', 'position', 'status', 'locked_until'];
 
     public function __construct(private readonly SystemClock $clock)
     {
@@ -46,34 +47,32 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
         $projection = $this->retrieve($projectionName);
 
-        if ($projection instanceof InMemoryProjection) {
-            if (isset($data['state'])) {
-                $projection->setState($data['state']);
-            }
-
-            if (isset($data['position'])) {
-                $projection->setPosition($data['position']);
-            }
-
-            if (isset($data['status'])) {
-                $projection->setStatus($data['status']);
-            }
-
-            if (array_key_exists('locked_until', $data)) {
-                $projection->setLockedUntil($data['locked_until']);
-            }
-
-            return true;
+        if (! $projection instanceof InMemoryProjection) {
+            throw ProjectionNotFound::withName($projectionName);
         }
 
-        throw ProjectionNotFound::withName($projectionName);
+        if (isset($data['state'])) {
+            $projection->setState($data['state']);
+        }
+
+        if (isset($data['position'])) {
+            $projection->setPosition($data['position']);
+        }
+
+        if (isset($data['status'])) {
+            $projection->setStatus($data['status']);
+        }
+
+        if (array_key_exists('locked_until', $data)) {
+            $projection->setLockedUntil($data['locked_until']);
+        }
+
+        return true;
     }
 
     public function deleteProjection(string $projectionName): bool
     {
-        if (! $this->projections->has($projectionName)) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
+        $this->assertProjectionExists($projectionName);
 
         $this->projections->forget($projectionName);
 
@@ -125,10 +124,17 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->clock->isGreaterThan($currentTime, $projection->lockedUntil());
     }
 
+    private function assertProjectionExists(string $projectionName): void
+    {
+        if (! $this->exists($projectionName)) {
+            throw ProjectionNotFound::withName($projectionName);
+        }
+    }
+
     private function assertFieldsExist(array $data, string $name): void
     {
         foreach (array_keys($data) as $key) {
-            if (! in_array($key, $this->fillable, true)) {
+            if (! in_array($key, self::FIELDS, true)) {
                 throw new InvalidArgumentException(
                     "Invalid projection field $key for projection $name"
                 );

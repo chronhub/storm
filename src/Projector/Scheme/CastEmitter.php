@@ -8,17 +8,15 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Closure;
 
-final class CastEmitter implements EmitterCasterInterface
+final readonly class CastEmitter implements EmitterCasterInterface
 {
-    private ?string $currentStreamName = null;
-
     public function __construct(
-        private readonly EmitterProjector $projector,
-        private readonly SystemClock $clock,
-        ?string &$currentStreamName
+        private EmitterProjector $projector,
+        private SystemClock $clock,
+        private Closure $currentStreamName
     ) {
-        $this->currentStreamName = &$currentStreamName;
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
@@ -38,7 +36,7 @@ final class CastEmitter implements EmitterCasterInterface
 
     public function streamName(): ?string
     {
-        return $this->currentStreamName;
+        return ($this->currentStreamName)();
     }
 
     public function clock(): SystemClock

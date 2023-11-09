@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Closure;
+
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
@@ -19,7 +20,7 @@ final class HandleStreamEvent
     {
     }
 
-    public function __invoke(Subscription $subscription, Closure $next): callable|bool
+    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
     {
         $streams = $this->loadStreams->batch(
             $subscription->streamPosition()->all(),
@@ -31,7 +32,7 @@ final class HandleStreamEvent
         }
 
         foreach ($streams as $eventPosition => $event) {
-            $subscription->currentStreamName = $streams->streamName();
+            $subscription->setCurrentStreamName($streams->streamName());
 
             $eventHandled = ($this->eventProcessor)($subscription, $event, $eventPosition);
 

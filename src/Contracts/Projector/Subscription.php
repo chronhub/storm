@@ -9,9 +9,6 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
-/**
- * @property ?string $currentStreamName set by reference
- */
 interface Subscription
 {
     /**
@@ -24,6 +21,10 @@ interface Subscription
      * Initializes the subscription again, resetting its state.
      */
     public function initializeAgain(): void;
+
+    public function &currentStreamName(): ?string;
+
+    public function setCurrentStreamName(string $streamName): void;
 
     /**
      * Get the current status of the subscription.

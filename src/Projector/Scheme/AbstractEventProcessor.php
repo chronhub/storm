@@ -8,20 +8,22 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
+
 use function pcntl_signal_dispatch;
 
 abstract readonly class AbstractEventProcessor
 {
-    final protected function preProcess(Subscription $subscription,
-                                        DomainEvent $event,
-                                        int $position): bool
+    final protected function preProcess(
+        Subscription $subscription,
+        DomainEvent $event,
+        int $position): bool
     {
         if ($subscription->option()->getSignal()) {
             pcntl_signal_dispatch();
         }
 
         // set the current stream handled by reference
-        $streamName = $subscription->currentStreamName;
+        $streamName = $subscription->currentStreamName();
 
         // for a persistent projection, we check if position match our internal cache
         // if it does not, we return early to store what we have and sleep before the next run

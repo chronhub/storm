@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 
-// todo rename state as it should reserved for state of projection with state and stream position
 final class ProjectionState implements ProjectionStateInterface
 {
     private array $state = [];

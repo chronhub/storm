@@ -7,12 +7,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\ProjectorManager;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
+use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -44,7 +44,7 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
 
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projection = $manager->emitter('amount');
+        $projection = $manager->newEmitter('amount');
         $this->assertSame('amount', $projection->getStreamName());
 
         $projection
@@ -91,7 +91,7 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
 
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projection = $manager->emitter('amount');
+        $projection = $manager->newEmitter('amount');
 
         $projection
             ->initialize(fn (): array => ['count' => 0])

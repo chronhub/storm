@@ -13,6 +13,7 @@ use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
 use Throwable;
 
 final readonly class ProjectorManager implements ProjectorManagerInterface
@@ -21,7 +22,7 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
     {
     }
 
-    public function query(array $options = []): QueryProjector
+    public function newQuery(array $options = []): QueryProjector
     {
         return new ProjectQuery(
             $this->subscriptionFactory->createQuerySubscription($options),
@@ -30,24 +31,20 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
         );
     }
 
-    public function emitter(string $streamName, array $options = []): EmitterProjector
+    public function newEmitter(string $streamName, array $options = []): EmitterProjector
     {
-        $subscription = $this->subscriptionFactory->createEmitterSubscription($streamName, $options);
-
         return new ProjectEmitter(
-            $subscription,
+            $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->chronicler,
             $streamName
         );
     }
 
-    public function readModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
+    public function newReadModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $subscription = $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options);
-
         return new ProjectReadModel(
-            $subscription,
+            $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
             $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->chronicler,
             $streamName,
@@ -83,7 +80,7 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
     {
         $projection = $this->tryRetrieveProjectionByName($projectionName);
 
-        return $this->subscriptionFactory->jsonSerializer->decode($projection->position());
+        return $this->subscriptionFactory->jsonSerializer->decode($projection->positions());
     }
 
     public function stateOf(string $projectionName): array
@@ -108,6 +105,9 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
         return $this->subscriptionFactory->queryScope;
     }
 
+    /**
+     * @throws ProjectionNotFound
+     */
     private function tryRetrieveProjectionByName(string $projectionName): ProjectionModel
     {
         $projection = $this->subscriptionFactory->projectionProvider->retrieve($projectionName);
@@ -120,8 +120,8 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
     }
 
     /**
-     * @throws ProjectionNotFound
      * @throws ProjectionFailed
+     * @throws ProjectionNotFound
      */
     private function updateProjectionStatus(string $projectionName, ProjectionStatus $projectionStatus): void
     {

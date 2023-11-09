@@ -36,10 +36,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function stop(array $streamPositions, array $state): bool
+    public function stop(ProjectionDetail $projectionDetail): bool
     {
         try {
-            $stopped = $this->repository->stop($streamPositions, $state);
+            $stopped = $this->repository->stop($projectionDetail);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -72,10 +72,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function persist(array $streamPositions, array $state): bool
+    public function persist(ProjectionDetail $projectionDetail): bool
     {
         try {
-            $persisted = $this->repository->persist($streamPositions, $state);
+            $persisted = $this->repository->persist($projectionDetail);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -90,10 +90,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function reset(array $streamPositions, array $state, ProjectionStatus $currentStatus): bool
+    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool
     {
         try {
-            $reset = $this->repository->reset($streamPositions, $state, $currentStatus);
+            $reset = $this->repository->reset($projectionDetail, $currentStatus);
         } catch (Throwable $exception) {
             throw InMemoryProjectionFailed::fromProjectionException($exception);
         }
@@ -177,9 +177,9 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         return true;
     }
 
-    public function loadState(): array
+    public function loadDetail(): ProjectionDetail
     {
-        return $this->repository->loadState();
+        return $this->repository->loadDetail();
     }
 
     public function loadStatus(): ProjectionStatus

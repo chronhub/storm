@@ -8,17 +8,15 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
+use Closure;
 
-final class CastReadModel implements ReadModelCasterInterface
+final readonly class CastReadModel implements ReadModelCasterInterface
 {
-    private ?string $currentStreamName = null;
-
     public function __construct(
-        private readonly ReadModelProjector $projector,
-        private readonly SystemClock $clock,
-        ?string &$currentStreamName
+        private ReadModelProjector $projector,
+        private SystemClock $clock,
+        private Closure $currentStreamName
     ) {
-        $this->currentStreamName = &$currentStreamName;
     }
 
     public function stop(): void
@@ -33,7 +31,7 @@ final class CastReadModel implements ReadModelCasterInterface
 
     public function streamName(): ?string
     {
-        return $this->currentStreamName;
+        return ($this->currentStreamName)();
     }
 
     public function clock(): SystemClock

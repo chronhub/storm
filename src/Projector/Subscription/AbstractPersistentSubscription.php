@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
+
 use function in_array;
-use function is_array;
 
 abstract class AbstractPersistentSubscription extends AbstractSubscription implements PersistentSubscriptionInterface
 {
@@ -17,7 +19,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
     protected EventCounter $eventCounter;
 
-    protected StreamGapDetector $gap;
+    protected StreamGapManager $gap;
 
     public function rise(): void
     {
@@ -28,7 +30,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
     public function store(): void
     {
-        $this->repository->persist($this->streamPosition->all(), $this->state->get());
+        $this->repository->persist($this->getProjectionDetail());
     }
 
     public function persistWhenThresholdIsReached(): void
@@ -50,18 +52,14 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
     public function revise(): void
     {
-        $this->resetProjectionState();
+        $this->resetProjection();
 
-        $this->repository->reset(
-            $this->streamPosition->all(),
-            $this->state->get(),
-            $this->status
-        );
+        $this->repository->reset($this->getProjectionDetail(), $this->status);
     }
 
     public function close(): void
     {
-        $this->repository->stop($this->streamPosition->all(), $this->state->get());
+        $this->repository->stop($this->getProjectionDetail());
 
         $this->status = ProjectionStatus::IDLE;
 
@@ -77,15 +75,19 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
         $this->status = ProjectionStatus::RUNNING;
     }
 
-    public function boundState(): void
+    public function refreshDetail(): void
     {
-        [$streamPositions, $state] = $this->repository->loadState();
+        $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamPosition->discover($streamPositions);
+        $this->streamPosition->discover($projectionDetail->streamPositions);
 
-        if (is_array($state) && $state !== []) {
+        $state = $projectionDetail->state;
+
+        if ($state !== []) {
             $this->state->put($state);
         }
+
+        $this->gap->mergeGaps($this->currentStreamName(), $projectionDetail->streamGaps);
     }
 
     public function renew(): void
@@ -115,7 +117,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
         return $this->eventCounter;
     }
 
-    public function gap(): StreamGapDetector
+    public function gap(): StreamGapManager
     {
         return $this->gap;
     }
@@ -137,13 +139,24 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
     {
         $this->streamPosition()->watch($this->context()->queries());
 
-        $this->boundState();
+        $this->refreshDetail();
     }
 
-    protected function resetProjectionState(): void
+    protected function resetProjection(): void
     {
         $this->streamPosition()->reset();
 
+        $this->gap()->resetGaps();
+
         $this->initializeAgain();
+    }
+
+    protected function getProjectionDetail(): ProjectionDetail
+    {
+        return new ProjectionDetail(
+            $this->streamPosition->all(),
+            $this->state->get(),
+            $this->gap->getConfirmedGaps($this->currentStreamName()),
+        );
     }
 }

@@ -19,7 +19,7 @@ final class InMemoryProjectionTest extends UnitTestCase
 
         $this->assertSame('projection', $projection->name());
         $this->assertSame('running', $projection->status());
-        $this->assertSame('{}', $projection->position());
+        $this->assertSame('{}', $projection->positions());
         $this->assertSame('{}', $projection->state());
         $this->assertNull($projection->lockedUntil());
     }
@@ -37,9 +37,9 @@ final class InMemoryProjectionTest extends UnitTestCase
     {
         $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertSame('{}', $projection->position());
+        $this->assertSame('{}', $projection->positions());
         $projection->setPosition('{foo:1}');
-        $this->assertSame('{foo:1}', $projection->position());
+        $this->assertSame('{foo:1}', $projection->positions());
     }
 
     public function testUpdateStatus(): void

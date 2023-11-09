@@ -8,9 +8,9 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Projector\AbstractPersistentSubscription;
-use Chronhub\Storm\Projector\AbstractSubscription;
-use Chronhub\Storm\Projector\EmitterSubscription;
+use Chronhub\Storm\Projector\Subscription\AbstractPersistentSubscription;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscription;
+use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Stream\StreamName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -95,15 +95,15 @@ final class EmitterSubscriptionTest extends PersistentSubscriptionTestCase
         /** @var EmitterSubscriptionInterface $subscription */
         $subscription = $this->newSubscription();
 
-        $this->assertFalse($subscription->isJoined());
+        $this->assertFalse($subscription->isFixed());
 
-        $subscription->join();
+        $subscription->fixe();
 
-        $this->assertTrue($subscription->isJoined());
+        $this->assertTrue($subscription->isFixed());
 
-        $subscription->disjoin();
+        $subscription->unfix();
 
-        $this->assertFalse($subscription->isJoined());
+        $this->assertFalse($subscription->isFixed());
     }
 
     protected function defineSubscriptionType(): MockObject|ReadModel|Chronicler

@@ -16,9 +16,9 @@ use Chronhub\Storm\Message\AliasFromMap;
 use Chronhub\Storm\Message\HasConstructableContent;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\QuerySubscription;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -26,6 +26,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;
@@ -171,7 +172,7 @@ final class ProcessArrayQueryEventTest extends UnitTestCase
 
     private function newProcess(?MessageAlias $messageAlias): ProcessArrayEvent
     {
-        if (null === $messageAlias || $messageAlias instanceof AliasFromClassName) {
+        if ($messageAlias === null || $messageAlias instanceof AliasFromClassName) {
             $eventHandlers = $this->provideEventHandlerWithFqn();
         } else {
             $eventHandlers = $this->provideEventHandlerWithAlias();

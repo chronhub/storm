@@ -17,10 +17,10 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Projector\QuerySubscription;
 use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
@@ -158,10 +158,10 @@ class HandleStreamEventTest extends UnitTestCase
     {
         return new class implements InMemoryQueryFilter
         {
-           public function apply(): callable
-           {
-              return static fn ($event) => $event;
-           }
+            public function apply(): callable
+            {
+                return static fn ($event) => $event;
+            }
 
             public function orderBy(): string
             {

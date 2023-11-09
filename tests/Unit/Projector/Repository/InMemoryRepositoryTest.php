@@ -530,12 +530,12 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->repository
             ->expects($this->once())
-            ->method('loadState')
+            ->method('loadDetail')
             ->willReturn(['stream_positions', 'projection_state']);
 
         $this->assertEquals(
             ['stream_positions', 'projection_state'],
-            (new InMemoryRepository($this->repository))->loadState()
+            (new InMemoryRepository($this->repository))->loadDetail()
         );
     }
 

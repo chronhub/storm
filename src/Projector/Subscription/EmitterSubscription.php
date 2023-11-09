@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Stream\StreamName;
 
@@ -24,7 +24,7 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
         ProjectionOption $option,
         StreamPosition $streamPosition,
         EventCounter $eventCounter,
-        StreamGapDetector $gap,
+        StreamGapManager $gap,
         SystemClock $clock,
         private readonly Chronicler $chronicler
     ) {
@@ -52,20 +52,20 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
 
         $this->sprint()->stop();
 
-        $this->resetProjectionState();
+        $this->resetProjection();
     }
 
-    public function isJoined(): bool
+    public function isFixed(): bool
     {
         return $this->streamFixed;
     }
 
-    public function join(): void
+    public function fixe(): void
     {
         $this->streamFixed = true;
     }
 
-    public function disjoin(): void
+    public function unfix(): void
     {
         $this->streamFixed = false;
     }
@@ -75,9 +75,9 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
         try {
             $this->chronicler->delete(new StreamName($this->projectionName()));
         } catch (StreamNotFound) {
-            //fail silently
+            // fail silently
         }
 
-        $this->disjoin();
+        $this->unfix();
     }
 }

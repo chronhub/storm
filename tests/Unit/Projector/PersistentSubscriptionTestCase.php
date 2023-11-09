@@ -15,16 +15,16 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
-use Chronhub\Storm\Projector\AbstractPersistentSubscription;
-use Chronhub\Storm\Projector\EmitterSubscription;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\ReadModelSubscription;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\AbstractPersistentSubscription;
+use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
+use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -44,7 +44,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     protected EventCounter $eventCounter;
 
-    protected StreamGapDetector $gap;
+    protected StreamGapManager $gap;
 
     protected PointInTime $clock;
 
@@ -55,7 +55,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $this->position = new StreamPosition(new InMemoryEventStream());
         $this->clock = new PointInTime();
         $this->eventCounter = new EventCounter(100);
-        $this->gap = new StreamGapDetector($this->position, $this->clock, []);
+        $this->gap = new StreamGapManager($this->position, $this->clock, []);
     }
 
     public function testInstance(): void
@@ -64,7 +64,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $this->assertInstanceOf(PersistentSubscriptionInterface::class, $subscription);
         $this->assertInstanceOf(EventCounter::class, $subscription->eventCounter());
-        $this->assertInstanceOf(StreamGapDetector::class, $subscription->gap());
+        $this->assertInstanceOf(StreamGapManager::class, $subscription->gap());
     }
 
     public function testRise(): void
@@ -77,7 +77,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $this->repository->expects($this->once())->method('exists')->willReturn(false);
         $this->repository->expects($this->once())->method('create')->with(ProjectionStatus::IDLE);
         $this->repository->expects($this->once())->method('acquireLock');
-        $this->repository->expects($this->once())->method('loadState')->willReturn(
+        $this->repository->expects($this->once())->method('loadDetail')->willReturn(
             [['stream_name' => 25], ['counter' => 100]]
         );
 
@@ -159,14 +159,14 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $subscription = $this->newSubscription();
         $subscription->compose($context, $this->caster, false);
 
-        $this->repository->expects($this->once())->method('loadState')->willReturn(
+        $this->repository->expects($this->once())->method('loadDetail')->willReturn(
             [['stream_name' => 25], ['counter' => 100]]
         );
 
         $this->assertEquals([], $subscription->streamPosition()->all());
         $this->assertEquals(['counter' => 0], $subscription->state()->get());
 
-        $subscription->boundState();
+        $subscription->refreshDetail();
 
         $this->assertEquals(['stream_name' => 25], $subscription->streamPosition()->all());
         $this->assertEquals(['counter' => 100], $subscription->state()->get());

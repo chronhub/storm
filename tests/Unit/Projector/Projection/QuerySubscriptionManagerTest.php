@@ -9,10 +9,10 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
-use Chronhub\Storm\Projector\InMemorySubscriptionFactory;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectQuery;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
+use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -40,7 +40,7 @@ final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCas
 
         $this->feedEventStore($this->streamName, V4AggregateId::create(), 1);
 
-        $subscription = $manager->query();
+        $subscription = $manager->newQuery();
 
         $subscription
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
@@ -61,7 +61,7 @@ final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCas
 
         $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
-        $subscription = $manager->query();
+        $subscription = $manager->newQuery();
 
         $subscription
             ->initialize(fn (): array => ['count' => 0])
@@ -83,7 +83,7 @@ final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCas
 
         $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
-        $subscription = $manager->query();
+        $subscription = $manager->newQuery();
 
         $subscription
             ->initialize(fn (): array => ['count' => 0])
@@ -127,7 +127,7 @@ final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCas
 
         $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
-        $subscription = $manager->query();
+        $subscription = $manager->newQuery();
 
         $subscription
             ->initialize(fn (): array => ['event_version' => []])
@@ -149,7 +149,7 @@ final class QuerySubscriptionManagerTest extends InMemoryProjectorManagerTestCas
 
         $this->feedEventStore($this->streamName, V4AggregateId::create(), 10);
 
-        $subscription = $manager->query();
+        $subscription = $manager->newQuery();
 
         $subscription
             ->initialize(fn (): array => ['count' => 0])

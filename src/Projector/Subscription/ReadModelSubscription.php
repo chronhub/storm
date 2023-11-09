@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
 
 final class ReadModelSubscription extends AbstractPersistentSubscription implements ReadModelSubscriptionInterface
@@ -20,15 +20,15 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
         ProjectionOption $option,
         StreamPosition $streamPosition,
         EventCounter $eventCounter,
-        StreamGapDetector $gap,
+        StreamGapManager $gap,
         SystemClock $clock,
         private readonly ReadModel $readModel,
     ) {
-       parent::__construct($option, $streamPosition, $clock);
+        parent::__construct($option, $streamPosition, $clock);
 
-       $this->repository = $repository;
-       $this->eventCounter = $eventCounter;
-       $this->gap = $gap;
+        $this->repository = $repository;
+        $this->eventCounter = $eventCounter;
+        $this->gap = $gap;
     }
 
     public function rise(): void
@@ -66,6 +66,6 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
 
         $this->sprint()->stop();
 
-        $this->resetProjectionState();
+        $this->resetProjection();
     }
 }

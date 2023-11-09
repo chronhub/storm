@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
@@ -22,8 +22,9 @@ use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Repository\ProjectionRepository;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapDetector;
+use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+
 use function array_merge;
 
 abstract class AbstractSubscriptionFactory
@@ -65,6 +66,7 @@ abstract class AbstractSubscriptionFactory
 
     public function createContextBuilder(): Context
     {
+        // fixMe do we need a context interface?
         return new Context();
     }
 
@@ -110,9 +112,9 @@ abstract class AbstractSubscriptionFactory
         return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): StreamGapDetector
+    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): StreamGapManager
     {
-        return new StreamGapDetector(
+        return new StreamGapManager(
             $streamPosition,
             $this->clock,
             $options->getRetries(),

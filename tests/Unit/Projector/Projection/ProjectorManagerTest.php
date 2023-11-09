@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Projector\AbstractSubscriptionFactory;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\ProjectEmitter;
@@ -16,6 +15,7 @@ use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectQuery;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
+use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -44,7 +44,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projector = $manager->query();
+        $projector = $manager->newQuery();
 
         $this->assertInstanceOf(QueryProjector::class, $projector);
         $this->assertEquals(ProjectQuery::class, $projector::class);
@@ -57,7 +57,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projector = $manager->emitter($this->streamName->name);
+        $projector = $manager->newEmitter($this->streamName->name);
 
         $this->assertInstanceOf(EmitterProjector::class, $projector);
         $this->assertEquals(ProjectEmitter::class, $projector::class);
@@ -70,7 +70,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
     {
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
-        $projector = $manager->readModel($this->streamName->name, new InMemoryReadModel());
+        $projector = $manager->newReadModel($this->streamName->name, new InMemoryReadModel());
 
         $this->assertInstanceOf(ReadModelProjector::class, $projector);
         $this->assertEquals(ProjectReadModel::class, $projector::class);
@@ -85,7 +85,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $this->assertFalse($defaultOption->getSignal());
 
         $manager = new ProjectorManager($this->createSubscriptionFactory(['signal' => true]));
-        $projector = $manager->query();
+        $projector = $manager->newQuery();
 
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
 
@@ -100,7 +100,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $this->assertFalse($defaultOption->getSignal());
 
         $manager = new ProjectorManager($this->createSubscriptionFactory(['signal' => true]));
-        $projector = $manager->query(['signal' => false]);
+        $projector = $manager->newQuery(['signal' => false]);
 
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
 

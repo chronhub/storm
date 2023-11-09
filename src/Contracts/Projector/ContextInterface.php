@@ -15,7 +15,7 @@ interface ContextInterface extends ContextReader
      *
      * @example $context->initialize(fn(): array => ['count' => 0]);
      */
-    public function initialize(Closure $initCallback): self;
+    public function initialize(Closure $initState): self;
 
     /**
      * Sets the streams to fetch events from.
@@ -33,18 +33,12 @@ interface ContextInterface extends ContextReader
     public function fromAll(): self;
 
     /**
-     * Sets the event handlers as array to be called when an event is received.
+     * Sets the event handlers to be called when an event is received.
      *
-     * @example $context->when([function(someEvent, array $state): array { ... }], ...);
+     * @example $context->when([fn(someEvent, array $state): array|void { ... }], ...);
+     * @example $context->when(fn(someEvent, array $state): array|void { ... });
      */
-    public function when(array $eventHandlers): self;
-
-    /**
-     * Sets the event handlers as Closure to be called when an event is received.
-     *
-     * @example $context->whenAny(function(someEvent, array $state): array { ... });
-     */
-    public function whenAny(callable $eventHandler): self;
+    public function when(array|Closure $eventHandlers): self;
 
     /**
      * Sets the query filter to filter events.

@@ -11,7 +11,9 @@ use DateTimeZone;
 use DomainException;
 use Exception;
 use Symfony\Component\Clock\MonotonicClock;
+
 use function is_string;
+use function preg_match;
 use function sleep;
 use function strtoupper;
 use function usleep;
@@ -22,6 +24,11 @@ final readonly class PointInTime implements SystemClock
      * @var string
      */
     final public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
+
+    /**
+     * @var string
+     */
+    final public const PATTERN = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/';
 
     private DateTimeZone $timezone;
 
@@ -76,10 +83,14 @@ final readonly class PointInTime implements SystemClock
             return $pointInTime;
         }
 
+        if (! preg_match(self::PATTERN, $pointInTime)) {
+            throw new DomainException("Point in time given has an invalid format: $pointInTime");
+        }
+
         try {
             return new DateTimeImmutable($pointInTime, $this->timezone);
         } catch (Exception $e) {
-            throw new DomainException("Invalid point in time format: $pointInTime", 0, $e);
+            throw new DomainException("Invalid point in time given: $pointInTime", 0, $e);
         }
     }
 

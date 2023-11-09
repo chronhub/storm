@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ApiProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
@@ -30,7 +30,7 @@ final readonly class LoadStreams
                 $queryFilter->setCurrentPosition($position + 1);
             }
 
-            if ($queryFilter instanceof ApiProjectionQueryFilter) {
+            if ($queryFilter instanceof StreamNameAwareQueryFilter) {
                 $queryFilter->setCurrentStreamName($streamName);
             }
 

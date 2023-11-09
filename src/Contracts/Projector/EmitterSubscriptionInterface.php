@@ -7,17 +7,17 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
 {
     /**
-     * Check if the subscription is joined to the projector.
+     * Check if the subscription is fixed to the projector.
      */
-    public function isJoined(): bool;
+    public function isFixed(): bool;
 
     /**
-     * Join the subscription to the projector.
+     * Fix the subscription to the projector.
      */
-    public function join(): void;
+    public function fixe(): void;
 
     /**
-     * Disjoin the subscription from the projector.
+     * Unfix the subscription from the projector.
      */
-    public function disjoin(): void;
+    public function unfix(): void;
 }

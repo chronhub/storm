@@ -11,14 +11,15 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\QuerySubscription;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;

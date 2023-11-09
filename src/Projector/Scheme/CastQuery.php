@@ -7,17 +7,15 @@ namespace Chronhub\Storm\Projector\Scheme;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
+use Closure;
 
-final class CastQuery implements QueryCasterInterface
+final readonly class CastQuery implements QueryCasterInterface
 {
-    private ?string $currentStreamName = null;
-
     public function __construct(
-        private readonly QueryProjector $projector,
-        private readonly SystemClock $clock,
-        ?string &$currentStreamName
+        private QueryProjector $projector,
+        private SystemClock $clock,
+        private Closure $currentStreamName
     ) {
-        $this->currentStreamName = &$currentStreamName;
     }
 
     public function stop(): void
@@ -27,7 +25,7 @@ final class CastQuery implements QueryCasterInterface
 
     public function streamName(): ?string
     {
-        return $this->currentStreamName;
+        return ($this->currentStreamName)();
     }
 
     public function clock(): SystemClock
