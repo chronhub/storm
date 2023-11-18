@@ -20,7 +20,7 @@ final class MergeStreamIterator implements Countable, Iterator
     private const CHUNK_SIZE = 32;
 
     /**
-     * @var Collection<array{StreamIterator, string}>
+     * @var Collection<array{StreamIterator,string}>
      */
     private Collection $iterators;
 
@@ -41,11 +41,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function rewind(): void
     {
-        $this->iterators->each(function (array $iterator) {
-            $iterator[0]->rewind();
-        });
-
-        $this->originalIteratorOrder->each(function (array $iterator) {
+        $this->iterators->each(function (array $iterator): void {
             $iterator[0]->rewind();
         });
 

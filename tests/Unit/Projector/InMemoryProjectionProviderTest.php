@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
@@ -22,7 +21,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
 {
     private InMemoryProjectionProvider $projectionProvider;
 
-    private SystemClock|MockObject $clock;
+    private MockObject|SystemClock $clock;
 
     protected function setUp(): void
     {
@@ -50,35 +49,31 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     public function testUpdateProjection(): void
     {
         $this->projectionProvider->createProjection('projection1', 'status1');
+        $this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2');
 
         $this->assertTrue($this->projectionProvider->updateProjection(
             'projection1',
-            [
-                'state' => 'count:1',
-                'position' => 'foo:1',
-                'status' => 'running',
-                'locked_until' => '2023-04-03 15:00:00',
-            ]
+            status: 'running',
+            state: '{count:1}',
+            positions: '{foo:1}',
+            lockedUntil: '2023-04-03 15:00:00',
         ));
 
         $projection = $this->projectionProvider->retrieve('projection1');
 
-        $this->assertSame('count:1', $projection->state());
-        $this->assertSame('foo:1', $projection->positions());
+        $this->assertSame('{count:1}', $projection->state());
+        $this->assertSame('{foo:1}', $projection->positions());
         $this->assertSame('running', $projection->status());
         $this->assertSame('2023-04-03 15:00:00', $projection->lockedUntil());
     }
 
-    public function testExceptionRaisedOnUpdateProjectionWithInvalidField(): void
+    public function testExceptionRaisedWhenUpdatingProjectionWithoutAcquiringLockEarlier(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid projection field(s) [invalid_field] for projection projection1');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Projection lock must be acquired before updating projection projection1');
 
         $this->projectionProvider->createProjection('projection1', 'status1');
-
-        $this->assertTrue($this->projectionProvider->updateProjection('projection1', ['state' => 'state1']));
-
-        $this->projectionProvider->updateProjection('projection1', ['invalid_field' => 'value']);
+        $this->projectionProvider->updateProjection('projection1', status: 'running');
     }
 
     public function testDeleteProjection(): void
@@ -98,8 +93,16 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     public function testAcquireLock(): void
     {
         $this->projectionProvider->createProjection('projection1', 'status1');
+        $this->assertNull($this->projectionProvider->retrieve('projection1')->lockedUntil());
 
         $this->assertTrue($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2'));
+        $this->assertEquals('locked_until2', $this->projectionProvider->retrieve('projection1')->lockedUntil());
+
+        $this->clock->expects($this->once())->method('isGreaterThanNow')->with('locked_until2')->willReturn(true);
+
+        $this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until3');
+
+        $this->assertEquals('locked_until3', $this->projectionProvider->retrieve('projection1')->lockedUntil());
     }
 
     public function testExceptionRaisedWhenAcquireLockOnProjectionNotFound(): void

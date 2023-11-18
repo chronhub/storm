@@ -11,8 +11,6 @@ use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
-use function array_merge;
-
 // todo add gaps field to migration
 final class ProjectionRepository implements ProjectionRepositoryInterface
 {
@@ -36,38 +34,38 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         }
 
         return $this->provider->updateProjection(
-            $this->streamName,
-            ['status' => ProjectionStatus::IDLE->value]
+            $this->streamName, status: ProjectionStatus::IDLE->value
         );
     }
 
     public function startAgain(): bool
     {
-        return $this->provider->updateProjection($this->streamName,
-            [
-                'status' => ProjectionStatus::RUNNING->value,
-                'locked_until' => $this->lockManager->acquire(),
-            ]
+        return $this->provider->updateProjection(
+            $this->streamName,
+            status: ProjectionStatus::RUNNING->value,
+            lockedUntil: $this->lockManager->acquire(),
         );
     }
 
     public function persist(ProjectionDetail $projectionDetail): bool
     {
-        return $this->provider->updateProjection($this->streamName,
-            array_merge(
-                $this->encodeProjectionDetail($projectionDetail),
-                ['locked_until' => $this->lockManager->refresh()]
-            )
+        return $this->provider->updateProjection(
+            $this->streamName,
+            state: $this->serializer->encode($projectionDetail->state),
+            positions: $this->serializer->encode($projectionDetail->streamPositions),
+            gaps: $this->serializer->encode($projectionDetail->streamGaps),
+            lockedUntil: $this->lockManager->refresh(),
         );
     }
 
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool
     {
-        return $this->provider->updateProjection($this->streamName,
-            array_merge(
-                $this->encodeProjectionDetail($projectionDetail),
-                ['status' => $currentStatus->value]
-            )
+        return $this->provider->updateProjection(
+            $this->streamName,
+            status: $currentStatus->value,
+            state: $this->serializer->encode($projectionDetail->state),
+            positions: $this->serializer->encode($projectionDetail->streamPositions),
+            gaps: $this->serializer->encode($projectionDetail->streamGaps),
         );
     }
 
@@ -111,14 +109,13 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         );
     }
 
-    public function attemptUpdateLockAndStreamPositions(array $streamPositions): bool
+    public function attemptUpdateStreamPositions(array $streamPositions): bool
     {
         if ($this->lockManager->tryUpdate()) {
-            return $this->provider->updateProjection($this->streamName,
-                [
-                    'position' => $this->serializer->encode($streamPositions),
-                    'locked_until' => $this->lockManager->increment(),
-                ]
+            return $this->provider->updateProjection(
+                $this->streamName,
+                positions: $this->serializer->encode($streamPositions),
+                lockedUntil: $this->lockManager->refresh(),
             );
         }
 
@@ -127,11 +124,10 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function releaseLock(): bool
     {
-        return $this->provider->updateProjection($this->streamName,
-            [
-                'status' => ProjectionStatus::IDLE->value,
-                'locked_until' => null,
-            ]
+        return $this->provider->updateProjection(
+            $this->streamName,
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null,
         );
     }
 
@@ -143,17 +139,5 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
     public function projectionName(): string
     {
         return $this->streamName;
-    }
-
-    /**
-     * @return array{position: string, state: string, gaps: string}
-     */
-    private function encodeProjectionDetail(ProjectionDetail $projectionDetail): array
-    {
-        return [
-            'position' => $this->serializer->encode($projectionDetail->streamPositions),
-            'state' => $this->serializer->encode($projectionDetail->state),
-            'gaps' => $this->serializer->encode($projectionDetail->streamGaps),
-        ];
     }
 }

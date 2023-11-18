@@ -22,7 +22,6 @@ abstract readonly class AbstractEventProcessor
             pcntl_signal_dispatch();
         }
 
-        // set the current stream handled by reference
         $streamName = $subscription->currentStreamName();
 
         // for a persistent projection, we check if position match our internal cache
@@ -32,13 +31,11 @@ abstract readonly class AbstractEventProcessor
             if ($subscription->streamManager()->detectGap($streamName, $position, $event->header(Header::EVENT_TIME))) {
                 return false;
             }
+
+            $subscription->eventCounter()->increment();
         }
 
         $subscription->streamManager()->bind($streamName, $position);
-
-        if ($subscription instanceof PersistentSubscriptionInterface) {
-            $subscription->eventCounter()->increment();
-        }
 
         return true;
     }

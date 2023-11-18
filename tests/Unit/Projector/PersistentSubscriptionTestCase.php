@@ -183,7 +183,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateLockAndStreamPositions')
+            ->method('attemptUpdateStreamPositions')
             ->with(['stream_name' => 25])
             ->willReturn(true);
 

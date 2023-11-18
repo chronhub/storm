@@ -7,25 +7,20 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Illuminate\Support\Collection;
 
-use function array_key_exists;
-use function array_keys;
 use function in_array;
 
-final class InMemoryProjectionProvider implements ProjectionProvider
+final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
-    private const FIELDS = ['state', 'position', 'status', 'locked_until'];
-
     /**
      * @var Collection<string, InMemoryProjection>
      */
-    private readonly Collection $projections;
+    private Collection $projections;
 
-    public function __construct(private readonly SystemClock $clock)
+    public function __construct(private SystemClock $clock)
     {
         $this->projections = new Collection();
     }
@@ -41,46 +36,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return true;
     }
 
-    public function updateProjection(string $projectionName, array $data): bool
-    {
-        $this->assertFieldsExist($data, $projectionName);
-
-        $projection = $this->retrieve($projectionName);
-
-        if (! $projection instanceof InMemoryProjection) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
-
-        if (isset($data['state'])) {
-            $projection->setState($data['state']);
-        }
-
-        if (isset($data['position'])) {
-            $projection->setPosition($data['position']);
-        }
-
-        if (isset($data['status'])) {
-            $projection->setStatus($data['status']);
-        }
-
-        if (array_key_exists('locked_until', $data)) {
-            $projection->setLockedUntil($data['locked_until']);
-        }
-
-        return true;
-    }
-
-    public function deleteProjection(string $projectionName): bool
-    {
-        if (! $this->exists($projectionName)) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
-
-        $this->projections->forget($projectionName);
-
-        return true;
-    }
-
+    //checkMe acquireLock could be the last args of updateProjection
     public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool
     {
         $projection = $this->retrieve($projectionName);
@@ -100,6 +56,58 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return false;
     }
 
+    public function updateProjection(
+        string $projectionName,
+        string $status = null,
+        string $state = null,
+        string $positions = null,
+        string $gaps = null,
+        bool|string|null $lockedUntil = false
+    ): bool {
+        $projection = $this->retrieve($projectionName);
+
+        if (! $projection instanceof InMemoryProjection) {
+            throw ProjectionNotFound::withName($projectionName);
+        }
+
+        if ($projection->lockedUntil() === null) {
+            throw new RuntimeException("Projection lock must be acquired before updating projection $projectionName");
+        }
+
+        if ($status !== null) {
+            $projection->setStatus($status);
+        }
+
+        if ($state !== null) {
+            $projection->setState($state);
+        }
+
+        if ($positions !== null) {
+            $projection->setPosition($positions);
+        }
+
+        if ($gaps !== null) {
+            $projection->setGaps($gaps);
+        }
+
+        if ($lockedUntil !== false) {
+            $projection->setLockedUntil($lockedUntil);
+        }
+
+        return true;
+    }
+
+    public function deleteProjection(string $projectionName): bool
+    {
+        if (! $this->exists($projectionName)) {
+            throw ProjectionNotFound::withName($projectionName);
+        }
+
+        $this->projections->forget($projectionName);
+
+        return true;
+    }
+
     public function retrieve(string $projectionName): ?ProjectionModel
     {
         return $this->projections->get($projectionName);
@@ -107,7 +115,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function filterByNames(string ...$projectionNames): array
     {
-        $byStreamNames = static fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames);
+        $byStreamNames = static fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames, true);
 
         return $this->projections->filter($byStreamNames)->keys()->toArray();
     }
@@ -124,16 +132,5 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         }
 
         return $this->clock->isGreaterThanNow($projection->lockedUntil());
-    }
-
-    private function assertFieldsExist(array $data, string $name): void
-    {
-        collect(array_keys($data))
-            ->diff(self::FIELDS)
-            ->whenNotEmpty(function (Collection $invalidFields) use ($name) {
-                throw new InvalidArgumentException(
-                    'Invalid projection field(s) ['.$invalidFields->implode(', ')."] for projection $name"
-                );
-            });
     }
 }

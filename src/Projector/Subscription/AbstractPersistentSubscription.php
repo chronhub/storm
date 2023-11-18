@@ -99,7 +99,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
     public function renew(): void
     {
-        $this->repository->attemptUpdateLockAndStreamPositions($this->streamManager->jsonSerialize());
+        $this->repository->attemptUpdateStreamPositions($this->streamManager->jsonSerialize());
     }
 
     public function freed(): void

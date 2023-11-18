@@ -127,8 +127,7 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
     {
         try {
             $success = $this->subscriptionFactory->projectionProvider->updateProjection(
-                $projectionName,
-                ['status' => $projectionStatus->value]
+                $projectionName, status : $projectionStatus->value
             );
         } catch (Throwable $exception) {
             throw ProjectionFailed::failedOnUpdateStatus($projectionName, $projectionStatus, $exception);

@@ -16,28 +16,6 @@ interface ProjectionProvider
     public function createProjection(string $projectionName, string $status): bool;
 
     /**
-     * Update the data for an existing projection.
-     *
-     * @param string $projectionName The name of the projection to update.
-     * @param array{
-     *     "state"?: string,
-     *     "position"?: string,
-     *     "status"?: string,
-     *     "locked_until"?: null|string
-     * } $data The data to update.
-     * @return bool True if the update was successful, false otherwise.
-     */
-    public function updateProjection(string $projectionName, array $data): bool;
-
-    /**
-     * Delete the data for an existing projection.
-     *
-     * @param  string $projectionName The name of the projection to delete.
-     * @return bool   True if the deletion was successful, false otherwise.
-     */
-    public function deleteProjection(string $projectionName): bool;
-
-    /**
      * Acquire a lock on a projection with the given name and status.
      *
      * @param  string $projectionName The name of the projection to acquire a lock on.
@@ -46,6 +24,29 @@ interface ProjectionProvider
      * @return bool   True if the lock was acquired successfully, false otherwise.
      */
     public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool;
+
+    /**
+     * Update the data for an existing projection.
+     *
+     * @param  string $projectionName The name of the projection to update.
+     * @return bool   True if the update was successful, false otherwise.
+     */
+    public function updateProjection(
+        string $projectionName,
+        string $status = null,
+        string $state = null,
+        string $positions = null,
+        string $gaps = null,
+        bool|string|null $lockedUntil = false
+    ): bool;
+
+    /**
+     * Delete the data for an existing projection.
+     *
+     * @param  string $projectionName The name of the projection to delete.
+     * @return bool   True if the deletion was successful, false otherwise.
+     */
+    public function deleteProjection(string $projectionName): bool;
 
     /**
      * Retrieve the data for an existing projection.

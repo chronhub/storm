@@ -95,10 +95,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function attemptUpdateLockAndStreamPositions(array $streamPositions): bool
+    public function attemptUpdateStreamPositions(array $streamPositions): bool
     {
         return $this->tryOperation(
-            fn (): bool => $this->repository->attemptUpdateLockAndStreamPositions($streamPositions),
+            fn (): bool => $this->repository->attemptUpdateStreamPositions($streamPositions),
             'Failed on update lock'
         );
     }

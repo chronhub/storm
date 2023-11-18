@@ -410,13 +410,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateLockAndStreamPositions')
+            ->method('attemptUpdateStreamPositions')
             ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->attemptUpdateLockAndStreamPositions(['foo' => 10, 'bar' => 25]));
+        $this->assertTrue($connectionProvider->attemptUpdateStreamPositions(['foo' => 10, 'bar' => 25]));
     }
 
     public function testQueryFailureRaisedWhenUpdateLockFailed(): void
@@ -425,14 +425,14 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateLockAndStreamPositions')
+            ->method('attemptUpdateStreamPositions')
             ->with(['foo' => 110, 'bar' => 251])
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->attemptUpdateLockAndStreamPositions(['foo' => 110, 'bar' => 251]);
+            $connectionProvider->attemptUpdateStreamPositions(['foo' => 110, 'bar' => 251]);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -452,13 +452,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateLockAndStreamPositions')
+            ->method('attemptUpdateStreamPositions')
             ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->attemptUpdateLockAndStreamPositions(['foo' => 10, 'bar' => 25]);
+        $connectionProvider->attemptUpdateStreamPositions(['foo' => 10, 'bar' => 25]);
     }
 
     public function testReleaseLock(): void

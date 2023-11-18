@@ -43,7 +43,7 @@ class LockManager
     {
         $now = $this->clock->now();
 
-        if ($this->shouldUpdateLockWithThreshold($now)) {
+        if ($this->shouldUpdateLock($now)) {
             $this->lastLock = $now;
 
             return true;
@@ -95,7 +95,7 @@ class LockManager
         return $this->current();
     }
 
-    private function shouldUpdateLockWithThreshold(DateTimeImmutable $currentTime): bool
+    private function shouldUpdateLock(DateTimeImmutable $currentTime): bool
     {
         if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
             return true;

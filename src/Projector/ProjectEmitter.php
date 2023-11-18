@@ -35,7 +35,15 @@ final readonly class ProjectEmitter implements EmitterProjector
     {
         $streamName = new StreamName($this->streamName);
 
-        $this->persistIfStreamIsFirstCommit($streamName);
+        /**
+         * If the stream is not fixed, we must verify if the stream already exists.
+         * Otherwise, we store it as the initial commit.
+         */
+        if (! $this->subscription->isFixed() && ! $this->chronicler->hasStream($streamName)) {
+            $this->chronicler->firstCommit(new Stream($streamName));
+
+            $this->subscription->fixe();
+        }
 
         $this->linkTo($this->streamName, $event);
     }
@@ -59,22 +67,9 @@ final readonly class ProjectEmitter implements EmitterProjector
     }
 
     /**
-     * Persist domain event if stream does not already exist
-     * in the event store and not already set in the projection context
-     */
-    private function persistIfStreamIsFirstCommit(StreamName $streamName): void
-    {
-        if (! $this->subscription->isFixed() && ! $this->chronicler->hasStream($streamName)) {
-            $this->chronicler->firstCommit(new Stream($streamName));
-
-            $this->subscription->fixe();
-        }
-    }
-
-    /**
-     * Check if stream name already exists in cache and/or in the event store
-     * if the in-memory cache has the stream, we assume it already exists in the event store
-     * otherwise, we push the stream into it and check if it exists in the event store
+     * Verify whether the stream name is present in the cache and/or the event store.
+     * If the stream is found in the in-memory cache, we assume it already exists in the event store.
+     * Otherwise, we add the stream to the cache and check for its existence in the event store.
      */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {
