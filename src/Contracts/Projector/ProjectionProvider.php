@@ -43,10 +43,9 @@ interface ProjectionProvider
      * @param  string $projectionName The name of the projection to acquire a lock on.
      * @param  string $status         The status of the projection.
      * @param  string $lockedUntil    The datetime until the lock is valid.
-     * @param  string $datetime       The current datetime.
      * @return bool   True if the lock was acquired successfully, false otherwise.
      */
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil, string $datetime): bool;
+    public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool;
 
     /**
      * Retrieve the data for an existing projection.

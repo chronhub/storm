@@ -27,7 +27,8 @@ interface ProjectorManagerInterface
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function newReadModel(string $streamName,
+    public function newReadModel(
+        string $streamName,
         ReadModel $readModel,
         array $options = []): ReadModelProjector;
 

@@ -13,7 +13,7 @@ use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -38,7 +38,7 @@ final class ProcessClosureQueryEventTest extends UnitTestCase
 
         $eventStore = new InMemoryEventStream();
 
-        $streamPosition = new StreamPosition($eventStore);
+        $streamPosition = new StreamManager($eventStore);
 
         $this->subscription = new QuerySubscription(
             new DefaultProjectionOption(signal: true),
@@ -55,7 +55,7 @@ final class ProcessClosureQueryEventTest extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 1)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 0);
+        $this->subscription->streamManager()->bind('test_stream', 0);
 
         $this->subscription->currentStreamName = 'test_stream';
 
@@ -78,7 +78,7 @@ final class ProcessClosureQueryEventTest extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 2)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 1);
+        $this->subscription->streamManager()->bind('test_stream', 1);
 
         $this->subscription->currentStreamName = 'test_stream';
 

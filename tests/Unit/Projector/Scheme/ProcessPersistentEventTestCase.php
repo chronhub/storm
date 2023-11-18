@@ -17,7 +17,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -51,7 +51,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             new DetermineStreamCategory()
         );
 
-        $streamPosition = new StreamPosition($eventStore);
+        $streamPosition = new StreamManager($eventStore);
 
         $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
         $this->subscription = new EmitterSubscription(
@@ -74,7 +74,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 1)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 0);
+        $this->subscription->streamManager()->bind('test_stream', 0);
 
         $this->subscription->currentStreamName = 'test_stream';
 
@@ -104,7 +104,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 1)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 5);
+        $this->subscription->streamManager()->bind('test_stream', 5);
 
         $this->subscription->currentStreamName = 'test_stream';
 
@@ -133,7 +133,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 2)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 1);
+        $this->subscription->streamManager()->bind('test_stream', 1);
 
         $this->subscription->currentStreamName = 'test_stream';
 
@@ -177,7 +177,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 2)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 1);
+        $this->subscription->streamManager()->bind('test_stream', 1);
 
         $this->subscription->currentStreamName = 'test_stream';
 
@@ -222,7 +222,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
             ->withHeader(EventHeader::AGGREGATE_VERSION, 2)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 1);
+        $this->subscription->streamManager()->bind('test_stream', 1);
 
         $this->subscription->currentStreamName = 'test_stream';
 

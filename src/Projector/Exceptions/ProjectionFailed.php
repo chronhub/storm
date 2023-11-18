@@ -10,13 +10,18 @@ use Throwable;
 
 class ProjectionFailed extends RuntimeException implements ProjectorFailed
 {
-    public static function fromProjectionException(Throwable $exception, ?string $message = null): self
+    public static function fromProjectionException(Throwable $exception, string $message = null): self
     {
         return new static(
             $message ?? $exception->getMessage(),
             $exception->getCode(),
             $exception
         );
+    }
+
+    public static function failedOnOperation(string $message): self
+    {
+        return new static($message);
     }
 
     public static function failedOnCreate(string $streamName): self

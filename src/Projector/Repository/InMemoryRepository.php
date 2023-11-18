@@ -20,17 +20,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function create(ProjectionStatus $status): bool
     {
-        try {
-            $created = $this->repository->create($status);
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $created) {
-            throw InMemoryProjectionFailed::failedOnCreate($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->create($status),
+            'Failed on create'
+        );
     }
 
     /**
@@ -38,17 +31,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function stop(ProjectionDetail $projectionDetail): bool
     {
-        try {
-            $stopped = $this->repository->stop($projectionDetail);
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $stopped) {
-            throw InMemoryProjectionFailed::failedOnStop($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->stop($projectionDetail),
+            'Failed on stop'
+        );
     }
 
     /**
@@ -56,17 +42,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function startAgain(): bool
     {
-        try {
-            $restarted = $this->repository->startAgain();
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $restarted) {
-            throw InMemoryProjectionFailed::failedOnStartAgain($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->startAgain(),
+            'Failed on start again'
+        );
     }
 
     /**
@@ -74,17 +53,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function persist(ProjectionDetail $projectionDetail): bool
     {
-        try {
-            $persisted = $this->repository->persist($projectionDetail);
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $persisted) {
-            throw InMemoryProjectionFailed::failedOnPersist($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->persist($projectionDetail),
+            'Failed on persist'
+        );
     }
 
     /**
@@ -92,17 +64,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool
     {
-        try {
-            $reset = $this->repository->reset($projectionDetail, $currentStatus);
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $reset) {
-            throw InMemoryProjectionFailed::failedOnReset($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->reset($projectionDetail, $currentStatus),
+            'Failed on reset'
+        );
     }
 
     /**
@@ -110,17 +75,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function delete(): bool
     {
-        try {
-            $deleted = $this->repository->delete();
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $deleted) {
-            throw InMemoryProjectionFailed::failedOnDelete($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->delete(),
+            'Failed on delete'
+        );
     }
 
     /**
@@ -128,35 +86,21 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function acquireLock(): bool
     {
-        try {
-            $locked = $this->repository->acquireLock();
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $locked) {
-            throw InMemoryProjectionFailed::failedOnAcquireLock($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->acquireLock(),
+            'Failed on acquire lock'
+        );
     }
 
     /**
      * @throws InMemoryProjectionFailed
      */
-    public function updateLock(array $streamPositions): bool
+    public function attemptUpdateLockAndStreamPositions(array $streamPositions): bool
     {
-        try {
-            $updated = $this->repository->updateLock($streamPositions);
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $updated) {
-            throw InMemoryProjectionFailed::failedOnUpdateLock($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->attemptUpdateLockAndStreamPositions($streamPositions),
+            'Failed on update lock'
+        );
     }
 
     /**
@@ -164,17 +108,10 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
      */
     public function releaseLock(): bool
     {
-        try {
-            $released = $this->repository->releaseLock();
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception);
-        }
-
-        if (! $released) {
-            throw InMemoryProjectionFailed::failedOnReleaseLock($this->projectionName());
-        }
-
-        return true;
+        return $this->tryOperation(
+            fn (): bool => $this->repository->releaseLock(),
+            'Failed on release lock'
+        );
     }
 
     public function loadDetail(): ProjectionDetail
@@ -195,5 +132,20 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
     public function projectionName(): string
     {
         return $this->repository->projectionName();
+    }
+
+    private function tryOperation(callable $operation, string $failedMessage): bool
+    {
+        try {
+            $result = $operation();
+        } catch (Throwable $exception) {
+            throw InMemoryProjectionFailed::fromProjectionException($exception, $failedMessage);
+        }
+
+        if ($result === true) {
+            return true;
+        }
+
+       throw InMemoryProjectionFailed::failedOnOperation($failedMessage.' for projection name '.$this->projectionName());
     }
 }

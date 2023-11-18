@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\ReadModel;
 
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Illuminate\Support\Collection;
+
 use function abs;
 
 final class InMemoryReadModel implements ReadModel
@@ -14,9 +16,14 @@ final class InMemoryReadModel implements ReadModel
     private bool $initialized = false;
 
     /**
-     * @var array<string, array>
+     * @var Collection<string, array>
      */
-    private array $container = [];
+    private Collection $container;
+
+    public function __construct()
+    {
+        $this->container = new Collection();
+    }
 
     public function initialize(): void
     {
@@ -30,49 +37,58 @@ final class InMemoryReadModel implements ReadModel
 
     public function reset(): void
     {
-        $this->container = [];
+        $this->container = new Collection();
     }
 
     public function down(): void
     {
-        $this->container = [];
+        $this->reset();
     }
 
     public function getContainer(): array
     {
-        return $this->container;
+        return $this->container->all();
     }
 
     protected function insert(string $id, array $data): void
     {
-        $this->container[$id] = $data;
+        $this->container->put($id, $data);
     }
 
     protected function update(string $id, string $field, mixed $value): void
     {
-        $this->container[$id][$field] = $value;
+        $data = $this->container->get($id);
+
+        $data[$field] = $value;
+
+        $this->container->put($id, $data);
     }
 
     protected function increment(string $id, string $field, int|float $value, array $extra = []): void
     {
-        $this->container[$id][$field] += abs($value);
-
-        foreach ($extra as $extraField => $extraValue) {
-            $this->update($id, $extraField, $extraValue);
-        }
+        $this->adjust($id, $field, $value, true, $extra);
     }
 
     protected function decrement(string $id, string $field, int|float $value, array $extra = []): void
     {
-        $this->container[$id][$field] -= abs($value);
-
-        foreach ($extra as $extraField => $extraValue) {
-            $this->update($id, $extraField, $extraValue);
-        }
+        $this->adjust($id, $field, $value, false, $extra);
     }
 
     protected function delete(string $id): void
     {
-        unset($this->container[$id]);
+        $this->container->forget($id);
+    }
+
+    private function adjust(string $id, string $field, int|float $value, bool $increment = true, array $extra = []): void
+    {
+        $data = $this->container->get($id);
+
+        $data[$field] += ($increment ? 1 : -1) * abs($value);
+
+        $this->container->put($id, $data);
+
+        foreach ($extra as $extraField => $extraValue) {
+            $this->update($id, $extraField, $extraValue);
+        }
     }
 }

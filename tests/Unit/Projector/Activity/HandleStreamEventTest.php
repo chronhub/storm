@@ -19,7 +19,7 @@ use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
 use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
@@ -47,7 +47,7 @@ class HandleStreamEventTest extends UnitTestCase
 
         $this->subscription = new QuerySubscription(
             new InMemoryProjectionOption(),
-            new StreamPosition($eventStore),
+            new StreamManager($eventStore),
             new PointInTime()
         );
 
@@ -66,16 +66,16 @@ class HandleStreamEventTest extends UnitTestCase
 
         $this->chronicler->firstCommit($stream);
 
-        $this->subscription->streamPosition()->bind('test_stream', 0);
-        $this->assertSame(0, $this->subscription->streamPosition()->all()['test_stream']);
-        $this->assertNull($this->subscription->currentStreamName);
+        $this->subscription->streamManager()->bind('test_stream', 0);
+        $this->assertSame(0, $this->subscription->streamManager()->jsonSerialize()['test_stream']);
+        $this->assertNull($this->subscription->currentStreamName());
 
         $context = new Context();
         $context->withQueryFilter($this->dummyQueryFilter());
         $context->fromStreams('test_stream');
 
         $eventHandled = false;
-        $context->whenAny(function (DomainEvent $event) use (&$eventHandled): void {
+        $context->when(function (DomainEvent $event) use (&$eventHandled): void {
             TestCase::assertInstanceOf(SomeEvent::class, $event);
             $eventHandled = true;
         });
@@ -83,7 +83,7 @@ class HandleStreamEventTest extends UnitTestCase
         $caster = new CastQuery(
             $this->createMock(QueryProjector::class),
             new PointInTime(),
-            $this->subscription->currentStreamName
+            fn () => $this->subscription->currentStreamName()
         );
 
         $this->subscription->compose($context, $caster, false);
@@ -94,8 +94,8 @@ class HandleStreamEventTest extends UnitTestCase
 
         $this->assertTrue($activity($this->subscription, $next));
         $this->assertTrue($eventHandled);
-        $this->assertSame('test_stream', $this->subscription->currentStreamName);
-        $this->assertSame(1, $this->subscription->streamPosition()->all()['test_stream']);
+        $this->assertSame('test_stream', $this->subscription->currentStreamName());
+        $this->assertSame(1, $this->subscription->streamManager()->jsonSerialize()['test_stream']);
     }
 
     public function testManyStreams(): void
@@ -110,18 +110,18 @@ class HandleStreamEventTest extends UnitTestCase
         $this->chronicler->firstCommit($firstStream);
         $this->chronicler->firstCommit($secondStream);
 
-        $this->subscription->streamPosition()->bind('first_stream', 0);
-        $this->subscription->streamPosition()->bind('second_stream', 0);
-        $this->assertSame(0, $this->subscription->streamPosition()->all()['first_stream']);
-        $this->assertSame(0, $this->subscription->streamPosition()->all()['second_stream']);
-        $this->assertNull($this->subscription->currentStreamName);
+        $this->subscription->streamManager()->bind('first_stream', 0);
+        $this->subscription->streamManager()->bind('second_stream', 0);
+        $this->assertSame(0, $this->subscription->streamManager()->jsonSerialize()['first_stream']);
+        $this->assertSame(0, $this->subscription->streamManager()->jsonSerialize()['second_stream']);
+        $this->assertNull($this->subscription->currentStreamName());
 
         $context = new Context();
         $context->withQueryFilter($this->dummyQueryFilter());
         $context->fromAll();
 
         $countEvents = 0;
-        $context->whenAny(function (DomainEvent $event) use (&$countEvents): void {
+        $context->when(function (DomainEvent $event) use (&$countEvents): void {
             /** @var QueryCasterInterface $this */
             TestCase::assertInstanceOf(SomeEvent::class, $event);
 
@@ -137,7 +137,7 @@ class HandleStreamEventTest extends UnitTestCase
         $caster = new CastQuery(
             $this->createMock(QueryProjector::class),
             new PointInTime(),
-            $this->subscription->currentStreamName
+            fn () => $this->subscription->currentStreamName()
         );
 
         $this->subscription->compose($context, $caster, false);
@@ -149,9 +149,9 @@ class HandleStreamEventTest extends UnitTestCase
         $this->assertTrue($activity($this->subscription, $next));
 
         $this->assertSame(2, $countEvents);
-        $this->assertSame('second_stream', $this->subscription->currentStreamName);
-        $this->assertSame(1, $this->subscription->streamPosition()->all()['first_stream']);
-        $this->assertSame(1, $this->subscription->streamPosition()->all()['second_stream']);
+        $this->assertSame('second_stream', $this->subscription->currentStreamName());
+        $this->assertSame(1, $this->subscription->streamManager()->jsonSerialize()['first_stream']);
+        $this->assertSame(1, $this->subscription->streamManager()->jsonSerialize()['second_stream']);
     }
 
     private function dummyQueryFilter(): InMemoryQueryFilter

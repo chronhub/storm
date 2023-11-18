@@ -52,12 +52,12 @@ final readonly class PointInTime implements SystemClock
         return $this->toDateTimeImmutable($pointInTime) > $this->toDateTimeImmutable($anotherPointInTime);
     }
 
-    public function isGreaterThanNow(string|DateTimeImmutable $pointInTime): bool
+    public function isGreaterThanNow(DateTimeImmutable|string $pointInTime): bool
     {
         return $this->now() < $this->toDateTimeImmutable($pointInTime);
     }
 
-    public function isNowSubGreaterThan(string|DateInterval $interval, string|DateTimeImmutable $pointInTime): bool
+    public function isNowSubGreaterThan(DateInterval|string $interval, DateTimeImmutable|string $pointInTime): bool
     {
         if (is_string($interval)) {
             $interval = new DateInterval(strtoupper($interval));

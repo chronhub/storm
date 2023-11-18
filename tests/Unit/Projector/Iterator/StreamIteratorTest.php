@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(StreamEventIterator::class)]
-final class StreamEventIteratorTest extends UnitTestCase
+#[CoversClass(StreamIterator::class)]
+final class StreamIteratorTest extends UnitTestCase
 {
     public function testEmptyGenerator(): void
     {
         $streamEvents = $this->provideEmptyGenerator();
 
-        $iterator = new StreamEventIterator($streamEvents);
+        $iterator = new StreamIterator($streamEvents);
 
         $this->assertNull($iterator->current());
-        $this->assertFalse($iterator->key());
+        $this->assertNull($iterator->key());
         $this->assertFalse($iterator->valid());
     }
 
@@ -30,7 +30,7 @@ final class StreamEventIteratorTest extends UnitTestCase
     {
         $streamEvents = $this->provideStreamEvens();
 
-        $iterator = new StreamEventIterator($streamEvents);
+        $iterator = new StreamIterator($streamEvents);
 
         $this->assertInstanceOf(SomeEvent::class, $iterator->current());
         $this->assertSame(1, $iterator->key());
@@ -48,11 +48,11 @@ final class StreamEventIteratorTest extends UnitTestCase
         $this->assertSame(10, $lastEvent->header(EventHeader::INTERNAL_POSITION));
     }
 
-    public function testDoesNotRewind(): void
+    public function testRewind(): void
     {
         $streamEvents = $this->provideStreamEvens();
 
-        $iterator = new StreamEventIterator($streamEvents);
+        $iterator = new StreamIterator($streamEvents);
 
         $this->assertSame(1, $iterator->current()->header(EventHeader::INTERNAL_POSITION));
 
@@ -61,8 +61,7 @@ final class StreamEventIteratorTest extends UnitTestCase
         $iterator->next();
         $iterator->rewind();
 
-        // generator raise exception normally
-        $this->assertSame(4, $iterator->current()->header(EventHeader::INTERNAL_POSITION));
+        $this->assertSame(1, $iterator->current()->header(EventHeader::INTERNAL_POSITION));
     }
 
     private function provideStreamEvens(): Generator
@@ -75,6 +74,8 @@ final class StreamEventIteratorTest extends UnitTestCase
 
             $count++;
         }
+
+        return $count;
     }
 
     private function provideEmptyGenerator(): Generator

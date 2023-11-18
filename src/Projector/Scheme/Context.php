@@ -32,9 +32,7 @@ final class Context implements ContextInterface
 
     public function initialize(Closure $initState): self
     {
-        if ($this->initState instanceof Closure) {
-            throw new InvalidArgumentException('Projection already initialized');
-        }
+        $this->assertNotAlreadyInitialized();
 
         $this->assertNotStaticClosure($initState);
 
@@ -45,9 +43,7 @@ final class Context implements ContextInterface
 
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
-        if ($this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter already set');
-        }
+        $this->assertQueryFilterNotSet();
 
         $this->queryFilter = $queryFilter;
 
@@ -56,19 +52,9 @@ final class Context implements ContextInterface
 
     public function until(DateInterval|string|int $interval): ContextInterface
     {
-        if ($this->timer !== null) {
-            throw new InvalidArgumentException('Projection timer already set');
-        }
+        $this->assertTimerNotSet();
 
-        if (is_int($interval)) {
-            $interval = new DateInterval(sprintf('PT%dS', $interval));
-        }
-
-        if (is_string($interval)) {
-            $interval = new DateInterval(mb_strtoupper($interval));
-        }
-
-        $this->timer = $interval;
+        $this->timer = $this->normalizeInterval($interval);
 
         return $this;
     }
@@ -104,13 +90,7 @@ final class Context implements ContextInterface
     {
         $this->assertEventHandlersNotSet();
 
-        if (is_array($eventHandlers)) {
-            foreach ($eventHandlers as $eventHandler) {
-                $this->assertNotStaticClosure($eventHandler);
-            }
-        } else {
-            $this->assertNotStaticClosure($eventHandlers);
-        }
+        $this->validateEventHandlers($eventHandlers);
 
         $this->eventHandlers = $eventHandlers;
 
@@ -124,31 +104,21 @@ final class Context implements ContextInterface
 
     public function eventHandlers(): callable
     {
-        if ($this->eventHandlers === null) {
-            throw new InvalidArgumentException('Projection event handlers not set');
-        }
+        $this->assertEventHandlersSet();
 
-        if (is_array($this->eventHandlers)) {
-            return new ProcessArrayEvent($this->eventHandlers);
-        }
-
-        return new ProcessClosureEvent($this->eventHandlers);
+        return $this->createEventHandlers();
     }
 
     public function queries(): array
     {
-        if ($this->queries === []) {
-            throw new InvalidArgumentException('Projection streams all|names|categories not set');
-        }
+        $this->assertQueriesSet();
 
         return $this->queries;
     }
 
     public function queryFilter(): QueryFilter
     {
-        if (! $this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter not set');
-        }
+        $this->assertQueryFilterSet();
 
         return $this->queryFilter;
     }
@@ -166,9 +136,7 @@ final class Context implements ContextInterface
         if ($this->eventHandlers instanceof Closure) {
             $this->eventHandlers = Closure::bind($this->eventHandlers, $caster, Caster::class);
         } else {
-            foreach ($this->eventHandlers as &$eventHandler) {
-                $eventHandler = Closure::bind($eventHandler, $caster, Caster::class);
-            }
+            $this->bindEventHandlers($caster);
         }
     }
 
@@ -190,6 +158,51 @@ final class Context implements ContextInterface
         return [];
     }
 
+    private function assertNotAlreadyInitialized(): void
+    {
+        if ($this->initState instanceof Closure) {
+            throw new InvalidArgumentException('Projection already initialized');
+        }
+    }
+
+    private function assertQueryFilterNotSet(): void
+    {
+        if ($this->queryFilter instanceof QueryFilter) {
+            throw new InvalidArgumentException('Projection query filter already set');
+        }
+    }
+
+    private function assertTimerNotSet(): void
+    {
+        if ($this->timer !== null) {
+            throw new InvalidArgumentException('Projection timer already set');
+        }
+    }
+
+    private function normalizeInterval(DateInterval|string|int $interval): DateInterval
+    {
+        if (is_int($interval)) {
+            return new DateInterval(sprintf('PT%dS', $interval));
+        }
+
+        if (is_string($interval)) {
+            return new DateInterval(mb_strtoupper($interval));
+        }
+
+        return $interval;
+    }
+
+    private function validateEventHandlers(array|Closure $eventHandlers): void
+    {
+        if (is_array($eventHandlers)) {
+            foreach ($eventHandlers as $eventHandler) {
+                $this->assertNotStaticClosure($eventHandler);
+            }
+        } else {
+            $this->assertNotStaticClosure($eventHandlers);
+        }
+    }
+
     private function assertQueriesNotSet(): void
     {
         if ($this->queries !== []) {
@@ -201,6 +214,43 @@ final class Context implements ContextInterface
     {
         if ($this->eventHandlers !== null) {
             throw new InvalidArgumentException('Projection event handlers already set');
+        }
+    }
+
+    private function assertEventHandlersSet(): void
+    {
+        if ($this->eventHandlers === null) {
+            throw new InvalidArgumentException('Projection event handlers not set');
+        }
+    }
+
+    private function createEventHandlers(): callable
+    {
+        if (is_array($this->eventHandlers)) {
+            return new ProcessArrayEvent($this->eventHandlers);
+        }
+
+        return new ProcessClosureEvent($this->eventHandlers);
+    }
+
+    private function assertQueriesSet(): void
+    {
+        if ($this->queries === []) {
+            throw new InvalidArgumentException('Projection streams all|names|categories not set');
+        }
+    }
+
+    private function assertQueryFilterSet(): void
+    {
+        if (! $this->queryFilter instanceof QueryFilter) {
+            throw new InvalidArgumentException('Projection query filter not set');
+        }
+    }
+
+    private function bindEventHandlers(Caster $caster): void
+    {
+        foreach ($this->eventHandlers as &$eventHandler) {
+            $eventHandler = Closure::bind($eventHandler, $caster, Caster::class);
         }
     }
 

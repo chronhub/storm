@@ -11,8 +11,8 @@ final readonly class HandleStreamGap
 {
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
-        if ($subscription->gap()->hasGap()) {
-            $subscription->gap()->sleep();
+        if ($subscription->streamManager()->hasGap()) {
+            $subscription->streamManager()->sleep();
 
             $subscription->store();
         }

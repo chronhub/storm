@@ -17,7 +17,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Closure;
 
 use function is_array;
@@ -36,7 +36,7 @@ abstract class AbstractSubscription implements Subscription
 
     public function __construct(
         protected readonly ProjectionOption $option,
-        protected readonly StreamPosition $streamPosition,
+        protected readonly StreamManager $streamManager,
         protected readonly SystemClock $clock,
     ) {
         $this->state = new ProjectionState();
@@ -108,9 +108,9 @@ abstract class AbstractSubscription implements Subscription
         return $this->option;
     }
 
-    public function streamPosition(): StreamPosition
+    public function streamManager(): StreamManager
     {
-        return $this->streamPosition;
+        return $this->streamManager;
     }
 
     public function state(): ProjectionStateInterface

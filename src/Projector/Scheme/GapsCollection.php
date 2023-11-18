@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Collection;
 
 use function array_fill_keys;
@@ -13,7 +12,7 @@ use function array_values;
 class GapsCollection
 {
     /**
-     * @var Collection<array<non-empty-string,array<int<1,max>,bool>>>
+     * @var Collection<array<int,bool>>
      */
     protected Collection $gaps;
 
@@ -23,73 +22,58 @@ class GapsCollection
     }
 
     /**
-     * Adds a new event position and its confirmation status to the specified stream.
+     * Adds a new event position and its confirmation status
      *
-     * @param non-empty-string $streamName    The name of the stream.
-     * @param int<1,max>       $eventPosition The position of the event.
-     * @param bool             $confirmed     The confirmation status of gap.
+     * @param int<1,max> $eventPosition The position of the event.
+     * @param bool       $confirmed     The confirmation status of gap.
      */
-    public function put(string $streamName, int $eventPosition, bool $confirmed): void
+    public function put(int $eventPosition, bool $confirmed): void
     {
-        $streamGap = $this->gaps->get($streamName, new Collection());
-
-        $this->gaps->put($streamName, $streamGap->put($eventPosition, $confirmed));
+        $this->gaps->put($eventPosition, $confirmed);
     }
 
     /**
-     * Removes the specified event position from the specified stream.
+     * Removes the specified stream gap if exists.
      *
-     * @param non-empty-string $streamName
-     * @param int<1,max>       $eventPosition
+     * @param int<1,max> $eventPosition
      */
-    public function remove(string $streamName, int $eventPosition): void
+    public function remove(int $eventPosition): void
     {
-        $streamGap = $this->gaps->get($streamName, new Collection());
-
-        $isGapConfirmed = $streamGap->get($eventPosition);
+        $isGapConfirmed = $this->gaps->get($eventPosition);
 
         if ($isGapConfirmed === null) {
             return;
         }
 
-        if ($isGapConfirmed === true) {
-            throw new InvalidArgumentException("Cannot remove confirmed event position $eventPosition for stream $streamName");
-        }
-
-        $this->gaps->put($streamName, $streamGap->forget($eventPosition));
+        $this->gaps->forget($eventPosition);
     }
 
     /**
-     * Merge remote stream gaps with local gaps
+     * Merge remote with local stream gaps
      *
-     * @param array<int> $streamGaps
+     * @param array<int<1,max>> $streamGaps
      */
-    public function merge(string $streamName, array $streamGaps): void
+    public function merge(array $streamGaps): void
     {
         if ($streamGaps === []) {
             return;
         }
 
-        $streamGap = $this->gaps->get($streamName, new Collection());
-
         $confirmedGaps = array_fill_keys(array_values($streamGaps), true);
 
-        $this->gaps->put($streamName, $streamGap->merge($confirmedGaps));
+        $this->gaps->merge($confirmedGaps);
     }
 
     /**
-     * Filter confirmed gaps and remove unconfirmed local gaps
-     * when projection is persisted
+     * Filter confirmed gaps and remove unconfirmed local gaps when projection is persisted
      *
      * @return array<int<1,max>>
      */
-    public function filterConfirmedGaps(string $streamName): array
+    public function filterConfirmedGaps(): array
     {
-        $streamGap = $this->gaps->get($streamName, new Collection());
+        $confirmedGaps = $this->gaps->filter(fn (bool $confirmed): bool => $confirmed);
 
-        $confirmedGaps = $streamGap->filter(fn (bool $confirmed) => $confirmed);
-
-        $this->gaps->put($streamName, $confirmedGaps);
+        $this->gaps = $confirmedGaps;
 
         return $confirmedGaps->keys()->all();
     }

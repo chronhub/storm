@@ -4,19 +4,30 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Iterator;
 
+use ArrayIterator;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Countable;
 use Generator;
 use Iterator;
 
-final class StreamEventIterator implements Iterator
+use function iterator_to_array;
+
+final class StreamIterator implements Countable, Iterator
 {
     private ?DomainEvent $event = null;
 
-    private int|false $position = 0;
+    private ?int $position = null;
 
-    public function __construct(private readonly Generator $streamEvents)
+    /**
+     * @var ArrayIterator<DomainEvent>
+     */
+    private ArrayIterator $streamEvents;
+
+    public function __construct(Generator $streamEvents)
     {
+        $this->streamEvents = new ArrayIterator(iterator_to_array($streamEvents));
+
         $this->next();
     }
 
@@ -32,14 +43,14 @@ final class StreamEventIterator implements Iterator
         if ($this->event instanceof DomainEvent) {
             $this->position = (int) $this->event->header(EventHeader::INTERNAL_POSITION);
         } else {
-            $this->position = false;
+            $this->position = null;
             $this->event = null;
         }
 
         $this->streamEvents->next();
     }
 
-    public function key(): false|int
+    public function key(): ?int
     {
         return $this->position;
     }
@@ -51,5 +62,13 @@ final class StreamEventIterator implements Iterator
 
     public function rewind(): void
     {
+        $this->streamEvents->rewind();
+
+        $this->next();
+    }
+
+    public function count(): int
+    {
+        return $this->streamEvents->count();
     }
 }

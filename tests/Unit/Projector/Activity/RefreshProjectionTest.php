@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -131,7 +131,7 @@ final class RefreshProjectionTest extends UnitTestCase
         // todo test provider should be called from all and category
         // as it will merge streams positions discovered
         $provider = $this->createMock(EventStreamProvider::class);
-        $streamPosition = new StreamPosition($provider);
+        $streamPosition = new StreamManager($provider);
 
         $context = new Context();
         $context->fromStreams('stream1', 'stream2');
@@ -143,7 +143,7 @@ final class RefreshProjectionTest extends UnitTestCase
 
         $this->subscription
             ->expects($this->once())
-            ->method('streamPosition')
+            ->method('streamManager')
             ->willReturn($streamPosition);
     }
 }

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Chronicler\InMemory;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Stream\StreamName;
 use Illuminate\Support\Collection;
+
 use function in_array;
 use function is_null;
 use function is_string;
@@ -24,7 +25,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         $this->eventStreams = new Collection();
     }
 
-    public function createStream(string $streamName, ?string $streamTable, ?string $category = null): bool
+    public function createStream(string $streamName, ?string $streamTable, string $category = null): bool
     {
         if ($this->eventStreams->has($streamName)) {
             return false;
@@ -69,7 +70,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
     public function allWithoutInternal(): array
     {
         return $this->eventStreams->filter(
-            static fn (?string $category, string $streamName) => ! str_starts_with($streamName, '$')
+            static fn (?string $category, string $streamName) => ! str_starts_with($streamName, self::INTERNAL_STREAM_PREFIX)
         )->keys()->toArray();
     }
 

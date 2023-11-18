@@ -17,7 +17,7 @@ final class RefreshProjection
 
         $queries = $subscription->context()->queries();
 
-        $subscription->streamPosition()->watch($queries);
+        $subscription->streamManager()->watchStreams($queries);
 
         return $next($subscription);
     }

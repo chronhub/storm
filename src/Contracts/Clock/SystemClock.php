@@ -17,7 +17,7 @@ interface SystemClock extends ClockInterface
     public function format(string|DateTimeImmutable $pointInTime): string;
 
     /**
-     * Compare now datetime greater than given point in time.
+     * Compare datetime greater than given point in time.
      */
     public function isGreaterThan(string|DateTimeImmutable $pointInTime, string|DateTimeImmutable $anotherPointInTime): bool;
 

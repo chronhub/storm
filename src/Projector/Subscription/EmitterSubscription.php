@@ -6,34 +6,14 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
 use Chronhub\Storm\Stream\StreamName;
 
 final class EmitterSubscription extends AbstractPersistentSubscription implements EmitterSubscriptionInterface
 {
+    private Chronicler $chronicler;
+
     private bool $streamFixed = false;
-
-    public function __construct(
-        ProjectionRepositoryInterface $repository,
-        ProjectionOption $option,
-        StreamPosition $streamPosition,
-        EventCounter $eventCounter,
-        StreamGapManager $gap,
-        SystemClock $clock,
-        private readonly Chronicler $chronicler
-    ) {
-        parent::__construct($option, $streamPosition, $clock);
-
-        $this->repository = $repository;
-        $this->eventCounter = $eventCounter;
-        $this->gap = $gap;
-    }
 
     public function revise(): void
     {
@@ -68,6 +48,11 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
     public function unfix(): void
     {
         $this->streamFixed = false;
+    }
+
+    public function setChronicler(Chronicler $chronicler): void
+    {
+        $this->chronicler = $chronicler;
     }
 
     private function deleteStream(): void

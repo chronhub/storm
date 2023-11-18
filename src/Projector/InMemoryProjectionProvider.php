@@ -72,14 +72,16 @@ final class InMemoryProjectionProvider implements ProjectionProvider
 
     public function deleteProjection(string $projectionName): bool
     {
-        $this->assertProjectionExists($projectionName);
+        if (! $this->exists($projectionName)) {
+            throw ProjectionNotFound::withName($projectionName);
+        }
 
         $this->projections->forget($projectionName);
 
         return true;
     }
 
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil, string $datetime): bool
+    public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool
     {
         $projection = $this->retrieve($projectionName);
 
@@ -87,7 +89,7 @@ final class InMemoryProjectionProvider implements ProjectionProvider
             throw ProjectionNotFound::withName($projectionName);
         }
 
-        if ($this->shouldUpdateLock($projection, $datetime)) {
+        if ($this->shouldUpdateLock($projection)) {
             $projection->setStatus($status);
 
             $projection->setLockedUntil($lockedUntil);
@@ -115,30 +117,23 @@ final class InMemoryProjectionProvider implements ProjectionProvider
         return $this->projections->has($projectionName);
     }
 
-    private function shouldUpdateLock(ProjectionModel $projection, string $currentTime): bool
+    private function shouldUpdateLock(ProjectionModel $projection): bool
     {
         if ($projection->lockedUntil() === null) {
             return true;
         }
 
-        return $this->clock->isGreaterThan($currentTime, $projection->lockedUntil());
-    }
-
-    private function assertProjectionExists(string $projectionName): void
-    {
-        if (! $this->exists($projectionName)) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
+        return $this->clock->isGreaterThanNow($projection->lockedUntil());
     }
 
     private function assertFieldsExist(array $data, string $name): void
     {
-        foreach (array_keys($data) as $key) {
-            if (! in_array($key, self::FIELDS, true)) {
+        collect(array_keys($data))
+            ->diff(self::FIELDS)
+            ->whenNotEmpty(function (Collection $invalidFields) use ($name) {
                 throw new InvalidArgumentException(
-                    "Invalid projection field $key for projection $name"
+                    'Invalid projection field(s) ['.$invalidFields->implode(', ')."] for projection $name"
                 );
-            }
-        }
+            });
     }
 }

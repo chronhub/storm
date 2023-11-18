@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -22,8 +23,8 @@ use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Repository\ProjectionRepository;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 use function array_merge;
 
@@ -43,46 +44,52 @@ abstract class AbstractSubscriptionFactory
 
     public function createQuerySubscription(array $options = []): Subscription
     {
+        $options = $this->createOption($options);
+
         return new QuerySubscription(
-            $this->createOption($options),
-            $this->createStreamPosition(),
+            $options,
+            $this->createStreamPosition($options),
             $this->clock
         );
     }
 
     public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
     {
-        $arguments = $this->createPersistentSubscription($streamName, null, $options);
+        $arguments = $this->createPersistentSubscription($streamName, $options);
 
-        return new EmitterSubscription(...$arguments);
+        $subscription = new EmitterSubscription(...$arguments);
+
+        $subscription->setChronicler($this->chronicler);
+
+        return $subscription;
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
     {
-        $arguments = $this->createPersistentSubscription($streamName, $readModel, $options);
+        $arguments = $this->createPersistentSubscription($streamName, $options);
 
-        return new ReadModelSubscription(...$arguments);
+        $subscription = new ReadModelSubscription(...$arguments);
+
+        $subscription->setReadModel($readModel);
+
+        return $subscription;
     }
 
-    public function createContextBuilder(): Context
+    public function createContextBuilder(): ContextInterface
     {
-        // fixMe do we need a context interface?
         return new Context();
     }
 
-    protected function createPersistentSubscription(string $streamName, ?ReadModel $readModel, array $options = []): array
+    protected function createPersistentSubscription(string $streamName, array $options = []): array
     {
         $projectionOption = $this->createOption($options);
-        $streamPosition = $this->createStreamPosition();
 
         return [
-            $this->createSubscriptionManagement($streamName, $projectionOption),
             $projectionOption,
-            $streamPosition,
-            $this->createEventCounter($projectionOption),
-            $this->createGapDetector($streamPosition, $projectionOption),
+            $this->createStreamPosition($projectionOption),
             $this->clock,
-            $readModel ?? $this->chronicler,
+            $this->createSubscriptionManagement($streamName, $projectionOption),
+            $this->createEventCounter($projectionOption),
         ];
     }
 
@@ -112,19 +119,14 @@ abstract class AbstractSubscriptionFactory
         return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createGapDetector(StreamPosition $streamPosition, ProjectionOption $options): StreamGapManager
+    protected function createStreamPosition(ProjectionOption $options): StreamManager
     {
-        return new StreamGapManager(
-            $streamPosition,
+        return new StreamManager(
+            new EventStreamLoader($this->eventStreamProvider),
             $this->clock,
             $options->getRetries(),
             $options->getDetectionWindows()
         );
-    }
-
-    protected function createStreamPosition(): StreamPosition
-    {
-        return new StreamPosition($this->eventStreamProvider);
     }
 
     protected function createEventCounter(ProjectionOption $options): EventCounter

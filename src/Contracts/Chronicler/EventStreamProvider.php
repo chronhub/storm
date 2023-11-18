@@ -8,13 +8,15 @@ use Chronhub\Storm\Stream\StreamName;
 
 interface EventStreamProvider
 {
+    final public const INTERNAL_STREAM_PREFIX = '$';
+
     /**
      * Create new stream
      *
      * @param non-empty-string      $streamName
      * @param non-empty-string|null $category
      */
-    public function createStream(string $streamName, ?string $streamTable, ?string $category = null): bool;
+    public function createStream(string $streamName, ?string $streamTable, string $category = null): bool;
 
     /**
      * Delete stream by name
@@ -38,7 +40,7 @@ interface EventStreamProvider
     public function filterByAscendantCategories(array $categoryNames): array;
 
     /**
-     * Filter streams without internal streams which start with dollar sign "$"
+     * Filter streams without internal streams which start with INTERNAL_STREAM_PREFIX
      *
      * @return array<string>
      */

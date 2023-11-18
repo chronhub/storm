@@ -22,7 +22,7 @@ use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
@@ -51,7 +51,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
             new DetermineStreamCategory()
         );
 
-        $streamPosition = new StreamPosition($eventStore);
+        $streamPosition = new StreamManager($eventStore);
 
         $this->subscription = new EmitterSubscription(
             $this->createMock(ProjectionRepositoryInterface::class),
@@ -84,11 +84,11 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
         $this->chronicler->firstCommit($firstStream);
         $this->chronicler->firstCommit($secondStream);
 
-        $this->subscription->streamPosition()->bind('first_stream', 6);
-        $this->subscription->streamPosition()->bind('second_stream', 0);
+        $this->subscription->streamManager()->bind('first_stream', 6);
+        $this->subscription->streamManager()->bind('second_stream', 0);
 
-        $this->assertSame(6, $this->subscription->streamPosition()->all()['first_stream']);
-        $this->assertSame(0, $this->subscription->streamPosition()->all()['second_stream']);
+        $this->assertSame(6, $this->subscription->streamManager()->jsonSerialize()['first_stream']);
+        $this->assertSame(0, $this->subscription->streamManager()->jsonSerialize()['second_stream']);
         $this->assertNull($this->subscription->currentStreamName);
 
         $context = new Context();
@@ -117,8 +117,8 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
         $this->assertSame(0, $countEvents);
         $this->assertSame('first_stream', $this->subscription->currentStreamName);
 
-        $this->assertSame(6, $this->subscription->streamPosition()->all()['first_stream']);
-        $this->assertSame(0, $this->subscription->streamPosition()->all()['second_stream']);
+        $this->assertSame(6, $this->subscription->streamManager()->jsonSerialize()['first_stream']);
+        $this->assertSame(0, $this->subscription->streamManager()->jsonSerialize()['second_stream']);
     }
 
     private function dummyQueryFilter(): InMemoryQueryFilter|ProjectionQueryFilter

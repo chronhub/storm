@@ -21,7 +21,7 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\AbstractPersistentSubscription;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
@@ -40,7 +40,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     protected DefaultProjectionOption $options;
 
-    protected StreamPosition $position;
+    protected StreamManager $position;
 
     protected EventCounter $eventCounter;
 
@@ -52,7 +52,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     {
         $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
         $this->options = new DefaultProjectionOption();
-        $this->position = new StreamPosition(new InMemoryEventStream());
+        $this->position = new StreamManager(new InMemoryEventStream());
         $this->clock = new PointInTime();
         $this->eventCounter = new EventCounter(100);
         $this->gap = new StreamGapManager($this->position, $this->clock, []);
@@ -81,12 +81,12 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             [['stream_name' => 25], ['counter' => 100]]
         );
 
-        $this->assertEquals([], $subscription->streamPosition()->all());
+        $this->assertEquals([], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 0], $subscription->state()->get());
 
         $subscription->rise();
 
-        $this->assertEquals(['stream_name' => 25], $subscription->streamPosition()->all());
+        $this->assertEquals(['stream_name' => 25], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 100], $subscription->state()->get());
 
         $this->assertEquals(ProjectionStatus::RUNNING, $subscription->currentStatus());
@@ -163,12 +163,12 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             [['stream_name' => 25], ['counter' => 100]]
         );
 
-        $this->assertEquals([], $subscription->streamPosition()->all());
+        $this->assertEquals([], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 0], $subscription->state()->get());
 
         $subscription->refreshDetail();
 
-        $this->assertEquals(['stream_name' => 25], $subscription->streamPosition()->all());
+        $this->assertEquals(['stream_name' => 25], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 100], $subscription->state()->get());
     }
 
@@ -179,17 +179,17 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $subscription = $this->newSubscription();
         $subscription->compose($context, $this->caster, false);
 
-        $subscription->streamPosition()->bind('stream_name', 25);
+        $subscription->streamManager()->bind('stream_name', 25);
 
         $this->repository
             ->expects($this->once())
-            ->method('updateLock')
+            ->method('attemptUpdateLockAndStreamPositions')
             ->with(['stream_name' => 25])
             ->willReturn(true);
 
         $subscription->renew();
 
-        $this->assertEquals(['stream_name' => 25], $subscription->streamPosition()->all());
+        $this->assertEquals(['stream_name' => 25], $subscription->streamManager()->jsonSerialize());
     }
 
     public function testFreed(): void
@@ -334,7 +334,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     {
         $this->assertEquals(ProjectionStatus::IDLE, $subscription->currentStatus());
         $this->assertSame(['counter' => 0], $subscription->state()->get());
-        $this->assertSame([], $subscription->streamPosition()->all());
+        $this->assertSame([], $subscription->streamManager()->jsonSerialize());
     }
 
     abstract protected function defineSubscriptionType(): MockObject|ReadModel|Chronicler;

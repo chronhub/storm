@@ -43,15 +43,7 @@ class LockManager
     {
         $now = $this->clock->now();
 
-        if (! $this->lastLock instanceof DateTimeImmutable || $this->lockThreshold === 0) {
-            $this->lastLock = $now;
-
-            return true;
-        }
-
-        $updateLockThreshold = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
-
-        if ($updateLockThreshold <= $now) {
+        if ($this->shouldUpdateLockWithThreshold($now)) {
             $this->lastLock = $now;
 
             return true;
@@ -101,5 +93,16 @@ class LockManager
         $this->lastLock = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
 
         return $this->current();
+    }
+
+    private function shouldUpdateLockWithThreshold(DateTimeImmutable $currentTime): bool
+    {
+        if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
+            return true;
+        }
+
+        $incrementedLock = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
+
+        return $this->clock->isGreaterThan($incrementedLock, $currentTime);
     }
 }

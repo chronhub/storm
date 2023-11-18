@@ -6,13 +6,14 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use JsonSerializable;
+
 use function array_fill;
 use function in_array;
 
 final class StreamCache implements JsonSerializable
 {
     /**
-     * @var array<int, string|null>
+     * @var array<int,string|null>
      */
     private array $container = [];
 
@@ -29,6 +30,8 @@ final class StreamCache implements JsonSerializable
 
     public function push(string $streamName): void
     {
+        $this->validateUniqueStream($streamName);
+
         $this->position = ++$this->position % $this->cacheSize;
 
         $this->container[$this->position] = $streamName;
@@ -42,5 +45,12 @@ final class StreamCache implements JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->container;
+    }
+
+    private function validateUniqueStream(string $streamName): void
+    {
+        if ($this->has($streamName)) {
+            throw new InvalidArgumentException("Stream $streamName is already in the cache");
+        }
     }
 }

@@ -29,12 +29,12 @@ abstract readonly class AbstractEventProcessor
         // if it does not, we return early to store what we have and sleep before the next run
         // and so on, till a gap is detected and provide retries
         if ($subscription instanceof PersistentSubscriptionInterface) {
-            if ($subscription->gap()->detect($streamName, $position, $event->header(Header::EVENT_TIME))) {
+            if ($subscription->streamManager()->detectGap($streamName, $position, $event->header(Header::EVENT_TIME))) {
                 return false;
             }
         }
 
-        $subscription->streamPosition()->bind($streamName, $position);
+        $subscription->streamManager()->bind($streamName, $position);
 
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->eventCounter()->increment();

@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\AbstractSubscription;
 use Chronhub\Storm\Tests\Unit\Projector\Stubs\SubscriptionStub;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -24,14 +24,14 @@ final class SubscriptionTest extends UnitTestCase
 {
     private DefaultProjectionOption $options;
 
-    private StreamPosition $position;
+    private StreamManager $position;
 
     private PointInTime $clock;
 
     protected function setUp(): void
     {
         $this->options = new DefaultProjectionOption();
-        $this->position = new StreamPosition(
+        $this->position = new StreamManager(
             new InMemoryEventStream()
         );
         $this->clock = new PointInTime();
@@ -44,7 +44,7 @@ final class SubscriptionTest extends UnitTestCase
         $this->assertInstanceOf(AbstractSubscription::class, $stub);
         $this->assertNull($stub->currentStreamName);
         $this->assertEquals(ProjectionStatus::IDLE, $stub->currentStatus());
-        $this->assertInstanceOf(StreamPosition::class, $stub->streamPosition());
+        $this->assertInstanceOf(StreamManager::class, $stub->streamManager());
         $this->assertInstanceOf(PointInTime::class, $stub->clock());
         $this->assertInstanceOf(ProjectionState::class, $stub->state());
         $this->assertInstanceOf(DefaultProjectionOption::class, $stub->option());

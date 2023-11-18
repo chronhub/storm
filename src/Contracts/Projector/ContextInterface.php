@@ -42,6 +42,7 @@ interface ContextInterface extends ContextReader
 
     /**
      * Sets the query filter to filter events.
+     *
      * A Projection query filter is mandatory when
      * the projection is persistent
      */

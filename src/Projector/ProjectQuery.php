@@ -44,7 +44,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function reset(): void
     {
-        $this->subscription->streamPosition()->reset();
+        $this->subscription->streamManager()->reset();
 
         $this->subscription->initializeAgain();
     }

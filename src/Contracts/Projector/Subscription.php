@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 interface Subscription
 {
@@ -59,7 +59,7 @@ interface Subscription
     /**
      * Get the stream position instance.
      */
-    public function streamPosition(): StreamPosition;
+    public function streamManager(): StreamManager;
 
     /**
      * Get the system clock of the subscription.

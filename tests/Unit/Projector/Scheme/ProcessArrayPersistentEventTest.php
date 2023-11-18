@@ -25,7 +25,7 @@ final class ProcessArrayPersistentEventTest extends ProcessPersistentEventTestCa
             ->withHeader(EventHeader::AGGREGATE_VERSION, 1)
             ->withHeader(Header::EVENT_TIME, $this->clock->now());
 
-        $this->subscription->streamPosition()->bind('test_stream', 0);
+        $this->subscription->streamManager()->bind('test_stream', 0);
 
         $this->subscription->currentStreamName = 'test_stream';
 

@@ -43,8 +43,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function startAgain(): bool
     {
-        return $this->provider->updateProjection(
-            $this->streamName,
+        return $this->provider->updateProjection($this->streamName,
             [
                 'status' => ProjectionStatus::RUNNING->value,
                 'locked_until' => $this->lockManager->acquire(),
@@ -54,8 +53,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function persist(ProjectionDetail $projectionDetail): bool
     {
-        return $this->provider->updateProjection(
-            $this->streamName,
+        return $this->provider->updateProjection($this->streamName,
             array_merge(
                 $this->encodeProjectionDetail($projectionDetail),
                 ['locked_until' => $this->lockManager->refresh()]
@@ -65,8 +63,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool
     {
-        return $this->provider->updateProjection(
-            $this->streamName,
+        return $this->provider->updateProjection($this->streamName,
             array_merge(
                 $this->encodeProjectionDetail($projectionDetail),
                 ['status' => $currentStatus->value]
@@ -110,17 +107,14 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         return $this->provider->acquireLock(
             $this->streamName,
             ProjectionStatus::RUNNING->value,
-            // todo fix this
             $this->lockManager->acquire(),
-            $this->lockManager->current(),
         );
     }
 
-    public function updateLock(array $streamPositions): bool
+    public function attemptUpdateLockAndStreamPositions(array $streamPositions): bool
     {
         if ($this->lockManager->tryUpdate()) {
-            return $this->provider->updateProjection(
-                $this->streamName,
+            return $this->provider->updateProjection($this->streamName,
                 [
                     'position' => $this->serializer->encode($streamPositions),
                     'locked_until' => $this->lockManager->increment(),
@@ -133,8 +127,7 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
 
     public function releaseLock(): bool
     {
-        return $this->provider->updateProjection(
-            $this->streamName,
+        return $this->provider->updateProjection($this->streamName,
             [
                 'status' => ProjectionStatus::IDLE->value,
                 'locked_until' => null,

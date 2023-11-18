@@ -18,7 +18,7 @@ final class PrepareQueryRunner
 
             $queries = $subscription->context()->queries();
 
-            $subscription->streamPosition()->watch($queries);
+            $subscription->streamManager()->watchStreams($queries);
         }
 
         return $next($subscription);

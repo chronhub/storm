@@ -72,6 +72,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     public function testExceptionRaisedOnUpdateProjectionWithInvalidField(): void
     {
         $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid projection field(s) [invalid_field] for projection projection1');
 
         $this->projectionProvider->createProjection('projection1', 'status1');
 
@@ -98,7 +99,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
     {
         $this->projectionProvider->createProjection('projection1', 'status1');
 
-        $this->assertTrue($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2', '2023-04-03 15:00:00'));
+        $this->assertTrue($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2'));
     }
 
     public function testExceptionRaisedWhenAcquireLockOnProjectionNotFound(): void
@@ -107,21 +108,7 @@ final class InMemoryProjectionProviderTest extends UnitTestCase
 
         $this->projectionProvider->createProjection('projection1', 'status1');
 
-        $this->projectionProvider->acquireLock('projection2', 'status2', 'locked_until2', '2023-04-03 15:00:00');
-    }
-
-    public function testDoesNotAcquireLockWhenCurrentTimeIsGreaterThanLock(): void
-    {
-        $this->clock
-            ->expects($this->once())
-            ->method('isGreaterThan')
-            ->with('2024-04-03 15:00:00', 'locked_until2')
-            ->willReturn(false);
-
-        $this->projectionProvider->createProjection('projection1', 'status1');
-
-        $this->assertTrue($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2', '2024-04-03 15:00:00'));
-        $this->assertFalse($this->projectionProvider->acquireLock('projection1', 'status2', 'locked_until2', '2024-04-03 15:00:00'));
+        $this->projectionProvider->acquireLock('projection2', 'status2', 'locked_until2');
     }
 
     public function testRetrieve(): void

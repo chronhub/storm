@@ -4,22 +4,29 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapManager;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 use function in_array;
 
 abstract class AbstractPersistentSubscription extends AbstractSubscription implements PersistentSubscriptionInterface
 {
-    protected ProjectionRepositoryInterface $repository;
+    public function __construct(
+        ProjectionOption $option,
+        StreamManager $streamManager,
+        SystemClock $clock,
+        protected ProjectionRepositoryInterface $repository,
+        protected EventCounter $eventCounter,
 
-    protected EventCounter $eventCounter;
-
-    protected StreamGapManager $gap;
+    ) {
+        parent::__construct($option, $streamManager, $clock);
+    }
 
     public function rise(): void
     {
@@ -79,7 +86,7 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamPosition->discover($projectionDetail->streamPositions);
+        $this->streamManager->discoverStreams($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
@@ -87,12 +94,12 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
             $this->state->put($state);
         }
 
-        $this->gap->mergeGaps($this->currentStreamName(), $projectionDetail->streamGaps);
+        $this->streamManager->mergeGaps($projectionDetail->streamGaps);
     }
 
     public function renew(): void
     {
-        $this->repository->updateLock($this->streamPosition->all());
+        $this->repository->attemptUpdateLockAndStreamPositions($this->streamManager->jsonSerialize());
     }
 
     public function freed(): void
@@ -117,11 +124,6 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
         return $this->eventCounter;
     }
 
-    public function gap(): StreamGapManager
-    {
-        return $this->gap;
-    }
-
     protected function mountProjection(): void
     {
         $this->sprint()->continue();
@@ -137,16 +139,14 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
 
     protected function discoverStreams(): void
     {
-        $this->streamPosition()->watch($this->context()->queries());
+        $this->streamManager()->watchStreams($this->context()->queries());
 
         $this->refreshDetail();
     }
 
     protected function resetProjection(): void
     {
-        $this->streamPosition()->reset();
-
-        $this->gap()->resetGaps();
+        $this->streamManager()->resets();
 
         $this->initializeAgain();
     }
@@ -154,9 +154,9 @@ abstract class AbstractPersistentSubscription extends AbstractSubscription imple
     protected function getProjectionDetail(): ProjectionDetail
     {
         return new ProjectionDetail(
-            $this->streamPosition->all(),
+            $this->streamManager->jsonSerialize(),
             $this->state->get(),
-            $this->gap->getConfirmedGaps($this->currentStreamName()),
+            $this->streamManager->confirmedGaps(),
         );
     }
 }

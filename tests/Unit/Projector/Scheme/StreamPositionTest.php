@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(StreamPosition::class)]
+#[CoversClass(StreamManager::class)]
 final class StreamPositionTest extends UnitTestCase
 {
     private EventStreamProvider|MockObject $eventStreamProvider;
@@ -27,20 +27,20 @@ final class StreamPositionTest extends UnitTestCase
 
     public function testInstance(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $this->assertEmpty($streamPosition->all());
+        $this->assertEmpty($streamPosition->jsonSerialize());
     }
 
     public function testWatchStreams(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $this->assertEmpty($streamPosition->all());
+        $this->assertEmpty($streamPosition->jsonSerialize());
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->all());
+        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
     }
 
     public function testDiscoverAllStreams(): void
@@ -49,11 +49,11 @@ final class StreamPositionTest extends UnitTestCase
             ->method('allWithoutInternal')
             ->willReturn(['customer', 'account']);
 
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['all' => true]);
+        $streamPosition->watchStreams(['all' => true]);
 
-        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->all());
+        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
     }
 
     public function testDiscoverCategoryStreams(): void
@@ -63,20 +63,20 @@ final class StreamPositionTest extends UnitTestCase
             ->with(['account', 'customer'])
             ->willReturn(['customer-123', 'account-123']);
 
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['categories' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['categories' => ['account', 'customer']]);
 
-        $this->assertEquals(['customer-123' => 0, 'account-123' => 0], $streamPosition->all());
+        $this->assertEquals(['customer-123' => 0, 'account-123' => 0], $streamPosition->jsonSerialize());
     }
 
     public function testDiscoverStreamNames(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->all());
+        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
     }
 
     #[DataProvider('provideInvalidStreamsNames')]
@@ -86,57 +86,57 @@ final class StreamPositionTest extends UnitTestCase
 
         $this->expectExceptionMessage('Stream names can not be empty');
 
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch($streamNames);
+        $streamPosition->watchStreams($streamNames);
     }
 
     public function testMergeDiscoverStreamNameWithCurrentStreamPositions(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->all());
+        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
 
-        $streamPosition->discover(['account' => 25, 'customer' => 25]);
+        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25]);
 
-        $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->all());
+        $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->jsonSerialize());
     }
 
     public function testMergeDiscoverNewStreamWithCurrentStreamPositions(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discover(['account' => 25, 'customer' => 25, 'passwords' => 10]);
+        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25, 'passwords' => 10]);
 
-        $this->assertEquals(['customer' => 25, 'account' => 25, 'passwords' => 10], $streamPosition->all());
+        $this->assertEquals(['customer' => 25, 'account' => 25, 'passwords' => 10], $streamPosition->jsonSerialize());
     }
 
     public function testBindStreamPosition(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discover(['account' => 25, 'customer' => 25]);
+        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25]);
 
-        $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->all());
+        $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->jsonSerialize());
 
         $streamPosition->bind('account', 26);
 
-        $this->assertEquals(['customer' => 25, 'account' => 26], $streamPosition->all());
+        $this->assertEquals(['customer' => 25, 'account' => 26], $streamPosition->jsonSerialize());
     }
 
     public function testHasNextPosition(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discover(['account' => 25, 'customer' => 20]);
+        $streamPosition->discoverStreams(['account' => 25, 'customer' => 20]);
 
         $this->assertTrue($streamPosition->hasNextPosition('account', 26));
         $this->assertFalse($streamPosition->hasNextPosition('account', 27));
@@ -146,22 +146,22 @@ final class StreamPositionTest extends UnitTestCase
 
     public function testResetStreamPositions(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->all());
+        $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
 
         $streamPosition->reset();
 
-        $this->assertEquals([], $streamPosition->all());
+        $this->assertEquals([], $streamPosition->jsonSerialize());
     }
 
-    public function testItCanBeJsonSerializedToArray(): void
+    public function testCanBeJsonSerialized(): void
     {
-        $streamPosition = new StreamPosition($this->eventStreamProvider);
+        $streamPosition = new StreamManager($this->eventStreamProvider);
 
-        $streamPosition->watch(['names' => ['account', 'customer']]);
+        $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
         $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
     }

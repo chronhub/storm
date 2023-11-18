@@ -8,7 +8,7 @@ use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -23,19 +23,19 @@ final class PrepareQueryRunnerTest extends UnitTestCase
         $context->fromStreams('stream_1', 'stream_2');
 
         $subscription->expects($this->once())->method('context')->willReturn($context);
-        $streamPosition = new StreamPosition(new InMemoryEventStream());
+        $streamPosition = new StreamManager(new InMemoryEventStream());
         $streamPosition->bind('stream_1', 10);
         $streamPosition->bind('stream_2', 100);
 
         $subscription
             ->expects($this->exactly(2))
-            ->method('streamPosition')
+            ->method('streamManager')
             ->willReturn($streamPosition);
 
         $next = function (Subscription $subscription) {
             $this->assertSame(
                 ['stream_1' => 10, 'stream_2' => 100],
-                $subscription->streamPosition()->all()
+                $subscription->streamManager()->jsonSerialize()
             );
 
             return true;

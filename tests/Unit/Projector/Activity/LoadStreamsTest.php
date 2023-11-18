@@ -12,14 +12,15 @@ use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
-use Chronhub\Storm\Stream\StreamName;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+
+use function count;
 
 #[CoversClass(LoadStreams::class)]
 final class LoadStreamsTest extends UnitTestCase
@@ -30,7 +31,7 @@ final class LoadStreamsTest extends UnitTestCase
 
     private ContextInterface|MockObject $context;
 
-    private StreamPosition $streamPosition;
+    private StreamManager $streamPosition;
 
     protected function setUp(): void
     {
@@ -39,62 +40,33 @@ final class LoadStreamsTest extends UnitTestCase
         $this->subscription = $this->createMock(Subscription::class);
         $this->chronicler = $this->createMock(Chronicler::class);
         $this->context = $this->createMock(ContextInterface::class);
-        $this->streamPosition = new StreamPosition(new InMemoryEventStream());
+        $this->streamPosition = new StreamManager(new InMemoryEventStream());
     }
 
     public function testLoadStreamsFromQueryFilter(): void
     {
-        $this->streamPosition->bind('foo', 0);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('streamPosition')
-            ->willReturn($this->streamPosition);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('context')
-            ->willReturn($this->context);
+        $this->prepareStreamPosition('stream2', 0);
 
         $this->context
             ->expects($this->once())
             ->method('queryFilter')
             ->willReturn($this->createMock(QueryFilter::class));
 
-        $this->chronicler
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->willReturnCallback(static function (): Generator {
-                yield SomeEvent::fromContent(['foo' => 'bar']);
-
-                return 1;
-            });
+        $this->chronicler->expects($this->once())->method('retrieveFiltered')->willReturn($this->provideEventStream(['name' => 'steph']));
 
         $loadStreams = new LoadStreams($this->chronicler);
 
         $iterator = $loadStreams->batch(
-            $this->subscription->streamPosition()->all(),
+            $this->subscription->streamManager()->jsonSerialize(),
             $this->subscription->context()->queryFilter()
         );
 
-        $this->assertSame(SortStreamIterator::class, $iterator::class);
-        $this->assertSame('foo', $iterator->streamName());
-        $this->assertEquals(['foo' => 'bar'], $iterator->current()->toContent());
+        $this->assertStreamIterator($iterator, 'stream2', ['name' => 'steph']);
     }
 
     public function testLoadStreamsFromProjectionQueryFilter(): void
     {
-        $this->streamPosition->bind('foo', 0);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('streamPosition')
-            ->willReturn($this->streamPosition);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('context')
-            ->willReturn($this->context);
+        $this->prepareStreamPosition('stream1', 0);
 
         $projectionQueryFilter = $this->createMock(ProjectionQueryFilter::class);
         $projectionQueryFilter
@@ -102,85 +74,84 @@ final class LoadStreamsTest extends UnitTestCase
             ->method('setCurrentPosition')
             ->with(1);
 
-        $this->context
-            ->expects($this->once())
-            ->method('queryFilter')
-            ->willReturn($projectionQueryFilter);
+        $this->context->expects($this->once())->method('queryFilter')->willReturn($projectionQueryFilter);
 
-        $this->chronicler
-            ->expects($this->once())
-            ->method('retrieveFiltered')
-            ->willReturnCallback(static function (): Generator {
-                yield SomeEvent::fromContent(['foo' => 'bar']);
-                yield SomeEvent::fromContent(['baz' => 'bar']);
-
-                return 2;
-            });
+        $this->chronicler->expects($this->once())->method('retrieveFiltered')
+            ->willReturn($this->provideEventStream(['foo' => 'bar'], ['baz' => 'bar']));
 
         $loadStreams = new LoadStreams($this->chronicler);
 
-        $iterator = $loadStreams->batch($this->subscription);
+        $iterator = $loadStreams->batch(
+            $this->subscription->streamManager()->jsonSerialize(),
+            $this->subscription->context()->queryFilter()
+        );
 
-        $this->assertSame(SortStreamIterator::class, $iterator::class);
-        $this->assertSame('foo', $iterator->streamName());
-        $this->assertEquals(['foo' => 'bar'], $iterator->current()->toContent());
+        $this->assertStreamIterator($iterator, 'stream1', ['foo' => 'bar']);
 
         $iterator->next();
 
-        $this->assertEquals(['baz' => 'bar'], $iterator->current()->toContent());
+        $this->assertStreamIterator($iterator, 'stream1', ['baz' => 'bar']);
     }
 
     public function testCatchStreamNotFoundAndIterateOverNextStream(): void
     {
-        $this->streamPosition->bind('foo', 0);
-        $this->streamPosition->bind('bar', 5);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('streamPosition')
-            ->willReturn($this->streamPosition);
-
-        $this->subscription
-            ->expects($this->once())
-            ->method('context')
-            ->willReturn($this->context);
+        $this->prepareStreamPosition('stream1', 0);
+        $this->prepareStreamPosition('stream2', 5);
 
         $projectionQueryFilter = $this->createMock(ProjectionQueryFilter::class);
-        $projectionQueryFilter
-            ->expects($this->exactly(2))
-            ->method('setCurrentPosition')
-            ->will($this->onConsecutiveCalls(1, 6)); //fixMe and complete with different values
 
-        $this->context
-            ->expects($this->once())
-            ->method('queryFilter')
-            ->willReturn($projectionQueryFilter);
+        $projectionQueryFilter->expects($this->exactly(2))->method('setCurrentPosition')
+            ->willReturnOnConsecutiveCalls(1, 6); // positions + 1
 
-        $this->chronicler
-            ->expects($this->exactly(2))
-            ->method('retrieveFiltered')
+        $this->context->expects($this->once())->method('queryFilter')->willReturn($projectionQueryFilter);
+
+        $this->chronicler->expects($this->exactly(2))->method('retrieveFiltered')
             ->willReturnOnConsecutiveCalls(
-               $this->returnCallback(fn () => $this->provideException()),
-               $this->returnCallback(fn () => $this->provideEvent()),
+                $this->provideStreamNotFound(),
+                $this->provideEventStream(['bar' => 'bar']),
             );
 
         $loadStreams = new LoadStreams($this->chronicler);
 
-        $iterator = $loadStreams->batch($this->subscription);
+        $iterator = $loadStreams->batch(
+            $this->subscription->streamManager()->jsonSerialize(),
+            $this->subscription->context()->queryFilter()
+        );
 
-        $this->assertInstanceOf(SortStreamIterator::class, $iterator);
-        $this->assertSame('bar', $iterator->streamName());
+        $this->assertInstanceOf(MergeStreamIterator::class, $iterator);
+        $this->assertSame('stream2', $iterator->streamName());
     }
 
-    private function provideEvent(): Generator
+    private function prepareStreamPosition(string $streamName, int $position): void
     {
-        yield SomeEvent::fromContent(['foo' => 'bar']);
+        $this->streamPosition->bind($streamName, $position);
 
-        return 1;
+        $this->subscription->expects($this->once())->method('streamManager')->willReturn($this->streamPosition);
+
+        $this->subscription->expects($this->once())->method('context')->willReturn($this->context);
     }
 
-    private function provideException(): Generator
+    private function provideEventStream(array ...$data): Generator
     {
-        throw StreamNotFound::withStreamName(new StreamName('foo'));
+        foreach ($data as $content) {
+            yield SomeEvent::fromContent($content);
+        }
+
+        return count($data);
+    }
+
+    private function provideStreamNotFound(): Generator
+    {
+        yield throw new StreamNotFound('stream not found');
+    }
+
+    private function assertStreamIterator(
+        MergeStreamIterator $iterator,
+        string $expectedStreamName,
+        array $expectedEventContent
+    ): void {
+        $this->assertSame(MergeStreamIterator::class, $iterator::class);
+        $this->assertSame($expectedStreamName, $iterator->streamName());
+        $this->assertEquals($expectedEventContent, $iterator->current()->toContent());
     }
 }

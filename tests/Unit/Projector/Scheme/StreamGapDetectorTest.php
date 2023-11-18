@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Projector\Scheme\StreamPosition;
+use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,7 +17,7 @@ use function microtime;
 #[CoversClass(StreamGapManager::class)]
 final class StreamGapDetectorTest extends UnitTestCase
 {
-    private StreamPosition $streamPosition;
+    private StreamManager $streamPosition;
 
     private SystemClock|MockObject $clock;
 
@@ -30,7 +30,7 @@ final class StreamGapDetectorTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->streamPosition = new StreamPosition($this->createMock(EventStreamProvider::class));
+        $this->streamPosition = new StreamManager($this->createMock(EventStreamProvider::class));
         $this->clock = $this->createMock(SystemClock::class);
     }
 

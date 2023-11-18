@@ -13,7 +13,7 @@ final readonly class PersistOrUpdateLock
 {
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
-        if (! $subscription->gap()->hasGap()) {
+        if (! $subscription->streamManager()->hasGap()) {
             $subscription->eventCounter()->isReset()
                 ? $this->sleepBeforeUpdateLock($subscription)
                 : $subscription->store();

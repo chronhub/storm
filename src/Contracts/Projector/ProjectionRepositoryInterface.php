@@ -65,7 +65,7 @@ interface ProjectionRepositoryInterface
      * @param  array $streamPositions The stream positions to update the lock with.
      * @return bool  True if the operation was successful, false otherwise.
      */
-    public function updateLock(array $streamPositions): bool;
+    public function attemptUpdateLockAndStreamPositions(array $streamPositions): bool;
 
     /**
      * Releases the lock for the projection.
@@ -84,7 +84,6 @@ interface ProjectionRepositoryInterface
     /**
      * Loads the projection state and stream positions.
      *
-     * @return ProjectionDetail
      *
      * @throws ProjectionNotFound If the projection cannot be found in the repository.
      */

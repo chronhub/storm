@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 
 interface PersistentSubscriptionInterface extends Subscription
 {
@@ -78,9 +77,4 @@ interface PersistentSubscriptionInterface extends Subscription
      * Get the event counter instance.
      */
     public function eventCounter(): EventCounter;
-
-    /**
-     * Get the stream gap detector instance.
-     */
-    public function gap(): StreamGapManager;
 }

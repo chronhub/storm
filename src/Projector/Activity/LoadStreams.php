@@ -7,11 +7,12 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Projector\Iterator\SortStreamIterator;
-use Chronhub\Storm\Projector\Iterator\StreamEventIterator;
+use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
+use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Stream\StreamName;
+
 use function array_keys;
 use function array_values;
 
@@ -21,7 +22,7 @@ final readonly class LoadStreams
     {
     }
 
-    public function batch(array $streamPositions, QueryFilter $queryFilter): SortStreamIterator
+    public function batch(array $streamPositions, QueryFilter $queryFilter): MergeStreamIterator
     {
         $streams = [];
 
@@ -37,12 +38,12 @@ final readonly class LoadStreams
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
 
-                $streams[$streamName] = new StreamEventIterator($events);
+                $streams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;
             }
         }
 
-        return new SortStreamIterator(array_keys($streams), ...array_values($streams));
+        return new MergeStreamIterator(array_keys($streams), ...array_values($streams));
     }
 }
