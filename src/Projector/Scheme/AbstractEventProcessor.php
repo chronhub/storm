@@ -13,29 +13,27 @@ use function pcntl_signal_dispatch;
 
 abstract readonly class AbstractEventProcessor
 {
-    final protected function preProcess(
-        Subscription $subscription,
-        DomainEvent $event,
-        int $position): bool
+    final protected function preProcess(Subscription $subscription, DomainEvent $event, int $position): bool
     {
         if ($subscription->option()->getSignal()) {
             pcntl_signal_dispatch();
         }
 
         $streamName = $subscription->currentStreamName();
+        $eventTime = $subscription instanceof PersistentSubscriptionInterface ? $event->header(Header::EVENT_TIME) : false;
 
-        // for a persistent projection, we check if position match our internal cache
-        // if it does not, we return early to store what we have and sleep before the next run
-        // and so on, till a gap is detected and provide retries
-        if ($subscription instanceof PersistentSubscriptionInterface) {
-            if ($subscription->streamManager()->detectGap($streamName, $position, $event->header(Header::EVENT_TIME))) {
-                return false;
-            }
+        // only bind stream name to his position if no gap and no retry left
+        $isBound = $subscription->streamManager()->bind($streamName, $position, $eventTime);
 
-            $subscription->eventCounter()->increment();
+        if (! $isBound) {
+            return false;
         }
 
-        $subscription->streamManager()->bind($streamName, $position);
+        // increment event counter only if stream is bound and subscription is persistent
+        if ($eventTime !== false) {
+            /** @var PersistentSubscriptionInterface $subscription */
+            $subscription->eventCounter()->increment();
+        }
 
         return true;
     }

@@ -18,7 +18,7 @@ interface Subscription
     public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void;
 
     /**
-     * Initializes the subscription again, resetting its state.
+     * Reset to his original state.
      */
     public function initializeAgain(): void;
 

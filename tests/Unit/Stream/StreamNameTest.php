@@ -24,7 +24,6 @@ final class StreamNameTest extends UnitTestCase
         $streamName = new StreamName('some_stream_name');
 
         $this->assertEquals($streamName, $streamName->__toString());
-        $this->assertEquals($streamName, $streamName->toString());
         $this->assertEquals($streamName, (string) $streamName);
     }
 

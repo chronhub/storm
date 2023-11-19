@@ -30,7 +30,9 @@ final class StreamCache implements JsonSerializable
 
     public function push(string $streamName): void
     {
-        $this->validateUniqueStream($streamName);
+        if ($this->has($streamName)) {
+            throw new InvalidArgumentException("Stream $streamName is already in the cache");
+        }
 
         $this->position = ++$this->position % $this->cacheSize;
 
@@ -45,12 +47,5 @@ final class StreamCache implements JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->container;
-    }
-
-    private function validateUniqueStream(string $streamName): void
-    {
-        if ($this->has($streamName)) {
-            throw new InvalidArgumentException("Stream $streamName is already in the cache");
-        }
     }
 }

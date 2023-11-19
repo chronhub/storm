@@ -6,9 +6,6 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Illuminate\Support\Collection;
 
-use function array_fill_keys;
-use function array_values;
-
 class GapsCollection
 {
     /**
@@ -39,9 +36,9 @@ class GapsCollection
      */
     public function remove(int $eventPosition): void
     {
-        $isGapConfirmed = $this->gaps->get($eventPosition);
+        $gap = $this->gaps->get($eventPosition);
 
-        if ($isGapConfirmed === null) {
+        if ($gap === null) {
             return;
         }
 
@@ -59,9 +56,10 @@ class GapsCollection
             return;
         }
 
-        $confirmedGaps = array_fill_keys(array_values($streamGaps), true);
-
-        $this->gaps->merge($confirmedGaps);
+        // checkMe what happened if we already have a gap with unconfirmed status
+        foreach ($streamGaps as $streamGap) {
+            $this->gaps->put($streamGap, true);
+        }
     }
 
     /**
@@ -71,16 +69,11 @@ class GapsCollection
      */
     public function filterConfirmedGaps(): array
     {
-        $confirmedGaps = $this->gaps->filter(fn (bool $confirmed): bool => $confirmed);
+        $this->gaps = $this->gaps->reject(fn (bool $confirmed): bool => $confirmed === false);
 
-        $this->gaps = $confirmedGaps;
-
-        return $confirmedGaps->keys()->all();
+        return $this->gaps->keys()->values()->toArray();
     }
 
-    /**
-     * Return a clone of gaps collection
-     */
     public function all(): Collection
     {
         return clone $this->gaps;

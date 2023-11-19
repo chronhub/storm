@@ -51,7 +51,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
     {
         foreach ($streamNames as &$streamName) {
             if ($streamName instanceof StreamName) {
-                $streamName = $streamName->toString();
+                $streamName = $streamName->name;
             }
         }
 
