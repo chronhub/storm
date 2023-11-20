@@ -31,7 +31,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
         return $this->readModel;
     }
 
-    protected function getCaster(): ReadModelProjectorScopeInterface
+    protected function getScope(): ReadModelProjectorScopeInterface
     {
         return new ReadModelProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()

@@ -55,7 +55,7 @@ final readonly class ProjectEmitter implements EmitterProjector
             : $this->chronicler->firstCommit($stream);
     }
 
-    protected function getCaster(): EmitterProjectorScopeInterface
+    protected function getScope(): EmitterProjectorScopeInterface
     {
         return new EmitterProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()

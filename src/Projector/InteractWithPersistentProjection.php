@@ -22,7 +22,7 @@ trait InteractWithPersistentProjection
 {
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
+        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -71,5 +71,5 @@ trait InteractWithPersistentProjection
         return new Workflow($this->subscription, $activities);
     }
 
-    abstract protected function getCaster(): ProjectorScope;
+    abstract protected function getScope(): ProjectorScope;
 }
