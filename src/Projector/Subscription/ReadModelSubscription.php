@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
@@ -17,6 +18,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
         protected readonly GenericSubscription $subscription,
         protected readonly ProjectionRepositoryInterface $repository,
         protected readonly EventCounter $eventCounter,
+        protected readonly Chronicler $chronicler,
         private readonly ReadModel $readModel,
     ) {
     }

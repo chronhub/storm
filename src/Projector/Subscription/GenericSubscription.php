@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
@@ -36,6 +37,7 @@ final class GenericSubscription implements Subscription
         private readonly ProjectionOption $option,
         private readonly StreamManager $streamManager,
         private readonly SystemClock $clock,
+        private readonly Chronicler $chronicler
     ) {
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
@@ -115,6 +117,11 @@ final class GenericSubscription implements Subscription
     public function clock(): SystemClock
     {
         return $this->clock;
+    }
+
+    public function chronicler(): Chronicler
+    {
+        return $this->chronicler;
     }
 
     private function bindScope(ProjectorScope $projectionScope): void

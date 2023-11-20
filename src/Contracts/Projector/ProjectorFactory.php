@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateInterval;
 
-/**
- * @template-covariant TItem of DomainEvent|object
- */
 interface ProjectorFactory extends Projector
 {
     /**
@@ -19,7 +15,7 @@ interface ProjectorFactory extends Projector
      *
      * @see ContextInterface::initialize()
      */
-    public function initialize(Closure $initCallback): static;
+    public function initialize(Closure $userState): static;
 
     /**
      * Proxy method to set the streams to fetch events from.
@@ -44,12 +40,8 @@ interface ProjectorFactory extends Projector
 
     /**
      * Proxy method to set the event handlers to be called when an event is received.
-     *
-     * @template T of Closure(TItem): void|Closure(TItem, array): array
-     *
-     * @param array<T> $eventsHandlers
      */
-    public function when(array|Closure $eventsHandlers): static;
+    public function when(Closure $reactors): static;
 
     /**
      * Proxy method to set the query filter to filter events.

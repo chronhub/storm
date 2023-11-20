@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -12,13 +13,13 @@ use Chronhub\Storm\Projector\Scheme\StreamManager;
 interface Subscription
 {
     /**
-     * Composes the subscription with a context and a projector caster.
+     * Composes the subscription with a context and a new scope.
      * It also allows to keep the subscription running in background.
      */
     public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void;
 
     /**
-     * Reset state to his original state.
+     * Reset user state to his original state.
      */
     public function initializeAgain(): void;
 
@@ -65,4 +66,9 @@ interface Subscription
      * Get the system clock instance.
      */
     public function clock(): SystemClock;
+
+    /**
+     * Get the chronicler instance.
+     */
+    public function chronicler(): Chronicler;
 }

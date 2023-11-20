@@ -27,7 +27,6 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
         return new ProjectQuery(
             $this->subscriptionFactory->createQuerySubscription($options),
             $this->subscriptionFactory->createContextBuilder(),
-            $this->subscriptionFactory->chronicler
         );
     }
 
@@ -36,7 +35,6 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
         return new ProjectEmitter(
             $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
             $this->subscriptionFactory->createContextBuilder(),
-            $this->subscriptionFactory->chronicler,
             $streamName
         );
     }
@@ -46,10 +44,18 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
         return new ProjectReadModel(
             $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
             $this->subscriptionFactory->createContextBuilder(),
-            $this->subscriptionFactory->chronicler,
             $streamName,
             $readModel
         );
+    }
+
+    // todo remove all below except query scope
+    public function provider(): ProjectorProvider
+    {
+        // make a subcontract from projectionProvider
+        // where we can only access projector provider methods
+        // another way is to dispatch events stop reset delete
+        return new ProjectorProvider($this->subscriptionFactory->projectionProvider, $this->subscriptionFactory->jsonSerializer);
     }
 
     public function stop(string $projectionName): void

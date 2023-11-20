@@ -21,7 +21,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         protected readonly GenericSubscription $subscription,
         protected readonly ProjectionRepositoryInterface $repository,
         protected readonly EventCounter $eventCounter,
-        private readonly Chronicler $chronicler,
+        protected readonly Chronicler $chronicler,
     ) {
     }
 

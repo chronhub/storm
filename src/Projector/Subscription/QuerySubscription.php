@@ -13,14 +13,14 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 final readonly class QuerySubscription implements Subscription
 {
     use InteractWithSubscription {
-        compose as protected compoQuery;
+        compose as protected composeWithQuery;
     }
 
     public function __construct(protected GenericSubscription $subscription)
     {
     }
 
-    protected function composeQuery(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
+    protected function composeWithQuery(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
     {
         if ($context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new InvalidArgumentException('Projection Query filter is not supported for query subscription');

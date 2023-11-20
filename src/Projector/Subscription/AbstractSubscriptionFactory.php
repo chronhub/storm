@@ -73,6 +73,7 @@ abstract class AbstractSubscriptionFactory
             $subscription,
             $this->createSubscriptionManagement($streamName, $projectionOption),
             $this->createEventCounter($projectionOption),
+            $this->chronicler,
             $readModel
         );
     }
@@ -87,7 +88,8 @@ abstract class AbstractSubscriptionFactory
         return new GenericSubscription(
             $projectionOption,
             $this->createStreamPosition($projectionOption),
-            $this->clock
+            $this->clock,
+            $this->chronicler,
         );
     }
 

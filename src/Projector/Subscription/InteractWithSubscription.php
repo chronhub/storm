@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
@@ -74,5 +75,10 @@ trait InteractWithSubscription
     public function clock(): SystemClock
     {
         return $this->subscription->clock();
+    }
+
+    public function chronicler(): Chronicler
+    {
+        return $this->chronicler;
     }
 }

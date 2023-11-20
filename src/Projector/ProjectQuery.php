@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
@@ -25,13 +24,12 @@ final readonly class ProjectQuery implements QueryProjector
     public function __construct(
         protected Subscription $subscription,
         protected ContextInterface $context,
-        private Chronicler $chronicler
     ) {
     }
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
+        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -55,7 +53,7 @@ final readonly class ProjectQuery implements QueryProjector
         return $this->subscription->state()->get();
     }
 
-    protected function getCaster(): ProjectorScope
+    protected function getScope(): ProjectorScope
     {
         return new QueryProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
@@ -67,7 +65,7 @@ final readonly class ProjectQuery implements QueryProjector
         $activities = [
             new RunUntil(),
             new PrepareQueryRunner(),
-            new HandleStreamEvent(new LoadStreams($this->chronicler)),
+            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler())),
             new DispatchSignal(),
         ];
 

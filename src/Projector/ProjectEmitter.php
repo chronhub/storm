@@ -25,7 +25,6 @@ final readonly class ProjectEmitter implements EmitterProjector
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
         protected ContextInterface $context,
-        protected Chronicler $chronicler,
         protected string $streamName
     ) {
         $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
@@ -35,8 +34,8 @@ final readonly class ProjectEmitter implements EmitterProjector
     {
         $streamName = new StreamName($this->streamName);
 
-        if (! $this->subscription->isStreamFixed() && ! $this->chronicler->hasStream($streamName)) {
-            $this->chronicler->firstCommit(new Stream($streamName));
+        if (! $this->subscription->isStreamFixed() && ! $this->chronicler()->hasStream($streamName)) {
+            $this->chronicler()->firstCommit(new Stream($streamName));
 
             $this->subscription->fixeStream();
         }
@@ -51,8 +50,8 @@ final readonly class ProjectEmitter implements EmitterProjector
         $stream = new Stream($newStreamName, [$event]);
 
         $this->determineIfStreamAlreadyExists($newStreamName)
-            ? $this->chronicler->amend($stream)
-            : $this->chronicler->firstCommit($stream);
+            ? $this->chronicler()->amend($stream)
+            : $this->chronicler()->firstCommit($stream);
     }
 
     protected function getScope(): EmitterProjectorScopeInterface
@@ -62,11 +61,6 @@ final readonly class ProjectEmitter implements EmitterProjector
         );
     }
 
-    /**
-     * Verify whether the stream name is present in the cache and/or the event store.
-     * If the stream is found in the in-memory cache, we assume it already exists in the event store.
-     * Otherwise, we add the stream to the cache and check for its existence in the event store.
-     */
     private function determineIfStreamAlreadyExists(StreamName $streamName): bool
     {
         if ($this->streamCache->has($streamName->name)) {
@@ -75,6 +69,11 @@ final readonly class ProjectEmitter implements EmitterProjector
 
         $this->streamCache->push($streamName->name);
 
-        return $this->chronicler->hasStream($streamName);
+        return $this->chronicler()->hasStream($streamName);
+    }
+
+    private function chronicler(): Chronicler
+    {
+        return $this->subscription->chronicler();
     }
 }

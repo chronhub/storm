@@ -100,15 +100,6 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         return ProjectionStatus::from($projection->status());
     }
 
-    public function acquireLock(): bool
-    {
-        return $this->provider->acquireLock(
-            $this->streamName,
-            ProjectionStatus::RUNNING->value,
-            $this->lockManager->acquire(),
-        );
-    }
-
     public function attemptUpdateStreamPositions(array $streamPositions): bool
     {
         if ($this->lockManager->tryUpdate()) {
@@ -120,6 +111,15 @@ final class ProjectionRepository implements ProjectionRepositoryInterface
         }
 
         return true;
+    }
+
+    public function acquireLock(): bool
+    {
+        return $this->provider->acquireLock(
+            $this->streamName,
+            ProjectionStatus::RUNNING->value,
+            $this->lockManager->acquire(),
+        );
     }
 
     public function releaseLock(): bool

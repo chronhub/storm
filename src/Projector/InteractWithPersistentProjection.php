@@ -59,7 +59,7 @@ trait InteractWithPersistentProjection
         $activities = [
             new RunUntil(),
             new PreparePersistentRunner(),
-            new HandleStreamEvent(new LoadStreams($this->chronicler)),
+            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler())),
             new HandleStreamGap(),
             new PersistOrUpdateLock(),
             new ResetEventCounter(),

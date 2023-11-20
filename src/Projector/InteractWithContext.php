@@ -10,9 +10,9 @@ use DateInterval;
 
 trait InteractWithContext
 {
-    public function initialize(Closure $initCallback): static
+    public function initialize(Closure $userState): static
     {
-        $this->context->initialize($initCallback);
+        $this->context->initialize($userState);
 
         return $this;
     }
@@ -38,9 +38,9 @@ trait InteractWithContext
         return $this;
     }
 
-    public function when(array|Closure $eventHandlers): static
+    public function when(array|Closure $reactors): static
     {
-        $this->context->when($eventHandlers);
+        $this->context->when($reactors);
 
         return $this;
     }
