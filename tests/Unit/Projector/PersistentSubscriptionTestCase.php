@@ -8,13 +8,13 @@ use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\Caster;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -36,7 +36,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 {
     protected ProjectionRepositoryInterface|MockObject $repository;
 
-    protected Caster|MockObject $caster;
+    protected ProjectorScope|MockObject $caster;
 
     protected DefaultProjectionOption $options;
 
@@ -265,7 +265,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     protected function testDiscard(bool $withEmittedEvent): void
     {
-        $caster = $this->createMock(ReadModelCasterInterface::class);
+        $caster = $this->createMock(ReadModelProjectorScopeInterface::class);
 
         $context = $this->defineContext();
 
@@ -314,7 +314,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $subscriptionType = $this->defineSubscriptionType();
 
         if ($subscriptionType instanceof ReadModel) {
-            $this->caster = $this->createMock(ReadModelCasterInterface::class);
+            $this->caster = $this->createMock(ReadModelProjectorScopeInterface::class);
 
             return new ReadModelSubscription(
                 $this->repository, $this->options, $this->position,
@@ -322,7 +322,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             );
         }
 
-        $this->caster = $this->createMock(EmitterCasterInterface::class);
+        $this->caster = $this->createMock(EmitterProjectorScopeInterface::class);
 
         return new EmitterSubscription(
             $this->repository, $this->options, $this->position,

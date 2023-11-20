@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Projector\Scheme\CastEmitter;
+use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
@@ -35,14 +35,10 @@ final readonly class ProjectEmitter implements EmitterProjector
     {
         $streamName = new StreamName($this->streamName);
 
-        /**
-         * If the stream is not fixed, we must verify if the stream already exists.
-         * Otherwise, we store it as the initial commit.
-         */
-        if (! $this->subscription->isFixed() && ! $this->chronicler->hasStream($streamName)) {
+        if (! $this->subscription->isStreamFixed() && ! $this->chronicler->hasStream($streamName)) {
             $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->subscription->fixe();
+            $this->subscription->fixeStream();
         }
 
         $this->linkTo($this->streamName, $event);
@@ -59,9 +55,9 @@ final readonly class ProjectEmitter implements EmitterProjector
             : $this->chronicler->firstCommit($stream);
     }
 
-    protected function getCaster(): EmitterCasterInterface
+    protected function getCaster(): EmitterProjectorScopeInterface
     {
-        return new CastEmitter(
+        return new EmitterProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
         );
     }

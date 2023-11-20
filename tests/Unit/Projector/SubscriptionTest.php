@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Projector\Caster;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
@@ -53,7 +53,7 @@ final class SubscriptionTest extends UnitTestCase
     #[DataProvider('provideBoolean')]
     public function testCompose(bool $keepRunning): void
     {
-        $caster = $this->createMock(Caster::class);
+        $caster = $this->createMock(ProjectorScope::class);
         $context = new Context();
 
         $stub = $this->newSubscription();
@@ -83,7 +83,7 @@ final class SubscriptionTest extends UnitTestCase
     {
         $stub = $this->newSubscription();
 
-        $caster = $this->createMock(Caster::class);
+        $caster = $this->createMock(ProjectorScope::class);
         $context = new Context();
         $context->initialize(fn (): array => ['count' => 0]);
 

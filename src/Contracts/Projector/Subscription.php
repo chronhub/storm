@@ -15,10 +15,10 @@ interface Subscription
      * Composes the subscription with a context and a projector caster.
      * It also allows to keep the subscription running in background.
      */
-    public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void;
+    public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void;
 
     /**
-     * Reset to his original state.
+     * Reset state to his original state.
      */
     public function initializeAgain(): void;
 
@@ -57,12 +57,12 @@ interface Subscription
     public function option(): ProjectionOption;
 
     /**
-     * Get the stream position instance.
+     * Get the stream manager instance.
      */
     public function streamManager(): StreamManager;
 
     /**
-     * Get the system clock of the subscription.
+     * Get the system clock instance.
      */
     public function clock(): SystemClock;
 }

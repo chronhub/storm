@@ -44,35 +44,37 @@ abstract class AbstractSubscriptionFactory
 
     public function createQuerySubscription(array $options = []): Subscription
     {
-        $options = $this->createOption($options);
+        $subscription = $this->createGenericSubscription($this->createOption($options));
 
-        return new QuerySubscription(
-            $options,
-            $this->createStreamPosition($options),
-            $this->clock
-        );
+        return new QuerySubscription($subscription);
     }
 
     public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
     {
-        $arguments = $this->createPersistentSubscription($streamName, $options);
+        $projectionOption = $this->createOption($options);
 
-        $subscription = new EmitterSubscription(...$arguments);
+        $subscription = $this->createGenericSubscription($projectionOption);
 
-        $subscription->setChronicler($this->chronicler);
-
-        return $subscription;
+        return new EmitterSubscription(
+            $subscription,
+            $this->createSubscriptionManagement($streamName, $projectionOption),
+            $this->createEventCounter($projectionOption),
+            $this->chronicler
+        );
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
     {
-        $arguments = $this->createPersistentSubscription($streamName, $options);
+        $projectionOption = $this->createOption($options);
 
-        $subscription = new ReadModelSubscription(...$arguments);
+        $subscription = $this->createGenericSubscription($projectionOption);
 
-        $subscription->setReadModel($readModel);
-
-        return $subscription;
+        return new ReadModelSubscription(
+            $subscription,
+            $this->createSubscriptionManagement($streamName, $projectionOption),
+            $this->createEventCounter($projectionOption),
+            $readModel
+        );
     }
 
     public function createContextBuilder(): ContextInterface
@@ -80,17 +82,13 @@ abstract class AbstractSubscriptionFactory
         return new Context();
     }
 
-    protected function createPersistentSubscription(string $streamName, array $options = []): array
+    protected function createGenericSubscription(ProjectionOption $projectionOption): GenericSubscription
     {
-        $projectionOption = $this->createOption($options);
-
-        return [
+        return new GenericSubscription(
             $projectionOption,
             $this->createStreamPosition($projectionOption),
-            $this->clock,
-            $this->createSubscriptionManagement($streamName, $projectionOption),
-            $this->createEventCounter($projectionOption),
-        ];
+            $this->clock
+        );
     }
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;

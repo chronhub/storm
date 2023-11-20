@@ -13,12 +13,12 @@ interface ContextReader
     /**
      * Get the callback to initialize the state.
      */
-    public function initCallback(): ?Closure;
+    public function userState(): ?Closure;
 
     /**
      * Get the event handlers as array to be called when an event is received.
      */
-    public function eventHandlers(): callable;
+    public function reactors(): callable;
 
     /**
      * Get stream names handled by the projection.
@@ -33,5 +33,5 @@ interface ContextReader
     /**
      * Get the timer interval to run the projection.
      */
-    public function timer(): null|DateInterval;
+    public function timer(): ?DateInterval;
 }

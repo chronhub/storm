@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
-use Chronhub\Storm\Projector\Scheme\CastEmitter;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
+use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(CastEmitter::class)]
+#[CoversClass(EmitterProjectorScope::class)]
 final class CastEmitterTest extends UnitTestCase
 {
     private PointInTime $clock;
@@ -29,9 +29,9 @@ final class CastEmitterTest extends UnitTestCase
     public function testInstance(): void
     {
         $streamName = null;
-        $caster = new CastEmitter($this->projector, $this->clock, $streamName);
+        $caster = new EmitterProjectorScope($this->projector, $this->clock, $streamName);
 
-        $this->assertInstanceOf(EmitterCasterInterface::class, $caster);
+        $this->assertInstanceOf(EmitterProjectorScopeInterface::class, $caster);
         $this->assertNull($caster->streamName());
         $this->assertSame($this->clock, $caster->clock());
     }
@@ -40,7 +40,7 @@ final class CastEmitterTest extends UnitTestCase
     {
         $streamName = null;
 
-        $caster = new CastEmitter($this->projector, $this->clock, $streamName);
+        $caster = new EmitterProjectorScope($this->projector, $this->clock, $streamName);
 
         $this->assertNull($caster->streamName());
 
@@ -55,7 +55,7 @@ final class CastEmitterTest extends UnitTestCase
 
         $this->projector->expects($this->once())->method('stop');
 
-        $caster = new CastEmitter($this->projector, $this->clock, $streamName);
+        $caster = new EmitterProjectorScope($this->projector, $this->clock, $streamName);
 
         $caster->stop();
     }
@@ -67,7 +67,7 @@ final class CastEmitterTest extends UnitTestCase
 
         $this->projector->expects($this->once())->method('emit')->with($event);
 
-        $caster = new CastEmitter($this->projector, $this->clock, $streamName);
+        $caster = new EmitterProjectorScope($this->projector, $this->clock, $streamName);
 
         $caster->emit($event);
     }
@@ -80,7 +80,7 @@ final class CastEmitterTest extends UnitTestCase
 
         $this->projector->expects($this->once())->method('linkTo')->with($streamName, $event);
 
-        $caster = new CastEmitter($this->projector, $this->clock, $currentStreamName);
+        $caster = new EmitterProjectorScope($this->projector, $this->clock, $currentStreamName);
 
         $caster->linkTo($streamName, $event);
     }

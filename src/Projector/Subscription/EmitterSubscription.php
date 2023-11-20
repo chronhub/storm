@@ -7,19 +7,34 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Stream\StreamName;
 
-final class EmitterSubscription extends AbstractPersistentSubscription implements EmitterSubscriptionInterface
+final class EmitterSubscription implements EmitterSubscriptionInterface
 {
-    private Chronicler $chronicler;
+    use InteractWithPersistentSubscription;
 
-    private bool $streamFixed = false;
+    private bool $isStreamFixed = false;
 
-    public function revise(): void
+    public function __construct(
+        protected readonly GenericSubscription $subscription,
+        protected readonly ProjectionRepositoryInterface $repository,
+        protected readonly EventCounter $eventCounter,
+        private readonly Chronicler $chronicler,
+    ) {
+    }
+
+    public function rise(): void
     {
-        parent::revise();
+        $this->mountProjection();
 
-        $this->deleteStream();
+        $this->discoverStreams();
+    }
+
+    public function store(): void
+    {
+        $this->repository->persist($this->getProjectionDetail());
     }
 
     public function discard(bool $withEmittedEvents): void
@@ -35,24 +50,28 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
         $this->resetProjection();
     }
 
-    public function isFixed(): bool
+    public function revise(): void
     {
-        return $this->streamFixed;
+        $this->resetProjection();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
+
+        $this->deleteStream();
     }
 
-    public function fixe(): void
+    public function isStreamFixed(): bool
     {
-        $this->streamFixed = true;
+        return $this->isStreamFixed;
     }
 
-    public function unfix(): void
+    public function fixeStream(): void
     {
-        $this->streamFixed = false;
+        $this->isStreamFixed = true;
     }
 
-    public function setChronicler(Chronicler $chronicler): void
+    public function unfixStream(): void
     {
-        $this->chronicler = $chronicler;
+        $this->isStreamFixed = false;
     }
 
     private function deleteStream(): void
@@ -63,6 +82,6 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
             // fail silently
         }
 
-        $this->unfix();
+        $this->unfixStream();
     }
 }

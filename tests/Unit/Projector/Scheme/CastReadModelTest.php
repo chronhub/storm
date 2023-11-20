@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Projector\Scheme\CastReadModel;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
+use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(CastReadModel::class)]
+#[CoversClass(ReadModelProjectorScope::class)]
 final class CastReadModelTest extends UnitTestCase
 {
     private PointInTime $clock;
@@ -29,9 +29,9 @@ final class CastReadModelTest extends UnitTestCase
     public function testInstance(): void
     {
         $streamName = null;
-        $caster = new CastReadModel($this->projector, $this->clock, $streamName);
+        $caster = new ReadModelProjectorScope($this->projector, $this->clock, $streamName);
 
-        $this->assertInstanceOf(ReadModelCasterInterface::class, $caster);
+        $this->assertInstanceOf(ReadModelProjectorScopeInterface::class, $caster);
         $this->assertNull($caster->streamName());
         $this->assertSame($this->clock, $caster->clock());
     }
@@ -40,7 +40,7 @@ final class CastReadModelTest extends UnitTestCase
     {
         $streamName = null;
 
-        $caster = new CastReadModel($this->projector, $this->clock, $streamName);
+        $caster = new ReadModelProjectorScope($this->projector, $this->clock, $streamName);
 
         $this->assertNull($caster->streamName());
 
@@ -56,7 +56,7 @@ final class CastReadModelTest extends UnitTestCase
         $readModel = $this->createMock(ReadModel::class);
         $this->projector->expects($this->once())->method('readModel')->willReturn($readModel);
 
-        $caster = new CastReadModel($this->projector, $this->clock, $streamName);
+        $caster = new ReadModelProjectorScope($this->projector, $this->clock, $streamName);
 
         $this->assertSame($readModel, $caster->readModel());
     }
@@ -67,7 +67,7 @@ final class CastReadModelTest extends UnitTestCase
 
         $this->projector->expects($this->once())->method('stop');
 
-        $caster = new CastReadModel($this->projector, $this->clock, $streamName);
+        $caster = new ReadModelProjectorScope($this->projector, $this->clock, $streamName);
 
         $caster->stop();
     }

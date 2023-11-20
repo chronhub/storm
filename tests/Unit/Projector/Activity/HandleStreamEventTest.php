@@ -11,14 +11,14 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
+use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Projector\Scheme\CastQuery;
 use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -80,7 +80,7 @@ class HandleStreamEventTest extends UnitTestCase
             $eventHandled = true;
         });
 
-        $caster = new CastQuery(
+        $caster = new QueryProjectorScope(
             $this->createMock(QueryProjector::class),
             new PointInTime(),
             fn () => $this->subscription->currentStreamName()
@@ -122,7 +122,7 @@ class HandleStreamEventTest extends UnitTestCase
 
         $countEvents = 0;
         $context->when(function (DomainEvent $event) use (&$countEvents): void {
-            /** @var QueryCasterInterface $this */
+            /** @var QueryProjectorScopeInterface $this */
             TestCase::assertInstanceOf(SomeEvent::class, $event);
 
             if ($countEvents === 0) {
@@ -134,7 +134,7 @@ class HandleStreamEventTest extends UnitTestCase
             $countEvents++;
         });
 
-        $caster = new CastQuery(
+        $caster = new QueryProjectorScope(
             $this->createMock(QueryProjector::class),
             new PointInTime(),
             fn () => $this->subscription->currentStreamName()

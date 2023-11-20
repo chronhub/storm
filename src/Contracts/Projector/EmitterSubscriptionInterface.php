@@ -9,15 +9,15 @@ interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
     /**
      * Check if the subscription is fixed to the projector.
      */
-    public function isFixed(): bool;
+    public function isStreamFixed(): bool;
 
     /**
      * Fix the subscription to the projector.
      */
-    public function fixe(): void;
+    public function fixeStream(): void;
 
     /**
      * Unfix the subscription from the projector.
      */
-    public function unfix(): void;
+    public function unfixStream(): void;
 }

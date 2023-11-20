@@ -34,20 +34,19 @@ final readonly class EventStreamLoader
         return new Collection($streams);
     }
 
+    /**
+     * @return array<string>
+     */
     private function handleStreamNames(array $streamNames): array
     {
         if ($streamNames === []) {
             throw new InvalidArgumentException('Stream names can not be empty');
         }
 
-        // checkMe for duplicate stream names as it could be redundant with provider
-        // which already check for duplicate stream names
-        $uniqueStreamNames = array_unique($streamNames);
-
-        if ($uniqueStreamNames !== $streamNames) {
+        if (array_unique($streamNames) !== $streamNames) {
             throw new InvalidArgumentException('Duplicate stream names is not allowed');
         }
 
-        return $uniqueStreamNames;
+        return $streamNames;
     }
 }

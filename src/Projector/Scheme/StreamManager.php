@@ -14,7 +14,7 @@ use function array_key_exists;
 use function usleep;
 
 /**
- * @template TStream of array<string, int>
+ * @template TStream of array<non-empty-string,int>
  * @template TGap of array<int<1,max>>
  */
 final class StreamManager implements JsonSerializable
@@ -51,7 +51,7 @@ final class StreamManager implements JsonSerializable
     /**
      * Watches event streams based on provided queries.
      *
-     * @param array{all?: bool, categories?: string[], names?: string[]} $queries The queries to identify event streams.
+     * @param array{all?: bool, categories?: string[], names?: string[]} $queries
      *
      * @throws LogicException When no streams are found.
      */

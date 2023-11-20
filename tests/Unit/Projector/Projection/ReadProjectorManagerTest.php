@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
-use Chronhub\Storm\Contracts\Projector\QueryCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
+use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -52,7 +52,7 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state) use ($manager): array {
-                TestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                TestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
                 TestCase::assertTrue($manager->exists('amount'));
                 TestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
 
@@ -98,7 +98,7 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var QueryCasterInterface $this */
+                /** @var QueryProjectorScopeInterface $this */
                 $state['count']++;
 
                 if ($state['count'] === 2) {

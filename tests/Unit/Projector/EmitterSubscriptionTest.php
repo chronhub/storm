@@ -95,15 +95,15 @@ final class EmitterSubscriptionTest extends PersistentSubscriptionTestCase
         /** @var EmitterSubscriptionInterface $subscription */
         $subscription = $this->newSubscription();
 
-        $this->assertFalse($subscription->isFixed());
+        $this->assertFalse($subscription->isStreamFixed());
 
-        $subscription->fixe();
+        $subscription->fixeStream();
 
-        $this->assertTrue($subscription->isFixed());
+        $this->assertTrue($subscription->isStreamFixed());
 
-        $subscription->unfix();
+        $subscription->unfixStream();
 
-        $this->assertFalse($subscription->isFixed());
+        $this->assertFalse($subscription->isStreamFixed());
     }
 
     protected function defineSubscriptionType(): MockObject|ReadModel|Chronicler

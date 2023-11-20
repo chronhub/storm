@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\Unit\Projector\Stubs\CasterStub;
+use Chronhub\Storm\Tests\Unit\Projector\Stubs\ProjectionScopeStub;
 use Chronhub\Storm\Tests\UnitTestCase;
 use DateInterval;
 use Generator;
@@ -33,7 +33,7 @@ final class ContextTest extends UnitTestCase
 
         $this->context->initialize($initCallback);
 
-        $this->assertSame($initCallback, $this->context->initCallback());
+        $this->assertSame($initCallback, $this->context->userState());
     }
 
     public function testExceptionRaisedWhenContextAlreadyInitialized()
@@ -162,7 +162,7 @@ final class ContextTest extends UnitTestCase
 
         $this->context->when($eventHandlers);
 
-        $this->assertEquals(new ProcessArrayEvent($eventHandlers), $this->context->eventHandlers());
+        $this->assertEquals(new ProcessArrayEvent($eventHandlers), $this->context->reactors());
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Projection event handlers already set');
@@ -176,7 +176,7 @@ final class ContextTest extends UnitTestCase
 
         $this->context->whenAny($eventHandlers);
 
-        $this->assertEquals(new ProcessClosureEvent($eventHandlers), $this->context->eventHandlers());
+        $this->assertEquals(new ProcessClosureEvent($eventHandlers), $this->context->reactors());
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Projection event handlers already set');
@@ -217,7 +217,7 @@ final class ContextTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Projection event handlers not set');
 
-        $this->context->eventHandlers();
+        $this->context->reactors();
     }
 
     public function testExceptionRaisedWhenQueryFilterNotSet()
@@ -244,9 +244,9 @@ final class ContextTest extends UnitTestCase
         };
 
         $this->context->whenAny($eventHandlers);
-        $this->context->castEventHandlers(new CasterStub());
+        $this->context->bindReactors(new ProjectionScopeStub());
 
-        $castEventHandlers = $this->context->eventHandlers();
+        $castEventHandlers = $this->context->reactors();
 
         $process = new ProcessClosureEvent($eventHandlers);
         $this->assertEquals($process, $castEventHandlers);
@@ -261,9 +261,9 @@ final class ContextTest extends UnitTestCase
         ];
 
         $this->context->when($eventHandlers);
-        $this->context->castEventHandlers(new CasterStub());
+        $this->context->bindReactors(new ProjectionScopeStub());
 
-        $castEventHandlers = $this->context->eventHandlers();
+        $castEventHandlers = $this->context->reactors();
 
         $process = new ProcessArrayEvent($eventHandlers);
         $this->assertEquals($process, $castEventHandlers);
@@ -275,24 +275,24 @@ final class ContextTest extends UnitTestCase
 
         $this->context->initialize($init);
 
-        $result = $this->context->castInitCallback(new CasterStub());
+        $result = $this->context->bindUserState(new ProjectionScopeStub());
 
         $this->assertSame($result, ['count' => 0]);
 
-        $castEventHandlers = $this->context->initCallback();
+        $castEventHandlers = $this->context->userState();
 
         $this->assertEquals($castEventHandlers, $init);
     }
 
     public function testCastInitCallbackBotInitialized(): void
     {
-        $this->assertNull($this->context->initCallback());
+        $this->assertNull($this->context->userState());
 
-        $result = $this->context->castInitCallback(new CasterStub());
+        $result = $this->context->bindUserState(new ProjectionScopeStub());
 
         $this->assertSame($result, []);
 
-        $this->assertNull($this->context->initCallback());
+        $this->assertNull($this->context->userState());
     }
 
     public static function provideTimerInterval(): Generator

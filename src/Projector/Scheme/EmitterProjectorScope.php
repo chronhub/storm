@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
-final readonly class CastEmitter implements EmitterCasterInterface
+final readonly class EmitterProjectorScope implements EmitterProjectorScopeInterface
 {
     public function __construct(
         private EmitterProjector $projector,

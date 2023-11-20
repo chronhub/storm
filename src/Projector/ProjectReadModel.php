@@ -7,10 +7,10 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
-use Chronhub\Storm\Projector\Scheme\CastReadModel;
+use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
@@ -31,9 +31,9 @@ final readonly class ProjectReadModel implements ReadModelProjector
         return $this->readModel;
     }
 
-    protected function getCaster(): ReadModelCasterInterface
+    protected function getCaster(): ReadModelProjectorScopeInterface
     {
-        return new CastReadModel(
+        return new ReadModelProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
         );
     }

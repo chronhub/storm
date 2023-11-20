@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Projector\ProjectEmitter;
 use Chronhub\Storm\Projector\ProjectorManager;
@@ -62,8 +62,8 @@ final class EmitterSubscriptionManagerTest extends InMemoryProjectorManagerTestC
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var EmitterCasterInterface $this */
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                /** @var EmitterProjectorScopeInterface $this */
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
                 UnitTestCase::assertSame('balance', $this->streamName());
                 UnitTestCase::assertInstanceOf(PointInTime::class, $this->clock());
 
@@ -99,8 +99,8 @@ final class EmitterSubscriptionManagerTest extends InMemoryProjectorManagerTestC
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var EmitterCasterInterface $this */
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                /** @var EmitterProjectorScopeInterface $this */
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
 
                 $this->linkTo('amount_duplicate', $event);
 

@@ -6,11 +6,11 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Closure;
 
-final readonly class CastReadModel implements ReadModelCasterInterface
+final readonly class ReadModelProjectorScope implements ReadModelProjectorScopeInterface
 {
     public function __construct(
         private ReadModelProjector $projector,

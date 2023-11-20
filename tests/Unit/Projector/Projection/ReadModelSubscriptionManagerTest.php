@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 use Chronhub\Storm\Aggregate\V4AggregateId;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Projector\ReadModelCasterInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectReadModel;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
@@ -54,8 +54,8 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
-                UnitTestCase::assertInstanceOf(ReadModelCasterInterface::class, $this);
+                /** @var ReadModelProjectorScopeInterface $this */
+                UnitTestCase::assertInstanceOf(ReadModelProjectorScopeInterface::class, $this);
                 UnitTestCase::assertSame('balance', $this->streamName());
                 UnitTestCase::assertInstanceOf(SystemClock::class, $this->clock());
 
@@ -95,7 +95,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
+                /** @var ReadModelProjectorScopeInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -142,7 +142,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
+                /** @var ReadModelProjectorScopeInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -195,7 +195,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
+                /** @var ReadModelProjectorScopeInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -248,7 +248,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
+                /** @var ReadModelProjectorScopeInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);
@@ -301,7 +301,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->fromStreams('balance')
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var ReadModelCasterInterface $this */
+                /** @var ReadModelProjectorScopeInterface $this */
                 if ($state['count'] === 0) {
                     $this->readModel()
                         ->stack('insert', $event->header(EventHeader::AGGREGATE_ID), ['balance' => $event->content['amount']]);

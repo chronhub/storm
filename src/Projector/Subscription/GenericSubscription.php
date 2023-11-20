@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\Caster;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -21,48 +18,45 @@ use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Closure;
 
 use function is_array;
+use function method_exists;
 
-abstract class AbstractSubscription implements Subscription
+final class GenericSubscription implements Subscription
 {
-    protected ?string $currentStreamName = null;
+    private ?string $currentStreamName = null;
 
-    protected ProjectionStatus $status = ProjectionStatus::IDLE;
+    private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    protected ContextInterface $context;
+    private ContextInterface $context;
 
-    protected readonly ProjectionStateInterface $state;
+    private readonly ProjectionStateInterface $state;
 
-    protected readonly Sprint $sprint;
+    private readonly Sprint $sprint;
 
     public function __construct(
-        protected readonly ProjectionOption $option,
-        protected readonly StreamManager $streamManager,
-        protected readonly SystemClock $clock,
+        private readonly ProjectionOption $option,
+        private readonly StreamManager $streamManager,
+        private readonly SystemClock $clock,
     ) {
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
     }
 
-    public function compose(ContextInterface $context, Caster $projectorCaster, bool $keepRunning): void
+    public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
     {
         $this->context = $context;
-
-        if ($this instanceof PersistentSubscriptionInterface && ! $this->context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new InvalidArgumentException('Persistent subscription require a projection query filter');
-        }
 
         $this->sprint->runInBackground($keepRunning);
 
         $this->sprint->continue();
 
-        $this->cast($projectorCaster);
+        $this->bindScope($projectionScope);
     }
 
     public function initializeAgain(): void
     {
         $this->state->reset();
 
-        $callback = $this->context->initCallback();
+        $callback = $this->context->userState();
 
         if ($callback instanceof Closure) {
             $state = $callback();
@@ -123,12 +117,16 @@ abstract class AbstractSubscription implements Subscription
         return $this->clock;
     }
 
-    protected function cast(Caster $caster): void
+    private function bindScope(ProjectorScope $projectionScope): void
     {
-        $originalState = $this->context->castInitCallback($caster);
+        if (method_exists($this->context, 'bindUserState')) {
+            $userState = $this->context->bindUserState($projectionScope);
 
-        $this->state->put($originalState);
+            $this->state->put($userState);
+        }
 
-        $this->context->castEventHandlers($caster);
+        if (method_exists($this->context, 'bindReactors')) {
+            $this->context->bindReactors($projectionScope);
+        }
     }
 }

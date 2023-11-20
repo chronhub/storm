@@ -4,12 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
 
-final class ReadModelSubscription extends AbstractPersistentSubscription implements ReadModelSubscriptionInterface
+final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
-    private ReadModel $readModel;
+    use InteractWithPersistentSubscription;
+
+    public function __construct(
+        protected readonly GenericSubscription $subscription,
+        protected readonly ProjectionRepositoryInterface $repository,
+        protected readonly EventCounter $eventCounter,
+        private readonly ReadModel $readModel,
+    ) {
+    }
 
     public function rise(): void
     {
@@ -24,14 +34,16 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
 
     public function store(): void
     {
-        parent::store();
+        $this->repository->persist($this->getProjectionDetail());
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        parent::revise();
+        $this->resetProjection();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
 
         $this->readModel->reset();
     }
@@ -47,10 +59,5 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
         $this->sprint()->stop();
 
         $this->resetProjection();
-    }
-
-    public function setReadModel(ReadModel $readModel): void
-    {
-        $this->readModel = $readModel;
     }
 }

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\RunProjection;
+use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Closure;

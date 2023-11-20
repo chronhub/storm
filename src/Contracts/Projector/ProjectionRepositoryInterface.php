@@ -20,6 +20,11 @@ interface ProjectionRepositoryInterface
     public function create(ProjectionStatus $status): bool;
 
     /**
+     * Saves the stream positions, state and gaps.
+     */
+    public function persist(ProjectionDetail $projectionDetail): bool;
+
+    /**
      * Stops the projection and saves the stream positions and state.
      */
     public function stop(ProjectionDetail $projectionDetail): bool;
@@ -30,11 +35,6 @@ interface ProjectionRepositoryInterface
      * @return bool True if the operation was successful, false otherwise.
      */
     public function startAgain(): bool;
-
-    /**
-     * Saves the stream positions and state.
-     */
-    public function persist(ProjectionDetail $projectionDetail): bool;
 
     /**
      * Resets stream positions and state.

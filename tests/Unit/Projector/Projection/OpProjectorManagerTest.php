@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Projection;
 
 use Chronhub\Storm\Aggregate\V4AggregateId;
-use Chronhub\Storm\Contracts\Projector\EmitterCasterInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectEmitter;
@@ -55,7 +55,7 @@ final class OpProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state) use ($manager): array {
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
                 UnitTestCase::assertTrue($manager->exists('amount'));
                 UnitTestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
 
@@ -89,7 +89,7 @@ final class OpProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state) use ($manager): array {
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
                 UnitTestCase::assertTrue($manager->exists('amount'));
                 UnitTestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
 
@@ -117,7 +117,7 @@ final class OpProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var EmitterCasterInterface $this */
+                /** @var EmitterProjectorScopeInterface $this */
                 $state['count']++;
 
                 if ($state['count'] === 2) {
@@ -146,7 +146,7 @@ final class OpProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state) use ($manager): array {
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
                 UnitTestCase::assertTrue($manager->exists('amount'));
                 UnitTestCase::assertEquals(ProjectionStatus::RUNNING->value, $manager->statusOf('amount'));
 
@@ -185,8 +185,8 @@ final class OpProjectorManagerTest extends InMemoryProjectorManagerTestCase
             ->fromStreams($this->streamName->name)
             ->withQueryFilter($manager->queryScope()->fromIncludedPosition())
             ->whenAny(function (SomeEvent $event, array $state): array {
-                /** @var EmitterCasterInterface $this */
-                UnitTestCase::assertInstanceOf(EmitterCasterInterface::class, $this);
+                /** @var EmitterProjectorScopeInterface $this */
+                UnitTestCase::assertInstanceOf(EmitterProjectorScopeInterface::class, $this);
 
                 $this->linkTo('link_to_amount', $event);
 

@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Stubs;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\Caster;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 
-final class CasterStub implements Caster
+final class ProjectionScopeStub implements ProjectorScope
 {
     public bool $isStopped = false;
 

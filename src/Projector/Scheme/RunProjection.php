@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector;
+namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Projector\Scheme\Workflow;
 use Throwable;
 
 final readonly class RunProjection

@@ -18,8 +18,8 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
-use Chronhub\Storm\Projector\Scheme\CastEmitter;
 use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\StreamGapManager;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
@@ -100,7 +100,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
             $countEvents++;
         });
 
-        $caster = new CastEmitter(
+        $caster = new EmitterProjectorScope(
             $this->createMock(EmitterProjector::class),
             new PointInTime(),
             $this->subscription->currentStreamName

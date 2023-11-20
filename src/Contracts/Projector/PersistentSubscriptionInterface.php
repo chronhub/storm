@@ -38,18 +38,19 @@ interface PersistentSubscriptionInterface extends Subscription
     public function disclose(): ProjectionStatus;
 
     /**
-     * Persist the current state and positions of the projection.
+     * Persist the current projection.
      */
     public function store(): void;
 
     /**
-     * Persist the current state and positions of the projection
-     * when threshold is reached.
+     * Persist the current projection when threshold is reached.
+     *
+     * @see ProjectionOption::BLOCK_SIZE
      */
     public function persistWhenThresholdIsReached(): void;
 
     /**
-     * Reset the state and position of the projection.
+     * Reset the projection.
      */
     public function revise(): void;
 
