@@ -39,7 +39,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
 
     public function stop(ProjectionDetail $projectionDetail): void
     {
-        $this->persist($projectionDetail, ProjectionStatus::IDLE);
+        $this->persist($projectionDetail, ProjectionStatus::IDLE, null);
     }
 
     public function release(): void
@@ -68,7 +68,21 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
             state: $this->serializer->encode($projectionDetail->state),
             positions: $this->serializer->encode($projectionDetail->streamPositions),
             gaps: $this->serializer->encode($projectionDetail->streamGaps),
-            lockedUntil: $this->lockManager->acquire() // checkMe
+            lockedUntil: $this->lockManager->acquire()
+        );
+    }
+
+    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
+    {
+        if (! $this->canRefreshLock($currentTime)) {
+            throw new RuntimeException('Cannot update projection lock with given time');
+        }
+
+        $this->provider->updateProjection(
+            $this->streamName,
+            positions: $this->serializer->encode($projectionDetail->streamPositions),
+            gaps: $this->serializer->encode($projectionDetail->streamGaps),
+            lockedUntil: $this->lockManager->refresh($currentTime)
         );
     }
 
@@ -114,21 +128,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         return ProjectionStatus::from($projection->status());
     }
 
-    public function update(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
-    {
-        //        if (! $this->canUpdate($currentTime)) {
-        //            throw new RuntimeException('Cannot update projection lock with given time');
-        //        }
-
-        $this->provider->updateProjection(
-            $this->streamName,
-            positions: $this->serializer->encode($projectionDetail->streamPositions),
-            gaps: $this->serializer->encode($projectionDetail->streamGaps),
-            lockedUntil: $this->lockManager->refresh($currentTime),
-        );
-    }
-
-    public function canUpdate(DateTimeImmutable $currentTime): bool
+    public function canRefreshLock(DateTimeImmutable $currentTime): bool
     {
         return $this->lockManager->shouldRefresh($currentTime);
     }

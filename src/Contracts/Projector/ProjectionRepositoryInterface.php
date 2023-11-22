@@ -31,11 +31,23 @@ interface ProjectionRepositoryInterface
     public function start(): void;
 
     /**
-     * Store projection data with current projection status.
+     * Persists projection data
+     *
+     * when current time is given we check if we can update projection data
+     * with a new refresh lock, otherwise we just acquire a new lock
      *
      * @throws ProjectionFailed When projection data cannot be stored.
+     * @throws RuntimeException When update lock failed if current time is given
      */
     public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void;
+
+    /**
+     * Persists projection data when lock threshold is reached
+     *
+     * @throws ProjectionFailed When projection data cannot be stored.
+     * @throws RuntimeException When refresh lock failed
+     */
+    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void;
 
     /**
      * Stops the projection and store data.
@@ -69,18 +81,9 @@ interface ProjectionRepositoryInterface
     public function delete(bool $withEmittedEvents): void;
 
     /**
-     * Updates stream positions and gaps with a new lock.
-     * note that should update lock must be called before update
-     *
-     * @throws ProjectionFailed When projection data cannot be stored.
-     * @throws RuntimeException When update lock failed
-     */
-    public function update(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void;
-
-    /**
      * Should update projection data based on current time.
      */
-    public function canUpdate(DateTimeImmutable $currentTime): bool;
+    public function canRefreshLock(DateTimeImmutable $currentTime): bool;
 
     /**
      * Releases the lock for the projection.

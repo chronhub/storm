@@ -187,7 +187,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             ->with(['stream_name' => 25])
             ->willReturn(true);
 
-        $subscription->renew();
+        $subscription->update();
 
         $this->assertEquals(['stream_name' => 25], $subscription->streamManager()->jsonSerialize());
     }

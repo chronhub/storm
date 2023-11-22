@@ -40,19 +40,19 @@ class LockManager
     }
 
     /**
-     * Ensures that the lock can be refreshed when the current lock
-     * with the threshold is greater than the current time,
-     * indicating that the lock is close to expiration.
+     * Determines whether the lock should be refreshed
+     * based on the current time and lock settings.
      */
     public function shouldRefresh(DateTimeImmutable $currentTime): bool
     {
+        // fixMe test scenarios when lastLock is null
         if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
             return true;
         }
 
-        $lockWithThreshold = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
+        $remainingTime = $this->lastLock->getTimestamp() - $currentTime->getTimestamp();
 
-        return $this->clock->isGreaterThan($lockWithThreshold, $currentTime);
+        return $remainingTime < $this->lockThreshold;
     }
 
     /**

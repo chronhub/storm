@@ -18,7 +18,7 @@ use DateTimeImmutable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Throwable;
 
-final readonly class EventAwareProjectionRepository implements ProjectionRepositoryInterface
+final readonly class EventDispatcherRepository implements ProjectionRepositoryInterface
 {
     public function __construct(
         private ProjectionRepositoryInterface $projectionRepository,
@@ -38,11 +38,6 @@ final readonly class EventAwareProjectionRepository implements ProjectionReposit
             fn () => $this->eventDispatcher->dispatch(new ProjectionStarted($this->projectionName())),
             ProjectionRestarted::class
         );
-    }
-
-    public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
-    {
-        $this->projectionRepository->persist($projectionDetail, $currentStatus);
     }
 
     public function stop(ProjectionDetail $projectionDetail): void
@@ -92,14 +87,19 @@ final readonly class EventAwareProjectionRepository implements ProjectionReposit
         );
     }
 
-    public function update(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
+    public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
     {
-        $this->projectionRepository->update($projectionDetail, $currentTime);
+        $this->projectionRepository->persist($projectionDetail, $currentStatus);
     }
 
-    public function canUpdate(DateTimeImmutable $currentTime): bool
+    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
     {
-        return $this->projectionRepository->canUpdate($currentTime);
+        $this->projectionRepository->persistWhenLockThresholdIsReached($projectionDetail, $currentTime);
+    }
+
+    public function canRefreshLock(DateTimeImmutable $currentTime): bool
+    {
+        return $this->projectionRepository->canRefreshLock($currentTime);
     }
 
     public function loadStatus(): ProjectionStatus
@@ -129,7 +129,9 @@ final readonly class EventAwareProjectionRepository implements ProjectionReposit
 
             $onSuccess();
         } catch (Throwable $exception) {
-            $this->eventDispatcher->dispatch(new ProjectionError($this->projectionName(), $failedEvent, $exception));
+            $this->eventDispatcher->dispatch(
+                new ProjectionError($this->projectionName(), $failedEvent, $exception)
+            );
 
             throw $exception;
         }

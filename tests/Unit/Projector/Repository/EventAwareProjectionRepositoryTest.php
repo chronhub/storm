@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Repository\Event\EventMap;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionError;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionStarted;
-use Chronhub\Storm\Projector\Repository\EventAwareProjectionRepository;
+use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Events\Dispatcher as EventDispatcher;
@@ -37,24 +37,11 @@ class EventAwareProjectionRepositoryTest extends UnitTestCase
     public function testStart(): void
     {
         $subscriber = $this->newSubscriber();
-        $this->repository->expects($this->once())->method('start')->willReturn(true);
         $repository = $this->newEventAwareRepository();
 
-        $this->assertTrue($repository->start());
+        $repository->start();
 
         $this->assertInstanceOf(ProjectionStarted::class, $subscriber->eventHandled());
-        $this->assertSame('foo', $subscriber->eventHandled()->streamName);
-    }
-
-    public function testStartOnFailed(): void
-    {
-        $subscriber = $this->newSubscriber();
-        $this->repository->expects($this->once())->method('start')->willReturn(false);
-        $repository = $this->newEventAwareRepository();
-
-        $this->assertFalse($repository->start());
-        $this->assertInstanceOf(ProjectionError::class, $subscriber->eventHandled());
-        $this->assertNull($subscriber->eventHandled()->error);
         $this->assertSame('foo', $subscriber->eventHandled()->streamName);
     }
 
@@ -112,8 +99,8 @@ class EventAwareProjectionRepositoryTest extends UnitTestCase
         return $subscriber;
     }
 
-    private function newEventAwareRepository(): EventAwareProjectionRepository
+    private function newEventAwareRepository(): EventDispatcherRepository
     {
-        return new EventAwareProjectionRepository($this->repository, $this->eventDispatcher);
+        return new EventDispatcherRepository($this->repository, $this->eventDispatcher);
     }
 }

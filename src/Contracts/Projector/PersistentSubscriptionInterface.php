@@ -43,11 +43,18 @@ interface PersistentSubscriptionInterface extends Subscription
     public function store(): void;
 
     /**
+     * Persist projection data only when the lock can be refreshed.
+     *
+     * light substitution of store() method
+     */
+    public function update(): void;
+
+    /**
      * Persist the current projection when threshold is reached.
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    public function persistWhenThresholdIsReached(): void;
+    public function persistWhenCounterIsReached(): void;
 
     /**
      * Reset the projection.
@@ -58,11 +65,6 @@ interface PersistentSubscriptionInterface extends Subscription
      * Delete the projection with or without emitted events.
      */
     public function discard(bool $withEmittedEvents): void;
-
-    /**
-     * Update projection lock and stream positions.
-     */
-    public function renew(): void;
 
     /**
      * Release the projection lock.

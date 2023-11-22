@@ -20,7 +20,7 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Projector\Repository\EventAwareProjectionRepository;
+use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -98,9 +98,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
-    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventAwareProjectionRepository
+    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository
     {
-        return new EventAwareProjectionRepository($projectionRepository, $this->dispatcher);
+        return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager

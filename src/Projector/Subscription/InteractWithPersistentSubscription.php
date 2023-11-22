@@ -36,12 +36,32 @@ trait InteractWithPersistentSubscription
         }
     }
 
-    public function renew(): void
+    public function persistWhenCounterIsReached(): void
+    {
+        if ($this->eventCounter->isReached()) {
+            $this->store();
+
+            $this->eventCounter()->reset();
+
+            $this->subscription->setStatus($this->disclose());
+
+            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
+
+            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
+                $this->sprint()->stop();
+            }
+        }
+    }
+
+    public function update(): void
     {
         $currentTime = $this->clock()->now();
 
-        if ($this->repository->canUpdate($currentTime)) {
-            $this->repository->update($this->persistProjectionDetail(), $currentTime);
+        if ($this->repository->canRefreshLock($currentTime)) {
+            $this->repository->persistWhenLockThresholdIsReached(
+                $this->persistProjectionDetail(),
+                $currentTime
+            );
         }
     }
 
@@ -73,23 +93,6 @@ trait InteractWithPersistentSubscription
     public function disclose(): ProjectionStatus
     {
         return $this->repository->loadStatus();
-    }
-
-    public function persistWhenThresholdIsReached(): void
-    {
-        if ($this->eventCounter->isReached()) {
-            $this->store();
-
-            $this->eventCounter()->reset();
-
-            $this->subscription->setStatus($this->disclose());
-
-            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
-
-            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
-                $this->sprint()->stop();
-            }
-        }
     }
 
     public function projectionName(): string

@@ -66,7 +66,7 @@ final readonly class EventProcessor
         }
 
         if ($subscription instanceof PersistentSubscriptionInterface) {
-            $subscription->persistWhenThresholdIsReached();
+            $subscription->persistWhenCounterIsReached();
         }
 
         return $subscription->sprint()->inProgress();
