@@ -16,7 +16,7 @@ interface Subscription
      * Composes the subscription with a context and a new scope.
      * It also allows to keep the subscription running in background.
      */
-    public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void;
+    public function compose(ContextInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void;
 
     /**
      * Reset user state to his original state.

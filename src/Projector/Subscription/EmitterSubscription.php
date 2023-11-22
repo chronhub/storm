@@ -29,17 +29,17 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     {
         $this->mountProjection();
 
-        $this->discoverStreams();
+        $this->syncStreams();
     }
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionDetail());
+        $this->repository->persist($this->persistProjectionDetail(), $this->currentStatus());
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete();
+        $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->deleteStream();
@@ -54,7 +54,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     {
         $this->resetProjection();
 
-        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
+        $this->repository->reset($this->persistProjectionDetail(), $this->currentStatus());
 
         $this->deleteStream();
     }

@@ -29,16 +29,16 @@ final class RemoteStatusDiscoveryTest extends UnitTestCase
     {
         $this->subscription->expects($this->exactly(2))->method('disclose')->willReturn(ProjectionStatus::STOPPING);
 
-       $firstExecution
-           ? $this->subscription->expects($this->exactly(2))->method('refreshDetail')
-           : $this->subscription->expects($this->never())->method('refreshDetail');
+        $firstExecution
+            ? $this->subscription->expects($this->exactly(2))->method('synchronise')
+            : $this->subscription->expects($this->never())->method('synchronise');
 
-         $this->subscription->expects($this->exactly(2))->method('close');
+        $this->subscription->expects($this->exactly(2))->method('close');
 
-         $instance = $this->newInstance();
+        $instance = $this->newInstance();
 
-         $this->assertSame($firstExecution, $instance->recover($firstExecution, false));
-         $this->assertSame($firstExecution, $instance->recover($firstExecution, true));
+        $this->assertSame($firstExecution, $instance->recover($firstExecution, false));
+        $this->assertSame($firstExecution, $instance->recover($firstExecution, true));
     }
 
     #[DataProvider('provideBoolean')]

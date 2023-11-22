@@ -63,7 +63,7 @@ class EventStreamLoaderTest extends UnitTestCase
     public function testLoadFromEmptyStreamNames(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Stream names can not be empty');
+        $this->expectExceptionMessage('No stream set or found');
 
         $this->newEventStreamLoader()->loadFrom(['names' => []]);
     }
@@ -74,6 +74,31 @@ class EventStreamLoaderTest extends UnitTestCase
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
         $this->newEventStreamLoader()->loadFrom(['names' => ['duplicate', 'duplicate']]);
+    }
+
+    public function testLoadFromDuplicateCategories(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Duplicate stream names is not allowed');
+
+        $this->eventStreamProvider->expects($this->once())
+            ->method('filterByAscendantCategories')
+            ->with(['category1', 'category2'])
+            ->willReturn(['duplicate', 'duplicate']);
+
+        $this->newEventStreamLoader()->loadFrom(['categories' => ['category1', 'category2']]);
+    }
+
+    public function testLoadFromDuplicateAll(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Duplicate stream names is not allowed');
+
+        $this->eventStreamProvider->expects($this->once())
+            ->method('allWithoutInternal')
+            ->willReturn(['duplicate', 'duplicate']);
+
+        $this->newEventStreamLoader()->loadFrom(['all' => true]);
     }
 
     private function newEventStreamLoader(): EventStreamLoader

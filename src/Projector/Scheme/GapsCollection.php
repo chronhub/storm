@@ -56,14 +56,13 @@ class GapsCollection
             return;
         }
 
-        // checkMe what happened if we already have a gap with unconfirmed status
         foreach ($streamGaps as $streamGap) {
             $this->gaps->put($streamGap, true);
         }
     }
 
     /**
-     * Filter confirmed gaps and remove unconfirmed local gaps when projection is persisted
+     * Filter confirmed gaps and remove unconfirmed local gaps.
      *
      * @return array<int<1,max>>
      */

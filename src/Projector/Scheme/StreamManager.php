@@ -14,19 +14,21 @@ use function array_key_exists;
 use function usleep;
 
 /**
+ * todo make contract for persistent manager and non persistent
+ *
  * @template TStream of array<non-empty-string,int>
  * @template TGap of array<int<1,max>>
  */
 final class StreamManager implements JsonSerializable
 {
-    protected int $retries = 0;
+    private int $retries = 0;
 
-    protected bool $gapDetected = false;
+    private bool $gapDetected = false;
 
     /**
      * @var GapsCollection{array<int,bool} GapsCollection
      */
-    protected GapsCollection $gaps;
+    private GapsCollection $gaps;
 
     /**
      * @var Collection<string,int>
@@ -35,7 +37,6 @@ final class StreamManager implements JsonSerializable
 
     /**
      * @param array       $retriesInMs      The array of retry durations in milliseconds.
-     *                                      When empty, no gap will be detected.
      * @param string|null $detectionWindows The detection window for resetting projection.
      */
     public function __construct(
@@ -49,30 +50,30 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Watches event streams based on provided queries.
+     * Watches event streams based on given queries.
      *
      * @param array{all?: bool, categories?: string[], names?: string[]} $queries
-     *
-     * @throws LogicException When no streams are found.
      */
     public function watchStreams(array $queries): void
     {
         $container = $this->eventStreamLoader
             ->loadFrom($queries)
-            ->whenEmpty(fn () => throw new LogicException('No streams found'))
             ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]);
 
         $this->streamPosition = $container->merge($this->streamPosition);
     }
 
     /**
-     * Merges remote stream positions into the local stream positions.
+     * Merges remote/local stream positions and gaps.
      *
-     * @param TStream $streamsPositions
+     * @param TStream           $streamsPositions
+     * @param array<int<1,max>> $streamGaps
      */
-    public function discoverStreams(array $streamsPositions): void
+    public function syncStreams(array $streamsPositions, array $streamGaps): void
     {
         $this->streamPosition = $this->streamPosition->merge($streamsPositions);
+
+        $this->gaps->merge($streamGaps);
     }
 
     /**
@@ -87,7 +88,7 @@ final class StreamManager implements JsonSerializable
             throw new LogicException("Stream $streamName not watched");
         }
 
-        if (! $eventTime || $this->hasNoGap($streamName, $position, $eventTime) || ! $this->hasRetry()) {
+        if (! $eventTime || $this->isGapFilled($streamName, $position, $eventTime) || ! $this->hasRetry()) {
             $this->streamPosition[$streamName] = $position;
 
             $this->resetGap();
@@ -96,28 +97,6 @@ final class StreamManager implements JsonSerializable
         }
 
         return false;
-    }
-
-    /**
-     * Merges remote gaps into the local gaps.
-     * Gaps are identified by their position and their retry status.
-     *
-     * @param TGap $streamGaps
-     */
-    public function mergeGaps(array $streamGaps): void
-    {
-        $this->gaps->merge($streamGaps);
-    }
-
-    /**
-     * Retrieves the confirmed gaps.
-     * A gap is confirmed when it has no more retry.
-     *
-     * @return array<int<1,max>>
-     */
-    public function confirmedGaps(): array
-    {
-        return $this->gaps->filterConfirmedGaps();
     }
 
     public function hasGap(): bool
@@ -160,7 +139,7 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Resets the stream position and the gaps.
+     * Resets steam manager.
      */
     public function resets(): void
     {
@@ -171,15 +150,41 @@ final class StreamManager implements JsonSerializable
         $this->resetGap();
     }
 
-    public function jsonSerialize(): array
+    public function getStreamPositions(): array
     {
         return $this->streamPosition->toArray();
     }
 
     /**
+     * Return all gaps confirmed or not.
+     *
+     * @return array<int,bool>
+     */
+    public function getGaps(): array
+    {
+        return $this->gaps->all()->toArray();
+    }
+
+    /**
+     * Return stream positions and confirmed gaps.
+     *
+     * note: this method should only be called to persist projection
+     * as we filter unconfirmed gaps locally
+     *
+     * @return array{positions: array<string,int>, gaps: array<int>}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'positions' => $this->getStreamPositions(),
+            'gaps' => $this->gaps->filterConfirmedGaps(),
+        ];
+    }
+
+    /**
      * Checks if there is no gap and updates the gaps collection.
      */
-    private function hasNoGap(string $streamName, int $eventPosition, DateTimeImmutable|string $eventTime): bool
+    private function isGapFilled(string $streamName, int $eventPosition, DateTimeImmutable|string $eventTime): bool
     {
         if ($this->retriesInMs === []) {
             return true;

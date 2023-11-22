@@ -7,9 +7,11 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
+use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Illuminate\Support\Collection;
+use LogicException;
 
 use function in_array;
 
@@ -25,19 +27,16 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         $this->projections = new Collection();
     }
 
-    public function createProjection(string $projectionName, string $status): bool
+    public function createProjection(string $projectionName, string $status): void
     {
         if ($this->exists($projectionName)) {
-            throw new RuntimeException("Projection $projectionName already exists");
+            throw ProjectionAlreadyExists::withName($projectionName);
         }
 
         $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $status));
-
-        return true;
     }
 
-    //checkMe acquireLock could be the last args of updateProjection
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool
+    public function acquireLock(string $projectionName, string $status, string $lockedUntil): void
     {
         $projection = $this->retrieve($projectionName);
 
@@ -45,15 +44,12 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
             throw ProjectionNotFound::withName($projectionName);
         }
 
-        if ($this->shouldUpdateLock($projection)) {
-            $projection->setStatus($status);
-
-            $projection->setLockedUntil($lockedUntil);
-
-            return true;
+        if (! $this->canAcquireLock($projection)) {
+            throw InMemoryProjectionFailed::failedOnAcquireLock($projectionName);
         }
 
-        return false;
+        $projection->setStatus($status);
+        $projection->setLockedUntil($lockedUntil);
     }
 
     public function updateProjection(
@@ -63,7 +59,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         string $positions = null,
         string $gaps = null,
         bool|string|null $lockedUntil = false
-    ): bool {
+    ): void {
         $projection = $this->retrieve($projectionName);
 
         if (! $projection instanceof InMemoryProjection) {
@@ -71,7 +67,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         }
 
         if ($projection->lockedUntil() === null) {
-            throw new RuntimeException("Projection lock must be acquired before updating projection $projectionName");
+            throw new LogicException("Projection lock must be acquired before updating projection $projectionName");
         }
 
         if ($status !== null) {
@@ -93,19 +89,15 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         if ($lockedUntil !== false) {
             $projection->setLockedUntil($lockedUntil);
         }
-
-        return true;
     }
 
-    public function deleteProjection(string $projectionName): bool
+    public function deleteProjection(string $projectionName): void
     {
         if (! $this->exists($projectionName)) {
             throw ProjectionNotFound::withName($projectionName);
         }
 
         $this->projections->forget($projectionName);
-
-        return true;
     }
 
     public function retrieve(string $projectionName): ?ProjectionModel
@@ -125,7 +117,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         return $this->projections->has($projectionName);
     }
 
-    private function shouldUpdateLock(ProjectionModel $projection): bool
+    private function canAcquireLock(ProjectionModel $projection): bool
     {
         if ($projection->lockedUntil() === null) {
             return true;

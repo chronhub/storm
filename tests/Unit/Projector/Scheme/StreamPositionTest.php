@@ -99,7 +99,7 @@ final class StreamPositionTest extends UnitTestCase
 
         $this->assertEquals(['customer' => 0, 'account' => 0], $streamPosition->jsonSerialize());
 
-        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25]);
+        $streamPosition->syncStreams(['account' => 25, 'customer' => 25]);
 
         $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->jsonSerialize());
     }
@@ -110,7 +110,7 @@ final class StreamPositionTest extends UnitTestCase
 
         $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25, 'passwords' => 10]);
+        $streamPosition->syncStreams(['account' => 25, 'customer' => 25, 'passwords' => 10]);
 
         $this->assertEquals(['customer' => 25, 'account' => 25, 'passwords' => 10], $streamPosition->jsonSerialize());
     }
@@ -121,7 +121,7 @@ final class StreamPositionTest extends UnitTestCase
 
         $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discoverStreams(['account' => 25, 'customer' => 25]);
+        $streamPosition->syncStreams(['account' => 25, 'customer' => 25]);
 
         $this->assertEquals(['customer' => 25, 'account' => 25], $streamPosition->jsonSerialize());
 
@@ -136,7 +136,7 @@ final class StreamPositionTest extends UnitTestCase
 
         $streamPosition->watchStreams(['names' => ['account', 'customer']]);
 
-        $streamPosition->discoverStreams(['account' => 25, 'customer' => 20]);
+        $streamPosition->syncStreams(['account' => 25, 'customer' => 20]);
 
         $this->assertTrue($streamPosition->hasNextPosition('account', 26));
         $this->assertFalse($streamPosition->hasNextPosition('account', 27));

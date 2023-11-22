@@ -278,7 +278,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
             )
             ->willReturn($success);
 
-        $this->assertSame($success, $this->newRepository()->acquireLock());
+        $this->assertSame($success, $this->newRepository()->start());
     }
 
     #[DataProvider('provideBoolean')]
@@ -292,7 +292,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
 
         $this->lock
             ->expects($this->once())
-            ->method('tryUpdate')
+            ->method('update')
             ->willReturn(true);
 
         $this->lock
@@ -311,7 +311,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
                 ],
             )->willReturn($successOnUpdate);
 
-        $this->assertSame($successOnUpdate, $this->newRepository()->attemptUpdateStreamPositions(['stream_name' => 1]));
+        $this->assertSame($successOnUpdate, $this->newRepository()->update(['stream_name' => 1]));
     }
 
     public function testUpdateLockAlwaysReturnTrueWhenUpdateLockFailed(): void
@@ -320,13 +320,13 @@ final class ProjectionRepositoryTest extends UnitTestCase
 
         $this->lock
             ->expects($this->once())
-            ->method('tryUpdate')
+            ->method('update')
             ->willReturn(false);
 
         $this->lock->expects($this->never())->method('increment');
         $this->provider->expects($this->never())->method('updateProjection');
 
-        $this->assertTrue($this->newRepository()->attemptUpdateStreamPositions(['stream_name' => 1]));
+        $this->assertTrue($this->newRepository()->update(['stream_name' => 1]));
     }
 
     #[DataProvider('provideBoolean')]
@@ -344,7 +344,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
             )
             ->willReturn($success);
 
-        $this->assertSame($success, $this->newRepository()->releaseLock());
+        $this->assertSame($success, $this->newRepository()->release());
     }
 
     #[DataProvider('provideBoolean')]

@@ -43,7 +43,7 @@ final class GenericSubscription implements Subscription
         $this->sprint = new Sprint();
     }
 
-    public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
+    public function compose(ContextInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
         $this->context = $context;
 
@@ -51,7 +51,7 @@ final class GenericSubscription implements Subscription
 
         $this->sprint->continue();
 
-        $this->bindScope($projectionScope);
+        $this->bindScope($projectorScope);
     }
 
     public function initializeAgain(): void

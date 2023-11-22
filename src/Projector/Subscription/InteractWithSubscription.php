@@ -17,9 +17,9 @@ use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 trait InteractWithSubscription
 {
-    public function compose(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
+    public function compose(ContextInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
-        $this->subscription->compose($context, $projectionScope, $keepRunning);
+        $this->subscription->compose($context, $projectorScope, $keepRunning);
     }
 
     public function initializeAgain(): void

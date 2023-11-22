@@ -30,7 +30,7 @@ interface PersistentSubscriptionInterface extends Subscription
      *
      * @throws ProjectionNotFound
      */
-    public function refreshDetail(): void;
+    public function synchronise(): void;
 
     /**
      * Get the current status of the projection.

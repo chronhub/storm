@@ -20,33 +20,54 @@ trait InteractWithPersistentSubscription
         compose as protected composeWithPersistence;
     }
 
-    public function refreshDetail(): void
+    public function synchronise(): void
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamManager()->discoverStreams($projectionDetail->streamPositions);
+        $this->streamManager()->syncStreams(
+            $projectionDetail->streamPositions,
+            $projectionDetail->streamGaps
+        );
 
         $state = $projectionDetail->state;
 
         if ($state !== []) {
             $this->subscription->state()->put($state);
         }
-
-        $this->streamManager()->mergeGaps($projectionDetail->streamGaps);
     }
 
     public function renew(): void
     {
-        $this->repository->attemptUpdateStreamPositions(
-            $this->subscription->streamManager()->jsonSerialize()
-        );
+        $currentTime = $this->clock()->now();
+
+        if ($this->repository->canUpdate($currentTime)) {
+            $this->repository->update($this->persistProjectionDetail(), $currentTime);
+        }
     }
 
     public function freed(): void
     {
-        $this->repository->releaseLock();
+        $this->repository->release();
 
         $this->subscription->setStatus(ProjectionStatus::IDLE);
+    }
+
+    public function close(): void
+    {
+        $this->repository->stop($this->persistProjectionDetail());
+
+        $this->subscription->setStatus(ProjectionStatus::IDLE);
+
+        $this->sprint()->stop();
+    }
+
+    public function restart(): void
+    {
+        $this->subscription->sprint()->continue();
+
+        $this->repository->startAgain();
+
+        $this->subscription->setStatus(ProjectionStatus::RUNNING);
     }
 
     public function disclose(): ProjectionStatus
@@ -69,24 +90,6 @@ trait InteractWithPersistentSubscription
                 $this->sprint()->stop();
             }
         }
-    }
-
-    public function close(): void
-    {
-        $this->repository->stop($this->getProjectionDetail());
-
-        $this->subscription->setStatus(ProjectionStatus::IDLE);
-
-        $this->sprint()->stop();
-    }
-
-    public function restart(): void
-    {
-        $this->subscription->sprint()->continue();
-
-        $this->repository->startAgain();
-
-        $this->subscription->setStatus(ProjectionStatus::RUNNING);
     }
 
     public function projectionName(): string
@@ -116,16 +119,16 @@ trait InteractWithPersistentSubscription
             $this->repository->create($this->subscription->currentStatus());
         }
 
-        $this->repository->acquireLock();
+        $this->repository->start();
 
         $this->subscription->setStatus(ProjectionStatus::RUNNING);
     }
 
-    protected function discoverStreams(): void
+    protected function syncStreams(): void
     {
         $this->streamManager()->watchStreams($this->context()->queries());
 
-        $this->refreshDetail();
+        $this->synchronise();
     }
 
     protected function resetProjection(): void
@@ -135,12 +138,14 @@ trait InteractWithPersistentSubscription
         $this->initializeAgain();
     }
 
-    protected function getProjectionDetail(): ProjectionDetail
+    protected function persistProjectionDetail(): ProjectionDetail
     {
+        $streamPositions = $this->streamManager()->jsonSerialize();
+
         return new ProjectionDetail(
-            $this->streamManager()->jsonSerialize(),
+            $streamPositions['positions'],
             $this->state()->get(),
-            $this->streamManager()->confirmedGaps(),
+            $streamPositions['gaps'],
         );
     }
 }

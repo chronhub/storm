@@ -26,7 +26,7 @@ final class ProjectionFailedTest extends UnitTestCase
     {
         $exceptionRaised = new RuntimeException('foo');
 
-        $exception = ProjectionFailed::fromProjectionException($exceptionRaised);
+        $exception = ProjectionFailed::from($exceptionRaised);
 
         $this->assertInstanceOf(ProjectionFailed::class, $exception);
         $this->assertEquals('foo', $exception->getMessage());
@@ -37,7 +37,7 @@ final class ProjectionFailedTest extends UnitTestCase
     {
         $exceptionRaised = new RuntimeException('foo');
 
-        $exception = ProjectionFailed::fromProjectionException($exceptionRaised, 'bar');
+        $exception = ProjectionFailed::from($exceptionRaised, 'bar');
 
         $this->assertInstanceOf(ProjectionFailed::class, $exception);
         $this->assertEquals('bar', $exception->getMessage());

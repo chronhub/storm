@@ -31,12 +31,12 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             $this->readModel->initialize();
         }
 
-        $this->discoverStreams();
+        $this->syncStreams();
     }
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionDetail());
+        $this->repository->persist($this->persistProjectionDetail(), $this->currentStatus());
 
         $this->readModel->persist();
     }
@@ -45,14 +45,14 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
     {
         $this->resetProjection();
 
-        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
+        $this->repository->reset($this->persistProjectionDetail(), $this->currentStatus());
 
         $this->readModel->reset();
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete(); // todo propagate $withEmittedEvents as info for dispatcher
+        $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->readModel->down();

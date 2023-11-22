@@ -31,7 +31,7 @@ final class RefreshProjectionTest extends UnitTestCase
 
         $this->assertProjectionStatus(ProjectionStatus::STOPPING);
 
-        $this->subscription->expects($this->never())->method('refreshDetail');
+        $this->subscription->expects($this->never())->method('synchronise');
         $this->subscription->expects($this->once())->method('close');
 
         $this->assertStreamPositions();

@@ -6,36 +6,18 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
+use Chronhub\Storm\Contracts\Projector\ProjectorMonitorInterface;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Throwable;
 
-final readonly class ProjectorProvider
+final readonly class ProjectorMonitor implements ProjectorMonitorInterface
 {
     public function __construct(
         private ProjectionProvider $projectionProvider,
         private JsonSerializer $jsonSerializer,
     ) {
-    }
-
-    /**
-     * @throws ProjectionFailed
-     * @throws ProjectionNotFound
-     */
-    public function updateProjectionStatus(string $projectionName, ProjectionStatus $projectionStatus): void
-    {
-        try {
-            $success = $this->projectionProvider->updateProjection(
-                $projectionName, status : $projectionStatus->value
-            );
-        } catch (Throwable $exception) {
-            throw ProjectionFailed::failedOnUpdateStatus($projectionName, $projectionStatus, $exception);
-        }
-
-        if (! $success) {
-            $this->assertProjectionExists($projectionName);
-        }
     }
 
     public function stop(string $projectionName): void
@@ -87,6 +69,23 @@ final readonly class ProjectorProvider
     }
 
     /**
+     * @throws ProjectionFailed
+     * @throws ProjectionNotFound
+     */
+    private function updateProjectionStatus(string $projectionName, ProjectionStatus $projectionStatus): void
+    {
+        try {
+            $this->projectionProvider->updateProjection($projectionName, status : $projectionStatus->value);
+        } catch (Throwable $exception) {
+            if ($exception instanceof ProjectionFailed) {
+                throw $exception;
+            }
+
+            throw ProjectionFailed::failedOnUpdateStatus($projectionName, $projectionStatus, $exception);
+        }
+    }
+
+    /**
      * @throws ProjectionNotFound
      */
     private function tryRetrieveProjectionByName(string $projectionName): ProjectionModel
@@ -98,15 +97,5 @@ final readonly class ProjectorProvider
         }
 
         return $projection;
-    }
-
-    /**
-     * @throws ProjectionNotFound
-     */
-    private function assertProjectionExists(string $projectionName): void
-    {
-        if (! $this->exists($projectionName)) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
     }
 }

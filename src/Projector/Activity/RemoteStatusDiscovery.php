@@ -28,7 +28,7 @@ trait RemoteStatusDiscovery
     private function markAsStop(PersistentSubscriptionInterface $subscription): bool
     {
         if ($this->isFirstExecution()) {
-            $subscription->refreshDetail();
+            $subscription->synchronise();
         }
 
         $subscription->close();

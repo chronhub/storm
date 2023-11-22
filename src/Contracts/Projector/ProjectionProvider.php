@@ -4,32 +4,44 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use LogicException;
+
 interface ProjectionProvider
 {
     /**
      * Create a new projection with the given name and status.
      *
-     * @param  string $projectionName The name of the projection to create.
-     * @param  string $status         The status of the projection.
-     * @return bool   True if the projection was created successfully, false otherwise.
+     * @param string $projectionName The name of the projection to create.
+     * @param string $status         The status of the projection.
+     *
+     * @throws ProjectionAlreadyExists When a projection with the given name already exists.
      */
-    public function createProjection(string $projectionName, string $status): bool;
+    public function createProjection(string $projectionName, string $status): void;
 
     /**
      * Acquire a lock on a projection with the given name and status.
      *
-     * @param  string $projectionName The name of the projection to acquire a lock on.
-     * @param  string $status         The status of the projection.
-     * @param  string $lockedUntil    The datetime until the lock is valid.
-     * @return bool   True if the lock was acquired successfully, false otherwise.
+     * @param string $projectionName The name of the projection to acquire a lock on.
+     * @param string $status         The status of the projection.
+     * @param string $lockedUntil    The datetime until the lock is valid.
+     *
+     * @throws ProjectionNotFound       When a projection with the given name doesn't exist.
+     * @throws ProjectionAlreadyRunning When a projection with the given name is already running.
      */
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil): bool;
+    public function acquireLock(string $projectionName, string $status, string $lockedUntil): void;
 
     /**
      * Update the data for an existing projection.
      *
-     * @param  string $projectionName The name of the projection to update.
-     * @return bool   True if the update was successful, false otherwise.
+     * @param string $projectionName The name of the projection to update.
+     *
+     * @throws ProjectionNotFound When a projection with the given name doesn't exist.
+     * @throws LogicException     When the projection has not acquired locked.
+     * @throws ProjectionFailed   When the projection data cannot be updated.
      */
     public function updateProjection(
         string $projectionName,
@@ -38,15 +50,17 @@ interface ProjectionProvider
         string $positions = null,
         string $gaps = null,
         bool|string|null $lockedUntil = false
-    ): bool;
+    ): void;
 
     /**
      * Delete the data for an existing projection.
      *
-     * @param  string $projectionName The name of the projection to delete.
-     * @return bool   True if the deletion was successful, false otherwise.
+     * @param string $projectionName The name of the projection to delete.
+     *
+     * @throws ProjectionNotFound When a projection with the given name doesn't exist.
+     * @throws ProjectionFailed   When the projection data cannot be deleted.
      */
-    public function deleteProjection(string $projectionName): bool;
+    public function deleteProjection(string $projectionName): void;
 
     /**
      * Retrieve the data for an existing projection.
@@ -60,15 +74,14 @@ interface ProjectionProvider
      * Filter projections by their names.
      *
      * @param  string        ...$projectionNames The names of the projections to filter.
-     * @return array{string} An array of projection names that match the given names.
+     * @return array{string} An array of string projection names that match the given names.
      */
     public function filterByNames(string ...$projectionNames): array;
 
     /**
      * Check if a projection with the given name exists.
      *
-     * @param  string $projectionName The name of the projection to check.
-     * @return bool   True if the projection exists, false otherwise.
+     * @param string $projectionName The name of the projection to check.
      */
     public function exists(string $projectionName): bool;
 }

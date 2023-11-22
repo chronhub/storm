@@ -133,7 +133,7 @@ class StreamManagerTest extends UnitTestCase
 
         $streamManager->watchStreams(['names' => ['foo']]);
 
-        $streamManager->discoverStreams(['bar' => 2]);
+        $streamManager->syncStreams(['bar' => 2]);
 
         $this->assertEquals(['foo' => 0, 'bar' => 2], $streamManager->jsonSerialize());
     }
@@ -149,7 +149,7 @@ class StreamManagerTest extends UnitTestCase
 
         $this->assertEquals(['foo' => 0], $streamManager->jsonSerialize());
 
-        $streamManager->discoverStreams(['foo' => 5, 'bar' => 2]);
+        $streamManager->syncStreams(['foo' => 5, 'bar' => 2]);
 
         $this->assertEquals(['foo' => 5, 'bar' => 2], $streamManager->jsonSerialize());
     }

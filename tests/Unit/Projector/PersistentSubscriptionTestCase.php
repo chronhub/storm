@@ -76,7 +76,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $this->repository->expects($this->once())->method('exists')->willReturn(false);
         $this->repository->expects($this->once())->method('create')->with(ProjectionStatus::IDLE);
-        $this->repository->expects($this->once())->method('acquireLock');
+        $this->repository->expects($this->once())->method('start');
         $this->repository->expects($this->once())->method('loadDetail')->willReturn(
             [['stream_name' => 25], ['counter' => 100]]
         );
@@ -166,7 +166,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $this->assertEquals([], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 0], $subscription->state()->get());
 
-        $subscription->refreshDetail();
+        $subscription->synchronise();
 
         $this->assertEquals(['stream_name' => 25], $subscription->streamManager()->jsonSerialize());
         $this->assertEquals(['counter' => 100], $subscription->state()->get());
@@ -183,7 +183,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateStreamPositions')
+            ->method('update')
             ->with(['stream_name' => 25])
             ->willReturn(true);
 
@@ -200,7 +200,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $subscription->setStatus(ProjectionStatus::RUNNING);
         $subscription->compose($context, $this->caster, false);
 
-        $this->repository->expects($this->once())->method('releaseLock')->willReturn(true);
+        $this->repository->expects($this->once())->method('release')->willReturn(true);
 
         $subscription->freed();
 

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Repository;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateTimeImmutable;
 
+// todo test
 class LockManager
 {
     private ?DateTimeImmutable $lastLock = null;
@@ -24,58 +25,38 @@ class LockManager
 
     /**
      * Acquires a lock and returns the new lock value.
-     *
-     * @return string The new lock value.
      */
     public function acquire(): string
-    {
-        $this->lastLock = $this->clock->now();
-
-        return $this->increment();
-    }
-
-    /**
-     * Attempts to set or update the lock if it has exceeded the lock threshold.
-     *
-     * @return bool Whether the lock was updated.
-     */
-    public function tryUpdate(): bool
-    {
-        $now = $this->clock->now();
-
-        if ($this->shouldUpdateLock($now)) {
-            $this->lastLock = $now;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Refreshes the lock with current time and returns the new lock value.
-     *
-     * @return string The new lock value.
-     */
-    public function refresh(): string
     {
         return $this->updateLockWithTimeout($this->clock->now());
     }
 
     /**
-     * Increments the lock and returns the new lock value.
-     *
-     * @return string The new lock value.
+     * Refreshes the lock with current time and returns the new lock value.
      */
-    public function increment(): string
+    public function refresh(DateTimeImmutable $currentTime): string
     {
-        return $this->updateLockWithTimeout($this->lastLock);
+        return $this->updateLockWithTimeout($currentTime);
+    }
+
+    /**
+     * Ensures that the lock can be refreshed when the current lock
+     * with the threshold is greater than the current time,
+     * indicating that the lock is close to expiration.
+     */
+    public function shouldRefresh(DateTimeImmutable $currentTime): bool
+    {
+        if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
+            return true;
+        }
+
+        $lockWithThreshold = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
+
+        return $this->clock->isGreaterThan($lockWithThreshold, $currentTime);
     }
 
     /**
      * Returns the current lock value.
-     *
-     * @return string The current lock value
      */
     public function current(): string
     {
@@ -85,24 +66,12 @@ class LockManager
     /**
      * Updates the lock with a new timeout and returns the new lock value.
      *
-     * @param  DateTimeImmutable $dateTime The new expiration time.
-     * @return string            The new lock value.
+     * @param DateTimeImmutable $dateTime The new expiration time.
      */
     private function updateLockWithTimeout(DateTimeImmutable $dateTime): string
     {
         $this->lastLock = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
 
         return $this->current();
-    }
-
-    private function shouldUpdateLock(DateTimeImmutable $currentTime): bool
-    {
-        if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
-            return true;
-        }
-
-        $incrementedLock = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
-
-        return $this->clock->isGreaterThan($incrementedLock, $currentTime);
     }
 }

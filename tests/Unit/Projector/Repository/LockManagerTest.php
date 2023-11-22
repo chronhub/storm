@@ -8,6 +8,7 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function sleep;
 
 #[CoversClass(LockManager::class)]
@@ -31,13 +32,13 @@ final class LockManagerTest extends UnitTestCase
     {
         $this->lockManager->acquire();
 
-        $updated = $this->lockManager->tryUpdate();
+        $updated = $this->lockManager->update();
 
         $this->assertFalse($updated);
 
         sleep(2);
 
-        $updated = $this->lockManager->tryUpdate();
+        $updated = $this->lockManager->update();
 
         $this->assertTrue($updated);
     }
@@ -79,6 +80,6 @@ final class LockManagerTest extends UnitTestCase
 
         $this->lockManager->acquire();
 
-        $this->assertTrue($lockManager->tryUpdate());
+        $this->assertTrue($lockManager->update());
     }
 }

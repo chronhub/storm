@@ -17,18 +17,20 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Repository\EventAwareProjectionRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
-use Chronhub\Storm\Projector\Repository\ProjectionRepository;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
+use Illuminate\Contracts\Events\Dispatcher;
 
 use function array_merge;
 
-abstract class AbstractSubscriptionFactory
+abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
     public function __construct(
         public readonly Chronicler $chronicler,
@@ -38,6 +40,7 @@ abstract class AbstractSubscriptionFactory
         public readonly SystemClock $clock,
         public readonly MessageAlias $messageAlias,
         public readonly JsonSerializer $jsonSerializer,
+        public readonly Dispatcher $dispatcher,
         public readonly ProjectionOption|array $options = []
     ) {
     }
@@ -95,14 +98,9 @@ abstract class AbstractSubscriptionFactory
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
-    protected function createRepository(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
+    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventAwareProjectionRepository
     {
-        return new ProjectionRepository(
-            $this->projectionProvider,
-            $this->createLockManager($options),
-            $this->jsonSerializer,
-            $streamName
-        );
+        return new EventAwareProjectionRepository($projectionRepository, $this->dispatcher);
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager

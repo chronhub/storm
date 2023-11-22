@@ -358,12 +358,12 @@ final class InMemoryRepositoryTest extends UnitTestCase
     {
         $this->repository
             ->expects(self::once())
-            ->method('acquireLock')
+            ->method('start')
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->acquireLock());
+        $this->assertTrue($connectionProvider->start());
     }
 
     public function testQueryFailureRaisedWhenAcquireLockFailed(): void
@@ -372,13 +372,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('acquireLock')
+            ->method('start')
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->acquireLock();
+            $connectionProvider->start();
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -398,25 +398,25 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('acquireLock')
+            ->method('start')
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->acquireLock();
+        $connectionProvider->start();
     }
 
     public function testUpdateLock(): void
     {
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateStreamPositions')
+            ->method('update')
             ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->attemptUpdateStreamPositions(['foo' => 10, 'bar' => 25]));
+        $this->assertTrue($connectionProvider->update(['foo' => 10, 'bar' => 25]));
     }
 
     public function testQueryFailureRaisedWhenUpdateLockFailed(): void
@@ -425,14 +425,14 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateStreamPositions')
+            ->method('update')
             ->with(['foo' => 110, 'bar' => 251])
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->attemptUpdateStreamPositions(['foo' => 110, 'bar' => 251]);
+            $connectionProvider->update(['foo' => 110, 'bar' => 251]);
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -452,25 +452,25 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('attemptUpdateStreamPositions')
+            ->method('update')
             ->with(['foo' => 10, 'bar' => 25])
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->attemptUpdateStreamPositions(['foo' => 10, 'bar' => 25]);
+        $connectionProvider->update(['foo' => 10, 'bar' => 25]);
     }
 
     public function testReleaseLock(): void
     {
         $this->repository
             ->expects($this->once())
-            ->method('releaseLock')
+            ->method('release')
             ->willReturn(true);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $this->assertTrue($connectionProvider->releaseLock());
+        $this->assertTrue($connectionProvider->release());
     }
 
     public function testQueryFailureRaisedWhenReleaseLockFailed(): void
@@ -479,13 +479,13 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('releaseLock')
+            ->method('release')
             ->willThrowException($this->someException);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
         try {
-            $connectionProvider->releaseLock();
+            $connectionProvider->release();
         } catch (InMemoryProjectionFailed $e) {
             $this->assertEquals($this->someException, $e->getPrevious());
 
@@ -505,12 +505,12 @@ final class InMemoryRepositoryTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('releaseLock')
+            ->method('release')
             ->willReturn(false);
 
         $connectionProvider = new InMemoryRepository($this->repository);
 
-        $connectionProvider->releaseLock();
+        $connectionProvider->release();
     }
 
     public function testLoadProjectionStatus(): void
