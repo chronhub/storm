@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 
-// todo test
 class LockManager
 {
     private ?DateTimeImmutable $lastLock = null;
 
     /**
-     * @param int<0,max> $lockTimeoutMs The duration for which a lock is valid, in milliseconds
-     * @param int<0,max> $lockThreshold The duration after which a lock should be refreshed, in milliseconds
+     * @param positive-int $lockTimeout   The duration for which a lock is valid, in milliseconds
+     * @param int<0,max>   $lockThreshold The duration after which a lock should be refreshed, in milliseconds
      */
     public function __construct(
-        private readonly SystemClock $clock,
-        private readonly int $lockTimeoutMs,
-        private readonly int $lockThreshold
+        protected readonly SystemClock $clock,
+        public readonly int $lockTimeout,
+        public readonly int $lockThreshold
     ) {
     }
 
@@ -28,50 +28,46 @@ class LockManager
      */
     public function acquire(): string
     {
-        return $this->updateLockWithTimeout($this->clock->now());
+        $this->lastLock = $this->clock->now();
+
+        return $this->current();
     }
 
     /**
-     * Refreshes the lock with current time and returns the new lock value.
+     * Refreshes the lock returns the new lock value.
      */
-    public function refresh(DateTimeImmutable $currentTime): string
+    public function refresh(): string
     {
-        return $this->updateLockWithTimeout($currentTime);
+        $this->lastLock = $this->clock->now()->modify('+'.$this->lockTimeout.' milliseconds');
+
+        return $this->current();
     }
 
     /**
-     * Determines whether the lock should be refreshed
-     * based on the current time and lock settings.
+     * Determines whether the lock should be refreshed.
      */
-    public function shouldRefresh(DateTimeImmutable $currentTime): bool
+    public function shouldRefresh(): bool
     {
-        // fixMe test scenarios when lastLock is null
-        if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
+        if ($this->lastLock === null || $this->lockThreshold === 0) {
             return true;
         }
 
-        $remainingTime = $this->lastLock->getTimestamp() - $currentTime->getTimestamp();
+        $adjustedLock = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
 
-        return $remainingTime < $this->lockThreshold;
+        return $adjustedLock < $this->clock->now();
     }
 
     /**
      * Returns the current lock value.
+     *
+     * @throws RuntimeException When lock is not acquired
      */
     public function current(): string
     {
+        if ($this->lastLock === null) {
+            throw new RuntimeException('Lock is not acquired');
+        }
+
         return $this->lastLock->format($this->clock->getFormat());
-    }
-
-    /**
-     * Updates the lock with a new timeout and returns the new lock value.
-     *
-     * @param DateTimeImmutable $dateTime The new expiration time.
-     */
-    private function updateLockWithTimeout(DateTimeImmutable $dateTime): string
-    {
-        $this->lastLock = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
-
-        return $this->current();
     }
 }

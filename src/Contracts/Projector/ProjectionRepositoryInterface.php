@@ -8,10 +8,8 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
-use DateTimeImmutable;
 
 interface ProjectionRepositoryInterface
 {
@@ -28,26 +26,16 @@ interface ProjectionRepositoryInterface
      * @throws ProjectionAlreadyRunning When another projection has already acquired the lock.
      * @throws ProjectionFailed         When the lock cannot be acquired.
      */
-    public function start(): void;
+    public function start(ProjectionStatus $projectionStatus): void;
 
     /**
      * Persists projection data
      *
-     * when current time is given we check if we can update projection data
-     * with a new refresh lock, otherwise we just acquire a new lock
+     * Projection status only meant to be IDLE when projection is stopped
      *
      * @throws ProjectionFailed When projection data cannot be stored.
-     * @throws RuntimeException When update lock failed if current time is given
      */
-    public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void;
-
-    /**
-     * Persists projection data when lock threshold is reached
-     *
-     * @throws ProjectionFailed When projection data cannot be stored.
-     * @throws RuntimeException When refresh lock failed
-     */
-    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void;
+    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void;
 
     /**
      * Stops the projection and store data.
@@ -55,7 +43,7 @@ interface ProjectionRepositoryInterface
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection data cannot be stored.
      */
-    public function stop(ProjectionDetail $projectionDetail): void;
+    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void;
 
     /**
      * Starts the projection again.
@@ -63,7 +51,7 @@ interface ProjectionRepositoryInterface
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection failed to update data.
      */
-    public function startAgain(): void;
+    public function startAgain(ProjectionStatus $projectionStatus): void;
 
     /**
      * Resets projection data.
@@ -81,9 +69,9 @@ interface ProjectionRepositoryInterface
     public function delete(bool $withEmittedEvents): void;
 
     /**
-     * Should update projection data based on current time.
+     * Update lock when lock threshold is reached
      */
-    public function canRefreshLock(DateTimeImmutable $currentTime): bool;
+    public function updateLock(): void;
 
     /**
      * Releases the lock for the projection.

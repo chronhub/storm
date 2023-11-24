@@ -36,7 +36,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
 
     public function store(): void
     {
-        $this->repository->persist($this->persistProjectionDetail(), $this->currentStatus());
+        $this->repository->persist($this->persistProjectionDetail(), null);
 
         $this->readModel->persist();
     }

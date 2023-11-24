@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Clock;
 
+use const STR_PAD_LEFT;
+
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
-use Exception;
-use Symfony\Component\Clock\MonotonicClock;
+use RuntimeException;
+use Throwable;
 
+use function explode;
+use function hrtime;
 use function is_string;
+use function microtime;
 use function preg_match;
 use function sleep;
+use function str_pad;
+use function strlen;
 use function strtoupper;
 use function usleep;
 
@@ -28,33 +35,55 @@ final readonly class PointInTime implements SystemClock
     /**
      * @var string
      */
-    final public const PATTERN = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/';
+    final public const PATTERN = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}$/';
 
     private DateTimeZone $timezone;
 
+    private int $sOffset;
+
+    private int $usOffset;
+
     public function __construct()
     {
+        $this->initializeOffsets();
+
         $this->timezone = new DateTimeZone('UTC');
     }
 
     public function now(): DateTimeImmutable
     {
-        return (new MonotonicClock($this->timezone))->now();
+        [$s, $us] = hrtime();
+
+        if (1000000 <= $us = (int) ($us / 1000) + $this->usOffset) {
+            $s++;
+            $us -= 1000000;
+        } elseif ($us < 0) {
+            $s--;
+            $us += 1000000;
+        }
+
+        if (strlen($now = (string) $us) !== 6) {
+            $now = str_pad($now, 6, '0', STR_PAD_LEFT);
+        }
+
+        $now = '@'.($s + $this->sOffset).'.'.$now;
+
+        return (new DateTimeImmutable($now, $this->timezone))->setTimezone($this->timezone);
     }
 
-    public function nowToString(): string
+    public function toString(): string
     {
         return $this->now()->format(self::DATE_TIME_FORMAT);
     }
 
     public function isGreaterThan(DateTimeImmutable|string $pointInTime, DateTimeImmutable|string $anotherPointInTime): bool
     {
-        return $this->toDateTimeImmutable($pointInTime) > $this->toDateTimeImmutable($anotherPointInTime);
+        return $this->toPointInTime($pointInTime) > $this->toPointInTime($anotherPointInTime);
     }
 
     public function isGreaterThanNow(DateTimeImmutable|string $pointInTime): bool
     {
-        return $this->now() < $this->toDateTimeImmutable($pointInTime);
+        return $this->now() < $this->toPointInTime($pointInTime);
     }
 
     public function isNowSubGreaterThan(DateInterval|string $interval, DateTimeImmutable|string $pointInTime): bool
@@ -63,7 +92,28 @@ final readonly class PointInTime implements SystemClock
             $interval = new DateInterval(strtoupper($interval));
         }
 
-        return $this->now()->sub($interval) > $this->toDateTimeImmutable($pointInTime);
+        return $this->now()->sub($interval) > $this->toPointInTime($pointInTime);
+    }
+
+    public function toPointInTime(DateTimeImmutable|string $pointInTime): DateTimeImmutable
+    {
+        if ($pointInTime instanceof DateTimeImmutable) {
+            if ($pointInTime->getTimezone()->getName() !== $this->timezone->getName()) {
+                throw new DomainException('Point in time must be in UTC timezone');
+            }
+
+            $pointInTime = $pointInTime->format(self::DATE_TIME_FORMAT);
+        }
+
+        if (! preg_match(self::PATTERN, $pointInTime)) {
+            throw new DomainException("Point in time given has an invalid format: $pointInTime");
+        }
+
+        try {
+            return (new DateTimeImmutable($pointInTime, $this->timezone))->setTimezone($this->timezone);
+        } catch (Throwable $e) {
+            throw new DomainException("Invalid point in time given: $pointInTime", 0, $e);
+        }
     }
 
     public function sleep(float|int $seconds): void
@@ -77,26 +127,9 @@ final readonly class PointInTime implements SystemClock
         }
     }
 
-    public function toDateTimeImmutable(string|DateTimeImmutable $pointInTime): DateTimeImmutable
+    public function format(DateTimeImmutable|string $pointInTime): string
     {
-        if ($pointInTime instanceof DateTimeImmutable) {
-            return $pointInTime;
-        }
-
-        if (! preg_match(self::PATTERN, $pointInTime)) {
-            throw new DomainException("Point in time given has an invalid format: $pointInTime");
-        }
-
-        try {
-            return new DateTimeImmutable($pointInTime, $this->timezone);
-        } catch (Exception $e) {
-            throw new DomainException("Invalid point in time given: $pointInTime", 0, $e);
-        }
-    }
-
-    public function format(string|DateTimeImmutable $pointInTime): string
-    {
-        return $this->toDateTimeImmutable($pointInTime)->format(self::DATE_TIME_FORMAT);
+        return $this->toPointInTime($pointInTime)->format(self::DATE_TIME_FORMAT);
     }
 
     public function getFormat(): string
@@ -104,8 +137,16 @@ final readonly class PointInTime implements SystemClock
         return self::DATE_TIME_FORMAT;
     }
 
-    public function withTimeZone(DateTimeZone|string $timezone): static
+    private function initializeOffsets(): void
     {
-        throw new DomainException('Point in time use immutable UTC date time zone by default');
+        $offset = hrtime();
+
+        if ($offset === false) {
+            throw new RuntimeException('hrtime() returned false: the runtime environment does not provide access to a monotonic timer.');
+        }
+
+        $time = explode(' ', microtime(), 2);
+        $this->sOffset = $time[1] - $offset[0];
+        $this->usOffset = (int) ($time[0] * 1000000) - (int) ($offset[1] / 1000);
     }
 }

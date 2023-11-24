@@ -7,102 +7,101 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
-use Chronhub\Storm\Tests\UnitTestCase;
-use Illuminate\Support\Collection;
-use PHPUnit\Framework\MockObject\MockObject;
 
-class EventStreamLoaderTest extends UnitTestCase
-{
-    private EventStreamProvider|MockObject $eventStreamProvider;
+beforeEach(function () {
+    $this->provider = $this->createMock(EventStreamProvider::class);
+    $this->loader = new EventStreamLoader($this->provider);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+describe('test load from', function () {
+    test('all', function () {
+        $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn(['stream1', 'stream2']);
 
-        $this->eventStreamProvider = $this->createMock(EventStreamProvider::class);
-    }
+        $result = $this->loader->loadFrom(['all' => true]);
 
-    public function testLoadFromAll(): void
-    {
-        $this->eventStreamProvider->expects($this->once())
-            ->method('allWithoutInternal')
-            ->willReturn(['stream1', 'stream2']);
+        expect($result->toArray())->toBe(['stream1', 'stream2']);
+    });
 
-        $result = $this->newEventStreamLoader()->loadFrom(['all' => true]);
+    test('categories', function () {
+        $this->provider->expects($this->once())->method('filterByAscendantCategories')->with(['category1', 'category2'])->willReturn(['stream3', 'stream4']);
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertEquals(['stream1', 'stream2'], $result->toArray());
-    }
+        $result = $this->loader->loadFrom(['categories' => ['category1', 'category2']]);
 
-    public function testLoadFromCategories(): void
-    {
-        $this->eventStreamProvider->expects($this->once())
-            ->method('filterByAscendantCategories')
-            ->with(['category1', 'category2'])
-            ->willReturn(['stream3', 'stream4']);
+        expect($result->toArray())->toBe(['stream3', 'stream4']);
+    });
 
-        $result = $this->newEventStreamLoader()->loadFrom(['categories' => ['category1', 'category2']]);
+    test('stream names', function () {
+        $this->provider->expects($this->never())->method('allWithoutInternal');
+        $this->provider->expects($this->never())->method('filterByAscendantCategories');
+        $this->provider->expects($this->never())->method('filterByAscendantStreams');
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertEquals(['stream3', 'stream4'], $result->toArray());
-    }
+        $result = $this->loader->loadFrom(['names' => ['stream5', 'stream6']]);
 
-    public function testLoadFromNames(): void
-    {
-        $this->eventStreamProvider->expects($this->never())
-            ->method('allWithoutInternal');
+        expect($result->toArray())->toBe(['stream5', 'stream6']);
+    });
+});
 
-        $loader = new EventStreamLoader($this->eventStreamProvider);
+describe('raise exception when', function () {
+    test('no stream set', function () {
+        $this->provider->expects($this->never())->method('allWithoutInternal');
+        $this->provider->expects($this->never())->method('filterByAscendantCategories');
+        $this->provider->expects($this->never())->method('filterByAscendantStreams');
 
-        $result = $loader->loadFrom(['names' => ['stream5', 'stream6']]);
-
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertEquals(['stream5', 'stream6'], $result->toArray());
-    }
-
-    public function testLoadFromEmptyStreamNames(): void
-    {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('No stream set or found');
 
-        $this->newEventStreamLoader()->loadFrom(['names' => []]);
-    }
+        $this->loader->loadFrom([]);
+    });
 
-    public function testLoadFromDuplicateStreamNames(): void
-    {
+    test('return empty stream names', function () {
+        $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn([]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No stream set or found');
+
+        $this->loader->loadFrom(['all' => true]);
+    });
+
+    test('return empty categories', function () {
+        $this->provider->expects($this->once())->method('filterByAscendantCategories')->with(['category1', 'category2'])->willReturn([]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No stream set or found');
+
+        $this->loader->loadFrom(['categories' => ['category1', 'category2']]);
+    });
+
+    test('return empty all', function () {
+        $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn([]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No stream set or found');
+
+        $this->loader->loadFrom(['all' => true]);
+    });
+
+    test('duplicate stream names', function () {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
-        $this->newEventStreamLoader()->loadFrom(['names' => ['duplicate', 'duplicate']]);
-    }
+        $this->loader->loadFrom(['names' => ['duplicate', 'duplicate']]);
+    });
 
-    public function testLoadFromDuplicateCategories(): void
-    {
+    test('duplicate from categories', function () {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
-        $this->eventStreamProvider->expects($this->once())
-            ->method('filterByAscendantCategories')
-            ->with(['category1', 'category2'])
-            ->willReturn(['duplicate', 'duplicate']);
+        $this->provider->expects($this->once())->method('filterByAscendantCategories')->with(['foo', 'bar'])->willReturn(['duplicate', 'duplicate']);
 
-        $this->newEventStreamLoader()->loadFrom(['categories' => ['category1', 'category2']]);
-    }
+        $this->loader->loadFrom(['categories' => ['foo', 'bar']]);
+    });
 
-    public function testLoadFromDuplicateAll(): void
-    {
+    test('duplicate from all', function () {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
-        $this->eventStreamProvider->expects($this->once())
-            ->method('allWithoutInternal')
-            ->willReturn(['duplicate', 'duplicate']);
+        $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn(['duplicate', 'duplicate']);
 
-        $this->newEventStreamLoader()->loadFrom(['all' => true]);
-    }
-
-    private function newEventStreamLoader(): EventStreamLoader
-    {
-        return new EventStreamLoader($this->eventStreamProvider);
-    }
-}
+        $this->loader->loadFrom(['all' => true]);
+    });
+});

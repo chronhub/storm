@@ -9,9 +9,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use DateTimeImmutable;
 
 final readonly class InMemoryRepository implements ProjectionRepositoryInterface
 {
@@ -28,18 +26,18 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         $this->provider->createProjection($this->streamName, $status->value);
     }
 
-    public function start(): void
+    public function start(ProjectionStatus $projectionStatus): void
     {
         $this->provider->acquireLock(
             $this->streamName,
-            ProjectionStatus::RUNNING->value,
+            $projectionStatus->value,
             $this->lockManager->acquire(),
         );
     }
 
-    public function stop(ProjectionDetail $projectionDetail): void
+    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
-        $this->persist($projectionDetail, ProjectionStatus::IDLE, null);
+        $this->persist($projectionDetail, $projectionStatus);
     }
 
     public function release(): void
@@ -51,38 +49,24 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         );
     }
 
-    public function startAgain(): void
+    public function startAgain(ProjectionStatus $projectionStatus): void
     {
         $this->provider->updateProjection(
             $this->streamName,
-            status: ProjectionStatus::RUNNING->value,
+            status: $projectionStatus->value,
             lockedUntil: $this->lockManager->acquire(),
         );
     }
 
-    public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
+    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
     {
         $this->provider->updateProjection(
             $this->streamName,
-            status: $currentStatus->value,
+            status: $projectionStatus?->value,
             state: $this->serializer->encode($projectionDetail->state),
             positions: $this->serializer->encode($projectionDetail->streamPositions),
             gaps: $this->serializer->encode($projectionDetail->streamGaps),
-            lockedUntil: $this->lockManager->acquire()
-        );
-    }
-
-    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
-    {
-        if (! $this->canRefreshLock($currentTime)) {
-            throw new RuntimeException('Cannot update projection lock with given time');
-        }
-
-        $this->provider->updateProjection(
-            $this->streamName,
-            positions: $this->serializer->encode($projectionDetail->streamPositions),
-            gaps: $this->serializer->encode($projectionDetail->streamGaps),
-            lockedUntil: $this->lockManager->refresh($currentTime)
+            lockedUntil: $this->lockManager->refresh()
         );
     }
 
@@ -117,6 +101,16 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         );
     }
 
+    public function updateLock(): void
+    {
+        if ($this->lockManager->shouldRefresh()) {
+            $this->provider->updateProjection(
+                $this->streamName,
+                lockedUntil: $this->lockManager->refresh()
+            );
+        }
+    }
+
     public function loadStatus(): ProjectionStatus
     {
         $projection = $this->provider->retrieve($this->streamName);
@@ -126,11 +120,6 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         }
 
         return ProjectionStatus::from($projection->status());
-    }
-
-    public function canRefreshLock(DateTimeImmutable $currentTime): bool
-    {
-        return $this->lockManager->shouldRefresh($currentTime);
     }
 
     public function exists(): bool

@@ -55,14 +55,7 @@ trait InteractWithPersistentSubscription
 
     public function update(): void
     {
-        $currentTime = $this->clock()->now();
-
-        if ($this->repository->canRefreshLock($currentTime)) {
-            $this->repository->persistWhenLockThresholdIsReached(
-                $this->persistProjectionDetail(),
-                $currentTime
-            );
-        }
+        $this->repository->updateLock();
     }
 
     public function freed(): void
@@ -74,9 +67,11 @@ trait InteractWithPersistentSubscription
 
     public function close(): void
     {
-        $this->repository->stop($this->persistProjectionDetail());
+        $idleStatus = ProjectionStatus::IDLE;
 
-        $this->subscription->setStatus(ProjectionStatus::IDLE);
+        $this->repository->stop($this->persistProjectionDetail(), $idleStatus);
+
+        $this->subscription->setStatus($idleStatus);
 
         $this->sprint()->stop();
     }
@@ -85,9 +80,11 @@ trait InteractWithPersistentSubscription
     {
         $this->subscription->sprint()->continue();
 
-        $this->repository->startAgain();
+        $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->subscription->setStatus(ProjectionStatus::RUNNING);
+        $this->repository->startAgain($runningStatus);
+
+        $this->subscription->setStatus($runningStatus);
     }
 
     public function disclose(): ProjectionStatus
@@ -122,9 +119,11 @@ trait InteractWithPersistentSubscription
             $this->repository->create($this->subscription->currentStatus());
         }
 
-        $this->repository->start();
+        $status = ProjectionStatus::RUNNING;
 
-        $this->subscription->setStatus(ProjectionStatus::RUNNING);
+        $this->repository->start($status);
+
+        $this->subscription->setStatus($status);
     }
 
     protected function syncStreams(): void

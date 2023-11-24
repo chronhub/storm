@@ -34,7 +34,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
 
     public function store(): void
     {
-        $this->repository->persist($this->persistProjectionDetail(), $this->currentStatus());
+        $this->repository->persist($this->persistProjectionDetail(), null);
     }
 
     public function discard(bool $withEmittedEvents): void

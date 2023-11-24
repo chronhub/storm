@@ -10,6 +10,16 @@ class Sprint
 
     protected bool $inProgress = false;
 
+    public function continue(): void
+    {
+        $this->inProgress = true;
+    }
+
+    public function stop(): void
+    {
+        $this->inProgress = false;
+    }
+
     public function runInBackground(bool $runInBackground): void
     {
         $this->runInBackground = $runInBackground;
@@ -23,15 +33,5 @@ class Sprint
     public function inProgress(): bool
     {
         return $this->inProgress;
-    }
-
-    public function stop(): void
-    {
-        $this->inProgress = false;
-    }
-
-    public function continue(): void
-    {
-        $this->inProgress = true;
     }
 }

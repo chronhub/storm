@@ -8,12 +8,19 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 final class EventCounter
 {
+    /**
+     * @var int<0,max>
+     */
     private int $counter = 0;
 
+    /**
+     * @param positive-int $limit
+     */
     public function __construct(public readonly int $limit)
     {
+        /** @phpstan-ignore-next-line  */
         if ($limit < 1) {
-            throw new InvalidArgumentException('Limit must be greater than 0');
+            throw new InvalidArgumentException('Event counter limit must be greater than 0');
         }
     }
 
@@ -34,7 +41,7 @@ final class EventCounter
 
     public function isReached(): bool
     {
-        return $this->counter === $this->limit;
+        return $this->counter >= $this->limit;
     }
 
     public function current(): int

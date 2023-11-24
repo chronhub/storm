@@ -17,7 +17,7 @@ use function usleep;
  * todo make contract for persistent manager and non persistent
  *
  * @template TStream of array<non-empty-string,int>
- * @template TGap of array<int<1,max>>
+ * @template TGap of array<int<positive-int>>
  */
 final class StreamManager implements JsonSerializable
 {
@@ -26,9 +26,9 @@ final class StreamManager implements JsonSerializable
     private bool $gapDetected = false;
 
     /**
-     * @var GapsCollection{array<int,bool} GapsCollection
+     * @var GapCollection{array<int,bool} GapsCollection
      */
-    private GapsCollection $gaps;
+    private GapCollection $gaps;
 
     /**
      * @var Collection<string,int>
@@ -36,16 +36,16 @@ final class StreamManager implements JsonSerializable
     private Collection $streamPosition;
 
     /**
-     * @param array       $retriesInMs      The array of retry durations in milliseconds.
-     * @param string|null $detectionWindows The detection window for resetting projection.
+     * @param array<int<0,max>>     $retriesInMs      The array of retry durations in milliseconds.
+     * @param non-empty-string|null $detectionWindows The detection window for resetting projection.
      */
     public function __construct(
         private readonly EventStreamLoader $eventStreamLoader,
         private readonly SystemClock $clock,
-        private readonly array $retriesInMs,
-        private readonly ?string $detectionWindows = null
+        public readonly array $retriesInMs,
+        public readonly ?string $detectionWindows = null
     ) {
-        $this->gaps = new GapsCollection();
+        $this->gaps = new GapCollection();
         $this->streamPosition = new Collection();
     }
 
@@ -66,8 +66,8 @@ final class StreamManager implements JsonSerializable
     /**
      * Merges remote/local stream positions and gaps.
      *
-     * @param TStream           $streamsPositions
-     * @param array<int<1,max>> $streamGaps
+     * @param TStream             $streamsPositions
+     * @param array<positive-int> $streamGaps
      */
     public function syncStreams(array $streamsPositions, array $streamGaps): void
     {
@@ -145,7 +145,7 @@ final class StreamManager implements JsonSerializable
     {
         $this->streamPosition = new Collection();
 
-        $this->gaps = new GapsCollection();
+        $this->gaps = new GapCollection();
 
         $this->resetGap();
     }
@@ -171,7 +171,7 @@ final class StreamManager implements JsonSerializable
      * note: this method should only be called to persist projection
      * as we filter unconfirmed gaps locally
      *
-     * @return array{positions: array<string,int>, gaps: array<int>}
+     * @return array{positions: array<string,int>, gaps: array<positive-int>}
      */
     public function jsonSerialize(): array
     {

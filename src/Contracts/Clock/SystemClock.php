@@ -6,30 +6,32 @@ namespace Chronhub\Storm\Contracts\Clock;
 
 use DateInterval;
 use DateTimeImmutable;
-use Symfony\Component\Clock\ClockInterface;
+use Psr\Clock\ClockInterface;
 
 interface SystemClock extends ClockInterface
 {
-    public function nowToString(): string;
+    public function toString(): string;
 
-    public function toDateTimeImmutable(string|DateTimeImmutable $pointInTime): DateTimeImmutable;
+    public function toPointInTime(DateTimeImmutable|string $pointInTime): DateTimeImmutable;
 
-    public function format(string|DateTimeImmutable $pointInTime): string;
+    public function sleep(float|int $seconds): void;
+
+    public function format(DateTimeImmutable|string $pointInTime): string;
 
     /**
      * Compare datetime greater than given point in time.
      */
-    public function isGreaterThan(string|DateTimeImmutable $pointInTime, string|DateTimeImmutable $anotherPointInTime): bool;
+    public function isGreaterThan(DateTimeImmutable|string $pointInTime, DateTimeImmutable|string $anotherPointInTime): bool;
 
     /**
      * Compare now datetime greater than given point in time.
      */
-    public function isGreaterThanNow(string|DateTimeImmutable $pointInTime): bool;
+    public function isGreaterThanNow(DateTimeImmutable|string $pointInTime): bool;
 
     /**
      * Compare now datetime subtracted by interval with given point in time.
      */
-    public function isNowSubGreaterThan(string|DateInterval $interval, string|DateTimeImmutable $pointInTime): bool;
+    public function isNowSubGreaterThan(DateInterval|string $interval, DateTimeImmutable|string $pointInTime): bool;
 
     public function getFormat(): string;
 }

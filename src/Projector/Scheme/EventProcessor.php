@@ -73,7 +73,7 @@ final readonly class EventProcessor
     }
 
     /**
-     * @throws InvalidArgumentException when event time header is null
+     * @throws InvalidArgumentException when event time header is not a string or DateTimeImmutable
      */
     private function getEventTime(Subscription $subscription, DomainEvent $event): DateTimeImmutable|string|false
     {

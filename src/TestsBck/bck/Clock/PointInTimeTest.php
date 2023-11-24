@@ -10,6 +10,7 @@ use DateInterval;
 use DomainException;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function date_default_timezone_get;
 use function microtime;
 use function usleep;
@@ -115,7 +116,7 @@ final class PointInTimeTest extends UnitTestCase
         $clock = new PointInTime();
         $now = $clock->now();
 
-        $toDatetime = $clock->toDateTimeImmutable($now);
+        $toDatetime = $clock->toPointInTime($now);
 
         $this->assertEquals($now, $toDatetime);
         $this->assertSame($now, $toDatetime);
@@ -126,7 +127,7 @@ final class PointInTimeTest extends UnitTestCase
         $clock = new PointInTime();
         $now = $clock->now();
 
-        $toDatetime = $clock->toDateTimeImmutable($now->format($clock->getFormat()));
+        $toDatetime = $clock->toPointInTime($now->format($clock->getFormat()));
 
         $this->assertEquals($now, $toDatetime);
     }
@@ -136,7 +137,7 @@ final class PointInTimeTest extends UnitTestCase
         $clock = new PointInTime();
 
         try {
-            $clock->toDateTimeImmutable('invalid date time');
+            $clock->toPointInTime('invalid date time');
         } catch (DomainException $e) {
             $this->assertSame('Invalid point in time format: invalid date time', $e->getMessage());
             $this->assertInstanceOf(Exception::class, $e->getPrevious());
@@ -149,7 +150,7 @@ final class PointInTimeTest extends UnitTestCase
         $clock = new PointInTime();
         $nowString = $clock->now()->format($clock::DATE_TIME_FORMAT);
 
-        $toDatetime = $clock->toDateTimeImmutable($nowString);
+        $toDatetime = $clock->toPointInTime($nowString);
 
         $this->assertSame($nowString, $clock->format($toDatetime));
         $this->assertSame($nowString, $clock->format($toDatetime->format($clock::DATE_TIME_FORMAT)));

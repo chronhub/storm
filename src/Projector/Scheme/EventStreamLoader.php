@@ -10,9 +10,9 @@ use Illuminate\Support\Collection;
 
 use function key;
 
-final readonly class EventStreamLoader
+class EventStreamLoader
 {
-    public function __construct(private EventStreamProvider $eventStreamProvider)
+    public function __construct(private readonly EventStreamProvider $eventStreamProvider)
     {
     }
 
@@ -29,7 +29,7 @@ final readonly class EventStreamLoader
                 throw new InvalidArgumentException('No stream set or found');
             }
 
-            if ($streams->unique(null, true)->count() !== $streams->count()) {
+            if ($streams->unique()->count() !== $streams->count()) {
                 throw new InvalidArgumentException('Duplicate stream names is not allowed');
             }
         });

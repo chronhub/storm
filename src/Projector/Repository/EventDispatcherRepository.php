@@ -14,7 +14,6 @@ use Chronhub\Storm\Projector\Repository\Event\ProjectionReset;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionRestarted;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionStarted;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionStopped;
-use DateTimeImmutable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Throwable;
 
@@ -31,28 +30,28 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
         $this->projectionRepository->create($status);
     }
 
-    public function start(): void
+    public function start(ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->start(),
+            fn () => $this->projectionRepository->start($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStarted($this->projectionName())),
             ProjectionRestarted::class
         );
     }
 
-    public function stop(ProjectionDetail $projectionDetail): void
+    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->stop($projectionDetail),
+            fn () => $this->projectionRepository->stop($projectionDetail, $projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStopped($this->projectionName())),
             ProjectionStopped::class
         );
     }
 
-    public function startAgain(): void
+    public function startAgain(ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->startAgain(),
+            fn () => $this->projectionRepository->startAgain($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionRestarted($this->projectionName())),
             ProjectionRestarted::class
         );
@@ -87,19 +86,14 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
         );
     }
 
-    public function persist(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
+    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
     {
-        $this->projectionRepository->persist($projectionDetail, $currentStatus);
+        $this->projectionRepository->persist($projectionDetail, $projectionStatus);
     }
 
-    public function persistWhenLockThresholdIsReached(ProjectionDetail $projectionDetail, DateTimeImmutable $currentTime): void
+    public function updateLock(): void
     {
-        $this->projectionRepository->persistWhenLockThresholdIsReached($projectionDetail, $currentTime);
-    }
-
-    public function canRefreshLock(DateTimeImmutable $currentTime): bool
-    {
-        return $this->projectionRepository->canRefreshLock($currentTime);
+        $this->projectionRepository->updateLock();
     }
 
     public function loadStatus(): ProjectionStatus
@@ -122,6 +116,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
         return $this->projectionRepository->projectionName();
     }
 
+    /**
+     * @throws Throwable
+     */
     private function wrapErrorHandling(callable $operation, callable $onSuccess, string $failedEvent): void
     {
         try {

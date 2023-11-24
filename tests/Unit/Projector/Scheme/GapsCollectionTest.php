@@ -4,105 +4,119 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Projector\Scheme\GapsCollection;
-use Chronhub\Storm\Tests\UnitTestCase;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Scheme\GapCollection;
 
-class GapsCollectionTest extends UnitTestCase
-{
-    private GapsCollection $gapsCollection;
+beforeEach(function (): void {
+    $this->gaps = new GapCollection();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('new instance', function (): void {
+    expect($this->gaps->all())->toBeEmpty()
+        ->and($this->gaps->all())->not()->toBe($this->gaps->all())
+        ->and($this->gaps->all())->toEqual($this->gaps->all());
+});
 
-        $this->gapsCollection = new GapsCollection();
-    }
+test('put gap', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-    /**
-     * @test
-     */
-    public function testInstance(): void
-    {
-        $this->assertEmpty($this->gapsCollection->all());
-    }
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
+});
 
-    /**
-     * @test
-     */
-    public function testAllReturnCloneCollection(): void
-    {
-        $this->assertEmpty($this->gapsCollection->all());
+test('put gap with zero position', function (): void {
+    $this->gaps->put(0, true);
+})->throws(InvalidArgumentException::class, 'Event position must be greater than 0');
 
-        $this->gapsCollection->put(1, true);
+test('remove gap', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-        $c1 = $this->gapsCollection->all();
-        $c2 = $this->gapsCollection->all();
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
 
-        $this->assertEquals($c1, $c2);
-        $this->assertNotSame($c1, $c2);
-    }
+    $this->gaps->remove(1);
 
-    public function testPut(): void
-    {
-        $this->gapsCollection->put(1, true);
-        $this->gapsCollection->put(2, false);
+    expect($this->gaps->all()->toArray())->toHaveCount(1)
+        ->and($this->gaps->all()->toArray())->toEqual([2 => false]);
+});
 
-        $gaps = $this->gapsCollection->all();
+test('remove gape with unknown position', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-        $this->assertCount(2, $gaps);
-        $this->assertTrue($gaps->get(1));
-        $this->assertFalse($gaps->get(2));
-    }
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
 
-    public function testRemove(): void
-    {
-        $this->gapsCollection->put(1, true);
-        $this->gapsCollection->put(5, false);
+    $this->gaps->remove(3);
 
-        $this->assertCount(2, $this->gapsCollection->all());
+    expect($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
+});
 
-        $this->gapsCollection->remove(1);
+test('merge gaps', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-        $this->assertCount(1, $this->gapsCollection->all());
-    }
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
 
-    public function testMerge(): void
-    {
-        $this->gapsCollection->put(1, true);
-        $this->gapsCollection->merge([2, 3, 4]);
+    $this->gaps->merge([3, 4]);
 
-        $gaps = $this->gapsCollection->all();
+    expect($this->gaps->all()->toArray())->toHaveCount(4)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false, 3 => true, 4 => true]);
+});
 
-        $this->assertCount(4, $gaps);
-        $this->assertTrue($gaps->get(1));
-        $this->assertTrue($gaps->get(2));
-        $this->assertTrue($gaps->get(3));
-        $this->assertTrue($gaps->get(4));
-    }
+test('merge gaps with empty array', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-    public function testMergeAndOverrideExistingGap(): void
-    {
-        $this->gapsCollection->put(1, true);
-        $this->gapsCollection->put(2, false);
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
 
-        $this->gapsCollection->merge([2, 3, 4]);
+    $this->gaps->merge([]);
 
-        $gaps = $this->gapsCollection->all();
+    expect($this->gaps->all()->toArray())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
+});
 
-        $this->assertCount(4, $gaps);
+test('merge gaps with associative array', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-        $this->assertTrue($gaps->get(2));
-    }
+    expect($this->gaps->all())->toHaveCount(2)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false]);
 
-    public function testFilterConfirmedGaps(): void
-    {
-        $this->gapsCollection->put(1, true);
-        $this->gapsCollection->put(2, false);
-        $this->gapsCollection->put(3, true);
+    $this->gaps->merge(['4' => true, '5' => true]);
+})->throws(InvalidArgumentException::class, 'Stream gaps must be not be an associative array');
 
-        $filteredGaps = $this->gapsCollection->filterConfirmedGaps();
+test('merge gaps with zero position', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
 
-        $this->assertCount(2, $filteredGaps);
-        $this->assertEquals([1, 3], $filteredGaps);
-    }
-}
+    $this->gaps->merge([0, 1]);
+})->throws(InvalidArgumentException::class, 'Event position must be greater than 0');
+
+test('merge and overwrite local gaps', function () {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
+
+    $this->gaps->merge([2, 3, 4]);
+
+    expect($this->gaps->all()->toArray())->toHaveCount(4)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => true, 3 => true, 4 => true]);
+});
+
+test('filter confirmed gaps alter local gaps', function (): void {
+    $this->gaps->put(1, true);
+    $this->gaps->put(2, false);
+    $this->gaps->put(3, true);
+
+    expect($this->gaps->all())->toHaveCount(3)
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 2 => false, 3 => true]);
+
+    $gaps = $this->gaps->filterConfirmedGaps();
+
+    expect($gaps)->toHaveCount(2)->and($gaps)->toEqual([1, 3])
+        ->and($this->gaps->all()->toArray())->toEqual([1 => true, 3 => true]);
+});
