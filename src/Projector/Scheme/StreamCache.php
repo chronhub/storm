@@ -13,7 +13,7 @@ use function in_array;
 final class StreamCache implements JsonSerializable
 {
     /**
-     * @var array<int,string|null>
+     * @var array<int<0,max>,string|null>
      */
     private array $container = [];
 

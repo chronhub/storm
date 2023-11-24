@@ -48,7 +48,6 @@ interface ProjectionProvider
         string $status = null,
         string $state = null,
         string $positions = null,
-        string $gaps = null,
         bool|string|null $lockedUntil = false
     ): void;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
@@ -24,7 +24,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
-        protected ContextInterface $context,
+        protected ContextReaderInterface $context,
         protected string $streamName
     ) {
         $this->streamCache = new StreamCache($subscription->option()->getCacheSize());

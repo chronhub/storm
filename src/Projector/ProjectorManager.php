@@ -11,13 +11,13 @@ use Chronhub\Storm\Contracts\Projector\ProjectorMonitorInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Projector\Subscription\AbstractSubscriptionFactory;
+use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 
 final class ProjectorManager implements ProjectorManagerInterface
 {
     private ProjectorMonitorInterface $monitor;
 
-    public function __construct(private readonly AbstractSubscriptionFactory $subscriptionFactory)
+    public function __construct(private readonly SubscriptionFactory $subscriptionFactory)
     {
     }
 
@@ -48,16 +48,16 @@ final class ProjectorManager implements ProjectorManagerInterface
         );
     }
 
-    public function queryScope(): ProjectionQueryScope
+    public function queryScope(): ?ProjectionQueryScope
     {
-        return $this->subscriptionFactory->queryScope;
+        return $this->subscriptionFactory->getQueryScope();
     }
 
     public function monitor(): ProjectorMonitorInterface
     {
         return $this->monitor ??= new ProjectorMonitor(
-            $this->subscriptionFactory->projectionProvider,
-            $this->subscriptionFactory->jsonSerializer,
+            $this->subscriptionFactory->getProjectionProvider(),
+            $this->subscriptionFactory->getSerializer(),
         );
     }
 }

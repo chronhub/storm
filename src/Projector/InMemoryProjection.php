@@ -10,8 +10,6 @@ final class InMemoryProjection implements ProjectionModel
 {
     private string $positions = '{}';
 
-    private string $gaps = '{}';
-
     private string $state = '{}';
 
     private ?string $lockedUntil = null;
@@ -30,11 +28,6 @@ final class InMemoryProjection implements ProjectionModel
     public function setPosition(string $positions): void
     {
         $this->positions = $positions;
-    }
-
-    public function setGaps(string $gaps): void
-    {
-        $this->gaps = $gaps;
     }
 
     public function setState(string $state): void
@@ -60,11 +53,6 @@ final class InMemoryProjection implements ProjectionModel
     public function positions(): string
     {
         return $this->positions;
-    }
-
-    public function gaps(): string
-    {
-        return $this->gaps;
     }
 
     public function state(): string

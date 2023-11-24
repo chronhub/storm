@@ -14,12 +14,6 @@ final readonly class PersistOrUpdate
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
         if (! $subscription->streamManager()->hasGap()) {
-            /**
-             * When the projection block size is reached,
-             * we update the projection if the lock can be refreshed,
-             * and add a brief pause before proceeding with the update.
-             * Otherwise, we persist the whole projection.
-             */
             $subscription->eventCounter()->isReset() ? $this->sleepBeforeUpdate($subscription) : $subscription->store();
         }
 

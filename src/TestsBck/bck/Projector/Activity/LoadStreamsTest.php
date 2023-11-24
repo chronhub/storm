@@ -8,7 +8,7 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
@@ -29,7 +29,7 @@ final class LoadStreamsTest extends UnitTestCase
 
     private Chronicler|MockObject $chronicler;
 
-    private ContextInterface|MockObject $context;
+    private ContextReaderInterface|MockObject $context;
 
     private StreamManager $streamPosition;
 
@@ -39,7 +39,7 @@ final class LoadStreamsTest extends UnitTestCase
 
         $this->subscription = $this->createMock(Subscription::class);
         $this->chronicler = $this->createMock(Chronicler::class);
-        $this->context = $this->createMock(ContextInterface::class);
+        $this->context = $this->createMock(ContextReaderInterface::class);
         $this->streamPosition = new StreamManager(new InMemoryEventStream());
     }
 

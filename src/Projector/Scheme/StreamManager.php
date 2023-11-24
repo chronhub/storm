@@ -17,18 +17,12 @@ use function usleep;
  * todo make contract for persistent manager and non persistent
  *
  * @template TStream of array<non-empty-string,int>
- * @template TGap of array<int<positive-int>>
  */
 final class StreamManager implements JsonSerializable
 {
     private int $retries = 0;
 
     private bool $gapDetected = false;
-
-    /**
-     * @var GapCollection{array<int,bool} GapsCollection
-     */
-    private GapCollection $gaps;
 
     /**
      * @var Collection<string,int>
@@ -45,7 +39,6 @@ final class StreamManager implements JsonSerializable
         public readonly array $retriesInMs,
         public readonly ?string $detectionWindows = null
     ) {
-        $this->gaps = new GapCollection();
         $this->streamPosition = new Collection();
     }
 
@@ -64,16 +57,13 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Merges remote/local stream positions and gaps.
+     * Merges remote/local stream positions.
      *
-     * @param TStream             $streamsPositions
-     * @param array<positive-int> $streamGaps
+     * @param TStream $streamsPositions
      */
-    public function syncStreams(array $streamsPositions, array $streamGaps): void
+    public function syncStreams(array $streamsPositions): void
     {
         $this->streamPosition = $this->streamPosition->merge($streamsPositions);
-
-        $this->gaps->merge($streamGaps);
     }
 
     /**
@@ -145,40 +135,22 @@ final class StreamManager implements JsonSerializable
     {
         $this->streamPosition = new Collection();
 
-        $this->gaps = new GapCollection();
-
         $this->resetGap();
     }
 
-    public function getStreamPositions(): array
+    public function all(): array
     {
         return $this->streamPosition->toArray();
     }
 
     /**
-     * Return all gaps confirmed or not.
-     *
-     * @return array<int,bool>
-     */
-    public function getGaps(): array
-    {
-        return $this->gaps->all()->toArray();
-    }
-
-    /**
      * Return stream positions and confirmed gaps.
      *
-     * note: this method should only be called to persist projection
-     * as we filter unconfirmed gaps locally
-     *
-     * @return array{positions: array<string,int>, gaps: array<positive-int>}
+     * @return array<string,int>
      */
     public function jsonSerialize(): array
     {
-        return [
-            'positions' => $this->getStreamPositions(),
-            'gaps' => $this->gaps->filterConfirmedGaps(),
-        ];
+        return $this->all();
     }
 
     /**
@@ -191,8 +163,6 @@ final class StreamManager implements JsonSerializable
         }
 
         if ($eventPosition === $this->streamPosition[$streamName] + 1) {
-            $this->gaps->remove($eventPosition);
-
             return true;
         }
 
@@ -200,8 +170,6 @@ final class StreamManager implements JsonSerializable
         if ($this->detectionWindows && ! $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime)) {
             return true;
         }
-
-        $this->gaps->put($eventPosition, ! $this->hasRetry());
 
         $this->gapDetected = true;
 

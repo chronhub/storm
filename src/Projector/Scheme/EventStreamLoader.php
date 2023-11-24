@@ -12,7 +12,7 @@ use function key;
 
 class EventStreamLoader
 {
-    public function __construct(private readonly EventStreamProvider $eventStreamProvider)
+    public function __construct(protected readonly EventStreamProvider $eventStreamProvider)
     {
     }
 

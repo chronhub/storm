@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
@@ -17,7 +17,7 @@ use function is_string;
 use function mb_strtoupper;
 use function sprintf;
 
-final class Context implements ContextInterface
+final class Context implements ContextReaderInterface
 {
     private array $queries = [];
 
@@ -49,7 +49,7 @@ final class Context implements ContextInterface
         return $this;
     }
 
-    public function until(DateInterval|string|int $interval): ContextInterface
+    public function until(DateInterval|string|int $interval): self
     {
         $this->assertTimerNotSet();
 
@@ -127,23 +127,17 @@ final class Context implements ContextInterface
         return $this->timer;
     }
 
-    /**
-     * @internal
-     */
-    public function bindReactors(ProjectorScope $projectionScope): void
+    public function bindReactors(ProjectorScope $projectorScope): void
     {
         if ($this->reactors instanceof Closure) {
-            $this->reactors = Closure::bind($this->reactors, $projectionScope, ProjectorScope::class);
+            $this->reactors = Closure::bind($this->reactors, $projectorScope, ProjectorScope::class);
         }
     }
 
-    /**
-     * @internal
-     */
-    public function bindUserState(ProjectorScope $scope): array
+    public function bindUserState(ProjectorScope $projectorScope): array
     {
         if ($this->userState instanceof Closure) {
-            $callback = Closure::bind($this->userState, $scope, ProjectorScope::class);
+            $callback = Closure::bind($this->userState, $projectorScope, ProjectorScope::class);
 
             $result = $callback();
 

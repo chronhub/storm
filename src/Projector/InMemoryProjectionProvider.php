@@ -57,7 +57,6 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         string $status = null,
         string $state = null,
         string $positions = null,
-        string $gaps = null,
         bool|string|null $lockedUntil = false
     ): void {
         $projection = $this->retrieve($projectionName);
@@ -80,10 +79,6 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
         if ($positions !== null) {
             $projection->setPosition($positions);
-        }
-
-        if ($gaps !== null) {
-            $projection->setGaps($gaps);
         }
 
         if ($lockedUntil !== false) {

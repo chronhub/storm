@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
-use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
@@ -19,7 +19,6 @@ use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Closure;
 
 use function is_array;
-use function method_exists;
 
 final class GenericSubscription implements Subscription
 {
@@ -27,7 +26,7 @@ final class GenericSubscription implements Subscription
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    private ContextInterface $context;
+    private ContextReaderInterface $context;
 
     private readonly ProjectionStateInterface $state;
 
@@ -43,7 +42,7 @@ final class GenericSubscription implements Subscription
         $this->sprint = new Sprint();
     }
 
-    public function compose(ContextInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
+    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
         $this->context = $context;
 
@@ -51,7 +50,11 @@ final class GenericSubscription implements Subscription
 
         $this->sprint->continue();
 
-        $this->bindScope($projectorScope);
+        $userState = $this->context->bindUserState($projectorScope);
+
+        $this->state->put($userState);
+
+        $this->context->bindReactors($projectorScope);
     }
 
     public function initializeAgain(): void
@@ -89,7 +92,7 @@ final class GenericSubscription implements Subscription
         $this->status = $status;
     }
 
-    public function context(): ContextReader
+    public function context(): ContextInterface
     {
         return $this->context;
     }
@@ -122,18 +125,5 @@ final class GenericSubscription implements Subscription
     public function chronicler(): Chronicler
     {
         return $this->chronicler;
-    }
-
-    private function bindScope(ProjectorScope $projectionScope): void
-    {
-        if (method_exists($this->context, 'bindUserState')) {
-            $userState = $this->context->bindUserState($projectionScope);
-
-            $this->state->put($userState);
-        }
-
-        if (method_exists($this->context, 'bindReactors')) {
-            $this->context->bindReactors($projectionScope);
-        }
     }
 }

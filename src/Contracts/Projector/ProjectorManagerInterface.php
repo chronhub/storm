@@ -33,7 +33,7 @@ interface ProjectorManagerInterface
     /**
      * Get the projection query scope.
      */
-    public function queryScope(): ProjectionQueryScope;
+    public function queryScope(): ?ProjectionQueryScope;
 
     /**
      * Get the projector monitor.

@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\MessageAlias;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -81,9 +81,24 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         );
     }
 
-    public function createContextBuilder(): ContextInterface
+    public function createContextBuilder(): ContextReaderInterface
     {
         return new Context();
+    }
+
+    public function getProjectionProvider(): ProjectionProvider
+    {
+        return $this->projectionProvider;
+    }
+
+    public function getSerializer(): JsonSerializer
+    {
+        return $this->jsonSerializer;
+    }
+
+    public function getQueryScope(): ?ProjectionQueryScope
+    {
+        return $this->queryScope;
     }
 
     protected function createGenericSubscription(ProjectionOption $projectionOption): GenericSubscription

@@ -13,28 +13,28 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to initialize the state.
      *
-     * @see ContextInterface::initialize()
+     * @see ContextReaderInterface::initialize()
      */
     public function initialize(Closure $userState): static;
 
     /**
      * Proxy method to set the streams to fetch events from.
      *
-     * @see ContextInterface::fromStreams()
+     * @see ContextReaderInterface::fromStreams()
      */
     public function fromStreams(string ...$streams): static;
 
     /**
      * Proxy method to set the categories to fetch events from.
      *
-     * @see ContextInterface::fromCategories()
+     * @see ContextReaderInterface::fromCategories()
      */
     public function fromCategories(string ...$categories): static;
 
     /**
      * Proxy method to set to fetch events from all streams.
      *
-     * @see ContextInterface::fromAll()
+     * @see ContextReaderInterface::fromAll()
      */
     public function fromAll(): static;
 
@@ -46,7 +46,7 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the query filter to filter events.
      *
-     * @see ContextInterface::withQueryFilter()
+     * @see ContextReaderInterface::withQueryFilter()
      */
     public function withQueryFilter(QueryFilter $queryFilter): static;
 

@@ -21,6 +21,6 @@ test('new instance', function () {
         ->and($this->streamManager->hasGap())->toBeFalse()
         ->and($this->streamManager->retries())->toBe(0)
         ->and($this->streamManager->getGaps())->toBeEmpty()
-        ->and($this->streamManager->getStreamPositions())->toBeEmpty()
+        ->and($this->streamManager->all())->toBeEmpty()
         ->and($this->streamManager->jsonSerialize())->toEqual(['gaps' => [], 'positions' => []]);
 });

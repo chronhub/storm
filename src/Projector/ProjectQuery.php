@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\Subscription;
@@ -23,7 +23,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function __construct(
         protected Subscription $subscription,
-        protected ContextInterface $context,
+        protected ContextReaderInterface $context,
     ) {
     }
 

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
-use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
@@ -17,7 +17,7 @@ use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 trait InteractWithSubscription
 {
-    public function compose(ContextInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
+    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
         $this->subscription->compose($context, $projectorScope, $keepRunning);
     }
@@ -47,7 +47,7 @@ trait InteractWithSubscription
         $this->subscription->setStatus($status);
     }
 
-    public function context(): ContextReader
+    public function context(): ContextInterface
     {
         return $this->subscription->context();
     }

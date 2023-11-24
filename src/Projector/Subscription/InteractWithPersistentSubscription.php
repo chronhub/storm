@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
@@ -24,10 +24,7 @@ trait InteractWithPersistentSubscription
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamManager()->syncStreams(
-            $projectionDetail->streamPositions,
-            $projectionDetail->streamGaps
-        );
+        $this->streamManager()->syncStreams($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
@@ -102,7 +99,7 @@ trait InteractWithPersistentSubscription
         return $this->eventCounter;
     }
 
-    protected function composeWithPersistence(ContextInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
+    protected function composeWithPersistence(ContextReaderInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
     {
         if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new InvalidArgumentException('Persistent subscription require a projection query filter');
@@ -144,10 +141,6 @@ trait InteractWithPersistentSubscription
     {
         $streamPositions = $this->streamManager()->jsonSerialize();
 
-        return new ProjectionDetail(
-            $streamPositions['positions'],
-            $this->state()->get(),
-            $streamPositions['gaps'],
-        );
+        return new ProjectionDetail($streamPositions, $this->state()->get());
     }
 }
