@@ -26,15 +26,18 @@ final class HandleStreamEvent
     {
         $streams = $this->getStreams($subscription);
 
-        foreach ($streams as $eventPosition => $event) {
+        // add projection name and status
+        // add to profiler ['stream_name' => ['loaded' => $streams->count(), 'handled' => 0]]
+
+        foreach ($streams as $position => $event) {
             $subscription->setCurrentStreamName($streams->streamName());
 
-            $eventHandled = $this->processEvent($subscription, $event, $eventPosition);
+            $eventHandled = $this->processEvent($subscription, $event, $position);
+
+            // add to profiler ['stream_name' => ['handled' => $handled + 1]]
 
             if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
-                gc_collect_cycles();
-
-                return $next($subscription);
+                break;
             }
         }
 
@@ -43,18 +46,18 @@ final class HandleStreamEvent
         return $next($subscription);
     }
 
+    private function processEvent(Subscription $subscription, DomainEvent $event, int $position): bool
+    {
+        $eventProcessor = $this->reactors ?? $this->reactors = $subscription->context()->reactors();
+
+        return $eventProcessor($subscription, $event, $position);
+    }
+
     private function getStreams(Subscription $subscription): MergeStreamIterator
     {
         return $this->loadStreams->batch(
             $subscription->streamManager()->jsonSerialize(),
             $subscription->context()->queryFilter()
         );
-    }
-
-    private function processEvent(Subscription $subscription, DomainEvent $event, int $eventPosition): bool
-    {
-        $eventProcessor = $this->reactors ?? $this->reactors = $subscription->context()->reactors();
-
-        return $eventProcessor($subscription, $event, $eventPosition);
     }
 }

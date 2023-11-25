@@ -12,14 +12,14 @@ final class RunUntil
 {
     private bool $started = false;
 
-    private Timer $timer;
+    private ?Timer $timer = null;
 
     public function __invoke(Subscription $subscription, Closure $next): Closure|bool
     {
-        $timer = $subscription->context()->timer();
+        $interval = $subscription->context()->timer();
 
-        if ($timer && ! $this->started) {
-            $this->timer = new Timer($subscription->clock(), $timer);
+        if ($interval && ! $this->started) {
+            $this->timer = new Timer($subscription->clock(), $interval);
 
             $this->timer->start();
 

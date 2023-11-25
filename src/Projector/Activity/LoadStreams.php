@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
@@ -18,8 +19,10 @@ use function array_values;
 
 final readonly class LoadStreams
 {
-    public function __construct(private Chronicler $chronicler)
-    {
+    public function __construct(
+        private Chronicler $chronicler,
+        private SystemClock $clock
+    ) {
     }
 
     public function batch(array $streamPositions, QueryFilter $queryFilter): MergeStreamIterator
@@ -44,6 +47,6 @@ final readonly class LoadStreams
             }
         }
 
-        return new MergeStreamIterator(array_keys($streams), ...array_values($streams));
+        return new MergeStreamIterator($this->clock, array_keys($streams), ...array_values($streams));
     }
 }

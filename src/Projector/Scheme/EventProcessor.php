@@ -7,12 +7,10 @@ namespace Chronhub\Storm\Projector\Scheme;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateTimeImmutable;
 
-use function is_string;
 use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
@@ -72,21 +70,12 @@ final readonly class EventProcessor
         return $subscription->sprint()->inProgress();
     }
 
-    /**
-     * @throws InvalidArgumentException when event time header is not a string or DateTimeImmutable
-     */
     private function getEventTime(Subscription $subscription, DomainEvent $event): DateTimeImmutable|string|false
     {
         if (! $subscription instanceof PersistentSubscriptionInterface) {
             return false;
         }
 
-        $eventTime = $event->header(Header::EVENT_TIME);
-
-        if (! is_string($eventTime) && ! $eventTime instanceof DateTimeImmutable) {
-            throw new InvalidArgumentException("Event time header not found in event {$event->header(Header::EVENT_TYPE)}");
-        }
-
-        return $eventTime;
+        return $event->header(Header::EVENT_TIME);
     }
 }

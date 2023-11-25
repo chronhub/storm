@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Iterator;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Countable;
 use DateTimeImmutable;
-use DateTimeZone;
 use Illuminate\Support\Collection;
 use Iterator;
 
@@ -28,9 +28,14 @@ final class MergeStreamIterator implements Countable, Iterator
 
     private int $numberOfIterators;
 
-    public function __construct(array $streamNames, StreamIterator ...$iterators)
-    {
-        $this->iterators = collect($iterators)->map(fn (StreamIterator $iterator, int $key): array => [$iterator, $streamNames[$key]]);
+    public function __construct(
+        private readonly SystemClock $clock,
+        array $streamNames,
+        StreamIterator ...$iterators
+    ) {
+        $this->iterators = collect($iterators)->map(
+            fn (StreamIterator $iterator, int $key): array => [$iterator, $streamNames[$key]]
+        );
 
         $this->originalIteratorOrder = $this->iterators;
 
@@ -96,14 +101,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
     private function toDatetime(DomainEvent $event): DateTimeImmutable
     {
-        // todo bring Clock or use facade
-        $eventTime = $event->header(Header::EVENT_TIME);
-
-        if ($eventTime instanceof DateTimeImmutable) {
-            return $eventTime;
-        }
-
-        return new DateTimeImmutable($eventTime, new DateTimeZone('UTC'));
+        return $this->clock->toPointInTime($event->header(Header::EVENT_TIME));
     }
 
     /**
