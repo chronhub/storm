@@ -40,7 +40,7 @@ interface Subscription
     /**
      * Get the context instance.
      */
-    public function context(): ContextInterface;
+    public function context(): ContextReaderInterface;
 
     /**
      * Get the sprint instance.

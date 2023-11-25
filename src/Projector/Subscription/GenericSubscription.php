@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
@@ -46,15 +45,15 @@ final class GenericSubscription implements Subscription
     {
         $this->context = $context;
 
-        $this->sprint->runInBackground($keepRunning);
-
-        $this->sprint->continue();
-
         $userState = $this->context->bindUserState($projectorScope);
 
         $this->state->put($userState);
 
         $this->context->bindReactors($projectorScope);
+
+        $this->sprint->runInBackground($keepRunning);
+
+        $this->sprint->continue();
     }
 
     public function initializeAgain(): void
@@ -92,7 +91,7 @@ final class GenericSubscription implements Subscription
         $this->status = $status;
     }
 
-    public function context(): ContextInterface
+    public function context(): ContextReaderInterface
     {
         return $this->context;
     }

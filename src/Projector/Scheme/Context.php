@@ -23,15 +23,17 @@ final class Context implements ContextReaderInterface
 
     private ?Closure $userState = null;
 
-    private array|Closure|null $reactors = null;
+    private ?Closure $reactors = null;
 
     private ?QueryFilter $queryFilter = null;
 
-    private null|int|DateInterval $timer = null;
+    private DateInterval|string|int|null $timer = null;
 
     public function initialize(Closure $userState): self
     {
-        $this->assertNotAlreadyInitialized();
+        if ($this->userState instanceof Closure) {
+            throw new InvalidArgumentException('Projection already initialized');
+        }
 
         $this->assertNotStaticClosure($userState);
 
@@ -42,7 +44,9 @@ final class Context implements ContextReaderInterface
 
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
-        $this->assertQueryFilterNotSet();
+        if ($this->queryFilter instanceof QueryFilter) {
+            throw new InvalidArgumentException('Projection query filter already set');
+        }
 
         $this->queryFilter = $queryFilter;
 
@@ -51,7 +55,9 @@ final class Context implements ContextReaderInterface
 
     public function until(DateInterval|string|int $interval): self
     {
-        $this->assertTimerNotSet();
+        if ($this->timer !== null) {
+            throw new InvalidArgumentException('Projection timer already set');
+        }
 
         $this->timer = $this->normalizeInterval($interval);
 
@@ -87,7 +93,9 @@ final class Context implements ContextReaderInterface
 
     public function when(Closure $reactors): self
     {
-        $this->assertReactorsNotSet();
+        if ($this->reactors !== null) {
+            throw new InvalidArgumentException('Projection reactors already set');
+        }
 
         $this->assertNotStaticClosure($reactors);
 
@@ -103,21 +111,27 @@ final class Context implements ContextReaderInterface
 
     public function reactors(): callable
     {
-        $this->assertReactorsSet();
+        if ($this->reactors === null) {
+            throw new InvalidArgumentException('Projection reactors not set');
+        }
 
         return new EventProcessor($this->reactors);
     }
 
     public function queries(): array
     {
-        $this->assertQueriesSet();
+        if ($this->queries === []) {
+            throw new InvalidArgumentException('Projection streams all|names|categories not set');
+        }
 
         return $this->queries;
     }
 
     public function queryFilter(): QueryFilter
     {
-        $this->assertQueryFilterSet();
+        if ($this->queryFilter === null) {
+            throw new InvalidArgumentException('Projection query filter not set');
+        }
 
         return $this->queryFilter;
     }
@@ -137,6 +151,7 @@ final class Context implements ContextReaderInterface
     public function bindUserState(ProjectorScope $projectorScope): array
     {
         if ($this->userState instanceof Closure) {
+            // checkMe why we need a new scope?
             $callback = Closure::bind($this->userState, $projectorScope, ProjectorScope::class);
 
             $result = $callback();
@@ -147,27 +162,6 @@ final class Context implements ContextReaderInterface
         }
 
         return [];
-    }
-
-    private function assertNotAlreadyInitialized(): void
-    {
-        if ($this->userState instanceof Closure) {
-            throw new InvalidArgumentException('Projection already initialized');
-        }
-    }
-
-    private function assertQueryFilterNotSet(): void
-    {
-        if ($this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter already set');
-        }
-    }
-
-    private function assertTimerNotSet(): void
-    {
-        if ($this->timer !== null) {
-            throw new InvalidArgumentException('Projection timer already set');
-        }
     }
 
     private function normalizeInterval(DateInterval|string|int $interval): DateInterval
@@ -187,34 +181,6 @@ final class Context implements ContextReaderInterface
     {
         if ($this->queries !== []) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
-        }
-    }
-
-    private function assertReactorsNotSet(): void
-    {
-        if ($this->reactors !== null) {
-            throw new InvalidArgumentException('Projection reactors already set');
-        }
-    }
-
-    private function assertReactorsSet(): void
-    {
-        if ($this->reactors === null) {
-            throw new InvalidArgumentException('Projection reactors not set');
-        }
-    }
-
-    private function assertQueriesSet(): void
-    {
-        if ($this->queries === []) {
-            throw new InvalidArgumentException('Projection streams all|names|categories not set');
-        }
-    }
-
-    private function assertQueryFilterSet(): void
-    {
-        if (! $this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter not set');
         }
     }
 

@@ -67,7 +67,7 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Binds a stream name to a position, handling gaps and retries.
+     * Binds a stream name to a position.
      *
      * note that false event time is used for non-persistent subscription
      * as they do not use gap detection
@@ -87,11 +87,6 @@ final class StreamManager implements JsonSerializable
         }
 
         return false;
-    }
-
-    public function hasGap(): bool
-    {
-        return $this->gapDetected;
     }
 
     /**
@@ -116,6 +111,11 @@ final class StreamManager implements JsonSerializable
         usleep($this->retriesInMs[$this->retries]);
 
         $this->retries++;
+    }
+
+    public function hasGap(): bool
+    {
+        return $this->gapDetected;
     }
 
     public function hasRetry(): bool
@@ -154,7 +154,7 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Checks if there is no gap and updates the gaps collection.
+     * Checks if there is no gap.
      */
     private function isGapFilled(string $streamName, int $eventPosition, DateTimeImmutable|string $eventTime): bool
     {
@@ -166,7 +166,6 @@ final class StreamManager implements JsonSerializable
             return true;
         }
 
-        // meant to speed up resetting projection
         if ($this->detectionWindows && ! $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime)) {
             return true;
         }

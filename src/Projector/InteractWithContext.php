@@ -52,7 +52,7 @@ trait InteractWithContext
         return $this;
     }
 
-    public function withTimer(int|string|DateInterval $interval): static
+    public function withTimer(DateInterval|string|int $interval): static
     {
         $this->context->until($interval);
 

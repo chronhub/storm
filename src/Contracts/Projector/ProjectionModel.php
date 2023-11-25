@@ -10,8 +10,6 @@ interface ProjectionModel
 
     public function positions(): string;
 
-    public function gaps(): string;
-
     public function state(): string;
 
     public function status(): string;

@@ -34,26 +34,30 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set to fetch events from all streams.
      *
-     * @see ContextReaderInterface::fromAll()
+     * @see ContextInterface::fromAll()
      */
     public function fromAll(): static;
 
     /**
      * Proxy method to set the event handlers to be called when an event is received.
+     *
+     * @see ContextInterface::when()
      */
     public function when(Closure $reactors): static;
 
     /**
      * Proxy method to set the query filter to filter events.
      *
-     * @see ContextReaderInterface::withQueryFilter()
+     * @see ContextInterface::withQueryFilter()
      */
     public function withQueryFilter(QueryFilter $queryFilter): static;
 
     /**
      * Proxy method to set the timer interval.
      *
-     * @param int|DateInterval $interval int in seconds or DateInterval
+     * @param DateInterval|string|int $interval int in seconds, a valid string interval or DateInterval instance
+     *
+     * @see ContextInterface::withTimer()
      */
-    public function withTimer(int|DateInterval $interval): static;
+    public function withTimer(DateInterval|string|int $interval): static;
 }
