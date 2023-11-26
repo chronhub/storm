@@ -46,8 +46,8 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function rewind(): void
     {
-        $this->iterators->each(function (array $iterator): void {
-            $iterator[0]->rewind();
+        $this->iterators->each(function (array $stream): void {
+            $stream[0]->rewind();
         });
 
         $this->prioritizeIterators();
@@ -55,7 +55,15 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function valid(): bool
     {
-        return $this->iterators->contains(fn (array $iterator): bool => $iterator[0]->valid());
+        foreach ($this->iterators as $stream) {
+            if ($stream[0]->valid()) {
+                return true;
+            }
+        }
+
+        return false;
+
+        return $this->iterators->contains(fn (array $stream): bool => $stream[0]->valid());
     }
 
     public function next(): void
@@ -83,15 +91,15 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function count(): int
     {
-        return $this->iterators->sum(fn (array $iterator) => $iterator[0]->count());
+        return $this->iterators->sum(fn (array $stream) => $stream[0]->count());
     }
 
     private function prioritizeIterators(): void
     {
         if ($this->numberOfIterators > 1) {
             $iterators = $this->originalIteratorOrder
-                ->filter(fn (array $iterators): bool => $iterators[0]->valid())
-                ->sortBy(fn (array $iterators): DateTimeImmutable => $this->toDatetime($iterators[0]->current()));
+                ->filter(fn (array $stream): bool => $stream[0]->valid())
+                ->sortBy(fn (array $stream): DateTimeImmutable => $this->toDatetime($stream[0]->current()));
 
             $chunkSize = $this->calculateDynamicChunkSize($iterators);
 
@@ -110,7 +118,7 @@ final class MergeStreamIterator implements Countable, Iterator
      */
     private function calculateDynamicChunkSize(Collection $iterators): int
     {
-        $totalEvents = $iterators->sum(fn (array $iterator): int => $iterator[0]->count());
+        $totalEvents = $iterators->sum(fn (array $stream): int => $stream[0]->count());
 
         $chunkSize = max(self::CHUNK_SIZE, (int) log($totalEvents, 2));
 
