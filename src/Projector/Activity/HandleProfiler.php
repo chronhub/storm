@@ -17,6 +17,7 @@ final readonly class HandleProfiler
 
     public function __invoke(Subscription $subscription, Closure $next): Closure|bool
     {
+        $response = null;
         $error = null;
 
         try {
@@ -26,9 +27,9 @@ final readonly class HandleProfiler
             $response = $next($subscription);
         } catch (Throwable $e) {
             $error = $e;
+        } finally {
+            $this->profiler->end($subscription, $error ?? null);
         }
-
-        $this->profiler->end($subscription, $error);
 
         return $response ?? throw $error;
     }

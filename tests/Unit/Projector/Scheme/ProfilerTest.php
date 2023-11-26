@@ -18,7 +18,7 @@ it('start cycle', function () {
     $this->subscription->expects($this->once())->method('currentStatus')->willReturn(ProjectionStatus::RUNNING);
     $this->profiler->start($this->subscription);
 
-    $cycles = $this->profiler->getData();
+    $cycles = $this->profiler->getRawData();
     expect($cycles)->toHaveCount(1);
 
     $cycle = $cycles[1];
@@ -39,32 +39,31 @@ it('end cycle', function () {
         ->willReturnOnConsecutiveCalls($runningStatus, $stoppedStatus);
 
     $this->profiler->start($this->subscription);
-    expect($this->profiler->getData()[1]['start']['status'])->toBe($runningStatus);
+    expect($this->profiler->getRawData()[1]['start']['status'])->toBe($runningStatus);
 
-    $startedCycle = $this->profiler->getData()[1];
+    $startedCycle = $this->profiler->getRawData()[1];
 
     $this->profiler->end($this->subscription);
 
-    $cycle = $this->profiler->getData()[1];
+    $cycle = $this->profiler->getRawData()[1];
     expect($cycle)->toHaveKey('start')->and($cycle['start'])->toBe($startedCycle['start'])
-        ->and($cycle)->toHaveKey('end')->and($cycle['end'])->toHaveKey('status')->and($cycle['end']['status'])->toBe($stoppedStatus)
-        ->and($cycle)->toHaveKey('end')->and($cycle['end'])->toHaveKey('memory')->and($cycle['end']['memory'])->toBeGreaterThan(0)
-        ->and($cycle)->toHaveKey('end')->and($cycle['end'])->toHaveKey('at')->and($cycle['end']['at'])->toBeFloat()
+        ->and($cycle)->toHaveKey('end')
+        ->and($cycle['end'])->toHaveKey('status')->and($cycle['end']['status'])->toBe($stoppedStatus)
+        ->and($cycle['end'])->toHaveKey('memory')->and($cycle['end']['memory'])->toBeGreaterThan(0)
+        ->and($cycle['end'])->toHaveKey('at')->and($cycle['end']['at'])->toBeFloat()
         ->and($cycle)->toHaveKey('error')->and($cycle['error'])->toBeNull();
 });
 
 it('report exception raised from subscription', function () {
-    $exception = new RuntimeException('error');
+    $exception = new RuntimeException('');
 
     $this->subscription->expects($this->exactly(2))->method('currentStatus')->willReturn(ProjectionStatus::RUNNING);
 
     $this->profiler->start($this->subscription);
     $this->profiler->end($this->subscription, $exception);
 
-    $cycle = $this->profiler->getData()[1];
-    expect($cycle)->toHaveKey('error')
-        ->and($cycle['error'])->toHaveKey('class')->and($cycle['error']['class'])->toBe(RuntimeException::class)
-        ->and($cycle['error'])->toHaveKey('message')->and($cycle['error']['message'])->toBe('error');
+    $cycle = $this->profiler->getRawData()[1];
+    expect($cycle)->toHaveKey('error')->and($cycle['error'])->toBe(class_basename($exception::class));
 });
 
 it('handle multiple cycles', function () {
@@ -78,5 +77,5 @@ it('handle multiple cycles', function () {
         $expectedCycles--;
     }
 
-    expect($this->profiler->getData())->toHaveCount(3);
+    expect($this->profiler->getRawData())->toHaveCount(3);
 });

@@ -26,30 +26,24 @@ final readonly class RunProjection
                 );
             } while ($this->subscription->sprint()->inBackground() && $inProgress);
         } catch (Throwable $exception) {
-            $this->handleException($exception);
+            $error = $exception;
+        } finally {
+            $this->tryReleaseLock($error ?? null);
         }
-
-        $this->tryReleaseLock();
     }
 
-    private function handleException(Throwable $exception): void
+    private function tryReleaseLock(?Throwable $exception): void
     {
-        if (! $exception instanceof ProjectionAlreadyRunning) {
-            $this->tryReleaseLock();
-        }
-
-        throw $exception;
-    }
-
-    private function tryReleaseLock(): void
-    {
-        if ($this->subscription instanceof PersistentSubscriptionInterface) {
+        if (! $exception instanceof ProjectionAlreadyRunning && $this->subscription instanceof PersistentSubscriptionInterface) {
             try {
                 $this->subscription->freed();
             } catch (Throwable) {
-                // todo logger
                 // fail silently
             }
+        }
+
+        if ($exception instanceof Throwable) {
+            throw $exception;
         }
     }
 }

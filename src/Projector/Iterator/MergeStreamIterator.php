@@ -20,13 +20,13 @@ final class MergeStreamIterator implements Countable, Iterator
     private const CHUNK_SIZE = 32;
 
     /**
-     * @var Collection<array{StreamIterator,string}>
+     * @var Collection<array{StreamIterator, string}>
      */
     private Collection $iterators;
 
     private Collection $originalIteratorOrder;
 
-    private int $numberOfIterators;
+    public readonly int $numberOfIterators;
 
     public function __construct(
         private readonly SystemClock $clock,
@@ -90,8 +90,8 @@ final class MergeStreamIterator implements Countable, Iterator
     {
         if ($this->numberOfIterators > 1) {
             $iterators = $this->originalIteratorOrder
-                ->filter(fn (array $iterator): bool => $iterator[0]->valid())
-                ->sortBy(fn (array $iterator): DateTimeImmutable => $this->toDatetime($iterator[0]->current()));
+                ->filter(fn (array $iterators): bool => $iterators[0]->valid())
+                ->sortBy(fn (array $iterators): DateTimeImmutable => $this->toDatetime($iterators[0]->current()));
 
             $chunkSize = $this->calculateDynamicChunkSize($iterators);
 
@@ -106,6 +106,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
     /**
      * Determine a chunk size based on the total number of events.
+     * produce chunk size of 32, 64, 128, 256, 512 ...
      */
     private function calculateDynamicChunkSize(Collection $iterators): int
     {

@@ -26,15 +26,14 @@ final class HandleStreamEvent
     {
         $streams = $this->getStreams($subscription);
 
-        // add projection name and status
-        // add to profiler ['stream_name' => ['loaded' => $streams->count(), 'handled' => 0]]
+        // add observer ['stream_name' => ['loaded' => $streams->count(), 'handled' => 0]]
 
         foreach ($streams as $position => $event) {
             $subscription->setCurrentStreamName($streams->streamName());
 
             $eventHandled = $this->processEvent($subscription, $event, $position);
 
-            // add to profiler ['stream_name' => ['handled' => $handled + 1]]
+            // add observer ['stream_name' => ['handled' => $handled + 1]]
 
             if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
                 break;

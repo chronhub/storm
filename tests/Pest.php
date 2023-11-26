@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Clock\PointInTimeFactory;
+use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\TestCase;
 
 /*
@@ -52,4 +56,20 @@ function something()
 function getPointInTime(): PointInTime
 {
     return new PointInTime();
+}
+
+function provideSomeEvents(): Generator
+{
+    yield from [
+        SomeEvent::fromContent([])->withHeaders([
+            EventHeader::INTERNAL_POSITION => 11,
+            Header::EVENT_TIME => PointInTimeFactory::times()->sole(),
+        ]),
+        SomeEvent::fromContent([])->withHeaders([
+            EventHeader::INTERNAL_POSITION => 21,
+            Header::EVENT_TIME => PointInTimeFactory::times()->sole(),
+        ]),
+    ];
+
+    return 2;
 }

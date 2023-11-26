@@ -24,6 +24,10 @@ final class StreamIterator implements Countable, Iterator
      */
     private ArrayIterator $streamEvents;
 
+    /**
+     * Stream events should be already sorted by event time in ascending order
+     * todo test if sorted ?again by event time has cost in performance
+     */
     public function __construct(Generator $streamEvents)
     {
         $this->streamEvents = new ArrayIterator(iterator_to_array($streamEvents));

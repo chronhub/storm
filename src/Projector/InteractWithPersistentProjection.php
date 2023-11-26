@@ -49,6 +49,7 @@ trait InteractWithPersistentProjection
         return $this->subscription->state()->get();
     }
 
+    // todo shortcut name to getName or ProjectionName
     public function getStreamName(): string
     {
         return $this->streamName;
@@ -59,7 +60,7 @@ trait InteractWithPersistentProjection
         $activities = [
             new RunUntil(),
             new PreparePersistentRunner(),
-            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler())),
+            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler(), $this->subscription->clock())),
             new HandleStreamGap(),
             new PersistOrUpdate(),
             new ResetEventCounter(),
