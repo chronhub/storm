@@ -12,23 +12,32 @@ use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
 use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use TypeError;
 
 beforeEach(function (): void {
     $this->clock = new PointInTime();
     $this->streams = MergeStreamIteratorFactory::getIterator($this->clock);
 });
 
-describe('raised stream not found exception in constructor', function (): void {
-    test('from empty stream events iterator', function (): void {
-        new MergeStreamIterator($this->clock, ['nope'], new StreamIterator(StreamEventsFactory::fromEmpty()));
-    })->throws(StreamNotFound::class, 'Stream not found');
+test('from empty stream events raise type error', function (): void {
+    $iterator = new MergeStreamIterator($this->clock, ['foo'], new StreamIterator(StreamEventsFactory::fromEmpty()));
 
-    test('send by generator', function (): void {
-        new MergeStreamIterator($this->clock, [], new StreamIterator(StreamEventsFactory::fromEmptyAndRaiseStreamNotFoundException('foo')));
-    })->throws(StreamNotFound::class, 'Stream foo not found');
-});
+    expect($iterator->streamName())->toBe('foo')
+        ->and($iterator->valid())->toBeFalse()
+        ->and($iterator->current())->toBeNull();
 
-test('iterator pointer advance in constructor', function (): void {
+    /**
+     * Generator from streamIterator should always
+     * raise a StreamNotFound exception on empty stream events
+     */
+    $iterator->key();
+})->throws(TypeError::class, 'Chronhub\Storm\Projector\Iterator\MergeStreamIterator::key(): Return value must be of type int, null returned');
+
+test('raised stream not found exception in constructor send by generator', function (): void {
+    new MergeStreamIterator($this->clock, [], new StreamIterator(StreamEventsFactory::fromEmptyAndRaiseStreamNotFoundException('foo')));
+})->throws(StreamNotFound::class, 'Stream foo not found');
+
+test('iterator cursor advance in constructor', function (): void {
     expect($this->streams->streamName())->toBe('stream2')
         ->and($this->streams->key())->toBe(5)
         ->and($this->streams->current())->toBeInstanceOf(SomeEvent::class)

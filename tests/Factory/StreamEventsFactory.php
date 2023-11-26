@@ -73,9 +73,9 @@ class StreamEventsFactory
      */
     public static function fromInternalPosition(int $endAt, int $startAt = 1): Generator
     {
-        $num = 1;
-        while ($num < $endAt + 1) {
-            $num++;
+        $count = 1;
+        while ($count < $endAt + 1) {
+            $count++;
 
             yield self::makeEvent([EventHeader::INTERNAL_POSITION => $startAt++]);
         }

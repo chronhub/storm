@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Iterator;
 
 use ArrayIterator;
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Countable;
@@ -32,13 +31,6 @@ final class StreamIterator implements Countable, Iterator
     public function __construct(Generator $streamEvents)
     {
         $this->streamEvents = new ArrayIterator(iterator_to_array($streamEvents));
-
-        // Empty generator should throw stream not found exception
-        // we make sure that stream is not empty as MergeStreamIterator
-        // does not handle empty stream events
-        if ($this->streamEvents->count() === 0) {
-            throw new StreamNotFound('Stream not found');
-        }
 
         $this->next();
     }
@@ -74,13 +66,13 @@ final class StreamIterator implements Countable, Iterator
         $this->next();
     }
 
-    public function count(): int
-    {
-        return $this->streamEvents->count();
-    }
-
     public function valid(): bool
     {
         return $this->event instanceof DomainEvent;
+    }
+
+    public function count(): int
+    {
+        return $this->streamEvents->count();
     }
 }

@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 
-test('empty generator raised stream not found exception', function (): void {
+test('empty generator set iterator not valid', function (): void {
     $streamEvents = StreamEventsFactory::fromEmpty();
 
-    new StreamIterator($streamEvents);
-})->throws(StreamNotFound::class, 'Stream not found');
+    $iterator = new StreamIterator($streamEvents);
 
-test('pointer advance on constructor', function (): void {
+    expect($iterator->valid())->toBeFalse()
+        ->and($iterator->current())->toBeNull()
+        ->and($iterator->key())->toBeNull();
+});
+
+test('iterator cursor advance on constructor', function (): void {
     $streamEvents = StreamEventsFactory::fromInternalPosition(10);
 
     $iterator = new StreamIterator($streamEvents);
@@ -67,7 +70,30 @@ test('rewind iterator', function (): void {
         ->and($iterator->key())->toBe(1);
 });
 
-test('count events', function (Generator $streamEvents, int $expectedCount): void {
+test('can rewind when iterator is no longer valid', function () {
+    $streamEvents = StreamEventsFactory::fromInternalPosition(10);
+
+    $iterator = new StreamIterator($streamEvents);
+
+    $iterator->next();
+    $iterator->next();
+
+    $iterator->rewind();
+
+    expect($iterator->valid())->toBeTrue();
+
+    while ($iterator->valid()) {
+        $iterator->next();
+    }
+
+    expect($iterator->valid())->toBeFalse();
+
+    $iterator->rewind();
+
+    expect($iterator->valid())->toBeTrue();
+});
+
+test('count total of events', function (Generator $streamEvents, int $expectedCount): void {
     $iterator = new StreamIterator($streamEvents);
 
     expect($iterator->count())->toBe($expectedCount);
