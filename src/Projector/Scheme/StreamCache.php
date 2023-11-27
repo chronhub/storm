@@ -28,6 +28,14 @@ final class StreamCache implements JsonSerializable
         $this->container = array_fill(0, $cacheSize, null);
     }
 
+    /**
+     * Add stream name or replace at the current position
+     * in the circular buffer
+     *
+     * @param non-empty-string $streamName
+     *
+     * @throws InvalidArgumentException
+     */
     public function push(string $streamName): void
     {
         if ($this->has($streamName)) {
@@ -39,6 +47,11 @@ final class StreamCache implements JsonSerializable
         $this->container[$this->position] = $streamName;
     }
 
+    /**
+     * Check if stream name is in cache
+     *
+     * @param non-empty-string $streamName
+     */
     public function has(string $streamName): bool
     {
         return in_array($streamName, $this->container, true);

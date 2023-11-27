@@ -57,7 +57,7 @@ class StreamEventsFactory
     }
 
     /**
-     * Fake an empty generator
+     * Fake an empty generator and raise StreamNotFound exception
      *
      * @return Generator<empty>
      */

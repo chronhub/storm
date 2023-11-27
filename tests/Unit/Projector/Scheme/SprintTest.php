@@ -16,6 +16,8 @@ test('new instance', function (): void {
 });
 
 test('start sprint', function (): void {
+    expect($this->sprint->inProgress())->toBeFalse();
+
     $this->sprint->continue();
 
     expect($this->sprint->inProgress())->toBeTrue();

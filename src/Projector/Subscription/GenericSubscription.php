@@ -46,7 +46,6 @@ final class GenericSubscription implements Subscription
         $this->context = $context;
 
         $userState = $this->context->bindUserState($projectorScope);
-
         $this->state->put($userState);
 
         $this->context->bindReactors($projectorScope);

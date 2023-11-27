@@ -19,7 +19,7 @@ beforeEach(function (): void {
     $this->streams = MergeStreamIteratorFactory::getIterator($this->clock);
 });
 
-test('from empty stream events raise type error', function (): void {
+test('empty stream events raise type error', function (): void {
     $iterator = new MergeStreamIterator($this->clock, ['foo'], new StreamIterator(StreamEventsFactory::fromEmpty()));
 
     expect($iterator->streamName())->toBe('foo')
@@ -44,7 +44,7 @@ test('iterator cursor advance in constructor', function (): void {
         ->and($this->streams->current()->header(Header::EVENT_TIME))->toBe('2023-05-10T10:15:19.000000');
 });
 
-test('iterate by ordered event time across streams', function () {
+test('can iterate by ordered event time across streams', function () {
     $streamsOrder = [];
 
     $previousEventTime = null;
@@ -64,7 +64,7 @@ test('iterate by ordered event time across streams', function () {
     expect($streamsOrder)->toBe(MergeStreamIteratorFactory::expectedIteratorOrder());
 });
 
-test('iterate over key as event position', function (): void {
+test('can iterate over key representing event position', function (): void {
     $eventPositions = [];
     while ($this->streams->valid()) {
         $eventPositions[] = $this->streams->key();
@@ -75,7 +75,7 @@ test('iterate over key as event position', function (): void {
     expect($eventPositions)->toBe(MergeStreamIteratorFactory::expectedIteratorPosition());
 });
 
-test('rewind streams', function (): void {
+test('can rewind streams', function (): void {
     expect($this->streams->streamName())->toBe('stream2');
 
     $this->streams->next();
@@ -89,7 +89,7 @@ test('rewind streams', function (): void {
     expect($this->streams->streamName())->toBe('stream2');
 });
 
-test('failed rewind when all streams are not valid', function () {
+test('failed rewind streams when all streams are no longer valid', function () {
     while ($this->streams->valid()) {
         $this->streams->next();
     }

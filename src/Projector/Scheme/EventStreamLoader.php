@@ -18,7 +18,7 @@ class EventStreamLoader
 
     /**
      * @param  array{all?: bool, categories?: string[], names?: string[]} $queries
-     * @return Collection<string>
+     * @return Collection<array<non-empty-string>>
      *
      * @throws InvalidArgumentException when local or remote stream names is empty or not unique
      */

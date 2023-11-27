@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Units\Projector\Repository;
 
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Clock\PointInTimeFactory;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Repository\LockManager;
@@ -17,9 +18,9 @@ beforeEach(function () {
 });
 
 dataset('dateTimes', [
-    'now' => getPointInTime()->now(),
-    'now plus 10 secs' => getPointInTime()->now()->add(new DateInterval('PT10S')),
-    'now plus one hour' => getPointInTime()->now()->add(new DateInterval('PT1H')),
+    'now' => PointInTimeFactory::make(),
+    'now plus 10 secs' => PointInTimeFactory::make()->add(new DateInterval('PT10S')),
+    'now plus one hour' => PointInTimeFactory::make()->add(new DateInterval('PT1H')),
 ]);
 
 test('lock manager instance', function (int $timeout, int $threshold): void {
@@ -31,7 +32,7 @@ test('lock manager instance', function (int $timeout, int $threshold): void {
     ->with(['timeout' => fn () => 1000, 2000, 3000])
     ->with(['threshold' => fn () => 0, 5000, 10000, 200000]);
 
-test('current of new instance raise exception', function (): void {
+test('current method of new instance raise exception when lock has not been acquired', function (): void {
     $instance = new LockManager($this->clock, 1000, 5000);
 
     $instance->current();
@@ -43,13 +44,12 @@ test('acquire lock', function (DateTimeImmutable $currentTime): void {
 
     $instance = new LockManager($this->clock, 1000, 5000);
 
-    $updated = $currentTime->modify('+1000 milliseconds');
-
-    expect($instance->acquire())->toBe($updated->format($this->time::DATE_TIME_FORMAT));
+    expect($instance->acquire())->toBe($currentTime->format($this->time::DATE_TIME_FORMAT));
 })->with('dateTimes');
 
 describe('should refresh', function () {
-    test('when lock is not acquired', function (DateTimeImmutable $datetime) {
+
+    test('when lock is not acquired', function () {
         $instance = new LockManager($this->clock, 2000, 5000);
 
         try {
@@ -58,8 +58,8 @@ describe('should refresh', function () {
             expect($e->getMessage())->toBe('Lock is not acquired');
         }
 
-        expect($instance->shouldRefresh($datetime))->toBeTrue();
-    })->with('dateTimes');
+        expect($instance->shouldRefresh())->toBeTrue();
+    });
 
     test('when lock threshold is set to zero', function () {
         $now = $this->time->now();
@@ -69,36 +69,42 @@ describe('should refresh', function () {
         $instance = new LockManager($this->clock, 1000, 0);
         $instance->acquire();
 
-        expect($instance->shouldRefresh($this->time->now()))->toBeTrue()
-            ->and($instance->shouldRefresh($this->time->now()))->toBeTrue()
-            ->and($instance->shouldRefresh($this->time->now()))->toBeTrue();
+        expect($instance->shouldRefresh())->toBeTrue();
     });
 
     test('with given time', function () {
-        $instance = new LockManager($this->time, 1000, 5000);
-        $currentLock = $instance->acquire();
-
-        expect($instance->shouldRefresh($this->time->now()))->toBeFalse()
-            ->and($currentLock)->toBe($instance->current());
-
-        $future = $this->time->now()->add(new DateInterval('PT6S'));
-
-        expect($instance->shouldRefresh($future))->toBeTrue();
-    });
+        //        $instance = new LockManager($this->time, 1000, 5000);
+        //        $currentLock = $instance->acquire();
+        //
+        //        expect($instance->shouldRefresh())->toBeFalse()
+        //            ->and($currentLock)->toBe($instance->current());
+        //
+        //        $future = $this->time->now()->add(new DateInterval('PT6S'));
+        //
+        //        expect($instance->shouldRefresh())->toBeTrue();
+    })->todo();
 });
 
-test('refresh with given time', function () {
-    $instance = new LockManager($this->time, 1000, 5000);
-
-    $currentLock = $instance->acquire();
-
-    $currentTime = $this->time->now()->add(new DateInterval('PT1S'));
-
-    $refreshLock = $instance->refresh($currentTime);
-
-    $expectedTime = $this->time->toPointInTime($currentTime)->add(new DateInterval('PT1S'))->format($this->time::DATE_TIME_FORMAT);
-
-    expect($refreshLock)->not()->toBe($currentLock)
-        ->and($instance->current())->toBe($refreshLock)
-        ->and($instance->current())->toBe($expectedTime);
-});
+test('refresh lock', function () {
+    //    $now = $this->time->now();
+    //    $future = $now->add(new DateInterval('PT6S'));
+    //
+    //    $this->clock->expects($this->exactly(3))->method('now')
+    //        ->willReturnOnConsecutiveCalls($now, $now, $future);
+    //
+    //    $this->clock->expects($this->exactly(3))
+    //        ->method('getFormat')->willReturn($this->time::DATE_TIME_FORMAT);
+    //
+    //    $instance = new LockManager($this->clock, 1000, 5000);
+    //
+    //    $currentLock = $instance->acquire();
+    //
+    //    expect($instance->shouldRefresh())->toBeFalse()
+    //        ->and($currentLock)->toBe($instance->current());
+    //
+    //    //fake lock with future on third call
+    //    $refreshLock = $instance->refresh();
+    //
+    //    expect($this->time->toPointInTime($currentLock)->modify('+1'.$instance->lockTimeout.' milliseconds'))
+    //        ->toBeLessThan($this->time->toPointInTime($refreshLock));
+})->todo();

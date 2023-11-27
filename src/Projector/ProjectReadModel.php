@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
@@ -18,7 +18,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function __construct(
         protected ReadModelSubscriptionInterface $subscription,
-        protected ContextReaderInterface $context,
+        protected ContextInterface $context,
         protected string $streamName,
         private ReadModel $readModel
     ) {

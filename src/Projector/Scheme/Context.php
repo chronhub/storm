@@ -109,13 +109,13 @@ final class Context implements ContextReaderInterface
         return $this->userState;
     }
 
-    public function reactors(): callable
+    public function reactors(): Closure
     {
         if ($this->reactors === null) {
             throw new InvalidArgumentException('Projection reactors not set');
         }
 
-        return new EventProcessor($this->reactors);
+        return $this->reactors;
     }
 
     public function queries(): array

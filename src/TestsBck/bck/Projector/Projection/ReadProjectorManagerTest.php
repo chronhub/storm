@@ -45,7 +45,7 @@ final class ReadProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $manager = new ProjectorManager($this->createSubscriptionFactory());
 
         $projection = $manager->newEmitter('amount');
-        $this->assertSame('amount', $projection->getStreamName());
+        $this->assertSame('amount', $projection->getName());
 
         $projection
             ->initialize(fn (): array => ['count' => 0])

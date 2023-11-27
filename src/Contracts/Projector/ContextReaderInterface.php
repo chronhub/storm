@@ -21,7 +21,7 @@ interface ContextReaderInterface extends ContextInterface
      *
      * @throws InvalidArgumentException When reactors is not set
      */
-    public function reactors(): callable;
+    public function reactors(): Closure;
 
     /**
      * Get stream names handled by the projection.

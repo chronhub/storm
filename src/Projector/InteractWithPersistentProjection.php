@@ -15,6 +15,7 @@ use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
+use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 
@@ -49,8 +50,7 @@ trait InteractWithPersistentProjection
         return $this->subscription->state()->get();
     }
 
-    // todo shortcut name to getName or ProjectionName
-    public function getStreamName(): string
+    public function getName(): string
     {
         return $this->streamName;
     }
@@ -60,7 +60,7 @@ trait InteractWithPersistentProjection
         $activities = [
             new RunUntil(),
             new PreparePersistentRunner(),
-            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler(), $this->subscription->clock())),
+            $this->makeStreamEventHandler(),
             new HandleStreamGap(),
             new PersistOrUpdate(),
             new ResetEventCounter(),
@@ -70,6 +70,14 @@ trait InteractWithPersistentProjection
         ];
 
         return new Workflow($this->subscription, $activities);
+    }
+
+    protected function makeStreamEventHandler(): HandleStreamEvent
+    {
+        return new HandleStreamEvent(
+            new LoadStreams($this->subscription->chronicler(), $this->subscription->clock()),
+            new EventProcessor($this->subscription->context()->reactors())
+        );
     }
 
     abstract protected function getScope(): ProjectorScope;

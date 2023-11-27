@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use JsonSerializable;
-use LogicException;
 
 use function array_key_exists;
 use function usleep;
@@ -18,7 +18,7 @@ use function usleep;
  *
  * @template TStream of array<non-empty-string,int>
  */
-final class StreamManager implements JsonSerializable
+class StreamManager implements JsonSerializable
 {
     private int $retries = 0;
 
@@ -67,19 +67,29 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Binds a stream name to a position.
+     * Binds a stream name to the next available position.
      *
-     * note that false event time is used for non-persistent subscription
-     * as they do not use gap detection
+     * @param int<1, max> $expectedPosition The incremented position of the current event.
+     *
+     * Successful bind in order:
+     *      - event time is false ( meant for query projection )
+     *      - no retry set
+     *      - no gap detected
+     *      - successful detection window checked
+     *      - gap detected but no more retries available
+     *
+     * @throw RuntimeException When stream name is not watched
      */
-    public function bind(string $streamName, int $position, DateTimeImmutable|string|false $eventTime): bool
+    public function bind(string $streamName, int $expectedPosition, DateTimeImmutable|string|false $eventTime): bool
     {
+        // checkMe: should we throw exception when expected position is less or equal than the current?
+
         if (! $this->streamPosition->has($streamName)) {
-            throw new LogicException("Stream $streamName not watched");
+            throw new RuntimeException("Stream $streamName is not watched");
         }
 
-        if (! $eventTime || $this->isGapFilled($streamName, $position, $eventTime) || ! $this->hasRetry()) {
-            $this->streamPosition[$streamName] = $position;
+        if (! $eventTime || $this->isGapFilled($streamName, $expectedPosition, $eventTime)) {
+            $this->streamPosition[$streamName] = $expectedPosition;
 
             $this->resetGap();
 
@@ -90,22 +100,18 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Sleeps for the specified retry duration.
+     * Sleeps for the specified retry duration available.
      *
-     * @throws LogicException When no gap is detected or no more retries are available.
+     * @throws RuntimeException When no gap is detected or no more retries are available.
      */
     public function sleep(): void
     {
-        if ($this->retriesInMs === []) {
-            return;
-        }
-
         if (! $this->hasGap()) {
-            throw new LogicException('No gap detected');
+            throw new RuntimeException('No gap detected');
         }
 
         if (! $this->hasRetry()) {
-            throw new LogicException('No more retries');
+            throw new RuntimeException('No more retries');
         }
 
         usleep($this->retriesInMs[$this->retries]);
@@ -123,13 +129,18 @@ final class StreamManager implements JsonSerializable
         return array_key_exists($this->retries, $this->retriesInMs);
     }
 
+    /**
+     * Returns the current number of retries.
+     *
+     * @return int<0, max>
+     */
     public function retries(): int
     {
         return $this->retries;
     }
 
     /**
-     * Resets steam manager.
+     * Resets stream manager.
      */
     public function resets(): void
     {
@@ -144,9 +155,9 @@ final class StreamManager implements JsonSerializable
     }
 
     /**
-     * Return stream positions and confirmed gaps.
+     * Return stream positions.
      *
-     * @return array<string,int>
+     * @return array<string, int>
      */
     public function jsonSerialize(): array
     {
@@ -156,13 +167,17 @@ final class StreamManager implements JsonSerializable
     /**
      * Checks if there is no gap.
      */
-    private function isGapFilled(string $streamName, int $eventPosition, DateTimeImmutable|string $eventTime): bool
+    private function isGapFilled(string $streamName, int $expectedPosition, DateTimeImmutable|string $eventTime): bool
     {
         if ($this->retriesInMs === []) {
             return true;
         }
 
-        if ($eventPosition === $this->streamPosition[$streamName] + 1) {
+        if ($expectedPosition === $this->streamPosition[$streamName] + 1) {
+            return true;
+        }
+
+        if (! $this->hasRetry()) {
             return true;
         }
 

@@ -9,7 +9,7 @@ use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 
-test('empty generator set iterator not valid', function (): void {
+test('empty generator set iterator as not valid', function (): void {
     $streamEvents = StreamEventsFactory::fromEmpty();
 
     $iterator = new StreamIterator($streamEvents);
@@ -29,7 +29,7 @@ test('iterator cursor advance on constructor', function (): void {
         ->and($iterator->key())->toBe(1);
 });
 
-test('iterate with internal position as key and event as value', function (): void {
+test('can iterate with internal position as key and event as value', function (): void {
     $streamEvents = StreamEventsFactory::fromInternalPosition(5);
 
     $iterator = new StreamIterator($streamEvents);
@@ -50,7 +50,7 @@ test('iterate with internal position as key and event as value', function (): vo
         ->and($iterator->key())->toBeNull();
 });
 
-test('rewind iterator', function (): void {
+test('can rewind', function (): void {
     $streamEvents = StreamEventsFactory::fromInternalPosition(10);
 
     $iterator = new StreamIterator($streamEvents);

@@ -117,6 +117,8 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
     }
 
     /**
+     * @param class-string $failedEvent
+     *
      * @throws Throwable
      */
     private function wrapErrorHandling(callable $operation, callable $onSuccess, string $failedEvent): void

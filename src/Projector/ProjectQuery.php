@@ -13,6 +13,7 @@ use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
 use Chronhub\Storm\Projector\Activity\RunUntil;
+use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
@@ -65,10 +66,18 @@ final readonly class ProjectQuery implements QueryProjector
         $activities = [
             new RunUntil(),
             new PrepareQueryRunner(),
-            new HandleStreamEvent(new LoadStreams($this->subscription->chronicler())),
+            $this->makeStreamEventHandler(),
             new DispatchSignal(),
         ];
 
         return new Workflow($this->subscription, $activities);
+    }
+
+    private function makeStreamEventHandler(): HandleStreamEvent
+    {
+        return new HandleStreamEvent(
+            new LoadStreams($this->subscription->chronicler(), $this->subscription->clock()),
+            new EventProcessor($this->subscription->context()->reactors())
+        );
     }
 }

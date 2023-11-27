@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 
 interface ProjectorMonitorInterface
@@ -11,21 +12,24 @@ interface ProjectorMonitorInterface
     /**
      * Stop the projection.
      *
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionFailed   when update projection status failed
      */
     public function stop(string $projectionName): void;
 
     /**
      * Reset the projection.
      *
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionFailed   when update projection status failed
      */
     public function reset(string $projectionName): void;
 
     /**
      * Delete the projection and optionally delete emitted events.
      *
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionFailed   when update projection status failed
      */
     public function delete(string $projectionName, bool $withEmittedEvents): void;
 

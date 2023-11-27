@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateInterval;
 use ReflectionFunction;
@@ -52,7 +52,7 @@ test('can set reactors once', function () {
 
     $this->context->when($reactors);
 
-    expect($this->context->reactors())->toBeInstanceOf(EventProcessor::class);
+    expect($this->context->reactors())->toBe($reactors);
 
     $this->context->when($reactors);
 })->throws(InvalidArgumentException::class, 'Projection reactors already set');
@@ -77,17 +77,17 @@ test('from all', function () {
 
 test('can not set queries twice from streams', function () {
     $this->context->fromStreams('foo');
-    $this->context->fromStreams('foo');
+    $this->context->fromStreams('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
 
 test('can not set queries twice from categories', function () {
     $this->context->fromCategories('foo');
-    $this->context->fromStreams('foo');
+    $this->context->fromStreams('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
 
 test('can not set queries twice from all', function () {
     $this->context->fromAll();
-    $this->context->fromStreams('foo');
+    $this->context->fromStreams('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
 
 test('can bind user state', function () {
@@ -105,5 +105,15 @@ test('can bind user state', function () {
 });
 
 test('can bind reactors', function () {
-    // hard to unit test
-})->todo();
+    $scope = $this->createMock(ProjectorScope::class);
+
+    $this->context->when(fn (DomainEvent $event, array $state) => ['count' => 10]);
+
+    $this->context->bindReactors($scope);
+
+    $boundReactors = $this->context->reactors();
+
+    $ref = new ReflectionFunction($boundReactors);
+
+    expect($ref->getClosureThis())->toBe($scope);
+});

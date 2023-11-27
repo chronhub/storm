@@ -9,8 +9,6 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Closure;
 
-use function in_array;
-
 final readonly class StopWhenRunningOnce
 {
     public function __construct(private PersistentProjector $projector)
@@ -19,7 +17,7 @@ final readonly class StopWhenRunningOnce
 
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
-        if (! $this->shouldKeepRunning($subscription) && $this->hasStatus($subscription)) {
+        if (! $this->shouldKeepRunning($subscription) && $subscription->currentStatus() === ProjectionStatus::RUNNING) {
             $this->projector->stop();
         }
 
@@ -29,13 +27,5 @@ final readonly class StopWhenRunningOnce
     private function shouldKeepRunning(PersistentSubscriptionInterface $subscription): bool
     {
         return $subscription->sprint()->inBackground() && $subscription->sprint()->inProgress();
-    }
-
-    private function hasStatus(PersistentSubscriptionInterface $subscription): bool
-    {
-        return in_array($subscription->currentStatus(), [
-            ProjectionStatus::RUNNING,
-            ProjectionStatus::IDLE,
-        ]);
     }
 }

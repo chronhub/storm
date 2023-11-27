@@ -14,16 +14,20 @@ final readonly class PersistOrUpdate
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {
         if (! $subscription->streamManager()->hasGap()) {
-            $subscription->eventCounter()->isReset() ? $this->sleepBeforeUpdate($subscription) : $subscription->store();
+            /**
+             * Counter is reset when no event has been handled and
+             * in rare case when the loaded/handled events match exactly the option block size
+             * so, we sleep to avoid too much query and update the lock or persist the projection
+             */
+            if ($subscription->eventCounter()->isReset()) {
+                usleep(microseconds: $subscription->option()->getSleep());
+
+                $subscription->update();
+            } else {
+                $subscription->store();
+            }
         }
 
         return $next($subscription);
-    }
-
-    private function sleepBeforeUpdate(PersistentSubscriptionInterface $subscription): void
-    {
-        usleep(microseconds: $subscription->option()->getSleep());
-
-        $subscription->update();
     }
 }

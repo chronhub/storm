@@ -47,7 +47,7 @@ final class ReadModelSubscriptionManagerTest extends InMemoryProjectorManagerTes
         $this->feedEventStore($this->streamName, $aggregateId, $expectedEvents);
 
         $projection = $manager->newReadModel('read_balance', $readModel);
-        $this->assertSame('read_balance', $projection->getStreamName());
+        $this->assertSame('read_balance', $projection->getName());
 
         $projection
             ->initialize(fn (): array => ['count' => 0])
