@@ -8,7 +8,7 @@ use Chronhub\Storm\Clock\PointInTimeFactory;
 use DateTimeImmutable;
 
 it('can make point in time', function (): void {
-    $pointInTime = PointInTimeFactory::make();
+    $pointInTime = PointInTimeFactory::now();
 
     $this->assertInstanceOf(DateTimeImmutable::class, $pointInTime);
 });
@@ -50,7 +50,7 @@ describe('generate times with interval', function (): void {
 
 describe('generate between', function (): void {
     test('two point int time per default', function (): void {
-        $between = PointInTimeFactory::between('-1 day', '+1 day');
+        $between = PointInTimeFactory::timesBetween('-1 day', '+1 day');
 
         $this->assertCount(2, $between);
         $this->assertInstanceOf(DateTimeImmutable::class, $between->first());
@@ -58,14 +58,14 @@ describe('generate between', function (): void {
 
     test('with given interval and times', function (): void {
         $expectedTimes = 5;
-        $between = PointInTimeFactory::between('-1 day', '+1 day', '+1 hour', $expectedTimes);
+        $between = PointInTimeFactory::timesBetween('-1 day', '+1 day', '+1 hour', $expectedTimes);
 
         $this->assertCount($expectedTimes, $between);
 
         /** @var DateTimeImmutable $startedTime */
         $startedTime = $between->shift();
 
-        $this->assertTrue($startedTime < PointInTimeFactory::make());
+        $this->assertTrue($startedTime < PointInTimeFactory::now());
 
         while ($between->count() > 0) {
             $this->assertInstanceOf(DateTimeImmutable::class, $between->first());
@@ -79,7 +79,7 @@ describe('generate between', function (): void {
 
     test('with interval but failed expected times', function () {
         $expectedTimes = 10;
-        $between = PointInTimeFactory::between('-1 day', '+1 day', '+10 hours', $expectedTimes);
+        $between = PointInTimeFactory::timesBetween('-1 day', '+1 day', '+10 hours', $expectedTimes);
 
         $this->assertNotEquals($expectedTimes, $between->count());
         $this->assertCount(5, $between);
@@ -87,7 +87,7 @@ describe('generate between', function (): void {
 
     test('return empty collection when end modifier greater or equal than start modifier ',
         function (string $startModifier, string $endModifier): void {
-            $between = PointInTimeFactory::between($startModifier, $endModifier, '+1 hours', 100);
+            $between = PointInTimeFactory::timesBetween($startModifier, $endModifier, '+1 hours', 100);
 
             $this->assertCount(0, $between);
         })->with([

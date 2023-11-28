@@ -18,9 +18,9 @@ beforeEach(function () {
 });
 
 dataset('dateTimes', [
-    'now' => PointInTimeFactory::make(),
-    'now plus 10 secs' => PointInTimeFactory::make()->add(new DateInterval('PT10S')),
-    'now plus one hour' => PointInTimeFactory::make()->add(new DateInterval('PT1H')),
+    'now' => PointInTimeFactory::now(),
+    'now plus 10 secs' => PointInTimeFactory::now()->add(new DateInterval('PT10S')),
+    'now plus one hour' => PointInTimeFactory::now()->add(new DateInterval('PT1H')),
 ]);
 
 test('lock manager instance', function (int $timeout, int $threshold): void {

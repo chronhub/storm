@@ -26,15 +26,15 @@ beforeEach(function () {
 
 dataset('streamEvents', [
     fn () => yield from StreamEventsFactory::fromArray([
-        StreamEventsFactory::withHeaders(PointInTimeFactory::make(), 11),
-        StreamEventsFactory::withHeaders(PointInTimeFactory::make(), 12),
+        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 11),
+        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 12),
     ]),
 ]);
 
 dataset('streamEvent2', [
     fn () => yield from StreamEventsFactory::fromArray([
-        StreamEventsFactory::withHeaders(PointInTimeFactory::make(), 22),
-        StreamEventsFactory::withHeaders(PointInTimeFactory::make(), 24),
+        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 22),
+        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 24),
     ]),
 ]);
 
@@ -67,7 +67,7 @@ describe('can load streams from', function () {
             });
 
         $this->chronicler->expects($this->exactly(2))->method('retrieveFiltered')->willReturnOnConsecutiveCalls($events, $events2);
-        $this->clock->expects($this->exactly(2))->method('toPointInTime')->willReturn(PointInTimeFactory::make());
+        $this->clock->expects($this->exactly(2))->method('toPointInTime')->willReturn(PointInTimeFactory::now());
 
         $streams = $this->loadStreams->batch(['customer-123' => 4, 'customer-456' => 8], $queryFilter);
 
@@ -92,7 +92,7 @@ describe('can load streams from', function () {
             });
 
         $this->chronicler->expects($this->exactly(2))->method('retrieveFiltered')->willReturnOnConsecutiveCalls($events, $events2);
-        $this->clock->expects($this->exactly(2))->method('toPointInTime')->willReturn(PointInTimeFactory::make());
+        $this->clock->expects($this->exactly(2))->method('toPointInTime')->willReturn(PointInTimeFactory::now());
 
         $streams = $this->loadStreams->batch(['customer-123' => 4, 'customer-456' => 8], $queryFilter);
 

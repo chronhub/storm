@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\StreamManager;
 
 interface Subscription
 {
@@ -60,7 +59,7 @@ interface Subscription
     /**
      * Get the stream manager instance.
      */
-    public function streamManager(): StreamManager;
+    public function streamManager(): StreamManagerInterface;
 
     /**
      * Get the system clock instance.

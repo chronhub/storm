@@ -10,11 +10,11 @@ use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Closure;
 
 use function is_array;
@@ -33,7 +33,7 @@ final class GenericSubscription implements Subscription
 
     public function __construct(
         private readonly ProjectionOption $option,
-        private readonly StreamManager $streamManager,
+        private readonly StreamManagerInterface $streamManager,
         private readonly SystemClock $clock,
         private readonly Chronicler $chronicler
     ) {
@@ -105,7 +105,7 @@ final class GenericSubscription implements Subscription
         return $this->option;
     }
 
-    public function streamManager(): StreamManager
+    public function streamManager(): StreamManagerInterface
     {
         return $this->streamManager;
     }

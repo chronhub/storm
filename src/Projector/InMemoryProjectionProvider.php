@@ -11,7 +11,6 @@ use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Illuminate\Support\Collection;
-use LogicException;
 
 use function in_array;
 
@@ -66,7 +65,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         }
 
         if ($projection->lockedUntil() === null) {
-            throw new LogicException("Projection lock must be acquired before updating projection $projectionName");
+            throw new InMemoryProjectionFailed("Projection lock must be acquired before updating projection $projectionName");
         }
 
         if ($status !== null) {

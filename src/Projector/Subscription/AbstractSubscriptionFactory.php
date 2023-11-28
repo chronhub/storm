@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -16,6 +15,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
@@ -36,12 +36,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         public readonly Chronicler $chronicler,
         public readonly ProjectionProvider $projectionProvider,
         public readonly EventStreamProvider $eventStreamProvider,
-        public readonly ProjectionQueryScope $queryScope,
         public readonly SystemClock $clock,
-        public readonly MessageAlias $messageAlias,
         public readonly JsonSerializer $jsonSerializer,
         public readonly Dispatcher $dispatcher,
-        public readonly ProjectionOption|array $options = []
+        public readonly ?ProjectionQueryScope $queryScope = null,
+        public readonly ProjectionOption|array $options = [],
     ) {
     }
 
@@ -105,7 +104,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         return new GenericSubscription(
             $projectionOption,
-            $this->createStreamPosition($projectionOption),
+            $this->createStreamManager($projectionOption),
             $this->clock,
             $this->chronicler,
         );
@@ -132,7 +131,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
-    protected function createStreamPosition(ProjectionOption $options): StreamManager
+    protected function createStreamManager(ProjectionOption $options): StreamManagerInterface
     {
         return new StreamManager(
             new EventStreamLoader($this->eventStreamProvider),

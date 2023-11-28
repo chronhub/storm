@@ -15,7 +15,7 @@ use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 
 final class ProjectorManager implements ProjectorManagerInterface
 {
-    private ProjectorMonitorInterface $monitor;
+    private ?ProjectorMonitorInterface $monitor = null;
 
     public function __construct(private readonly SubscriptionFactory $subscriptionFactory)
     {

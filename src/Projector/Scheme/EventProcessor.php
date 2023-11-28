@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
+use function is_array;
 use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
@@ -20,13 +21,13 @@ final readonly class EventProcessor
 
     public function __invoke(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
     {
-        // gap has been detected
-        if (! $this->bindStream($subscription, $event, $nextPosition)) {
-            return false;
-        }
-
         if ($subscription->option()->getSignal()) {
             pcntl_signal_dispatch();
+        }
+
+        // gap has been detected for persistent subscription
+        if (! $this->bindStream($subscription, $event, $nextPosition)) {
+            return false;
         }
 
         if ($subscription instanceof PersistentSubscriptionInterface) {
@@ -36,7 +37,7 @@ final readonly class EventProcessor
         // handle event and user state if it has been initialized and returned
         $userState = ($this->reactors)($event, $subscription->state()->get());
 
-        if ($userState) {
+        if (is_array($userState)) {
             $subscription->state()->put($userState);
         }
 
@@ -51,13 +52,13 @@ final readonly class EventProcessor
     /**
      * Bind the current stream name to the expected position if match
      */
-    private function bindStream(Subscription $subscription, DomainEvent $event, int $position): bool
+    private function bindStream(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
     {
         // query subscription does not mind of gap
         $eventTime = $subscription instanceof PersistentSubscriptionInterface
             ? $event->header(Header::EVENT_TIME)
             : false;
 
-        return $subscription->streamManager()->bind($subscription->currentStreamName(), $position, $eventTime);
+        return $subscription->streamManager()->bind($subscription->currentStreamName(), $nextPosition, $eventTime);
     }
 }
