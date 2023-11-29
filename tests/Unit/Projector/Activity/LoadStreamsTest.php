@@ -15,6 +15,7 @@ use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 
 beforeEach(function () {
@@ -26,15 +27,15 @@ beforeEach(function () {
 
 dataset('streamEvents', [
     fn () => yield from StreamEventsFactory::fromArray([
-        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 11),
-        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 12),
+        StreamEventsFactory::withEvent(SomeEvent::class)->withHeaders(PointInTimeFactory::now(), 11),
+        StreamEventsFactory::withEvent(SomeEvent::class)->withHeaders(PointInTimeFactory::now(), 12),
     ]),
 ]);
 
 dataset('streamEvent2', [
     fn () => yield from StreamEventsFactory::fromArray([
-        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 22),
-        StreamEventsFactory::withHeaders(PointInTimeFactory::now(), 24),
+        StreamEventsFactory::withEvent(SomeEvent::class)->withHeaders(PointInTimeFactory::now(), 22),
+        StreamEventsFactory::withEvent(SomeEvent::class)->withHeaders(PointInTimeFactory::now(), 24),
     ]),
 ]);
 

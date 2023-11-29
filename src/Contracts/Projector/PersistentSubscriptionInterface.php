@@ -16,7 +16,7 @@ interface PersistentSubscriptionInterface extends Subscription
     public function rise(): void;
 
     /**
-     * Stop the persistent subscription and the projection.
+     * Stop the projection.
      */
     public function close(): void;
 
@@ -43,9 +43,7 @@ interface PersistentSubscriptionInterface extends Subscription
     public function store(): void;
 
     /**
-     * Persist projection data only when the lock can be refreshed.
-     *
-     * light substitution of store() method
+     * Update lock if ity can be refreshed.
      */
     public function update(): void;
 

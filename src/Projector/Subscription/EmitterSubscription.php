@@ -6,14 +6,19 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Stream\StreamName;
 
 final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
+    use InteractWithSubscription;
 
     private bool $isStreamFixed = false;
 
@@ -23,6 +28,15 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         protected readonly EventCounter $eventCounter,
         protected readonly Chronicler $chronicler,
     ) {
+    }
+
+    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
+    {
+        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new InvalidArgumentException('Persistent subscription require a projection query filter');
+        }
+
+        $this->subscription->compose($context, $projectorScope, $keepRunning);
     }
 
     public function rise(): void

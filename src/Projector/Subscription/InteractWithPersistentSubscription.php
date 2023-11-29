@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -16,10 +12,6 @@ use function in_array;
 
 trait InteractWithPersistentSubscription
 {
-    use InteractWithSubscription {
-        compose as protected composeWithPersistence;
-    }
-
     public function synchronise(): void
     {
         $projectionDetail = $this->repository->loadDetail();
@@ -97,15 +89,6 @@ trait InteractWithPersistentSubscription
     public function eventCounter(): EventCounter
     {
         return $this->eventCounter;
-    }
-
-    protected function composeWithPersistence(ContextReaderInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
-    {
-        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new InvalidArgumentException('Persistent subscription require a projection query filter');
-        }
-
-        $this->compose($context, $projectionScope, $keepRunning);
     }
 
     protected function mountProjection(): void

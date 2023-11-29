@@ -48,7 +48,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscription = $this->createGenericSubscription($this->createOption($options));
 
-        return new QuerySubscription($subscription);
+        return new QuerySubscription($subscription, $this->chronicler);
     }
 
     public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface

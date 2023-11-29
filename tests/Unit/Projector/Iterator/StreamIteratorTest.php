@@ -20,7 +20,7 @@ test('empty generator set iterator as not valid', function (): void {
 });
 
 test('iterator cursor advance on constructor', function (): void {
-    $streamEvents = StreamEventsFactory::fromInternalPosition(10);
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
 
     $iterator = new StreamIterator($streamEvents);
 
@@ -30,7 +30,7 @@ test('iterator cursor advance on constructor', function (): void {
 });
 
 test('can iterate with internal position as key and event as value', function (): void {
-    $streamEvents = StreamEventsFactory::fromInternalPosition(5);
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(5);
 
     $iterator = new StreamIterator($streamEvents);
 
@@ -51,7 +51,7 @@ test('can iterate with internal position as key and event as value', function ()
 });
 
 test('can rewind', function (): void {
-    $streamEvents = StreamEventsFactory::fromInternalPosition(10);
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
 
     $iterator = new StreamIterator($streamEvents);
 
@@ -71,7 +71,7 @@ test('can rewind', function (): void {
 });
 
 test('can rewind when iterator is no longer valid', function () {
-    $streamEvents = StreamEventsFactory::fromInternalPosition(10);
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
 
     $iterator = new StreamIterator($streamEvents);
 
@@ -99,7 +99,7 @@ test('count total of events', function (Generator $streamEvents, int $expectedCo
     expect($iterator->count())->toBe($expectedCount);
 })->with(
     [
-        [fn () => StreamEventsFactory::fromInternalPosition(5), 5],
-        [fn () => StreamEventsFactory::fromInternalPosition(10), 10],
-        [fn () => StreamEventsFactory::fromInternalPosition(20), 20],
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(5), 5],
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10), 10],
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(20), 20],
     ]);

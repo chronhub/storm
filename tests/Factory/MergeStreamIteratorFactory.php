@@ -8,6 +8,7 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -21,21 +22,23 @@ class MergeStreamIteratorFactory
      */
     public static function getData(): array
     {
+        $factory = StreamEventsFactory::withEvent(SomeEvent::class);
+
         return [
-            'stream1' => StreamEventsFactory::fromArray([
-                StreamEventsFactory::withHeaders('2023-05-10T10:16:19.000000', 1),
-                StreamEventsFactory::withHeaders('2023-05-10T10:17:19.000000', 4),
-                StreamEventsFactory::withHeaders('2023-05-10T10:24:19.000000', 6),
+            'stream1' => $factory::fromArray([
+                $factory->withHeaders('2023-05-10T10:16:19.000000', 1),
+                $factory->withHeaders('2023-05-10T10:17:19.000000', 4),
+                $factory->withHeaders('2023-05-10T10:24:19.000000', 6),
             ]),
-            'stream2' => StreamEventsFactory::fromArray([
-                StreamEventsFactory::withHeaders('2023-05-10T10:15:19.000000', 5),
-                StreamEventsFactory::withHeaders('2023-05-10T10:20:19.000000', 7),
-                StreamEventsFactory::withHeaders('2023-05-10T10:22:19.000000', 2),
+            'stream2' => $factory::fromArray([
+                $factory->withHeaders('2023-05-10T10:15:19.000000', 5),
+                $factory->withHeaders('2023-05-10T10:20:19.000000', 7),
+                $factory->withHeaders('2023-05-10T10:22:19.000000', 2),
             ]),
-            'stream3' => StreamEventsFactory::fromArray([
-                StreamEventsFactory::withHeaders('2023-05-10T10:18:19.000000', 3),
-                StreamEventsFactory::withHeaders('2023-05-10T10:19:19.000000', 8),
-                StreamEventsFactory::withHeaders('2023-05-10T10:23:19.000000', 9),
+            'stream3' => $factory::fromArray([
+                $factory->withHeaders('2023-05-10T10:18:19.000000', 3),
+                $factory->withHeaders('2023-05-10T10:19:19.000000', 8),
+                $factory->withHeaders('2023-05-10T10:23:19.000000', 9),
             ]),
         ];
     }

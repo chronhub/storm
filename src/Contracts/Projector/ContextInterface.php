@@ -63,12 +63,13 @@ interface ContextInterface
     public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
-     * Sets the timer interval to run the projection.
+     * Sets the timer interval to run the projection when it runs in background.
      *
      * Note that it could not stop projection at the exact time wanted
-     * as projection should stop gracefully
+     * as projection should stop gracefully.
      *
-     * @param DateInterval|string|int $interval int in seconds or valid string interval or DateInterval
+     *
+     * @param DateInterval|string|int $interval int in seconds, a valid string interval or DateInterval
      *
      * @throws InvalidArgumentException When timer is already set
      */

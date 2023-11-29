@@ -4,28 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 final readonly class QuerySubscription implements Subscription
 {
-    use InteractWithSubscription {
-        compose as protected composeWithQuery;
+    use InteractWithSubscription;
+
+    public function __construct(
+        protected GenericSubscription $subscription,
+        protected Chronicler $chronicler,
+    ) {
     }
 
-    public function __construct(protected GenericSubscription $subscription)
+    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
-    }
-
-    protected function composeWithQuery(ContextReaderInterface $context, ProjectorScope $projectionScope, bool $keepRunning): void
-    {
-        if ($context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new InvalidArgumentException('Projection Query filter is not supported for query subscription');
-        }
-
-        $this->compose($context, $projectionScope, $keepRunning);
+        $this->subscription->compose($context, $projectorScope, $keepRunning);
     }
 }
