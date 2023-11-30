@@ -22,8 +22,14 @@ interface Subscription
      */
     public function initializeAgain(): void;
 
+    /**
+     * Get the current stream name.
+     */
     public function &currentStreamName(): ?string;
 
+    /**
+     * Set the current stream name.
+     */
     public function setCurrentStreamName(string $streamName): void;
 
     /**

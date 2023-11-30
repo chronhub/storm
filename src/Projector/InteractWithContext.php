@@ -38,7 +38,7 @@ trait InteractWithContext
         return $this;
     }
 
-    public function when(array|Closure $reactors): static
+    public function when(Closure $reactors): static
     {
         $this->context->when($reactors);
 

@@ -12,36 +12,6 @@ use function in_array;
 
 trait InteractWithPersistentSubscription
 {
-    public function synchronise(): void
-    {
-        $projectionDetail = $this->repository->loadDetail();
-
-        $this->streamManager()->syncStreams($projectionDetail->streamPositions);
-
-        $state = $projectionDetail->state;
-
-        if ($state !== []) {
-            $this->subscription->state()->put($state);
-        }
-    }
-
-    public function persistWhenCounterIsReached(): void
-    {
-        if ($this->eventCounter->isReached()) {
-            $this->store();
-
-            $this->eventCounter()->reset();
-
-            $this->subscription->setStatus($this->disclose());
-
-            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
-
-            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
-                $this->sprint()->stop();
-            }
-        }
-    }
-
     public function update(): void
     {
         $this->repository->updateLock();
@@ -81,7 +51,37 @@ trait InteractWithPersistentSubscription
         return $this->repository->loadStatus();
     }
 
-    public function projectionName(): string
+    public function synchronise(): void
+    {
+        $projectionDetail = $this->repository->loadDetail();
+
+        $this->streamManager()->syncStreams($projectionDetail->streamPositions);
+
+        $state = $projectionDetail->state;
+
+        if ($state !== []) {
+            $this->subscription->state()->put($state);
+        }
+    }
+
+    public function persistWhenCounterIsReached(): void
+    {
+        if ($this->eventCounter->isReached()) {
+            $this->store();
+
+            $this->eventCounter()->reset();
+
+            $this->subscription->setStatus($this->disclose());
+
+            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
+
+            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
+                $this->sprint()->stop();
+            }
+        }
+    }
+
+    public function getName(): string
     {
         return $this->repository->projectionName();
     }

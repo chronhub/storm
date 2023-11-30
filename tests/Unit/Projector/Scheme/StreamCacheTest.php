@@ -67,9 +67,16 @@ test('raise exception when cache size is less than 1', function (int $cacheSize)
     ->with(['zero' => [0], 'negative' => [-1, -5]])
     ->throws(InvalidArgumentException::class, 'Stream cache size must be greater than 0');
 
-test('raise exception when push stream name already exists', function (): void {
-    $cache = new StreamCache(10);
+test('raise exception when push stream name already exists', function (array $streamNames): void {
+    $cache = new StreamCache(3);
 
-    $cache->push('customer-123');
-    $cache->push('customer-123');
-})->throws(InvalidArgumentException::class, 'Stream customer-123 is already in the cache');
+    foreach ($streamNames as $streamName) {
+        $cache->push($streamName);
+    }
+})
+    ->with([
+        'empty cache' => [['customer-123', 'customer-123']],
+        'alternate' => [['customer-123', 'customer-256', 'customer-123']],
+        'rotation' => [['customer-123', 'customer-256', 'customer-478', 'customer-123']],
+    ])
+    ->throws(InvalidArgumentException::class, 'Stream customer-123 is already in the cache');

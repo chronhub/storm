@@ -6,18 +6,27 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateInterval;
 
+/**
+ * @template TState of array
+ * @template TReactor of array<DomainEvent, TState>|array<DomainEvent>
+ */
 interface ContextReaderInterface extends ContextInterface
 {
     /**
      * Get the callback to initialize the state.
+     *
+     * @return Closure():TState|null
      */
     public function userState(): ?Closure;
 
     /**
      * Get the event handlers as array to be called when an event is received.
+     *
+     * @return Closure(TReactor): ?TState $reactors
      *
      * @throws InvalidArgumentException When reactors is not set
      */

@@ -240,7 +240,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     {
         $this->repository->expects($this->once())->method('projectionName')->willReturn('projection_name');
 
-        $this->assertSame('projection_name', $this->newSubscription()->projectionName());
+        $this->assertSame('projection_name', $this->newSubscription()->getName());
     }
 
     protected function testRevise(): void

@@ -15,7 +15,7 @@ final class StreamCache implements JsonSerializable
     /**
      * @var array<int<0,max>,string|null>
      */
-    private array $container = [];
+    private array $buffer = [];
 
     private int $position = -1;
 
@@ -25,16 +25,15 @@ final class StreamCache implements JsonSerializable
             throw new InvalidArgumentException('Stream cache size must be greater than 0');
         }
 
-        $this->container = array_fill(0, $cacheSize, null);
+        $this->buffer = array_fill(0, $cacheSize, null);
     }
 
     /**
-     * Add stream name or replace at the current position
-     * in the circular buffer
+     * Add or replace stream name at the current position in the circular buffer
      *
      * @param non-empty-string $streamName
      *
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException When stream name is already in the cache
      */
     public function push(string $streamName): void
     {
@@ -44,7 +43,7 @@ final class StreamCache implements JsonSerializable
 
         $this->position = ++$this->position % $this->cacheSize;
 
-        $this->container[$this->position] = $streamName;
+        $this->buffer[$this->position] = $streamName;
     }
 
     /**
@@ -54,11 +53,11 @@ final class StreamCache implements JsonSerializable
      */
     public function has(string $streamName): bool
     {
-        return in_array($streamName, $this->container, true);
+        return in_array($streamName, $this->buffer, true);
     }
 
     public function jsonSerialize(): array
     {
-        return $this->container;
+        return $this->buffer;
     }
 }

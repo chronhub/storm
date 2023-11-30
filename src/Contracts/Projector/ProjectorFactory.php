@@ -5,13 +5,20 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateInterval;
 
+/**
+ * @template TInit of array
+ * @template TWhen of array<DomainEvent,TInit>|array<DomainEvent>
+ */
 interface ProjectorFactory extends Projector
 {
     /**
      * Proxy method to initialize the state.
+     *
+     * @param Closure():TInit $userState
      *
      * @see ContextReaderInterface::initialize()
      */
@@ -40,6 +47,8 @@ interface ProjectorFactory extends Projector
 
     /**
      * Proxy method to set the event handlers to be called when an event is received.
+     *
+     * @param Closure(TWhen): ?TInit $reactors
      *
      * @see ContextInterface::when()
      */

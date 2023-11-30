@@ -30,7 +30,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
+        $this->subscription->compose($this->context, $this->newScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -54,7 +54,7 @@ final readonly class ProjectQuery implements QueryProjector
         return $this->subscription->state()->get();
     }
 
-    protected function getScope(): ProjectorScope
+    private function newScope(): ProjectorScope
     {
         return new QueryProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()

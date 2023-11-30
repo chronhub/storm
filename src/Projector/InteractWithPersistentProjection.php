@@ -23,7 +23,7 @@ trait InteractWithPersistentProjection
 {
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
+        $this->subscription->compose($this->context, $this->newScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -52,7 +52,7 @@ trait InteractWithPersistentProjection
 
     public function getName(): string
     {
-        return $this->streamName;
+        return $this->subscription->getName();
     }
 
     protected function newWorkflow(): Workflow
@@ -66,7 +66,7 @@ trait InteractWithPersistentProjection
             new ResetEventCounter(),
             new DispatchSignal(),
             new RefreshProjection(),
-            new StopWhenRunningOnce($this),
+            new StopWhenRunningOnce(),
         ];
 
         return new Workflow($this->subscription, $activities);
@@ -80,5 +80,5 @@ trait InteractWithPersistentProjection
         );
     }
 
-    abstract protected function getScope(): ProjectorScope;
+    abstract protected function newScope(): ProjectorScope;
 }

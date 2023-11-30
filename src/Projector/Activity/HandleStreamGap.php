@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Closure;
 
-final readonly class HandleStreamGap
+final class HandleStreamGap
 {
     public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
     {

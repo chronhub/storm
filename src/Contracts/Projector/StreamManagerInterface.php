@@ -9,7 +9,7 @@ use DateTimeImmutable;
 use JsonSerializable;
 
 /**
- * @template TStream of array<non-empty-string,int>
+ * @template TStream of array<non-empty-string,int<0,max>>
  */
 interface StreamManagerInterface extends JsonSerializable
 {
@@ -30,7 +30,7 @@ interface StreamManagerInterface extends JsonSerializable
     /**
      * Binds a stream name to the next available position.
      *
-     * @param int<1,max> $expectedPosition The incremented position of the current event.
+     * @param int<1, max> $expectedPosition The incremented position of the current event.
      *
      * Successful bind in order:
      *      - event time is false ( meant for query projection )
@@ -51,6 +51,9 @@ interface StreamManagerInterface extends JsonSerializable
      */
     public function sleep(): void;
 
+    /**
+     * Check if a gap is detected.
+     */
     public function hasGap(): bool;
 
     /**
@@ -61,7 +64,7 @@ interface StreamManagerInterface extends JsonSerializable
     /**
      * Returns the current number of retries.
      *
-     * @return int<0,max>
+     * @return int<0, max>
      */
     public function retries(): int;
 

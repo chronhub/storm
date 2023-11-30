@@ -23,7 +23,7 @@ final readonly class HandleProfiler
         try {
             $this->profiler->start($subscription);
 
-            /** @var callable|bool $response */
+            /** @var Closure|bool $response */
             $response = $next($subscription);
         } catch (Throwable $e) {
             $error = $e;

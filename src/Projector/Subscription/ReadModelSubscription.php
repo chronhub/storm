@@ -14,17 +14,17 @@ use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
-final class ReadModelSubscription implements ReadModelSubscriptionInterface
+final readonly class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription;
 
     public function __construct(
-        protected readonly GenericSubscription $subscription,
-        protected readonly ProjectionRepositoryInterface $repository,
-        protected readonly EventCounter $eventCounter,
-        protected readonly Chronicler $chronicler,
-        private readonly ReadModel $readModel,
+        protected GenericSubscription $subscription,
+        protected ProjectionRepositoryInterface $repository,
+        protected EventCounter $eventCounter,
+        protected Chronicler $chronicler,
+        private ReadModel $readModel,
     ) {
     }
 

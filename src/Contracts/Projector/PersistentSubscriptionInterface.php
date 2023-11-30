@@ -72,7 +72,7 @@ interface PersistentSubscriptionInterface extends Subscription
     /**
      * Get the projection name.
      */
-    public function projectionName(): string;
+    public function getName(): string;
 
     /**
      * Get the event counter instance.

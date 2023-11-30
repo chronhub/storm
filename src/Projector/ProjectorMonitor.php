@@ -20,17 +20,17 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
     ) {
     }
 
-    public function stop(string $projectionName): void
+    public function markAsStop(string $projectionName): void
     {
         $this->updateProjectionStatus($projectionName, ProjectionStatus::STOPPING);
     }
 
-    public function reset(string $projectionName): void
+    public function markAsReset(string $projectionName): void
     {
         $this->updateProjectionStatus($projectionName, ProjectionStatus::RESETTING);
     }
 
-    public function delete(string $projectionName, bool $withEmittedEvents): void
+    public function markAsDelete(string $projectionName, bool $withEmittedEvents): void
     {
         $deleteProjectionStatus = $withEmittedEvents
             ? ProjectionStatus::DELETING_WITH_EMITTED_EVENTS

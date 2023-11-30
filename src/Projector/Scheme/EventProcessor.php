@@ -34,11 +34,16 @@ final readonly class EventProcessor
             $subscription->eventCounter()->increment();
         }
 
-        // handle event and user state if it has been initialized and returned
-        $userState = ($this->reactors)($event, $subscription->state()->get());
+        // ensure to pass user state to reactor when it has been initialized
+        $userState = $subscription->context()->userState() instanceof Closure
+            ? $subscription->state()->get()
+            : null;
 
-        if (is_array($userState)) {
-            $subscription->state()->put($userState);
+        // handle event and user state if it has been initialized and returned
+        $currentState = ($this->reactors)($event, $userState);
+
+        if ($userState !== null && is_array($currentState)) {
+            $subscription->state()->put($currentState);
         }
 
         // when block size is reached, persist data

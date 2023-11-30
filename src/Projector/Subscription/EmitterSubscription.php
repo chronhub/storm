@@ -73,17 +73,17 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         $this->deleteStream();
     }
 
-    public function isStreamFixed(): bool
+    public function wasEmitted(): bool
     {
         return $this->isStreamFixed;
     }
 
-    public function fixeStream(): void
+    public function eventEmitted(): void
     {
         $this->isStreamFixed = true;
     }
 
-    public function unfixStream(): void
+    public function unsetEmitted(): void
     {
         $this->isStreamFixed = false;
     }
@@ -91,11 +91,11 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     private function deleteStream(): void
     {
         try {
-            $this->chronicler->delete(new StreamName($this->projectionName()));
+            $this->chronicler->delete(new StreamName($this->getName()));
         } catch (StreamNotFound) {
             // fail silently
         }
 
-        $this->unfixStream();
+        $this->unsetEmitted();
     }
 }

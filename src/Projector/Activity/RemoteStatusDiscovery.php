@@ -25,7 +25,7 @@ trait RemoteStatusDiscovery
         return $statusFn ? $statusFn() : false;
     }
 
-    private function markAsStop(PersistentSubscriptionInterface $subscription): bool
+    private function onStop(PersistentSubscriptionInterface $subscription): bool
     {
         if ($this->isFirstExecution()) {
             $subscription->synchronise();
@@ -36,7 +36,7 @@ trait RemoteStatusDiscovery
         return $this->isFirstExecution();
     }
 
-    private function markAsReset(PersistentSubscriptionInterface $subscription): bool
+    private function onReset(PersistentSubscriptionInterface $subscription): bool
     {
         $subscription->revise();
 
@@ -47,7 +47,7 @@ trait RemoteStatusDiscovery
         return false;
     }
 
-    private function markForDeletion(PersistentSubscriptionInterface $subscription, bool $shouldDiscardEvents): bool
+    private function onDelete(PersistentSubscriptionInterface $subscription, bool $shouldDiscardEvents): bool
     {
         $subscription->discard($shouldDiscardEvents);
 
@@ -57,10 +57,10 @@ trait RemoteStatusDiscovery
     private function getStatuses(PersistentSubscriptionInterface $subscription): array
     {
         return [
-            ProjectionStatus::STOPPING->value => fn () => $this->markAsStop($subscription),
-            ProjectionStatus::RESETTING->value => fn () => $this->markAsReset($subscription),
-            ProjectionStatus::DELETING->value => fn () => $this->markForDeletion($subscription, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => fn () => $this->markForDeletion($subscription, true),
+            ProjectionStatus::STOPPING->value => fn () => $this->onStop($subscription),
+            ProjectionStatus::RESETTING->value => fn () => $this->onReset($subscription),
+            ProjectionStatus::DELETING->value => fn () => $this->onDelete($subscription, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => fn () => $this->onDelete($subscription, true),
         ];
     }
 }

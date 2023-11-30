@@ -34,7 +34,6 @@ final class ProjectorManager implements ProjectorManagerInterface
         return new ProjectEmitter(
             $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
             $this->subscriptionFactory->createContextBuilder(),
-            $streamName
         );
     }
 
@@ -43,7 +42,6 @@ final class ProjectorManager implements ProjectorManagerInterface
         return new ProjectReadModel(
             $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
             $this->subscriptionFactory->createContextBuilder(),
-            $streamName,
             $readModel
         );
     }

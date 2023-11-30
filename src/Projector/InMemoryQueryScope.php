@@ -23,6 +23,8 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
             private int $counter = 0;
 
+            private int $currentPosition = 0;
+
             public function __construct(int $limit = 500)
             {
                 if ($limit < 0) {
@@ -31,8 +33,6 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
                 $this->limit = $limit === 0 ? PHP_INT_MAX : $limit;
             }
-
-            private int $currentPosition = 0;
 
             public function apply(): callable
             {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
@@ -24,6 +25,7 @@ beforeEach(function () {
     $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
     $this->option = $this->createMock(ProjectionOption::class);
     $this->streamManager = $this->createMock(StreamManagerInterface::class);
+    $this->context = $this->createMock(ContextReaderInterface::class);
 
     $this->subscription->expects($this->once())->method('option')->willReturn($this->option);
     $this->subscription->expects($this->any())->method('streamManager')->willReturn($this->streamManager);
@@ -36,6 +38,8 @@ beforeEach(function () {
 dataset('sprint in', ['in progress' => true, 'stopped' => false]);
 
 $assertEventProcessed = function (bool $inProgress) {
+    $this->context->expects($this->exactly(1))->method('userState')->willReturn(fn () => []);
+    $this->subscription->expects($this->any())->method('context')->willReturn($this->context);
     $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
     $this->subscription->expects($this->once())->method('persistWhenCounterIsReached');
     $this->subscription->expects($this->once())->method('sprint')->willReturn($this->sprint);

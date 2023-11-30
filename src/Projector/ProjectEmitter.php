@@ -25,22 +25,23 @@ final readonly class ProjectEmitter implements EmitterProjector
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
         protected ContextInterface $context,
-        protected string $streamName
     ) {
         $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
     }
 
     public function emit(DomainEvent $event): void
     {
-        $streamName = new StreamName($this->streamName);
+        $streamName = new StreamName($this->getName());
 
-        if (! $this->subscription->isStreamFixed() && ! $this->chronicler()->hasStream($streamName)) {
+        // First commit the stream name without event
+        if (! $this->streamNotEmittedAndNotExists($streamName)) {
             $this->chronicler()->firstCommit(new Stream($streamName));
 
-            $this->subscription->fixeStream();
+            $this->subscription->eventEmitted();
         }
 
-        $this->linkTo($this->streamName, $event);
+        // Append the stream with the event
+        $this->linkTo($this->getName(), $event);
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
@@ -49,19 +50,24 @@ final readonly class ProjectEmitter implements EmitterProjector
 
         $stream = new Stream($newStreamName, [$event]);
 
-        $this->determineIfStreamAlreadyExists($newStreamName)
+        $this->streamIsCachedOrExists($newStreamName)
             ? $this->chronicler()->amend($stream)
             : $this->chronicler()->firstCommit($stream);
     }
 
-    protected function getScope(): EmitterProjectorScopeInterface
+    protected function newScope(): EmitterProjectorScopeInterface
     {
         return new EmitterProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
         );
     }
 
-    private function determineIfStreamAlreadyExists(StreamName $streamName): bool
+    private function streamNotEmittedAndNotExists(StreamName $streamName): bool
+    {
+        return ! $this->subscription->wasEmitted() && ! $this->chronicler()->hasStream($streamName);
+    }
+
+    private function streamIsCachedOrExists(StreamName $streamName): bool
     {
         if ($this->streamCache->has($streamName->name)) {
             return true;

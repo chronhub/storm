@@ -247,3 +247,101 @@ it('can run query projection with a dedicated query filter', function () {
 
     expect($projector->getState())->toBe(['positions' => [8, 9, 10]]);
 });
+
+it('can run query projection with user state', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQuery();
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, $state): array {
+            expect($state)->toBeArray()->and($state['count'])->toBe(0);
+
+            $state['count']++;
+
+            return $state;
+        })->run(false);
+
+    expect($projector->getState())->toBe(['count' => 1]);
+});
+
+it('can run query projection with empty user state', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQuery();
+
+    // run projection
+    $projector
+        ->initialize(fn () => [])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, $state): array {
+            expect($state)->toBeArray()->toBeEmpty();
+
+            return ['count' => 1];
+        })->run(false);
+
+    expect($projector->getState())->toBe(['count' => 1]);
+});
+
+it('can run query projection with user state and return', function (array $returnState) {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQuery();
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, $state) use ($returnState): array {
+            expect($state)->toBeArray()->and($state['count'])->toBe(0);
+
+            $state['count']++;
+
+            return $returnState;
+        })->run(false);
+
+    expect($projector->getState())->toBe($returnState);
+})->with([
+    'whatever data' => [['return whatever data']],
+    'empty array' => [[]],
+]);
+
+it('can run query projection without user state and return will be ignored', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQuery();
+
+    // run projection
+    $projector
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, $state): array {
+            expect($state)->toBeNull();
+
+            return ['foo' => 'bar'];
+        })->run(false);
+
+    expect($projector->getState())->toBe([]);
+});

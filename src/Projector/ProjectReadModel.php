@@ -19,7 +19,6 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function __construct(
         protected ReadModelSubscriptionInterface $subscription,
         protected ContextInterface $context,
-        protected string $streamName,
         private ReadModel $readModel
     ) {
     }
@@ -29,7 +28,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
         return $this->readModel;
     }
 
-    protected function getScope(): ReadModelProjectorScopeInterface
+    protected function newScope(): ReadModelProjectorScopeInterface
     {
         return new ReadModelProjectorScope(
             $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()

@@ -15,7 +15,7 @@ interface ProjectorMonitorInterface
      * @throws ProjectionNotFound when projection not found
      * @throws ProjectionFailed   when update projection status failed
      */
-    public function stop(string $projectionName): void;
+    public function markAsStop(string $projectionName): void;
 
     /**
      * Reset the projection.
@@ -23,7 +23,7 @@ interface ProjectorMonitorInterface
      * @throws ProjectionNotFound when projection not found
      * @throws ProjectionFailed   when update projection status failed
      */
-    public function reset(string $projectionName): void;
+    public function markAsReset(string $projectionName): void;
 
     /**
      * Delete the projection and optionally delete emitted events.
@@ -31,7 +31,7 @@ interface ProjectorMonitorInterface
      * @throws ProjectionNotFound when projection not found
      * @throws ProjectionFailed   when update projection status failed
      */
-    public function delete(string $projectionName, bool $withEmittedEvents): void;
+    public function markAsDelete(string $projectionName, bool $withEmittedEvents): void;
 
     /**
      * Get the projection status.
