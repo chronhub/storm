@@ -34,7 +34,7 @@ final readonly class ProjectEmitter implements EmitterProjector
         $streamName = new StreamName($this->getName());
 
         // First commit the stream name without event
-        if (! $this->streamNotEmittedAndNotExists($streamName)) {
+        if ($this->streamNotEmittedAndNotExists($streamName)) {
             $this->chronicler()->firstCommit(new Stream($streamName));
 
             $this->subscription->eventEmitted();

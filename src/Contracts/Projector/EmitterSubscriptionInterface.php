@@ -8,7 +8,6 @@ interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
 {
     /**
      * Check if an event has been emitted.
-     * it avoids queries and assume the stream exists in the chronicler
      */
     public function wasEmitted(): bool;
 

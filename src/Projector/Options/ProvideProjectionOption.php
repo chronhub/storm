@@ -10,45 +10,39 @@ use function range;
 
 trait ProvideProjectionOption
 {
-    /**
-     * Dispatch async signal
-     */
     protected readonly bool $signal;
 
     /**
-     * Number of stream to keep in cache
+     * @var positive-int
      */
     protected readonly int $cacheSize;
 
     /**
-     * Lock timeout in milliseconds
+     * @var int<1,max>
      */
     protected readonly int $timeout;
 
     /**
-     * Sleep before update lock in milliseconds
-     */
-    protected readonly int $sleep;
-
-    /**
-     * threshold of event to keep in memory before persisting
-     */
-    protected readonly int $blockSize;
-
-    /**
-     * Update lock Threshold
+     * @var int<0,max>
      */
     protected readonly int $lockout;
 
     /**
-     * Number of retries in milliseconds to fill a gap detected
+     * @var int<0,max>
+     */
+    protected readonly int $sleep;
+
+    /**
+     * @var positive-int
+     */
+    protected readonly int $blockSize;
+
+    /**
+     * @var array<int<0,max>>
      */
     protected readonly array $retries;
 
-    /**
-     * Detection windows as a string interval
-     */
-    protected readonly string|null $detectionWindows;
+    protected readonly ?string $detectionWindows;
 
     public function getSignal(): bool
     {

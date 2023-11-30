@@ -52,18 +52,18 @@ interface ProjectorMonitorInterface
     /**
      * Get the projection state.
      *
-     * @return array<string|int,null|string|int|float|bool|array>
+     * @return array<string|int,mixed>
      *
      * @throws ProjectionNotFound
      */
     public function stateOf(string $projectionName): array;
 
     /**
-     * Filter projection names by ascendant order.
+     * Filter projection names which exists.
      *
      * @return array<string>
      */
-    public function filterNamesByAscendantOrder(string ...$streamNames): array;
+    public function filterNames(string ...$streamNames): array;
 
     /**
      * Check if projection exists.

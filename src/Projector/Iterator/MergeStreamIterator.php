@@ -20,7 +20,7 @@ final class MergeStreamIterator implements Countable, Iterator
     private const CHUNK_SIZE = 32;
 
     /**
-     * @var Collection<array{StreamIterator, string}>
+     * @var Collection<array{StreamIterator,string}>
      */
     private Collection $iterators;
 

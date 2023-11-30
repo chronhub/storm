@@ -33,7 +33,7 @@ final class StreamCache implements JsonSerializable
      *
      * @param non-empty-string $streamName
      *
-     * @throws InvalidArgumentException When stream name is already in the cache
+     * @throws InvalidArgumentException When stream name is already in buffer
      */
     public function push(string $streamName): void
     {
@@ -47,7 +47,7 @@ final class StreamCache implements JsonSerializable
     }
 
     /**
-     * Check if stream name is in cache
+     * Check if stream name is in buffer
      *
      * @param non-empty-string $streamName
      */

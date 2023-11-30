@@ -15,7 +15,7 @@ final class InMemoryProjectionOption implements ProjectionOption
         $this->signal = false;
         $this->cacheSize = 100;
         $this->blockSize = 1;
-        $this->timeout = 0;
+        $this->timeout = 1;
         $this->sleep = 100;
         $this->lockout = 0;
         $this->retries = [];

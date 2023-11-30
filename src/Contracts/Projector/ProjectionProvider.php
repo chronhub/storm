@@ -73,7 +73,7 @@ interface ProjectionProvider
      * Filter projections by their names.
      *
      * @param  string        ...$projectionNames The names of the projections to filter.
-     * @return array{string} An array of string projection names that match the given names.
+     * @return array<string> An array of string projection names that match the given names.
      */
     public function filterByNames(string ...$projectionNames): array;
 

@@ -16,7 +16,7 @@ interface StreamManagerInterface extends JsonSerializable
     /**
      * Watches event streams based on given queries.
      *
-     * @param array{all?: bool, categories?: string[], names?: string[]} $queries
+     * @param array{'all'?: bool, 'categories'?: string[], 'names'?: string[]} $queries
      */
     public function watchStreams(array $queries): void;
 
@@ -29,22 +29,21 @@ interface StreamManagerInterface extends JsonSerializable
 
     /**
      * Binds a stream name to the next available position.
-     *
-     * @param int<1, max> $expectedPosition The incremented position of the current event.
-     *
      * Successful bind in order:
-     *      - event time is false ( meant for query projection )
-     *      - no retry set
-     *      - no gap detected
-     *      - gap detected but no more retries available
-     *      - successful detection window checked
+     *       - event time is false ( meant for query projection )
+     *       - no retry set
+     *       - no gap detected
+     *       - gap detected but no more retries available
+     *       - successful detection window checked
+     *
+     * @param int<1,max> $expectedPosition The incremented position of the current event.
      *
      * @throw RuntimeException When stream name is not watched
      */
     public function bind(string $streamName, int $expectedPosition, DateTimeImmutable|string|false $eventTime): bool;
 
     /**
-     * Sleeps for the specified retry duration available.
+     * Sleeps for the internal retry duration available.
      *
      * @throws RuntimeException When no gap is detected
      * @throws RuntimeException When no more retries are available.
@@ -64,7 +63,7 @@ interface StreamManagerInterface extends JsonSerializable
     /**
      * Returns the current number of retries.
      *
-     * @return int<0, max>
+     * @return int<0,max>
      */
     public function retries(): int;
 

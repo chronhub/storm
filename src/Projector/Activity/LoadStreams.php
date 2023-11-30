@@ -26,7 +26,7 @@ final readonly class LoadStreams
     }
 
     /**
-     * @param array<non-empty-string, positive-int> $streamPositions
+     * @param array<non-empty-string,positive-int> $streamPositions
      */
     public function batch(array $streamPositions, QueryFilter $queryFilter): MergeStreamIterator
     {

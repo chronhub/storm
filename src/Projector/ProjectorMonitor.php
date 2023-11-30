@@ -58,7 +58,7 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
         return $this->jsonSerializer->decode($projection->state());
     }
 
-    public function filterNamesByAscendantOrder(string ...$streamNames): array
+    public function filterNames(string ...$streamNames): array
     {
         return $this->projectionProvider->filterByNames(...$streamNames);
     }
@@ -77,7 +77,7 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
         try {
             $this->projectionProvider->updateProjection($projectionName, status : $projectionStatus->value);
         } catch (Throwable $exception) {
-            if ($exception instanceof ProjectionFailed) {
+            if ($exception instanceof ProjectionFailed || $exception instanceof ProjectionNotFound) {
                 throw $exception;
             }
 

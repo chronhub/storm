@@ -68,7 +68,7 @@ test('process event and return result of sprint in progress', function (bool $in
 
     $inProgress ? $this->sprint->continue() : $this->sprint->stop();
 
-    $assertEventProcessed->bindTo($this)($inProgress);
+    $assertEventProcessed->call($this, $inProgress);
 })->with(['in progress' => [true], 'stopped' => [false]]);
 
 test('process event and stop sprint on handle signal', function () use ($assertEventProcessed): void {
@@ -82,7 +82,7 @@ test('process event and stop sprint on handle signal', function () use ($assertE
 
     posix_kill(posix_getpid(), SIGTERM);
 
-    $assertEventProcessed->bindTo($this)(false);
+    $assertEventProcessed->call($this, false);
 });
 
 test('does not process event when gap has been detected and always return false', function () {

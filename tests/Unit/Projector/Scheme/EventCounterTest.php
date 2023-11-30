@@ -19,7 +19,7 @@ test('new instance', function (): void {
 test('exception raised when limit is less than one', function (int $limit): void {
     new EventCounter($limit);
 })
-    ->with([0, -1, -10])
+    ->with([[0, -1, -10]])
     ->throws(InvalidArgumentException::class, 'Event counter limit must be greater than');
 
 test('can increment counter', function (): void {
