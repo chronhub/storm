@@ -9,7 +9,7 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\ProcessClosureEvent;
@@ -41,7 +41,7 @@ final class ProcessClosureQueryEventTest extends UnitTestCase
         $streamPosition = new StreamManager($eventStore);
 
         $this->subscription = new QuerySubscription(
-            new DefaultProjectionOption(signal: true),
+            new DefaultOption(signal: true),
             $streamPosition,
             new PointInTime(),
         );

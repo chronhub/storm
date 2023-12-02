@@ -7,67 +7,109 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
+use Closure;
+
+use function is_array;
 
 trait InteractWithSubscription
 {
+    protected ?string $currentStreamName = null;
+
+    protected ContextReaderInterface $context;
+
+    protected ProjectionStatus $status = ProjectionStatus::IDLE;
+
+    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
+    {
+        if ($this instanceof PersistentSubscriptionInterface && ! $context->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Persistent subscription must have a projection query filter');
+        }
+
+        $this->context = $context;
+
+        $userState = $this->context->bindUserState($projectorScope);
+
+        $this->state->put($userState);
+
+        $this->context->bindReactors($projectorScope);
+
+        $this->sprint->runInBackground($keepRunning);
+
+        $this->sprint->continue();
+    }
+
     public function initializeAgain(): void
     {
-        $this->subscription->initializeAgain();
+        $this->state->reset();
+
+        $callback = $this->context->userState();
+
+        if ($callback instanceof Closure) {
+            $userState = $callback();
+
+            if (is_array($userState)) {
+                $this->state->put($userState);
+            }
+        }
     }
 
     public function &currentStreamName(): ?string
     {
-        return $this->subscription->currentStreamName();
+        return $this->currentStreamName;
     }
 
-    public function setCurrentStreamName(string $streamName): void
+    public function setStreamName(string &$streamName): void
     {
-        $this->subscription->setCurrentStreamName($streamName);
+        $this->currentStreamName = &$streamName;
     }
 
     public function currentStatus(): ProjectionStatus
     {
-        return $this->subscription->currentStatus();
+        return $this->status;
     }
 
     public function setStatus(ProjectionStatus $status): void
     {
-        $this->subscription->setStatus($status);
+        $this->status = $status;
     }
 
     public function context(): ContextReaderInterface
     {
-        return $this->subscription->context();
+        return $this->context;
     }
 
     public function sprint(): Sprint
     {
-        return $this->subscription->sprint();
+        return $this->sprint;
     }
 
     public function state(): ProjectionStateInterface
     {
-        return $this->subscription->state();
+        return $this->state;
     }
 
     public function option(): ProjectionOption
     {
-        return $this->subscription->option();
+        return $this->option;
     }
 
     public function streamManager(): StreamManagerInterface
     {
-        return $this->subscription->streamManager();
+        return $this->streamManager;
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscription->clock();
+        return $this->clock;
     }
 
     public function chronicler(): Chronicler

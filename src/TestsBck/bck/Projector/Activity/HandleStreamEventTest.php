@@ -16,7 +16,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
@@ -46,7 +46,7 @@ class HandleStreamEventTest extends UnitTestCase
         $eventStore = new InMemoryEventStream();
 
         $this->subscription = new QuerySubscription(
-            new InMemoryProjectionOption(),
+            new InMemoryOption(),
             new StreamManager($eventStore),
             new PointInTime()
         );

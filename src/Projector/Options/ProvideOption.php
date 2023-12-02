@@ -8,7 +8,7 @@ use function explode;
 use function is_array;
 use function range;
 
-trait ProvideProjectionOption
+trait ProvideOption
 {
     protected readonly bool $signal;
 

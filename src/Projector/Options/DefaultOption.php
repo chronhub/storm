@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Options;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 
-final class DefaultProjectionOption implements ProjectionOption
+final class DefaultOption implements ProjectionOption
 {
-    use ProvideProjectionOption;
+    use ProvideOption;
 
     public function __construct(
         protected readonly bool $signal = false,
@@ -18,8 +18,8 @@ final class DefaultProjectionOption implements ProjectionOption
         protected readonly int $timeout = 1000,
         protected readonly int $lockout = 100000,
         array|string $retries = [0, 5, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
-        protected readonly ?string $detectionWindows = null)
-    {
+        protected readonly ?string $detectionWindows = null
+    ) {
         $this->setUpRetries($retries);
     }
 }

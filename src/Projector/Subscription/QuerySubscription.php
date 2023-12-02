@@ -5,22 +5,37 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Scheme\Sprint;
 
-final readonly class QuerySubscription implements Subscription
+final class QuerySubscription implements QuerySubscriptionInterface
 {
     use InteractWithSubscription;
 
-    public function __construct(
-        protected GenericSubscription $subscription,
-        protected Chronicler $chronicler,
-    ) {
-    }
+    protected Chronicler $chronicler;
 
-    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
-    {
-        $this->subscription->compose($context, $projectorScope, $keepRunning);
+    protected Sprint $sprint;
+
+    protected ProjectionStateInterface $state;
+
+    public function __construct(
+        protected StreamManagerInterface $streamManager,
+        protected ProjectionOption $option,
+        protected SystemClock $clock,
+        Chronicler $chronicler,
+    ) {
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
+        }
+
+        $this->chronicler = $chronicler;
+        $this->state = new ProjectionState();
+        $this->sprint = new Sprint();
     }
 }

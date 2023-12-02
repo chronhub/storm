@@ -17,7 +17,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -55,7 +55,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
 
         $this->subscription = new EmitterSubscription(
             $this->createMock(ProjectionRepositoryInterface::class),
-            new InMemoryProjectionOption(),
+            new InMemoryOption(),
             $streamPosition,
             new EventCounter(10),
             new StreamGapManager($streamPosition, new PointInTime(), [10]),

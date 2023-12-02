@@ -23,7 +23,6 @@ beforeEach(function () {
 });
 
 test('dispatch signal when projection option signal is active', function () {
-
     $this->option->expects($this->once())->method('getSignal')->willReturn(true);
 
     $called = false;

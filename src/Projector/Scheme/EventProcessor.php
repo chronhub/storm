@@ -19,6 +19,9 @@ final readonly class EventProcessor
     {
     }
 
+    /**
+     * @param int<1,max> $nextPosition
+     */
     public function __invoke(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
     {
         if ($subscription->option()->getSignal()) {

@@ -29,7 +29,9 @@ final class HandleStreamEvent
         $streams = $this->getStreams($subscription);
 
         foreach ($streams as $position => $event) {
-            $subscription->setCurrentStreamName($streams->streamName());
+            $streamName = $streams->streamName();
+
+            $subscription->setStreamName($streamName);
 
             $eventHandled = ($this->eventProcessor)($subscription, $event, $position);
 

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(DefaultProjectionOption::class)]
+#[CoversClass(DefaultOption::class)]
 final class DefaultProjectionOptionTest extends UnitTestCase
 {
     public function testDefaultValues()
     {
-        $options = new DefaultProjectionOption();
+        $options = new DefaultOption();
 
         $expectedResult = [
             'signal' => false,
@@ -31,7 +31,7 @@ final class DefaultProjectionOptionTest extends UnitTestCase
 
     public function testPromoteConstructor()
     {
-        $options = new DefaultProjectionOption(signal: true, lockout: 0);
+        $options = new DefaultOption(signal: true, lockout: 0);
 
         $this->assertTrue($options->jsonSerialize()['signal']);
         $this->assertSame(0, $options->jsonSerialize()['lockout']);

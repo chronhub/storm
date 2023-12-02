@@ -28,9 +28,9 @@ interface Subscription
     public function &currentStreamName(): ?string;
 
     /**
-     * Set the current stream name.
+     * Set the current stream name by reference.
      */
-    public function setCurrentStreamName(string $streamName): void;
+    public function setStreamName(string &$streamName): void;
 
     /**
      * Get the current status of the subscription.

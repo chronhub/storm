@@ -5,54 +5,36 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+use Chronhub\Storm\Tests\Uses\TestingSubscriptionFactory;
 use LogicException;
+use TypeError;
 
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;
 
-beforeEach(function () {
-    $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
-    $this->option = $this->createMock(ProjectionOption::class);
-    $this->streamManager = $this->createMock(StreamManagerInterface::class);
-    $this->context = $this->createMock(ContextReaderInterface::class);
+uses(TestingSubscriptionFactory::class);
 
-    $this->subscription->expects($this->once())->method('option')->willReturn($this->option);
-    $this->subscription->expects($this->any())->method('streamManager')->willReturn($this->streamManager);
-    $this->state = new ProjectionState();
-    $this->eventCounter = new EventCounter(5);
-    $this->sprint = new Sprint();
+beforeEach(function () {
+    $this->setUpWithSubscription(PersistentSubscriptionInterface::class);
     $this->event = SomeEvent::fromContent(['name' => 'steph'])->withHeader(Header::EVENT_TIME, 'some_event_time');
 });
 
-dataset('sprint in', ['in progress' => true, 'stopped' => false]);
-
 $assertEventProcessed = function (bool $inProgress) {
-    $this->context->expects($this->exactly(1))->method('userState')->willReturn(fn () => []);
-    $this->subscription->expects($this->any())->method('context')->willReturn($this->context);
-    $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
+    $this->fakeInitializeUserState();
     $this->subscription->expects($this->once())->method('persistWhenCounterIsReached');
-    $this->subscription->expects($this->once())->method('sprint')->willReturn($this->sprint);
-    $this->subscription->expects($this->exactly(2))->method('state')->willReturn($this->state);
-    $this->subscription->expects($this->once())->method('currentStreamName')->willReturn('foo');
-    $this->streamManager->expects($this->once())->method('bind')->with('foo', 5, 'some_event_time')->willReturn(true);
+    $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, 'some_event_time')->willReturn(true);
 
     $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state): array {
         expect($event)
             ->toBe($this->event)
             ->and($state)->toBe($this->state->get());
 
-        return $event->toContent();
+        return ['altered content'];
     });
 
     $result = $eventProcessor($this->subscription, $this->event, 5);
@@ -60,10 +42,10 @@ $assertEventProcessed = function (bool $inProgress) {
     expect($result)
         ->toBe($inProgress)
         ->and($this->sprint->inProgress())->toBe($inProgress)
-        ->and($this->state->get())->toBe(['name' => 'steph']);
+        ->and($this->state->get())->toBe(['altered content']);
 };
 
-test('process event and return result of sprint in progress', function (bool $inProgress) use ($assertEventProcessed): void {
+test('process event and return sprint in progress', function (bool $inProgress) use ($assertEventProcessed): void {
     $this->option->expects($this->once())->method('getSignal')->willReturn(false);
 
     $inProgress ? $this->sprint->continue() : $this->sprint->stop();
@@ -92,9 +74,7 @@ test('does not process event when gap has been detected and always return false'
 
     $this->subscription->expects($this->never())->method('sprint');
     $this->subscription->expects($this->never())->method('state');
-    $this->subscription->expects($this->once())->method('currentStreamName')->willReturn('foo');
-
-    $this->streamManager->expects($this->once())->method('bind')->with('foo', 5, 'some_event_time')->willReturn(false);
+    $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, 'some_event_time')->willReturn(false);
 
     $eventProcessor = new EventProcessor(function (): void {
         throw new LogicException('test: should not be called');
@@ -104,3 +84,17 @@ test('does not process event when gap has been detected and always return false'
 
     expect($result)->toBeFalse();
 });
+
+test('raise error when event time extracted from event header is not string or date time', function () {
+    $this->event = SomeEvent::fromContent(['name' => 'steph']);
+
+    $this->subscription->expects($this->never())->method('sprint');
+    $this->subscription->expects($this->never())->method('state');
+    $this->streamManager->expects($this->never())->method('bind');
+
+    $eventProcessor = new EventProcessor(function (): void {
+        throw new LogicException('test: should not be called');
+    });
+
+    $eventProcessor($this->subscription, $this->event, 5);
+})->throws(TypeError::class, 'Argument #3 ($eventTime) must be of type DateTimeImmutable|string|false');

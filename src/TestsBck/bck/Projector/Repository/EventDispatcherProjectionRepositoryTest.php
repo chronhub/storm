@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Repository;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Repository\Event\EventMap;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionError;
+use Chronhub\Storm\Projector\Repository\Event\ProjectionEventMap;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionStarted;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -16,7 +16,7 @@ use Illuminate\Events\Dispatcher as EventDispatcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use Throwable;
 
-class EventAwareProjectionRepositoryTest extends UnitTestCase
+class EventDispatcherProjectionRepositoryTest extends UnitTestCase
 {
     private ProjectionRepositoryInterface|MockObject $repository;
 
@@ -67,13 +67,13 @@ class EventAwareProjectionRepositoryTest extends UnitTestCase
     {
         $subscriber = new class()
         {
-            private EventMap $eventMap;
+            private ProjectionEventMap $eventMap;
 
             private ?object $eventHandled = null;
 
             public function __construct()
             {
-                $this->eventMap = new EventMap();
+                $this->eventMap = new ProjectionEventMap();
             }
 
             public function handle(object $event): void

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 #[CoversClass(AbstractSubscription::class)]
 final class SubscriptionTest extends UnitTestCase
 {
-    private DefaultProjectionOption $options;
+    private DefaultOption $options;
 
     private StreamManager $position;
 
@@ -30,7 +30,7 @@ final class SubscriptionTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->options = new DefaultProjectionOption();
+        $this->options = new DefaultOption();
         $this->position = new StreamManager(
             new InMemoryEventStream()
         );
@@ -47,7 +47,7 @@ final class SubscriptionTest extends UnitTestCase
         $this->assertInstanceOf(StreamManager::class, $stub->streamManager());
         $this->assertInstanceOf(PointInTime::class, $stub->clock());
         $this->assertInstanceOf(ProjectionState::class, $stub->state());
-        $this->assertInstanceOf(DefaultProjectionOption::class, $stub->option());
+        $this->assertInstanceOf(DefaultOption::class, $stub->option());
     }
 
     #[DataProvider('provideBoolean')]

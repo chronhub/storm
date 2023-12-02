@@ -12,7 +12,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\InMemoryQueryScope;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
 use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
@@ -67,7 +67,7 @@ class InMemoryFactory
             new ProjectorJsonSerializer(),
             new Dispatcher(),
             new InMemoryQueryScope(),
-            new InMemoryProjectionOption(),
+            new InMemoryOption(),
         );
     }
 

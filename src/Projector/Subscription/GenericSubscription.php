@@ -19,13 +19,16 @@ use Closure;
 
 use function is_array;
 
+/**
+ * @deprecated
+ */
 final class GenericSubscription implements Subscription
 {
     private ?string $currentStreamName = null;
 
-    private ProjectionStatus $status = ProjectionStatus::IDLE;
-
     private ContextReaderInterface $context;
+
+    private ProjectionStatus $status = ProjectionStatus::IDLE;
 
     private readonly ProjectionStateInterface $state;
 
@@ -76,7 +79,7 @@ final class GenericSubscription implements Subscription
         return $this->currentStreamName;
     }
 
-    public function setCurrentStreamName(string $streamName): void
+    public function setStreamName(string &$streamName): void
     {
         $this->currentStreamName = &$streamName;
     }

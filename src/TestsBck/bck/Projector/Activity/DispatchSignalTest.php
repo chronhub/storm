@@ -6,11 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function pcntl_signal;
 use function posix_getpid;
 use function posix_kill;
@@ -21,7 +22,7 @@ final class DispatchSignalTest extends UnitTestCase
     #[DataProvider('provideBoolean')]
     public function testPCNTLSignalDispatch(bool $dispatchSignal): void
     {
-        $options = new DefaultProjectionOption(signal: $dispatchSignal);
+        $options = new DefaultOption(signal: $dispatchSignal);
 
         $subscription = $this->createMock(Subscription::class);
 

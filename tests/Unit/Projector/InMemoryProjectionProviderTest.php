@@ -12,6 +12,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\InMemoryProjection;
 use Chronhub\Storm\Projector\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\ProjectionStatus;
 
 beforeEach(function (): void {
     $this->clock = $this->createMock(SystemClock::class);
@@ -22,8 +23,8 @@ test('in memory projection provider instance', function () {
     $this->assertNull($this->provider->retrieve('customer'));
 });
 
-test('create projection', function (): void {
-    $this->provider->createProjection('customer', 'idle');
+test('create projection with status', function (ProjectionStatus $status): void {
+    $this->provider->createProjection('customer', $status->value);
 
     expect($this->provider->exists('customer'))->toBeTrue();
 
@@ -34,25 +35,25 @@ test('create projection', function (): void {
         ->and($projection->name())->toBe('customer')
         ->and($projection->state())->toEqual('{}')
         ->and($projection->positions())->toEqual('{}')
-        ->and($projection->status())->toEqual('idle')
+        ->and($projection->status())->toEqual($status->value)
         ->and($projection->lockedUntil())->toBeNull();
-});
+})->with('projection status');
 
-test('acquire lock', function (): void {
+test('acquire lock with status', function (ProjectionStatus $status): void {
     $nowToString = PointInTimeFactory::nowToString();
 
     $this->clock->expects($this->never())->method('isGreaterThan');
 
-    $this->provider->createProjection('customer', 'idle');
+    $this->provider->createProjection('customer', 'running');
 
-    $this->provider->acquireLock('customer', 'running', $nowToString);
+    $this->provider->acquireLock('customer', $status->value, $nowToString);
 
     $projection = $this->provider->retrieve('customer');
 
     expect($projection->status())
-        ->toBe('running')
+        ->toBe($status->value)
         ->and($projection->lockedUntil())->toBe($nowToString);
-});
+})->with('projection status');
 
 test('acquire lock failed when another process has lock', function (): void {
     $lockedUntil = PointInTimeFactory::nowToString();
@@ -158,7 +159,7 @@ test('filter non existent requested names', function (): void {
         ->and($projectionNames)->toBe(['customer', 'order']);
 });
 
-test('filter by names return empty array', function (): void {
+it('filter by names return empty array', function (): void {
     $this->provider->createProjection('customer', 'idle');
     $this->provider->createProjection('order', 'idle');
 

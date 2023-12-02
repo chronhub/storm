@@ -10,7 +10,7 @@ final readonly class ProjectionError
 {
     public function __construct(
         public string $streamName,
-        public string $eventType,
+        public string $event,
         public Throwable $error
     ) {
     }

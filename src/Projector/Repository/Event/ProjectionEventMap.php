@@ -7,9 +7,10 @@ namespace Chronhub\Storm\Projector\Repository\Event;
 use function array_keys;
 use function array_merge;
 
-final class EventMap
+final class ProjectionEventMap
 {
     private array $map = [
+        ProjectionCreated::class => [],
         ProjectionStarted::class => [],
         ProjectionStopped::class => [],
         ProjectionRestarted::class => [],

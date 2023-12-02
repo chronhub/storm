@@ -23,6 +23,8 @@ final class ProjectorManager implements ProjectorManagerInterface
 
     public function newQuery(array $options = []): QueryProjector
     {
+        $options = $this->subscriptionFactory->createOption($options);
+
         return new ProjectQuery(
             $this->subscriptionFactory->createQuerySubscription($options),
             $this->subscriptionFactory->createContextBuilder(),
@@ -31,14 +33,19 @@ final class ProjectorManager implements ProjectorManagerInterface
 
     public function newEmitter(string $streamName, array $options = []): EmitterProjector
     {
+        $options = $this->subscriptionFactory->createOption($options);
+
         return new ProjectEmitter(
             $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
             $this->subscriptionFactory->createContextBuilder(),
+            $this->subscriptionFactory->createStreamCache($options),
         );
     }
 
     public function newReadModel(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
+        $options = $this->subscriptionFactory->createOption($options);
+
         return new ProjectReadModel(
             $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
             $this->subscriptionFactory->createContextBuilder(),

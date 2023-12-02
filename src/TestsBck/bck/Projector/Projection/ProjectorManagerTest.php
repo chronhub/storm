@@ -8,8 +8,8 @@ use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
+use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\ProjectEmitter;
 use Chronhub\Storm\Projector\ProjectorManager;
 use Chronhub\Storm\Projector\ProjectQuery;
@@ -50,7 +50,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $this->assertEquals(ProjectQuery::class, $projector::class);
 
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
-        $this->assertEquals(InMemoryProjectionOption::class, $subscription->option()::class);
+        $this->assertEquals(InMemoryOption::class, $subscription->option()::class);
     }
 
     public function testEmitterProjector(): void
@@ -63,7 +63,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $this->assertEquals(ProjectEmitter::class, $projector::class);
 
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
-        $this->assertEquals(InMemoryProjectionOption::class, $subscription->option()::class);
+        $this->assertEquals(InMemoryOption::class, $subscription->option()::class);
     }
 
     public function testReadModelProjector(): void
@@ -76,12 +76,12 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $this->assertEquals(ProjectReadModel::class, $projector::class);
 
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
-        $this->assertEquals(InMemoryProjectionOption::class, $subscription->option()::class);
+        $this->assertEquals(InMemoryOption::class, $subscription->option()::class);
     }
 
     public function testProjectorWithOptions(): void
     {
-        $defaultOption = new DefaultProjectionOption();
+        $defaultOption = new DefaultOption();
         $this->assertFalse($defaultOption->getSignal());
 
         $manager = new ProjectorManager($this->createSubscriptionFactory(['signal' => true]));
@@ -90,13 +90,13 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
 
         $option = $subscription->option();
-        $this->assertEquals(DefaultProjectionOption::class, $option::class);
+        $this->assertEquals(DefaultOption::class, $option::class);
         $this->assertTrue($option->getSignal());
     }
 
     public function testProjectorWithOptionsOverridden(): void
     {
-        $defaultOption = new DefaultProjectionOption();
+        $defaultOption = new DefaultOption();
         $this->assertFalse($defaultOption->getSignal());
 
         $manager = new ProjectorManager($this->createSubscriptionFactory(['signal' => true]));
@@ -105,7 +105,7 @@ final class ProjectorManagerTest extends InMemoryProjectorManagerTestCase
         $subscription = ReflectionProperty::getProperty($projector, 'subscription');
 
         $option = $subscription->option();
-        $this->assertEquals(DefaultProjectionOption::class, $option::class);
+        $this->assertEquals(DefaultOption::class, $option::class);
         $this->assertFalse($option->getSignal());
     }
 }

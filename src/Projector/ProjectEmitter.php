@@ -9,8 +9,8 @@ use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
-use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
@@ -20,13 +20,11 @@ final readonly class ProjectEmitter implements EmitterProjector
     use InteractWithContext;
     use InteractWithPersistentProjection;
 
-    private StreamCache $streamCache;
-
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
         protected ContextInterface $context,
+        private StreamCacheInterface $streamCache
     ) {
-        $this->streamCache = new StreamCache($subscription->option()->getCacheSize());
     }
 
     public function emit(DomainEvent $event): void

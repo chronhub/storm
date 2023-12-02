@@ -64,7 +64,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
             $this->streamName,
             status: $projectionStatus?->value,
             state: $this->serializer->encode($projectionDetail->state),
-            positions: $this->serializer->encode($projectionDetail->streamPositions),
+            position: $this->serializer->encode($projectionDetail->streamPositions),
             lockedUntil: $this->lockManager->refresh()
         );
     }
@@ -75,7 +75,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
             $this->streamName,
             status: $currentStatus->value,
             state: $this->serializer->encode($projectionDetail->state),
-            positions: $this->serializer->encode($projectionDetail->streamPositions),
+            position: $this->serializer->encode($projectionDetail->streamPositions),
         );
     }
 

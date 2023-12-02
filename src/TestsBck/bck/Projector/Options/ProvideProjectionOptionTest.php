@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Projector\Options\ProvideProjectionOption;
+use Chronhub\Storm\Projector\Options\ProvideOption;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(ProvideProjectionOption::class)]
+#[CoversClass(ProvideOption::class)]
 final class ProvideProjectionOptionTest extends UnitTestCase
 {
     public function testAccessor()
     {
         $options = new class implements ProjectionOption
         {
-            use ProvideProjectionOption;
+            use ProvideOption;
 
             public function __construct()
             {
@@ -44,7 +44,7 @@ final class ProvideProjectionOptionTest extends UnitTestCase
     {
         $options = new class implements ProjectionOption
         {
-            use ProvideProjectionOption;
+            use ProvideOption;
 
             public function __construct()
             {

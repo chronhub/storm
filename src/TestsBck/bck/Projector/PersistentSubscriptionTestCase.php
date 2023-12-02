@@ -16,7 +16,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -38,7 +38,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
     protected ProjectorScope|MockObject $caster;
 
-    protected DefaultProjectionOption $options;
+    protected DefaultOption $options;
 
     protected StreamManager $position;
 
@@ -51,7 +51,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
     protected function setUp(): void
     {
         $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
-        $this->options = new DefaultProjectionOption();
+        $this->options = new DefaultOption();
         $this->position = new StreamManager(new InMemoryEventStream());
         $this->clock = new PointInTime();
         $this->eventCounter = new EventCounter(100);

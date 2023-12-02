@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
@@ -23,7 +23,7 @@ final readonly class ProjectQuery implements QueryProjector
     use InteractWithContext;
 
     public function __construct(
-        protected Subscription $subscription,
+        protected QuerySubscriptionInterface $subscription,
         protected ContextReaderInterface $context,
     ) {
     }

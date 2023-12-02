@@ -14,7 +14,7 @@ use Chronhub\Storm\Message\AliasFromClassName;
 use Chronhub\Storm\Message\AliasFromInflector;
 use Chronhub\Storm\Message\AliasFromMap;
 use Chronhub\Storm\Message\HasConstructableContent;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProcessArrayEvent;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
@@ -47,7 +47,7 @@ final class ProcessArrayQueryEventTest extends UnitTestCase
         $streamPosition = new StreamManager($eventStore);
 
         $this->subscription = new QuerySubscription(
-            new DefaultProjectionOption(signal: true),
+            new DefaultOption(signal: true),
             $streamPosition,
             new PointInTime(),
         );

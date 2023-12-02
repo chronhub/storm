@@ -16,9 +16,12 @@ test('stream cache instance', function (): void {
 test('can push stream name', function (): void {
     $cache = new StreamCache(3);
 
+    expect($cache->has('customer-123'))->toBeFalse();
+
     $cache->push('customer-123');
 
-    expect($cache->jsonSerialize())->toBe([0 => 'customer-123', 1 => null, 2 => null]);
+    expect($cache->has('customer-123'))->toBeTrue()
+        ->and($cache->jsonSerialize())->toBe([0 => 'customer-123', 1 => null, 2 => null]);
 });
 
 test('can push stream name and replace oldest stream name according to cache size and position', function (): void {
@@ -43,11 +46,14 @@ test('can push stream with cache size of one', function (): void {
 
     $cache->push('customer-123');
 
-    expect($cache->jsonSerialize())->toBe(['customer-123']);
+    expect($cache->has('customer-123'))->toBeTrue()
+        ->and($cache->jsonSerialize())->toBe(['customer-123']);
 
     $cache->push('customer-456');
 
-    expect($cache->jsonSerialize())->toBe(['customer-456']);
+    expect($cache->has('customer-123'))->toBeFalse()
+        ->and($cache->has('customer-456'))->toBeTrue()
+        ->and($cache->jsonSerialize())->toBe(['customer-456']);
 });
 
 test('check if stream name is in cache', function (): void {
@@ -78,5 +84,6 @@ test('raise exception when push stream name already exists', function (array $st
         'empty cache' => [['customer-123', 'customer-123']],
         'alternate' => [['customer-123', 'customer-256', 'customer-123']],
         'rotation' => [['customer-123', 'customer-256', 'customer-478', 'customer-123']],
+        'rotation_2' => [['customer-256', 'customer-123', 'customer-478', 'customer-123']],
     ])
     ->throws(InvalidArgumentException::class, 'Stream customer-123 is already in the cache');

@@ -5,36 +5,45 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Scheme\Sprint;
 
-final readonly class ReadModelSubscription implements ReadModelSubscriptionInterface
+final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription;
 
-    public function __construct(
-        protected GenericSubscription $subscription,
-        protected ProjectionRepositoryInterface $repository,
-        protected EventCounter $eventCounter,
-        protected Chronicler $chronicler,
-        private ReadModel $readModel,
-    ) {
-    }
+    protected ProjectionStateInterface $state;
 
-    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
-    {
-        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new InvalidArgumentException('Persistent subscription require a projection query filter');
+    protected Sprint $sprint;
+
+    protected Chronicler $chronicler;
+
+    public function __construct(
+        protected ProjectionRepositoryInterface $repository,
+        protected StreamManagerInterface $streamManager,
+        protected ProjectionOption $option,
+        protected SystemClock $clock,
+        protected EventCounter $eventCounter,
+        private readonly ReadModel $readModel,
+        Chronicler $chronicler,
+    ) {
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
         }
 
-        $this->subscription->compose($context, $projectorScope, $keepRunning);
+        $this->chronicler = $chronicler;
+        $this->state = new ProjectionState();
+        $this->sprint = new Sprint();
     }
 
     public function rise(): void
@@ -72,7 +81,7 @@ final readonly class ReadModelSubscription implements ReadModelSubscriptionInter
             $this->readModel->down();
         }
 
-        $this->sprint()->stop();
+        $this->sprint->stop();
 
         $this->resetProjection();
     }

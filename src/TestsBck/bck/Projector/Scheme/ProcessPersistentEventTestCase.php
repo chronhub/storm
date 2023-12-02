@@ -12,7 +12,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\AbstractEventProcessor;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -56,7 +56,7 @@ abstract class ProcessPersistentEventTestCase extends UnitTestCase
         $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
         $this->subscription = new EmitterSubscription(
             $this->repository,
-            new DefaultProjectionOption(signal: true),
+            new DefaultOption(signal: true),
             $streamPosition,
             new EventCounter(2),
             new StreamGapManager($streamPosition, new PointInTime(), [10]),

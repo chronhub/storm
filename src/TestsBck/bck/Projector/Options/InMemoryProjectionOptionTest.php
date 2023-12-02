@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Options;
 
-use Chronhub\Storm\Projector\Options\InMemoryProjectionOption;
+use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(InMemoryProjectionOption::class)]
+#[CoversClass(InMemoryOption::class)]
 final class InMemoryProjectionOptionTest extends UnitTestCase
 {
     public function testInstance(): void
     {
-        $options = new InMemoryProjectionOption();
+        $options = new InMemoryOption();
 
         $expectedResult = [
             'signal' => false,

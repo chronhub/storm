@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Repository\Event\ProjectionCreated;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionDeleted;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionDeletedWithEvents;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionError;
@@ -20,29 +21,33 @@ use Throwable;
 final readonly class EventDispatcherRepository implements ProjectionRepositoryInterface
 {
     public function __construct(
-        private ProjectionRepositoryInterface $projectionRepository,
+        private ProjectionRepositoryInterface $repository,
         private Dispatcher $eventDispatcher
     ) {
     }
 
     public function create(ProjectionStatus $status): void
     {
-        $this->projectionRepository->create($status);
+        $this->wrapErrorHandling(
+            fn () => $this->repository->create($status),
+            fn () => $this->eventDispatcher->dispatch(new ProjectionCreated($this->projectionName())),
+            ProjectionCreated::class
+        );
     }
 
     public function start(ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->start($projectionStatus),
+            fn () => $this->repository->start($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStarted($this->projectionName())),
-            ProjectionRestarted::class
+            ProjectionStarted::class
         );
     }
 
     public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->stop($projectionDetail, $projectionStatus),
+            fn () => $this->repository->stop($projectionDetail, $projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStopped($this->projectionName())),
             ProjectionStopped::class
         );
@@ -51,7 +56,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
     public function startAgain(ProjectionStatus $projectionStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->startAgain($projectionStatus),
+            fn () => $this->repository->startAgain($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionRestarted($this->projectionName())),
             ProjectionRestarted::class
         );
@@ -60,7 +65,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->reset($projectionDetail, $currentStatus),
+            fn () => $this->repository->reset($projectionDetail, $currentStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionReset($this->projectionName(), $projectionDetail)),
             ProjectionReset::class
         );
@@ -71,7 +76,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
         $event = $withEmittedEvents ? ProjectionDeletedWithEvents::class : ProjectionDeleted::class;
 
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->delete($withEmittedEvents),
+            fn () => $this->repository->delete($withEmittedEvents),
             fn () => $this->eventDispatcher->dispatch(new $event($this->projectionName())),
             $event
         );
@@ -80,7 +85,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
     public function release(): void
     {
         $this->wrapErrorHandling(
-            fn () => $this->projectionRepository->release(),
+            fn () => $this->repository->release(),
             fn () => $this->eventDispatcher->dispatch(new ProjectionReleased($this->projectionName())),
             ProjectionReleased::class
         );
@@ -88,32 +93,32 @@ final readonly class EventDispatcherRepository implements ProjectionRepositoryIn
 
     public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
     {
-        $this->projectionRepository->persist($projectionDetail, $projectionStatus);
+        $this->repository->persist($projectionDetail, $projectionStatus);
     }
 
     public function updateLock(): void
     {
-        $this->projectionRepository->updateLock();
+        $this->repository->updateLock();
     }
 
     public function loadStatus(): ProjectionStatus
     {
-        return $this->projectionRepository->loadStatus();
+        return $this->repository->loadStatus();
     }
 
     public function loadDetail(): ProjectionDetail
     {
-        return $this->projectionRepository->loadDetail();
+        return $this->repository->loadDetail();
     }
 
     public function exists(): bool
     {
-        return $this->projectionRepository->exists();
+        return $this->repository->exists();
     }
 
     public function projectionName(): string
     {
-        return $this->projectionRepository->projectionName();
+        return $this->repository->projectionName();
     }
 
     /**

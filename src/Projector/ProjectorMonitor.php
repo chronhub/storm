@@ -22,12 +22,12 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
 
     public function markAsStop(string $projectionName): void
     {
-        $this->updateProjectionStatus($projectionName, ProjectionStatus::STOPPING);
+        $this->applyStatus($projectionName, ProjectionStatus::STOPPING);
     }
 
     public function markAsReset(string $projectionName): void
     {
-        $this->updateProjectionStatus($projectionName, ProjectionStatus::RESETTING);
+        $this->applyStatus($projectionName, ProjectionStatus::RESETTING);
     }
 
     public function markAsDelete(string $projectionName, bool $withEmittedEvents): void
@@ -36,7 +36,7 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
             ? ProjectionStatus::DELETING_WITH_EMITTED_EVENTS
             : ProjectionStatus::DELETING;
 
-        $this->updateProjectionStatus($projectionName, $deleteProjectionStatus);
+        $this->applyStatus($projectionName, $deleteProjectionStatus);
     }
 
     public function statusOf(string $projectionName): string
@@ -72,10 +72,10 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
      * @throws ProjectionFailed
      * @throws ProjectionNotFound
      */
-    private function updateProjectionStatus(string $projectionName, ProjectionStatus $projectionStatus): void
+    private function applyStatus(string $projectionName, ProjectionStatus $projectionStatus): void
     {
         try {
-            $this->projectionProvider->updateProjection($projectionName, status : $projectionStatus->value);
+            $this->projectionProvider->updateProjection($projectionName, status: $projectionStatus->value);
         } catch (Throwable $exception) {
             if ($exception instanceof ProjectionFailed || $exception instanceof ProjectionNotFound) {
                 throw $exception;

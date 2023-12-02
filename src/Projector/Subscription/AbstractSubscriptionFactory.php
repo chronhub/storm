@@ -10,79 +10,106 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionOptionImmutable;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
-use Chronhub\Storm\Projector\Options\DefaultProjectionOption;
+use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
+use Chronhub\Storm\Projector\Scheme\StreamCache;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function array_merge;
+use function get_class;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
     public function __construct(
-        public readonly Chronicler $chronicler,
-        public readonly ProjectionProvider $projectionProvider,
-        public readonly EventStreamProvider $eventStreamProvider,
-        public readonly SystemClock $clock,
-        public readonly JsonSerializer $jsonSerializer,
-        public readonly Dispatcher $dispatcher,
-        public readonly ?ProjectionQueryScope $queryScope = null,
-        public readonly ProjectionOption|array $options = [],
+        protected readonly Chronicler $chronicler,
+        protected readonly ProjectionProvider $projectionProvider,
+        protected readonly EventStreamProvider $eventStreamProvider,
+        protected readonly SystemClock $clock,
+        protected readonly JsonSerializer $jsonSerializer,
+        protected readonly Dispatcher $dispatcher,
+        protected readonly ?ProjectionQueryScope $queryScope = null,
+        protected readonly ProjectionOption|array $options = [],
     ) {
     }
 
-    public function createQuerySubscription(array $options = []): Subscription
+    public function createQuerySubscription(ProjectionOption $option): Subscription
     {
-        $subscription = $this->createGenericSubscription($this->createOption($options));
-
-        return new QuerySubscription($subscription, $this->chronicler);
-    }
-
-    public function createEmitterSubscription(string $streamName, array $options = []): EmitterSubscriptionInterface
-    {
-        $projectionOption = $this->createOption($options);
-
-        $subscription = $this->createGenericSubscription($projectionOption);
-
-        return new EmitterSubscription(
-            $subscription,
-            $this->createSubscriptionManagement($streamName, $projectionOption),
-            $this->createEventCounter($projectionOption),
+        return new QuerySubscription(
+            $this->createStreamManager($option),
+            $option,
+            $this->clock,
             $this->chronicler
         );
     }
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, array $options = []): ReadModelSubscriptionInterface
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriptionInterface
     {
-        $projectionOption = $this->createOption($options);
-
-        $subscription = $this->createGenericSubscription($projectionOption);
-
-        return new ReadModelSubscription(
-            $subscription,
-            $this->createSubscriptionManagement($streamName, $projectionOption),
-            $this->createEventCounter($projectionOption),
+        return new EmitterSubscription(
+            $this->createSubscriptionManagement($streamName, $option),
+            $this->createStreamManager($option),
+            $option,
+            $this->clock,
+            $this->createEventCounter($option),
             $this->chronicler,
-            $readModel
         );
+    }
+
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface
+    {
+        return new ReadModelSubscription(
+            $this->createSubscriptionManagement($streamName, $option),
+            $this->createStreamManager($option),
+            $option,
+            $this->clock,
+            $this->createEventCounter($option),
+            $readModel,
+            $this->chronicler,
+        );
+    }
+
+    public function createOption(array $options = []): ProjectionOption
+    {
+        if ($options !== []) {
+            if ($this->options instanceof ProjectionOption && ! $this->options instanceof ProjectionOptionImmutable) {
+                $optionClass = get_class($this->options);
+
+                return new $optionClass(...array_merge($this->options->jsonSerialize(), $options));
+            }
+
+            return new DefaultOption(...$options);
+        }
+
+        if ($this->options instanceof ProjectionOption) {
+            return $this->options;
+        }
+
+        return new DefaultOption(...$this->options);
     }
 
     public function createContextBuilder(): ContextReaderInterface
     {
         return new Context();
+    }
+
+    public function createStreamCache(ProjectionOption $option): StreamCacheInterface
+    {
+        return new StreamCache($option->getCacheSize());
     }
 
     public function getProjectionProvider(): ProjectionProvider
@@ -100,16 +127,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $this->queryScope;
     }
 
-    protected function createGenericSubscription(ProjectionOption $projectionOption): GenericSubscription
-    {
-        return new GenericSubscription(
-            $projectionOption,
-            $this->createStreamManager($projectionOption),
-            $this->clock,
-            $this->chronicler,
-        );
-    }
-
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
     protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository
@@ -120,15 +137,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createLockManager(ProjectionOption $option): LockManager
     {
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
-    }
-
-    protected function createOption(array $options): ProjectionOption
-    {
-        if ($this->options instanceof ProjectionOption) {
-            return $this->options;
-        }
-
-        return new DefaultProjectionOption(...array_merge($this->options, $options));
     }
 
     protected function createStreamManager(ProjectionOption $options): StreamManagerInterface
