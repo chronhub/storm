@@ -38,11 +38,41 @@ test('watch streams', function () {
     expect($streamManager->all())->toBe(['customer' => 0]);
 });
 
+test('watch streams with added event stream', function () {
+    $this->eventStreamLoader->expects($this->exactly(2))
+        ->method('loadFrom')
+        ->with(['names' => ['foo', 'bar']])
+        ->willReturnOnConsecutiveCalls(collect(['foo']), collect(['foo', 'bar']));
+
+    $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
+    $streamManager->discover(['names' => ['foo', 'bar']]);
+
+    expect($streamManager->all())->toBe(['foo' => 0]);
+
+    $streamManager->discover(['names' => ['foo', 'bar']]);
+
+    expect($streamManager->all())->toBe(['foo' => 0, 'bar' => 0]);
+});
+
+test('watch streams with unrecoverable event stream', function () {
+    $this->eventStreamLoader->expects($this->exactly(2))
+        ->method('loadFrom')
+        ->with(['names' => ['foo', 'bar']])
+        ->willReturnOnConsecutiveCalls(collect(['foo', 'bar']), collect(['bar']));
+
+    $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
+    $streamManager->discover(['names' => ['foo', 'bar']]);
+
+    expect($streamManager->all())->toBe(['foo' => 0, 'bar' => 0]);
+
+    $streamManager->discover(['names' => ['foo', 'bar']]);
+
+    expect($streamManager->all())->toBe(['bar' => 0, 'foo' => 0]);
+});
+
 test('sync streams', function () {
     $this->eventStreamLoader->expects($this->once())
-        ->method('loadFrom')
-        ->with(['all' => true])
-        ->willReturn(collect(['customer']));
+        ->method('loadFrom')->with(['all' => true])->willReturn(collect(['customer']));
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
     $streamManager->discover(['all' => true]);

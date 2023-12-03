@@ -89,7 +89,7 @@ it('can run query projection in background with timer', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withTimer(0)
+        ->until(0)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;

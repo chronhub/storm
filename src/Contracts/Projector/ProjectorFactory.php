@@ -10,10 +10,8 @@ use Closure;
 use DateInterval;
 
 /**
- * todo fix template with scope
- *
  * @template TInit of array
- * @template TWhen of array<DomainEvent,TInit>|array<DomainEvent>
+ * @template TWhen of array{DomainEvent,TInit,ProjectorScope}|array<DomainEvent,ProjectorScope>
  */
 interface ProjectorFactory extends Projector
 {
@@ -27,28 +25,28 @@ interface ProjectorFactory extends Projector
     public function initialize(Closure $userState): static;
 
     /**
-     * Proxy method to set the streams to fetch events from.
+     * Proxy method to set the streams.
      *
      * @see ContextReaderInterface::fromStreams()
      */
     public function fromStreams(string ...$streams): static;
 
     /**
-     * Proxy method to set the categories to fetch events from.
+     * Proxy method to set the categories.
      *
      * @see ContextReaderInterface::fromCategories()
      */
     public function fromCategories(string ...$categories): static;
 
     /**
-     * Proxy method to set to fetch events from all streams.
+     * Proxy method to set all streams.
      *
      * @see ContextInterface::fromAll()
      */
     public function fromAll(): static;
 
     /**
-     * Proxy method to set the event handlers to be called when an event is received.
+     * Proxy method to set the reactos.
      *
      * @param Closure(TWhen): ?TInit $reactors
      *
@@ -57,7 +55,7 @@ interface ProjectorFactory extends Projector
     public function when(Closure $reactors): static;
 
     /**
-     * Proxy method to set the query filter to filter events.
+     * Proxy method to set the query filter.
      *
      * @see ContextInterface::withQueryFilter()
      */
@@ -66,14 +64,16 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the timer interval.
      *
-     * @param DateInterval|string|int $interval int in seconds, a valid string interval or DateInterval instance
+     * @param DateInterval|string|int<0,max> $interval
      *
-     * @see ContextInterface::withTimer()
+     * @see ContextInterface::until()
      */
-    public function withTimer(DateInterval|string|int $interval): static;
+    public function until(DateInterval|string|int $interval): static;
 
     /**
      * Proxy method to set the projector scope.
+     *
+     * @see ContextInterface::withScope()
      */
     public function withScope(Closure $scope): static;
 }

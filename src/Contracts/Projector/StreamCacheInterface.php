@@ -13,16 +13,16 @@ use JsonSerializable;
 interface StreamCacheInterface extends JsonSerializable
 {
     /**
-     * Add or replace stream name at the current position in the circular buffer
+     * Add or replace stream name at the current position in the circular buffer.
      *
      * @param non-empty-string $streamName
      *
-     * @throws InvalidArgumentException When stream name is already in buffer
+     * @throws InvalidArgumentException When stream name is already in buffer.
      */
     public function push(string $streamName): void;
 
     /**
-     * Check if stream name is in buffer
+     * Check if the stream name is in buffer.
      *
      * @param non-empty-string $streamName
      */

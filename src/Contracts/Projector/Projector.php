@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface Projector
 {
     /**
-     * Set the projection run in background.
+     * Run in the background.
      */
     public function run(bool $inBackground): void;
 

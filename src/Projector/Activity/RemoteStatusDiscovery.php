@@ -35,15 +35,6 @@ trait RemoteStatusDiscovery
         $this->isFirstCycle = false;
     }
 
-    private function discovering(PersistentSubscriptionInterface $subscription): bool
-    {
-        $statuses = $this->getStatuses($subscription);
-
-        $statusFn = $statuses[$subscription->disclose()->value] ?? null;
-
-        return $statusFn ? $statusFn() : false;
-    }
-
     private function onStopping(PersistentSubscriptionInterface $subscription): bool
     {
         if ($this->isFirstCycle) {
@@ -73,13 +64,14 @@ trait RemoteStatusDiscovery
         return $this->isFirstCycle;
     }
 
-    private function getStatuses(PersistentSubscriptionInterface $subscription): array
+    private function discovering(PersistentSubscriptionInterface $subscription): bool
     {
-        return [
-            ProjectionStatus::STOPPING->value => fn () => $this->onStopping($subscription),
-            ProjectionStatus::RESETTING->value => fn () => $this->onResetting($subscription),
-            ProjectionStatus::DELETING->value => fn () => $this->onDeleting($subscription, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => fn () => $this->onDeleting($subscription, true),
-        ];
+        return match ($subscription->disclose()->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping($subscription),
+            ProjectionStatus::RESETTING->value => $this->onResetting($subscription),
+            ProjectionStatus::DELETING->value => $this->onDeleting($subscription, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($subscription, true),
+            default => false,
+        };
     }
 }

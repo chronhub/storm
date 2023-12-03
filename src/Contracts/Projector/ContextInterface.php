@@ -12,7 +12,7 @@ use DateInterval;
 
 /**
  * @template TInit of array
- * @template TWhen of array<DomainEvent,TInit>|array<DomainEvent>
+ * @template TWhen of array{DomainEvent,TInit,ProjectorScope}|array<DomainEvent,ProjectorScope>
  */
 interface ContextInterface
 {
@@ -31,24 +31,24 @@ interface ContextInterface
     /**
      * Sets the streams to fetch events from.
      *
-     * @throws InvalidArgumentException When streams is already set
-     * @throws InvalidArgumentException When streams is empty
+     * @throws InvalidArgumentException When streams are already set
+     * @throws InvalidArgumentException When streams are empty
      */
     public function fromStreams(string ...$streamNames): self;
 
     /**
      * Sets the categories to fetch events from.
      *
-     * @throws InvalidArgumentException When streams is already set
-     * @throws InvalidArgumentException When streams is empty
+     * @throws InvalidArgumentException When streams are already set
+     * @throws InvalidArgumentException When streams are empty
      */
     public function fromCategories(string ...$categories): self;
 
     /**
      * Sets to fetch events from all streams
      *
-     * @throws InvalidArgumentException When streams is already set
-     * @throws InvalidArgumentException When streams is empty
+     * @throws InvalidArgumentException When streams are already set
+     * @throws InvalidArgumentException When streams are empty
      */
     public function fromAll(): self;
 
@@ -57,7 +57,7 @@ interface ContextInterface
      *
      * @param Closure(TWhen): ?TInit $reactors
      *
-     * @throws InvalidArgumentException When reactors is already set
+     * @throws InvalidArgumentException When reactors are already set
      * @throws InvalidArgumentException When reactors is a static closure
      */
     public function when(Closure $reactors): self;

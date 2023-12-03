@@ -22,7 +22,7 @@ interface ReadModel
     public function stack(string $operation, mixed ...$arguments): void;
 
     /**
-     * Persists any changes made to the read model made
+     * Persist any changes made to the read model made
      * by the stacked operations.
      */
     public function persist(): void;
