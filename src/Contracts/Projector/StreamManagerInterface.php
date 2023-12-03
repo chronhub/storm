@@ -16,7 +16,7 @@ interface StreamManagerInterface extends JsonSerializable
     /**
      * Watches event streams based on given queries.
      *
-     * @param array{'all'?: bool, 'categories'?: string[], 'names'?: string[]} $queries
+     * @param array{'all'?:bool, 'categories'?:string[], 'names'?:string[]} $queries
      */
     public function watchStreams(array $queries): void;
 
@@ -29,12 +29,13 @@ interface StreamManagerInterface extends JsonSerializable
 
     /**
      * Binds a stream name to the next available position.
+     *
      * Successful bind in order:
-     *       - event time is false ( meant for query projection )
+     *       - event time is false (meant for query projection)
      *       - no retry set
      *       - no gap detected
      *       - gap detected but no more retries available
-     *       - successful detection window checked
+     *       - successful detection windows checked
      *
      * @param int<1,max> $expectedPosition The incremented position of the current event.
      *

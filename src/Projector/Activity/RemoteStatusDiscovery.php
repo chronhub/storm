@@ -30,6 +30,11 @@ trait RemoteStatusDiscovery
         return $this->isFirstCycle;
     }
 
+    protected function disableFlag(): void
+    {
+        $this->isFirstCycle = false;
+    }
+
     private function discovering(PersistentSubscriptionInterface $subscription): bool
     {
         $statuses = $this->getStatuses($subscription);
