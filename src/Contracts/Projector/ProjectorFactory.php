@@ -10,6 +10,8 @@ use Closure;
 use DateInterval;
 
 /**
+ * todo fix template with scope
+ *
  * @template TInit of array
  * @template TWhen of array<DomainEvent,TInit>|array<DomainEvent>
  */
@@ -69,4 +71,9 @@ interface ProjectorFactory extends Projector
      * @see ContextInterface::withTimer()
      */
     public function withTimer(DateInterval|string|int $interval): static;
+
+    /**
+     * Proxy method to set the projector scope.
+     */
+    public function withScope(Closure $scope): static;
 }

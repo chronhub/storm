@@ -14,9 +14,10 @@ final readonly class PersistOrUpdate
     {
         if (! $subscription->streamManager()->hasGap()) {
             /**
-             * The event counter is reset when no event has been handled.
-             * Or, when persistWhenThresholdReached was successfully called,
-             * so, we sleep to avoid too much query and try updating the lock or store the projection
+             * The event counter is reset when no event has been handled,
+             * and, when persistWhenThresholdReached was successfully called,
+             * so, we sleep and try updating the lock.
+             * Or we store the new data
              */
             if ($subscription->eventCounter()->isReset()) {
                 usleep(microseconds: $subscription->option()->getSleep());

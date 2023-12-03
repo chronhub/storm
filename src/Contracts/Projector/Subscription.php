@@ -13,10 +13,14 @@ use Chronhub\Storm\Projector\Scheme\Sprint;
 interface Subscription
 {
     /**
-     * Composes the subscription with a context and a new scope.
-     * It also allows to keep the subscription running in background.
+     * Composes the subscription.
      */
     public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void;
+
+    /**
+     * Get the projector scope
+     */
+    public function scope(): ProjectorScope;
 
     /**
      * Reset user state to his original state.

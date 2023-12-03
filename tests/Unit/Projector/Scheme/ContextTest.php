@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\Context;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use DateInterval;
-use ReflectionFunction;
 
 beforeEach(function () {
     $this->context = new Context();
@@ -89,31 +86,3 @@ test('can not set queries twice from all', function () {
     $this->context->fromAll();
     $this->context->fromStreams('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
-
-test('can bind user state', function () {
-    $scope = $this->createMock(ProjectorScope::class);
-
-    $this->context->initialize(fn () => ['count' => 0]);
-
-    expect($this->context->bindUserState($scope))->toBe(['count' => 0]);
-
-    $boundState = $this->context->userState();
-
-    $ref = new ReflectionFunction($boundState);
-
-    expect($ref->getClosureThis())->toBe($scope);
-});
-
-test('can bind reactors', function () {
-    $scope = $this->createMock(ProjectorScope::class);
-
-    $this->context->when(fn (DomainEvent $event, array $state) => ['count' => 10]);
-
-    $this->context->bindReactors($scope);
-
-    $boundReactors = $this->context->reactors();
-
-    $ref = new ReflectionFunction($boundReactors);
-
-    expect($ref->getClosureThis())->toBe($scope);
-});

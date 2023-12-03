@@ -7,6 +7,8 @@ namespace Chronhub\Storm\Tests\Feature;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
+use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
+use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -33,18 +35,16 @@ it('can run emitter projection', function (): void {
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line  */
+        ->when(function (DomainEvent $event, array $state, EmitterProjectorScopeInterface $scope): array {
             if ($state['count'] === 1) {
-                expect($this)
-                    ->toBeInstanceOf(EmitterProjectorScopeInterface::class)
-                    ->and($this->streamName())->toBe('user')
-                    ->and($this->clock())->toBeInstanceOf(PointInTime::class)
+                expect($scope)
+                    ->toBeInstanceOf(EmitterProjectorScope::class)
+                    ->and($scope->streamName())->toBe('user')
+                    ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
                     ->and($event)->toBeInstanceOf(SomeEvent::class);
             }
 
-            expect($this->streamName())->not()->toBeNull();
+            expect($scope->streamName())->not()->toBeNull();
 
             $state['count']++;
 
@@ -70,11 +70,8 @@ it('can emit event to a new stream named from projection', function (): void {
         ->initialize(fn () => ['events' => []])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
-
-            /** @phpstan-ignore-next-line */
-            $this->emit($event);
+        ->when(function (DomainEvent $event, array $state, EmitterProjectorScope $scope): array {
+            $scope->emit($event);
 
             $state['events'][] = $event;
 
@@ -92,8 +89,6 @@ it('can emit event to a new stream named from projection', function (): void {
         ->fromStreams('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line */
             $state['events'][] = $event;
 
             return $state;
@@ -120,17 +115,11 @@ it('can link event to a new stream', function (): void {
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
+        ->when(function (DomainEvent $event, array $state, EmitterProjectorScopeInterface $scope): array {
+            $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
 
-            /** @phpstan-ignore-next-line */
-            if ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) {
-                $this->linkTo('user_odd', $event);
-                $state['odd'][] = $event;
-            } else {
-                $this->linkTo('user_even', $event);
-                $state['even'][] = $event;
-            }
+            $scope->linkTo('user_'.$eventType, $event);
+            $state[$eventType][] = $event;
 
             return $state;
         })->run(false);
@@ -147,14 +136,10 @@ it('can link event to a new stream', function (): void {
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->fromStreams('user_odd', 'user_even')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line */
-            if ($this->streamName() === 'user_odd') {
-                $state['odd'][] = $event;
-            } elseif ($this->streamName() === 'user_even') {
-                $state['even'][] = $event;
-            }
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $projector): array {
+            $projector->streamName() === 'user_odd'
+                ? $state['odd'][] = $event
+                : $state['even'][] = $event;
 
             return $state;
         })->run(false);
@@ -179,17 +164,12 @@ it('can link event to new categories', function (): void {
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
+        ->when(function (DomainEvent $event, array $state, EmitterProjectorScopeInterface $projector): array {
+            $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
 
-            /** @phpstan-ignore-next-line */
-            if ($event->header(EventHeader::INTERNAL_POSITION) % 2 !== 0) {
-                $this->linkTo('customer-odd', $event);
-                $state['odd'][] = $event;
-            } else {
-                $this->linkTo('customer-even', $event);
-                $state['even'][] = $event;
-            }
+            $projector->linkTo('customer-'.$eventType, $event);
+
+            $state[$eventType][] = $event;
 
             return $state;
         })->run(false);
@@ -206,14 +186,10 @@ it('can link event to new categories', function (): void {
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->fromCategories('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var EmitterProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line */
-            if ($this->streamName() === 'customer-odd') {
-                $state['odd'][] = $event;
-            } elseif ($this->streamName() === 'customer-even') {
-                $state['even'][] = $event;
-            }
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $scope): array {
+            $scope->streamName() === 'customer-odd'
+                ? $state['odd'][] = $event
+                : $state['even'][] = $event;
 
             return $state;
         })->run(false);

@@ -29,6 +29,8 @@ final class GenericSubscription implements Subscription
 
     private ?string $currentStreamName = null;
 
+    protected ?ProjectorScope $scope = null;
+
     private ContextReaderInterface $context;
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
@@ -50,12 +52,9 @@ final class GenericSubscription implements Subscription
     public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
         $this->context = $context;
+        $this->scope = $projectorScope;
 
-        $userState = $this->context->bindUserState($projectorScope);
-
-        $this->state->put($userState);
-
-        $this->context->bindReactors($projectorScope);
+        $this->setOriginalUserState();
 
         $this->sprint->runInBackground($keepRunning);
 
@@ -66,15 +65,7 @@ final class GenericSubscription implements Subscription
     {
         $this->state->reset();
 
-        $callback = $this->context->userState();
-
-        if ($callback instanceof Closure) {
-            $state = $callback();
-
-            if (is_array($state)) {
-                $this->state->put($state);
-            }
-        }
+        $this->setOriginalUserState();
     }
 
     public function &currentStreamName(): ?string
@@ -141,8 +132,26 @@ final class GenericSubscription implements Subscription
         return $this->clock;
     }
 
+    public function scope(): ProjectorScope
+    {
+        return $this->scope;
+    }
+
     public function chronicler(): Chronicler
     {
         return $this->chronicler;
+    }
+
+    private function setOriginalUserState(): void
+    {
+        $callback = $this->context->userState();
+
+        if ($callback instanceof Closure) {
+            $userState = $callback();
+
+            if (is_array($userState)) {
+                $this->state->put($userState);
+            }
+        }
     }
 }

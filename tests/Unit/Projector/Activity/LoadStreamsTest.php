@@ -19,6 +19,8 @@ use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 
+// todo refactor test to activity load tests
+
 beforeEach(function () {
     $this->chronicler = $this->createMock(Chronicler::class);
     $this->clock = $this->createMock(SystemClock::class);

@@ -24,18 +24,18 @@ interface ContextReaderInterface extends ContextInterface
     public function userState(): ?Closure;
 
     /**
-     * Get the event handlers as array to be called when an event is received.
+     * Get the event handlers as an array to be called when an event is received.
      *
      * @return Closure(TReactor): ?TState $reactors
      *
-     * @throws InvalidArgumentException When reactors is not set
+     * @throws InvalidArgumentException When reactors are not set
      */
     public function reactors(): Closure;
 
     /**
      * Get stream names handled by the projection.
      *
-     * @throws InvalidArgumentException When queries is not set
+     * @throws InvalidArgumentException When queries are not set
      */
     public function queries(): array;
 
@@ -52,12 +52,9 @@ interface ContextReaderInterface extends ContextInterface
     public function timer(): ?DateInterval;
 
     /**
-     * Bind projector scope to user state if initialized.
+     * Get the projection scope.
+     *
+     * When not set, a default scope will be used.
      */
-    public function bindUserState(ProjectorScope $projectorScope): array;
-
-    /**
-     * Bind projector scope to reactors.
-     */
-    public function bindReactors(ProjectorScope $projectorScope): void;
+    public function userScope(): ?Closure;
 }

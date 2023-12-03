@@ -41,6 +41,9 @@ final class HandleStreamEvent
 
     private function eventProcessor(Subscription $subscription): callable
     {
-        return $this->eventProcessor ??= new EventProcessor($subscription->context()->reactors());
+        return $this->eventProcessor ??= new EventProcessor(
+            $subscription->context()->reactors(),
+            $subscription->scope()
+        );
     }
 }

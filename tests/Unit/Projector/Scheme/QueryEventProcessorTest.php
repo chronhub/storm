@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -18,7 +19,7 @@ use function posix_kill;
 uses(TestingSubscriptionFactory::class);
 
 beforeEach(function () {
-    $this->setUpWithSubscription(Subscription::class);
+    $this->setUpWithSubscription(Subscription::class, ProjectorScope::class);
     $this->event = SomeEvent::fromContent(['name' => 'steph'])->withHeader(Header::EVENT_TIME, 'not used');
 });
 
@@ -26,13 +27,14 @@ $assertEventProcessed = function (bool $inProgress) {
     $this->fakeInitializeUserState();
     $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, false)->willReturn(true);
 
-    $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state): array {
+    $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
         expect($event)
             ->toBe($this->event)
-            ->and($state)->toBe($this->state->get());
+            ->and($state)->toBe($this->state->get())
+            ->and($scope)->toBe($this->projectorScope);
 
         return ['altered content'];
-    });
+    }, $this->projectorScope);
 
     $result = $eventProcessor($this->subscription, $this->event, 5);
 

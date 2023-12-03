@@ -7,7 +7,9 @@ namespace Chronhub\Storm\Tests\Feature;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
+use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Symfony\Component\Uid\Uuid;
@@ -32,15 +34,13 @@ it('can run query projection', function () {
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var QueryProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line */
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $scope): array {
             $state['count']++;
 
             if ($state['count'] === 1) {
-                expect($this)->toBeInstanceOf(QueryProjectorScopeInterface::class)
-                    ->and($this->streamName())->toBe('user')
-                    ->and($this->clock())->toBeInstanceOf(PointInTime::class);
+                expect($scope)->toBeInstanceOf(QueryProjectorScope::class)
+                    ->and($scope->streamName())->toBe('user')
+                    ->and($scope->clock())->toBeInstanceOf(PointInTime::class);
             }
 
             return $state;
@@ -63,13 +63,11 @@ it('can stop query projection', function () {
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            /** @var QueryProjectorScopeInterface $this */
-            /** @phpstan-ignore-next-line */
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $scope): array {
             $state['count']++;
 
             if ($state['count'] === 5) {
-                $this->stop();
+                $scope->stop();
             }
 
             return $state;
@@ -340,7 +338,7 @@ it('can run query projection without user state and return will be ignored', fun
     $projector
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, $state): array {
+        ->when(function (DomainEvent $event, ProjectorScope $scope, array $state = null): array {
             expect($state)->toBeNull();
 
             return ['foo' => 'bar'];

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
@@ -15,21 +16,23 @@ use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
 {
-    public function __construct(private Closure $reactors)
-    {
+    public function __construct(
+        private Closure $reactors,
+        private ProjectorScope $scope
+    ) {
     }
 
     /**
-     * @param int<1,max> $nextPosition
+     * @param int<1,max> $expectedPosition
      */
-    public function __invoke(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $expectedPosition): bool
     {
         if ($subscription->option()->getSignal()) {
             pcntl_signal_dispatch();
         }
 
         // gap has been detected for persistent subscription
-        if (! $this->bindStream($subscription, $event, $nextPosition)) {
+        if (! $this->bindStream($subscription, $event, $expectedPosition)) {
             return false;
         }
 
@@ -42,7 +45,11 @@ final readonly class EventProcessor
             ? $subscription->state()->get() : null;
 
         // handle event and user state if it has been initialized and returned
-        $currentState = ($this->reactors)($event, $userState);
+        if ($userState === null) {
+            $currentState = ($this->reactors)($event, $this->scope);
+        } else {
+            $currentState = ($this->reactors)($event, $userState, $this->scope);
+        }
 
         if ($userState !== null && is_array($currentState)) {
             $subscription->state()->put($currentState);
@@ -61,7 +68,7 @@ final readonly class EventProcessor
      */
     private function bindStream(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
     {
-        // query subscription does not mind of gap
+        // query subscription does not mind of gaps
         $eventTime = $subscription instanceof PersistentSubscriptionInterface
             ? $event->header(Header::EVENT_TIME) : false;
 

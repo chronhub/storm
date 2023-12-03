@@ -16,6 +16,7 @@ use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
+use Closure;
 
 final readonly class ProjectQuery implements QueryProjector
 {
@@ -29,7 +30,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->newScope(), $inBackground);
+        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -53,8 +54,14 @@ final readonly class ProjectQuery implements QueryProjector
         return $this->subscription->state()->get();
     }
 
-    private function newScope(): ProjectorScope
+    private function getScope(): ProjectorScope
     {
+        $userScope = $this->context->userScope();
+
+        if ($userScope instanceof Closure) {
+            return $userScope($this);
+        }
+
         return new QueryProjectorScope(
             $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
         );

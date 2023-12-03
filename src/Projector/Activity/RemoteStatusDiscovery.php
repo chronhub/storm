@@ -9,29 +9,28 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 
 trait RemoteStatusDiscovery
 {
-    private bool $isFirstExecution = true;
+    private bool $isFirstCycle = true;
 
-    protected function shouldStopOnDiscoverStatus(PersistentSubscriptionInterface $subscription): bool
+    protected function shouldStopOnDiscoveringStatus(PersistentSubscriptionInterface $subscription): bool
     {
-        return $this->discover($subscription);
+        $shouldStop = $this->discovering($subscription);
+
+        $this->isFirstCycle = false;
+
+        return $shouldStop;
     }
 
     protected function discoverStatus(PersistentSubscriptionInterface $subscription): void
     {
-        $this->discover($subscription);
+        $this->discovering($subscription);
     }
 
-    protected function disableFlag(): void
+    protected function isFirstCycle(): bool
     {
-        $this->isFirstExecution = false;
+        return $this->isFirstCycle;
     }
 
-    protected function isFirstExecution(): bool
-    {
-        return $this->isFirstExecution;
-    }
-
-    private function discover(PersistentSubscriptionInterface $subscription): bool
+    private function discovering(PersistentSubscriptionInterface $subscription): bool
     {
         $statuses = $this->getStatuses($subscription);
 
@@ -42,20 +41,20 @@ trait RemoteStatusDiscovery
 
     private function onStopping(PersistentSubscriptionInterface $subscription): bool
     {
-        if ($this->isFirstExecution) {
+        if ($this->isFirstCycle) {
             $subscription->synchronise();
         }
 
         $subscription->close();
 
-        return $this->isFirstExecution;
+        return $this->isFirstCycle;
     }
 
     private function onResetting(PersistentSubscriptionInterface $subscription): bool
     {
         $subscription->revise();
 
-        if (! $this->isFirstExecution && $subscription->sprint()->inBackground()) {
+        if (! $this->isFirstCycle && $subscription->sprint()->inBackground()) {
             $subscription->restart();
         }
 
@@ -66,7 +65,7 @@ trait RemoteStatusDiscovery
     {
         $subscription->discard($shouldDiscardEvents);
 
-        return $this->isFirstExecution;
+        return $this->isFirstCycle;
     }
 
     private function getStatuses(PersistentSubscriptionInterface $subscription): array

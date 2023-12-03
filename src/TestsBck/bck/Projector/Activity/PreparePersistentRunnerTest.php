@@ -27,7 +27,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     {
         $activity = new RisePersistentProjection();
 
-        $this->assertFalse($activity->isFirstExecution());
+        $this->assertFalse($activity->isFirstCycle());
     }
 
     #[DataProvider('provideStatusesWhichStopOnFirstExecution')]
@@ -35,7 +35,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     {
         $activity = new RisePersistentProjection();
 
-        $this->assertFalse($activity->isFirstExecution());
+        $this->assertFalse($activity->isFirstCycle());
 
         $this->subscription
             ->expects($this->once())
@@ -51,7 +51,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 
         $next = $activity($this->subscription, fn () => true);
 
-        $this->assertTrue($activity->isFirstExecution());
+        $this->assertTrue($activity->isFirstCycle());
         $this->assertTrue($next);
     }
 
@@ -60,7 +60,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     {
         $activity = new RisePersistentProjection();
 
-        $this->assertFalse($activity->isFirstExecution());
+        $this->assertFalse($activity->isFirstCycle());
 
         $this->subscription
             ->expects($this->once())
@@ -76,7 +76,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 
         $next = $activity($this->subscription, fn () => true);
 
-        $this->assertTrue($activity->isFirstExecution());
+        $this->assertTrue($activity->isFirstCycle());
         $this->assertTrue($next);
     }
 
@@ -84,7 +84,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     {
         $activity = new RisePersistentProjection();
 
-        $this->assertFalse($activity->isFirstExecution());
+        $this->assertFalse($activity->isFirstCycle());
 
         $sprint = new Sprint();
         $sprint->runInBackground(true);
@@ -106,7 +106,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 
         $next = $activity($this->subscription, fn () => true);
 
-        $this->assertTrue($activity->isFirstExecution());
+        $this->assertTrue($activity->isFirstCycle());
         $this->assertTrue($next);
 
         $activity($this->subscription, fn () => true);

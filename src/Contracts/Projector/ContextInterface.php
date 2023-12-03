@@ -70,7 +70,12 @@ interface ContextInterface
     public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
-     * Sets the timer interval to run the projection when it runs in background.
+     * Sets an optional projector scope
+     */
+    public function withScope(Closure $scope): self;
+
+    /**
+     * Sets the timer interval to run the projection when it runs in the background.
      *
      * Note that it could not stop projection at the exact time wanted
      * as projection should stop gracefully.
@@ -78,7 +83,7 @@ interface ContextInterface
      *
      * @param DateInterval|string|int<0,max> $interval int in seconds, a valid string interval or DateInterval
      *
-     * @throws InvalidArgumentException When timer is already set
+     * @throws InvalidArgumentException When the timer is already set
      */
     public function until(DateInterval|string|int $interval): self;
 }

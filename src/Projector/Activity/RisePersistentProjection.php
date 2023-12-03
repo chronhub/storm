@@ -12,14 +12,16 @@ final class RisePersistentProjection
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        if ($this->isFirstExecution()) {
-            if ($this->shouldStopOnDiscoverStatus($subscription)) {
+        if ($this->isFirstCycle()) {
+            /**
+             * Depending on the discovered status of the projection, we will
+             * have to stop the projection early.
+             */
+            if ($this->shouldStopOnDiscoveringStatus($subscription)) {
                 return false;
             }
 
             $subscription->rise();
-
-            $this->disableFlag();
         }
 
         return $next($subscription);

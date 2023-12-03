@@ -58,4 +58,11 @@ trait InteractWithContext
 
         return $this;
     }
+
+    public function withScope(Closure $scope): static
+    {
+        $this->context->withScope($scope);
+
+        return $this;
+    }
 }

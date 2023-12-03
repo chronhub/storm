@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
@@ -14,6 +14,7 @@ use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
+use Closure;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {
@@ -22,7 +23,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
-        protected ContextInterface $context,
+        protected ContextReaderInterface $context,
         private StreamCacheInterface $streamCache
     ) {
     }
@@ -31,7 +32,7 @@ final readonly class ProjectEmitter implements EmitterProjector
     {
         $streamName = new StreamName($this->getName());
 
-        // First commit the stream name without event
+        // First commit the stream name without the event
         if ($this->streamNotEmittedAndNotExists($streamName)) {
             $this->chronicler()->firstCommit(new Stream($streamName));
 
@@ -53,8 +54,14 @@ final readonly class ProjectEmitter implements EmitterProjector
             : $this->chronicler()->firstCommit($stream);
     }
 
-    protected function newScope(): EmitterProjectorScopeInterface
+    protected function getScope(): EmitterProjectorScopeInterface
     {
+        $userScope = $this->context->userScope();
+
+        if ($userScope instanceof Closure) {
+            return $userScope($this);
+        }
+
         return new EmitterProjectorScope(
             $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
         );

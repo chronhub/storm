@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
 use DateInterval;
@@ -29,6 +28,8 @@ final class Context implements ContextReaderInterface
 
     private DateInterval|string|int|null $timer = null;
 
+    private ?Closure $userScope = null;
+
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
@@ -37,7 +38,7 @@ final class Context implements ContextReaderInterface
 
         $this->assertNotStaticClosure($userState);
 
-        $this->userState = $userState;
+        $this->userState = Closure::bind($userState, $this);
 
         return $this;
     }
@@ -49,6 +50,17 @@ final class Context implements ContextReaderInterface
         }
 
         $this->queryFilter = $queryFilter;
+
+        return $this;
+    }
+
+    public function withScope(Closure $scope): self
+    {
+        if ($this->userScope instanceof Closure) {
+            throw new InvalidArgumentException('Projection scope already set');
+        }
+
+        $this->userScope = $scope;
 
         return $this;
     }
@@ -109,6 +121,11 @@ final class Context implements ContextReaderInterface
         return $this->userState;
     }
 
+    public function userScope(): ?Closure
+    {
+        return $this->userScope;
+    }
+
     public function reactors(): Closure
     {
         if ($this->reactors === null) {
@@ -139,29 +156,6 @@ final class Context implements ContextReaderInterface
     public function timer(): ?DateInterval
     {
         return $this->timer;
-    }
-
-    public function bindReactors(ProjectorScope $projectorScope): void
-    {
-        if ($this->reactors instanceof Closure) {
-            $this->reactors = Closure::bind($this->reactors, $projectorScope, ProjectorScope::class);
-        }
-    }
-
-    public function bindUserState(ProjectorScope $projectorScope): array
-    {
-        if ($this->userState instanceof Closure) {
-            // checkMe why we need a new scope?
-            $callback = Closure::bind($this->userState, $projectorScope, ProjectorScope::class);
-
-            $result = $callback();
-
-            $this->userState = $callback;
-
-            return $result;
-        }
-
-        return [];
     }
 
     private function normalizeInterval(DateInterval|string|int $interval): DateInterval

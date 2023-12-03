@@ -28,29 +28,22 @@ trait InteractWithSubscription
 
     protected ?MergeStreamIterator $streamIterator = null;
 
+    protected ?ProjectorScope $scope;
+
     protected ContextReaderInterface $context;
 
     protected ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
-        // @todo remove this check
-        // if we pass scope to event processor, we could remove this part
-        // but we need to fix order fn(DomainEvent $event, ?array $userState, Scope $scope)
         if ($this instanceof PersistentSubscriptionInterface && ! $context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new RuntimeException('Persistent subscription must have a projection query filter');
         }
 
         $this->context = $context;
-
-        $userState = $this->context->bindUserState($projectorScope);
-
-        $this->state->put($userState);
-
-        $this->context->bindReactors($projectorScope);
-
+        $this->scope = $projectorScope;
+        $this->setOriginalUserState();
         $this->sprint->runInBackground($keepRunning);
-
         $this->sprint->continue();
     }
 
@@ -58,15 +51,7 @@ trait InteractWithSubscription
     {
         $this->state->reset();
 
-        $callback = $this->context->userState();
-
-        if ($callback instanceof Closure) {
-            $userState = $callback();
-
-            if (is_array($userState)) {
-                $this->state->put($userState);
-            }
-        }
+        $this->setOriginalUserState();
     }
 
     public function &currentStreamName(): ?string
@@ -138,6 +123,11 @@ trait InteractWithSubscription
         return $this->chronicler;
     }
 
+    public function scope(): ProjectorScope
+    {
+        return $this->scope;
+    }
+
     /**
      * Strip decorator to get innermost chronicler
      */
@@ -148,5 +138,18 @@ trait InteractWithSubscription
         }
 
         return $chronicler;
+    }
+
+    private function setOriginalUserState(): void
+    {
+        $callback = $this->context->userState();
+
+        if ($callback instanceof Closure) {
+            $userState = $callback();
+
+            if (is_array($userState)) {
+                $this->state->put($userState);
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Uses;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -18,6 +19,8 @@ use tests\TestCase;
 trait TestingSubscriptionFactory
 {
     protected Subscription&MockObject $subscription;
+
+    protected ProjectorScope&MockObject $projectorScope;
 
     protected ProjectionOption&MockObject $option;
 
@@ -35,10 +38,11 @@ trait TestingSubscriptionFactory
 
     protected int $eventCounterLimit = 1;
 
-    protected function setUpWithSubscription(string $subscription): void
+    protected function setUpWithSubscription(string $subscription, string $projectorScope): void
     {
         /** @var TestCase $this */
         $this->subscription = $this->createMock($subscription);
+        $this->projectorScope = $this->createMock($projectorScope);
 
         $this->option = $this->createMock(ProjectionOption::class);
         $this->streamManager = $this->createMock(StreamManagerInterface::class);
@@ -46,6 +50,7 @@ trait TestingSubscriptionFactory
         $this->state = new ProjectionState(); // mock
         $this->sprint = new Sprint();
 
+        $this->subscription->method('scope')->willReturn($this->projectorScope);
         $this->subscription->method('option')->willReturn($this->option);
         $this->subscription->method('streamManager')->willReturn($this->streamManager);
         $this->subscription->method('context')->willReturn($this->context);

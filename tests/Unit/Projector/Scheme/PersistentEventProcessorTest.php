@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -20,7 +21,7 @@ use function posix_kill;
 uses(TestingSubscriptionFactory::class);
 
 beforeEach(function () {
-    $this->setUpWithSubscription(PersistentSubscriptionInterface::class);
+    $this->setUpWithSubscription(PersistentSubscriptionInterface::class, ProjectorScope::class);
     $this->event = SomeEvent::fromContent(['name' => 'steph'])->withHeader(Header::EVENT_TIME, 'some_event_time');
 });
 
@@ -29,13 +30,14 @@ $assertEventProcessed = function (bool $inProgress) {
     $this->subscription->expects($this->once())->method('persistWhenCounterIsReached');
     $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, 'some_event_time')->willReturn(true);
 
-    $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state): array {
+    $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
         expect($event)
             ->toBe($this->event)
-            ->and($state)->toBe($this->state->get());
+            ->and($state)->toBe($this->state->get())
+            ->and($scope)->toBe($this->projectorScope);
 
         return ['altered content'];
-    });
+    }, $this->projectorScope);
 
     $result = $eventProcessor($this->subscription, $this->event, 5);
 
@@ -78,7 +80,7 @@ test('does not process event when gap has been detected and always return false'
 
     $eventProcessor = new EventProcessor(function (): void {
         throw new LogicException('test: should not be called');
-    });
+    }, $this->projectorScope);
 
     $result = $eventProcessor($this->subscription, $this->event, 5);
 
@@ -94,7 +96,7 @@ test('raise error when event time extracted from event header is not string or d
 
     $eventProcessor = new EventProcessor(function (): void {
         throw new LogicException('test: should not be called');
-    });
+    }, $this->projectorScope);
 
     $eventProcessor($this->subscription, $this->event, 5);
 })->throws(TypeError::class, 'Argument #3 ($eventTime) must be of type DateTimeImmutable|string|false');
