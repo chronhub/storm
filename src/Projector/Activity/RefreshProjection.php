@@ -26,7 +26,7 @@ final class RefreshProjection
          * been added or deleted after the first watch.
          */
         $queries = $subscription->context()->queries();
-        $subscription->streamManager()->watchStreams($queries);
+        $subscription->streamManager()->discover($queries);
 
         return $next($subscription);
     }

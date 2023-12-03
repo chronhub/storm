@@ -47,7 +47,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     {
         $this->mountProjection();
 
-        $this->syncStreams();
+        $this->syncStreamsOnRise();
     }
 
     public function store(): void

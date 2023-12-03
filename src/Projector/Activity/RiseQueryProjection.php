@@ -17,7 +17,7 @@ final class RiseQueryProjection
 
             $queries = $subscription->context()->queries();
 
-            $subscription->streamManager()->watchStreams($queries);
+            $subscription->streamManager()->discover($queries);
         }
 
         return $next($subscription);

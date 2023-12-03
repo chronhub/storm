@@ -18,14 +18,14 @@ interface StreamManagerInterface extends JsonSerializable
      *
      * @param array{'all'?:bool, 'categories'?:string[], 'names'?:string[]} $queries
      */
-    public function watchStreams(array $queries): void;
+    public function discover(array $queries): void;
 
     /**
-     * Merges remote/local stream positions.
+     * Merges local with remote stream positions.
      *
      * @param TStream $streamsPositions
      */
-    public function syncStreams(array $streamsPositions): void;
+    public function merge(array $streamsPositions): void;
 
     /**
      * Binds a stream name to the next available position.

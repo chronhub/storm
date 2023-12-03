@@ -55,7 +55,7 @@ trait InteractWithPersistentSubscription
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamManager->syncStreams($projectionDetail->streamPositions);
+        $this->streamManager->merge($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
@@ -106,9 +106,9 @@ trait InteractWithPersistentSubscription
         $this->setStatus($status);
     }
 
-    protected function syncStreams(): void
+    protected function syncStreamsOnRise(): void
     {
-        $this->streamManager->watchStreams($this->context->queries());
+        $this->streamManager->discover($this->context->queries());
 
         $this->synchronise();
     }

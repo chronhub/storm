@@ -37,23 +37,24 @@ final class StreamManager implements StreamManagerInterface
         $this->streamPosition = new Collection();
     }
 
-    public function watchStreams(array $queries): void
+    public function discover(array $queries): void
     {
         $container = $this->eventStreamLoader
             ->loadFrom($queries)
             ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]);
 
+        // todo tests add streams and delete streams
         $this->streamPosition = $container->merge($this->streamPosition);
     }
 
-    public function syncStreams(array $streamsPositions): void
+    public function merge(array $streamsPositions): void
     {
         $this->streamPosition = $this->streamPosition->merge($streamsPositions);
     }
 
     public function bind(string $streamName, int $expectedPosition, DateTimeImmutable|string|false $eventTime): bool
     {
-        // checkMe: should we throw exception when expected position is less or equal than the current?
+        // checkMe: should we throw exception when the expected position is less or equal than the current?
 
         if (! $this->streamPosition->has($streamName)) {
             throw new RuntimeException("Stream $streamName is not watched");

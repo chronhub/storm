@@ -33,7 +33,7 @@ test('watch streams', function () {
         ->willReturn(collect(['customer']));
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
-    $streamManager->watchStreams(['all' => true]);
+    $streamManager->discover(['all' => true]);
 
     expect($streamManager->all())->toBe(['customer' => 0]);
 });
@@ -45,11 +45,11 @@ test('sync streams', function () {
         ->willReturn(collect(['customer']));
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
-    $streamManager->watchStreams(['all' => true]);
+    $streamManager->discover(['all' => true]);
 
     expect($streamManager->all())->toBe(['customer' => 0]);
 
-    $streamManager->syncStreams(['customer' => 10]);
+    $streamManager->merge(['customer' => 10]);
 
     expect($streamManager->all())->toBe(['customer' => 10]);
 });
@@ -69,7 +69,7 @@ describe('always bind stream to its position', function () {
 
     test('when event time is false which is meant for query projection', function (int $position) {
         $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1], null);
-        $streamManager->syncStreams(['customer' => 10]);
+        $streamManager->merge(['customer' => 10]);
 
         expect($streamManager->bind('customer', $position, false))->toBe(true)
             ->and($streamManager->all())->toBe(['customer' => $position]);
@@ -84,7 +84,7 @@ describe('always bind stream to its position', function () {
 
         $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [], null);
 
-        $streamManager->syncStreams(['customer' => 10]);
+        $streamManager->merge(['customer' => 10]);
 
         $bound = $streamManager->bind('customer', $position, 'event_time');
 
@@ -102,7 +102,7 @@ test('bind stream to the next position available', function (int $currentPositio
     $this->clock->expects($this->never())->method('isNowSubGreaterThan');
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], null);
-    $streamManager->syncStreams(['customer' => $currentPosition]);
+    $streamManager->merge(['customer' => $currentPosition]);
 
     $bound = $streamManager->bind('customer', $currentPosition + 1, 'event_time');
 
@@ -116,7 +116,7 @@ test('bind stream when gap is detected but detection windows bypassed', function
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], 'PT1D');
 
-    $streamManager->syncStreams(['customer' => $currentPosition]);
+    $streamManager->merge(['customer' => $currentPosition]);
 
     $bound = $streamManager->bind('customer', $currentPosition + 2, 'event_time');
 
@@ -130,7 +130,7 @@ test('detect gap', function (int $currentPosition) {
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], 'PT1D');
 
-    $streamManager->syncStreams(['customer' => $currentPosition]);
+    $streamManager->merge(['customer' => $currentPosition]);
 
     expect($streamManager->bind('customer', $currentPosition + 2, 'event_time'))->toBe(false)
         ->and($streamManager->all())->toBe(['customer' => $currentPosition])
@@ -143,7 +143,7 @@ test('bind stream when gap is detected but no more retry left', function (int $c
     $this->clock->expects($this->exactly(1))->method('isNowSubGreaterThan')->willReturn(true);
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], 'PT1D');
-    $streamManager->syncStreams(['customer' => $currentPosition]);
+    $streamManager->merge(['customer' => $currentPosition]);
 
     expect($streamManager->bind('customer', $currentPosition + 2, 'event_time'))->toBe(false)
         ->and($streamManager->all())->toBe(['customer' => $currentPosition])
@@ -163,7 +163,7 @@ test('bind stream when gap is detected but no more retry left', function (int $c
 test('resets manager', function () {
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], 'PT1D');
 
-    $streamManager->syncStreams(['customer' => 10]);
+    $streamManager->merge(['customer' => 10]);
 
     expect($streamManager->all())->toBe(['customer' => 10]);
 
@@ -177,7 +177,7 @@ test('reset manager with detected gap and retries', function () {
 
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2], 'PT1D');
 
-    $streamManager->syncStreams(['customer' => 10]);
+    $streamManager->merge(['customer' => 10]);
 
     expect($streamManager->bind('customer', 10 + 2, 'event_time'))->toBe(false)
         ->and($streamManager->all())->toBe(['customer' => 10])
@@ -197,7 +197,7 @@ test('sleep raised exception when no gap detected', function () {
     $this->clock->expects($this->never())->method('isNowSubGreaterThan');
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2]);
 
-    $streamManager->syncStreams(['customer' => 10]);
+    $streamManager->merge(['customer' => 10]);
 
     expect($streamManager->bind('customer', 10 + 1, 'event_time'))->toBe(true)
         ->and($streamManager->all())->toBe(['customer' => 11])
@@ -212,7 +212,7 @@ test('sleep raised exception when gap detected but no more retry left', function
     $this->clock->expects($this->never())->method('isNowSubGreaterThan');
     $streamManager = new StreamManager($this->eventStreamLoader, $this->clock, [1, 2, 3, 4]);
 
-    $streamManager->syncStreams(['customer' => 10]);
+    $streamManager->merge(['customer' => 10]);
 
     expect($streamManager->bind('customer', 10 + 2, 'event_time'))->toBe(false)
         ->and($streamManager->all())->toBe(['customer' => 10])

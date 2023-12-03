@@ -49,7 +49,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             $this->readModel->initialize();
         }
 
-        $this->syncStreams();
+        $this->syncStreamsOnRise();
     }
 
     public function store(): void
