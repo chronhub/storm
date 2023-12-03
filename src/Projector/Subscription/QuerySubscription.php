@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
@@ -30,11 +29,7 @@ final class QuerySubscription implements QuerySubscriptionInterface
         protected SystemClock $clock,
         Chronicler $chronicler,
     ) {
-        while ($chronicler instanceof ChroniclerDecorator) {
-            $chronicler = $chronicler->innerChronicler();
-        }
-
-        $this->chronicler = $chronicler;
+        $this->chronicler = $this->resolveInnerMostChronicler($chronicler);
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
     }

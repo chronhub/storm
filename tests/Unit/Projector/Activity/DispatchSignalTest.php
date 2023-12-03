@@ -22,7 +22,7 @@ beforeEach(function () {
     };
 });
 
-test('dispatch signal when projection option signal is active', function () {
+it('dispatch signal when projection option signal is active', function () {
     $this->option->expects($this->once())->method('getSignal')->willReturn(true);
 
     $called = false;
@@ -39,7 +39,7 @@ test('dispatch signal when projection option signal is active', function () {
         ->and($result())->toBe($this->subscription);
 });
 
-test('does not dispatch signal when projection option signal is inactive', function () {
+it('does not dispatch signal when projection option signal is inactive', function () {
     $this->option->expects($this->once())->method('getSignal')->willReturn(false);
 
     $called = false;

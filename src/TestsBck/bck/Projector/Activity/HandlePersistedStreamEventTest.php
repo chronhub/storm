@@ -16,7 +16,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
+use Chronhub\Storm\Projector\Activity\LoadStreamsToRemove;
 use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
@@ -38,7 +38,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
 
     private Chronicler $chronicler;
 
-    private LoadStreams $loader;
+    private LoadStreamsToRemove $loader;
 
     protected function setUp(): void
     {
@@ -63,7 +63,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
             $this->chronicler
         );
 
-        $this->loader = new LoadStreams($this->chronicler);
+        $this->loader = new LoadStreamsToRemove($this->chronicler);
     }
 
     public function testReturnEarlyWhenGapDetected(): void

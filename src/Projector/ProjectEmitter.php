@@ -56,7 +56,7 @@ final readonly class ProjectEmitter implements EmitterProjector
     protected function newScope(): EmitterProjectorScopeInterface
     {
         return new EmitterProjectorScope(
-            $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
+            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
         );
     }
 

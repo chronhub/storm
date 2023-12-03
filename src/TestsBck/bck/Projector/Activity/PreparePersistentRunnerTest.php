@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
+use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Tests\UnitTestCase;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(PreparePersistentRunner::class)]
+#[CoversClass(RisePersistentProjection::class)]
 final class PreparePersistentRunnerTest extends UnitTestCase
 {
     private PersistentSubscriptionInterface|MockObject $subscription;
@@ -25,7 +25,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 
     public function testInstance(): void
     {
-        $activity = new PreparePersistentRunner();
+        $activity = new RisePersistentProjection();
 
         $this->assertFalse($activity->isFirstExecution());
     }
@@ -33,7 +33,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     #[DataProvider('provideStatusesWhichStopOnFirstExecution')]
     public function testStopOnFirstExecution(ProjectionStatus $stopOnFirstExecution): void
     {
-        $activity = new PreparePersistentRunner();
+        $activity = new RisePersistentProjection();
 
         $this->assertFalse($activity->isFirstExecution());
 
@@ -58,7 +58,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
     #[DataProvider('provideStatusesWhichKeepRunningOnFirstExecution')]
     public function testKeepWorkflowOnFirstExecution(ProjectionStatus $keepRunning): void
     {
-        $activity = new PreparePersistentRunner();
+        $activity = new RisePersistentProjection();
 
         $this->assertFalse($activity->isFirstExecution());
 
@@ -82,7 +82,7 @@ final class PreparePersistentRunnerTest extends UnitTestCase
 
     public function testResetWhenKeepRunningAndDoesNotRestartProjection(): void
     {
-        $activity = new PreparePersistentRunner();
+        $activity = new RisePersistentProjection();
 
         $this->assertFalse($activity->isFirstExecution());
 

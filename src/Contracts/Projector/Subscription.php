@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
@@ -41,6 +42,16 @@ interface Subscription
      * Set the current status of the subscription.
      */
     public function setStatus(ProjectionStatus $status): void;
+
+    /**
+     * Set the stream iterator instance.
+     */
+    public function setStreamIterator(MergeStreamIterator $streamIterator): void;
+
+    /**
+     * Get the stream iterator instance if set and reset it.
+     */
+    public function pullStreamIterator(): ?MergeStreamIterator;
 
     /**
      * Get the context instance.

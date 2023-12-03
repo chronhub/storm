@@ -64,7 +64,7 @@ trait TestingProjectorMonitor
 
                 break;
             case 'positions':
-                $this->model->expects($this->once())->method('positions')->willReturn('{"foo": 1}');
+                $this->model->expects($this->once())->method('position')->willReturn('{"foo": 1}');
                 $this->serializer->expects($this->once())->method('decode')->with('{"foo": 1}')->willReturn(['foo' => 1]);
 
                 expect($this->projectorMonitor->streamPositionsOf('projection_name'))->toBe(['foo' => 1]);
@@ -91,7 +91,7 @@ trait TestingProjectorMonitor
 
                 break;
             case 'positions':
-                $this->model->expects($this->never())->method('positions');
+                $this->model->expects($this->never())->method('position');
                 $this->projectorMonitor->streamPositionsOf('projection_name');
 
                 break;

@@ -12,6 +12,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -24,6 +25,8 @@ use function is_array;
  */
 final class GenericSubscription implements Subscription
 {
+    private ?MergeStreamIterator $streamIterator = null;
+
     private ?string $currentStreamName = null;
 
     private ContextReaderInterface $context;
@@ -92,6 +95,20 @@ final class GenericSubscription implements Subscription
     public function setStatus(ProjectionStatus $status): void
     {
         $this->status = $status;
+    }
+
+    public function setStreamIterator(MergeStreamIterator $streamIterator): void
+    {
+        $this->streamIterator = $streamIterator;
+    }
+
+    public function pullStreamIterator(): ?MergeStreamIterator
+    {
+        $streamIterator = $this->streamIterator;
+
+        $this->streamIterator = null;
+
+        return $streamIterator;
     }
 
     public function context(): ContextReaderInterface

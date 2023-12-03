@@ -15,7 +15,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
+use Chronhub\Storm\Projector\Activity\LoadStreamsToRemove;
 use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
@@ -37,7 +37,7 @@ class HandleStreamEventTest extends UnitTestCase
 
     private Chronicler $chronicler;
 
-    private LoadStreams $loader;
+    private LoadStreamsToRemove $loader;
 
     protected function setUp(): void
     {
@@ -56,7 +56,7 @@ class HandleStreamEventTest extends UnitTestCase
             new DetermineStreamCategory()
         );
 
-        $this->loader = new LoadStreams($this->chronicler);
+        $this->loader = new LoadStreamsToRemove($this->chronicler);
     }
 
     public function testHandleEvent(): void

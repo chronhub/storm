@@ -198,11 +198,14 @@ it('can run query projection with limit in query filter', function () {
     // create a projection
     $projector = $this->projectorManager->newQuery();
 
+    $queryFilter = $this->projectorManager->queryScope()->fromIncludedPosition();
+    $queryFilter->setLimit(3);
+
     // run projection
     $projector
         ->initialize(fn () => ['positions' => []])
         ->fromAll()
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition(3))
+        ->withQueryFilter($queryFilter)
         ->when(function (DomainEvent $event, array $state): array {
             $state['positions'][] = $event->header(EventHeader::INTERNAL_POSITION);
 

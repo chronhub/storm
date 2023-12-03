@@ -37,10 +37,9 @@ final readonly class EventProcessor
             $subscription->eventCounter()->increment();
         }
 
-        // ensure to pass user state to reactor when it has been initialized
+        // ensure to pass user state when it has been initialized
         $userState = $subscription->context()->userState() instanceof Closure
-            ? $subscription->state()->get()
-            : null;
+            ? $subscription->state()->get() : null;
 
         // handle event and user state if it has been initialized and returned
         $currentState = ($this->reactors)($event, $userState);
@@ -64,8 +63,7 @@ final readonly class EventProcessor
     {
         // query subscription does not mind of gap
         $eventTime = $subscription instanceof PersistentSubscriptionInterface
-            ? $event->header(Header::EVENT_TIME)
-            : false;
+            ? $event->header(Header::EVENT_TIME) : false;
 
         return $subscription->streamManager()->bind($subscription->currentStreamName(), $nextPosition, $eventTime);
     }

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Closure;
 
-final class PrepareQueryRunner
+final class RiseQueryProjection
 {
     private bool $isFirstExecution = true;
 
-    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         if ($this->isFirstExecution) {
             $this->isFirstExecution = false;

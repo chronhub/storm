@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Closure;
 
 final class HandleStreamGap
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
+        /**
+         * When a gap is detected and still retry left,
+         * we sleep and store the projection if some event(s) has been handled
+         */
         if ($subscription->streamManager()->hasGap()) {
             $subscription->streamManager()->sleep();
 
-            $subscription->store();
+            if (! $subscription->eventCounter()->isReset()) {
+                $subscription->store();
+            }
         }
 
         return $next($subscription);

@@ -49,6 +49,11 @@ interface ProjectionOption extends JsonSerializable
     public const DETECTION_WINDOWS = 'detectionWindows';
 
     /**
+     * @var string
+     */
+    public const LOADS = 'loadsLimiter';
+
+    /**
      * Dispatch async signal
      */
     public function getSignal(): bool;
@@ -102,4 +107,16 @@ interface ProjectionOption extends JsonSerializable
      * @return null|string as date interval duration
      */
     public function getDetectionWindows(): ?string;
+
+    /**
+     * Get loads limiter for the query filter
+     *
+     * null limiter will either allow to dynamically set the limiter
+     * or means no limit
+     *
+     * @return int<1,max>|null
+     *
+     * @see LoadLimiterProjectionQueryFilter
+     */
+    public function getLoads(): ?int;
 }

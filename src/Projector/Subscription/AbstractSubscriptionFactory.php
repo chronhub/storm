@@ -14,11 +14,11 @@ use Chronhub\Storm\Contracts\Projector\ProjectionOptionImmutable;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\DefaultOption;
@@ -48,7 +48,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     ) {
     }
 
-    public function createQuerySubscription(ProjectionOption $option): Subscription
+    public function createQuerySubscription(ProjectionOption $option): QuerySubscriptionInterface
     {
         return new QuerySubscription(
             $this->createStreamManager($option),

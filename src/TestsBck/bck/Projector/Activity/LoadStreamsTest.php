@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
+use Chronhub\Storm\Projector\Activity\LoadStreamsToRemove;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -22,7 +22,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 use function count;
 
-#[CoversClass(LoadStreams::class)]
+#[CoversClass(LoadStreamsToRemove::class)]
 final class LoadStreamsTest extends UnitTestCase
 {
     private Subscription|MockObject $subscription;
@@ -54,7 +54,7 @@ final class LoadStreamsTest extends UnitTestCase
 
         $this->chronicler->expects($this->once())->method('retrieveFiltered')->willReturn($this->provideEventStream(['name' => 'steph']));
 
-        $loadStreams = new LoadStreams($this->chronicler);
+        $loadStreams = new LoadStreamsToRemove($this->chronicler);
 
         $iterator = $loadStreams->batch(
             $this->subscription->streamManager()->jsonSerialize(),
@@ -79,7 +79,7 @@ final class LoadStreamsTest extends UnitTestCase
         $this->chronicler->expects($this->once())->method('retrieveFiltered')
             ->willReturn($this->provideEventStream(['foo' => 'bar'], ['baz' => 'bar']));
 
-        $loadStreams = new LoadStreams($this->chronicler);
+        $loadStreams = new LoadStreamsToRemove($this->chronicler);
 
         $iterator = $loadStreams->batch(
             $this->subscription->streamManager()->jsonSerialize(),
@@ -111,7 +111,7 @@ final class LoadStreamsTest extends UnitTestCase
                 $this->provideEventStream(['bar' => 'bar']),
             );
 
-        $loadStreams = new LoadStreams($this->chronicler);
+        $loadStreams = new LoadStreamsToRemove($this->chronicler);
 
         $iterator = $loadStreams->batch(
             $this->subscription->streamManager()->jsonSerialize(),

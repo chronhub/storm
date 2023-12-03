@@ -6,13 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Chronicler\InMemory\InMemoryEventStream;
 use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
+use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(PrepareQueryRunner::class)]
+#[CoversClass(RiseQueryProjection::class)]
 final class PrepareQueryRunnerTest extends UnitTestCase
 {
     public function testInvoke(): void
@@ -41,7 +41,7 @@ final class PrepareQueryRunnerTest extends UnitTestCase
             return true;
         };
 
-        $prepareQueryRunner = new PrepareQueryRunner();
+        $prepareQueryRunner = new RiseQueryProjection();
 
         $result = $prepareQueryRunner($subscription, $next);
 

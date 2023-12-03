@@ -21,7 +21,7 @@ use function ucfirst;
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
     /**
-     * @var Collection<string,InMemoryProjection>
+     * @var Collection<non-empty-string,InMemoryProjection>
      */
     private Collection $projections;
 

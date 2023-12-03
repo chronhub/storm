@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
 
 beforeEach(function () {
@@ -41,7 +41,7 @@ describe('load from', function () {
 describe('raise exception when', function () {
 
     test('no stream set', function () {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No stream set or found');
 
         $this->eventStreamLoader->loadFrom([]);
@@ -50,7 +50,7 @@ describe('raise exception when', function () {
     test('return empty stream names', function () {
         $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn([]);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No stream set or found');
 
         $this->eventStreamLoader->loadFrom(['all' => true]);
@@ -59,7 +59,7 @@ describe('raise exception when', function () {
     test('return empty categories', function () {
         $this->provider->expects($this->once())->method('filterByAscendantCategories')->with(['category1', 'category2'])->willReturn([]);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No stream set or found');
 
         $this->eventStreamLoader->loadFrom(['categories' => ['category1', 'category2']]);
@@ -68,21 +68,21 @@ describe('raise exception when', function () {
     test('return empty all', function () {
         $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn([]);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No stream set or found');
 
         $this->eventStreamLoader->loadFrom(['all' => true]);
     });
 
     test('duplicate stream names', function () {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
         $this->eventStreamLoader->loadFrom(['names' => ['duplicate', 'duplicate']]);
     });
 
     test('duplicate from categories', function () {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
         $this->provider->expects($this->once())->method('filterByAscendantCategories')->with(['foo', 'bar'])->willReturn(['duplicate', 'duplicate']);
@@ -91,7 +91,7 @@ describe('raise exception when', function () {
     });
 
     test('duplicate from all', function () {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Duplicate stream names is not allowed');
 
         $this->provider->expects($this->once())->method('allWithoutInternal')->willReturn(['duplicate', 'duplicate']);

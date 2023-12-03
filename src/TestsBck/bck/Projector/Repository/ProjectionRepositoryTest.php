@@ -191,7 +191,7 @@ final class ProjectionRepositoryTest extends UnitTestCase
     public function testLoadState(): void
     {
         $model = $this->createMock(ProjectionModel::class);
-        $model->expects($this->once())->method('positions')->willReturn('{"stream_name":1}');
+        $model->expects($this->once())->method('position')->willReturn('{"stream_name":1}');
         $model->expects($this->once())->method('state')->willReturn('{"count":1}');
 
         $this->provider

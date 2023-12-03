@@ -191,12 +191,14 @@ it('can run read model projection with limit in query filter', function () {
     // create a projection
     $readModel = $this->testFactory->readModel;
     $projector = $this->projectorManager->newReadModel('customer', $readModel);
+    $queryFilter = $this->projectorManager->queryScope()->fromIncludedPosition();
+    $queryFilter->setLimit(5);
 
     // run projection
     $projector
         ->initialize(fn () => ['positions' => []])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition(5))
+        ->withQueryFilter($queryFilter)
         ->when(function (DomainEvent $event, array $state): array {
             if ($state['positions'] === []) {
                 $this->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());

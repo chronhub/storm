@@ -15,7 +15,7 @@ final readonly class HandleProfiler
     {
     }
 
-    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         $response = null;
         $error = null;

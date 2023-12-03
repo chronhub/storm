@@ -93,7 +93,7 @@ final readonly class InMemoryRepository implements ProjectionRepositoryInterface
         }
 
         return new ProjectionDetail(
-            $this->serializer->decode($projection->positions()),
+            $this->serializer->decode($projection->position()),
             $this->serializer->decode($projection->state()),
         );
     }

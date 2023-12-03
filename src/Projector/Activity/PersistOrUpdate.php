@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Closure;
 
 use function usleep;
 
 final readonly class PersistOrUpdate
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if (! $subscription->streamManager()->hasGap()) {
             /**
-             * Counter is reset when no event has been handled and
-             * in rare case when the loaded/handled events match exactly the option block size
-             * so, we sleep to avoid too much query and update the lock or persist the projection
+             * The event counter is reset when no event has been handled.
+             * Or, when persistWhenThresholdReached was successfully called,
+             * so, we sleep to avoid too much query and try updating the lock or store the projection
              */
             if ($subscription->eventCounter()->isReset()) {
                 usleep(microseconds: $subscription->option()->getSleep());

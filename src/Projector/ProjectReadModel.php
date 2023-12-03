@@ -31,7 +31,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
     protected function newScope(): ReadModelProjectorScopeInterface
     {
         return new ReadModelProjectorScope(
-            $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
+            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
         );
     }
 }

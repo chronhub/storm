@@ -28,6 +28,8 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public readonly int $numberOfIterators;
 
+    public readonly int $numberOfEvents;
+
     public function __construct(
         private readonly SystemClock $clock,
         array $streamNames,
@@ -40,6 +42,7 @@ final class MergeStreamIterator implements Countable, Iterator
         $this->originalIteratorOrder = $this->iterators;
 
         $this->numberOfIterators = $this->iterators->count();
+        $this->numberOfEvents = $this->iterators->sum(fn (array $stream) => $stream[0]->count());
 
         $this->prioritizeIterators();
     }
@@ -81,9 +84,12 @@ final class MergeStreamIterator implements Countable, Iterator
         return $this->iterators->first()[0]->key();
     }
 
+    /**
+     * @phpstan-impure
+     */
     public function count(): int
     {
-        return $this->iterators->sum(fn (array $stream) => $stream[0]->count());
+        return $this->iterators->sum(fn (array $stream): int => $stream[0]->count());
     }
 
     private function prioritizeIterators(): void

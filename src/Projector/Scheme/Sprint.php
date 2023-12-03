@@ -20,6 +20,11 @@ class Sprint
         $this->inProgress = false;
     }
 
+    public function inProgress(): bool
+    {
+        return $this->inProgress;
+    }
+
     public function runInBackground(bool $runInBackground): void
     {
         $this->runInBackground = $runInBackground;
@@ -28,10 +33,5 @@ class Sprint
     public function inBackground(): bool
     {
         return $this->runInBackground;
-    }
-
-    public function inProgress(): bool
-    {
-        return $this->inProgress;
     }
 }

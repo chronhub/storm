@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
@@ -14,6 +15,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Closure;
@@ -24,12 +26,17 @@ trait InteractWithSubscription
 {
     protected ?string $currentStreamName = null;
 
+    protected ?MergeStreamIterator $streamIterator = null;
+
     protected ContextReaderInterface $context;
 
     protected ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
     {
+        // @todo remove this check
+        // if we pass scope to event processor, we could remove this part
+        // but we need to fix order fn(DomainEvent $event, ?array $userState, Scope $scope)
         if ($this instanceof PersistentSubscriptionInterface && ! $context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new RuntimeException('Persistent subscription must have a projection query filter');
         }
@@ -82,6 +89,20 @@ trait InteractWithSubscription
         $this->status = $status;
     }
 
+    public function setStreamIterator(MergeStreamIterator $streamIterator): void
+    {
+        $this->streamIterator = $streamIterator;
+    }
+
+    public function pullStreamIterator(): ?MergeStreamIterator
+    {
+        $streamIterator = $this->streamIterator;
+
+        $this->streamIterator = null;
+
+        return $streamIterator;
+    }
+
     public function context(): ContextReaderInterface
     {
         return $this->context;
@@ -115,5 +136,17 @@ trait InteractWithSubscription
     public function chronicler(): Chronicler
     {
         return $this->chronicler;
+    }
+
+    /**
+     * Strip decorator to get innermost chronicler
+     */
+    protected function resolveInnerMostChronicler(Chronicler $chronicler): Chronicler
+    {
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
+        }
+
+        return $chronicler;
     }
 }

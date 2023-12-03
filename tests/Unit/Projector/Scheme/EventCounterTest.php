@@ -16,13 +16,13 @@ test('new instance', function (): void {
         ->and($counter->isReached())->toBeFalse();
 });
 
-test('exception raised when limit is less than one', function (int $limit): void {
+it('raise exception when limit is less than one', function (int $limit): void {
     new EventCounter($limit);
 })
     ->with([[0, -1, -10]])
     ->throws(InvalidArgumentException::class, 'Event counter limit must be greater than');
 
-test('can increment counter', function (): void {
+it('can increment counter', function (): void {
     $limit = 3;
     $count = 0;
 
@@ -38,7 +38,7 @@ test('can increment counter', function (): void {
     }
 });
 
-test('can increment counter beyond the limit', function (): void {
+it('can increment counter beyond the limit', function (): void {
     $limit = 3;
     $counter = new EventCounter(3);
 
@@ -53,7 +53,7 @@ test('can increment counter beyond the limit', function (): void {
     expect($counter->current())->toBe(4);
 });
 
-test('can reset counter', function (): void {
+it('can reset counter', function (): void {
     $limit = 3;
     $counter = new EventCounter(3);
 
@@ -70,7 +70,7 @@ test('can reset counter', function (): void {
         ->and($counter->isReached())->toBeFalse();
 });
 
-test('return true when limit is reached', function (): void {
+it('return true when limit is reached', function (): void {
     $limit = 3;
     $counter = new EventCounter($limit);
 
@@ -85,7 +85,7 @@ test('return true when limit is reached', function (): void {
     expect($counter->isReached())->toBeTrue();
 });
 
-test('return true when incremented counter is greater than limit', function (): void {
+it('return true when incremented counter is greater than limit', function (): void {
     $limit = 3;
     $counter = new EventCounter($limit);
 

@@ -42,6 +42,11 @@ trait ProvideOption
      */
     protected readonly array $retries;
 
+    /**
+     * @var int<1,max>|null
+     */
+    protected readonly ?int $loads;
+
     protected readonly ?string $detectionWindows;
 
     public function getSignal(): bool
@@ -79,6 +84,11 @@ trait ProvideOption
         return $this->retries;
     }
 
+    public function getLoads(): ?int
+    {
+        return $this->loads;
+    }
+
     public function getDetectionWindows(): ?string
     {
         return $this->detectionWindows;
@@ -95,6 +105,7 @@ trait ProvideOption
             self::LOCKOUT => $this->getLockout(),
             self::RETRIES => $this->getRetries(),
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),
+            self::LOADS => $this->getLoads(),
         ];
     }
 

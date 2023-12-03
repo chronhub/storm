@@ -6,50 +6,41 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
-use Closure;
+use Chronhub\Storm\Projector\Scheme\EventProcessor;
 
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
 {
-    /**
-     * @var callable
-     */
-    private $eventProcessor;
+    private ?EventProcessor $eventProcessor;
 
-    public function __construct(
-        private readonly LoadStreams $loadStreams,
-        callable $eventProcessor
-    ) {
-        $this->eventProcessor = $eventProcessor;
-    }
-
-    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $streams = $this->getStreams($subscription);
+        $streams = $subscription->pullStreamIterator();
 
-        foreach ($streams as $position => $event) {
-            $streamName = $streams->streamName();
+        if ($streams instanceof MergeStreamIterator) {
+            $eventProcessor = $this->eventProcessor($subscription);
 
-            $subscription->setStreamName($streamName);
+            foreach ($streams as $position => $event) {
+                $streamName = $streams->streamName();
 
-            $eventHandled = ($this->eventProcessor)($subscription, $event, $position);
+                $subscription->setStreamName($streamName);
 
-            if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
-                break;
+                $eventHandled = $eventProcessor($subscription, $event, $position);
+
+                if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
+                    break;
+                }
             }
-        }
 
-        gc_collect_cycles();
+            gc_collect_cycles();
+        }
 
         return $next($subscription);
     }
 
-    private function getStreams(Subscription $subscription): MergeStreamIterator
+    private function eventProcessor(Subscription $subscription): callable
     {
-        return $this->loadStreams->batch(
-            $subscription->streamManager()->jsonSerialize(),
-            $subscription->context()->queryFilter()
-        );
+        return $this->eventProcessor ??= new EventProcessor($subscription->context()->reactors());
     }
 }

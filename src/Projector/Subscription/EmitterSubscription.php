@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -39,11 +38,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         protected EventCounter $eventCounter,
         Chronicler $chronicler,
     ) {
-        while ($chronicler instanceof ChroniclerDecorator) {
-            $chronicler = $chronicler->innerChronicler();
-        }
-
-        $this->chronicler = $chronicler;
+        $this->chronicler = $this->resolveInnerMostChronicler($chronicler);
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
     }

@@ -6,11 +6,10 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Closure;
 
 final readonly class StopWhenRunningOnce
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if (! $this->shouldKeepRunning($subscription) && $subscription->currentStatus() === ProjectionStatus::RUNNING) {
             $subscription->close();

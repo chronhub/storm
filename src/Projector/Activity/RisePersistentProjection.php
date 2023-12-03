@@ -6,11 +6,21 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
-final class ResetEventCounter
+final class RisePersistentProjection
 {
+    use RemoteStatusDiscovery;
+
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        $subscription->eventCounter()->reset();
+        if ($this->isFirstExecution()) {
+            if ($this->shouldStopOnDiscoverStatus($subscription)) {
+                return false;
+            }
+
+            $subscription->rise();
+
+            $this->disableFlag();
+        }
 
         return $next($subscription);
     }

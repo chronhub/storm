@@ -26,7 +26,7 @@ final class StreamManager implements StreamManagerInterface
 
     /**
      * @param array<int<0,max>>     $retriesInMs      The array of retry durations in milliseconds.
-     * @param non-empty-string|null $detectionWindows The detection window for resetting projection.
+     * @param non-empty-string|null $detectionWindows The detection window.
      */
     public function __construct(
         private readonly EventStreamLoader $eventStreamLoader,

@@ -101,6 +101,24 @@ test('failed rewind streams when all streams are no longer valid', function () {
     expect($this->streams->valid())->toBeFalse();
 });
 
-test('count total of events across streams', function (): void {
-    expect($this->streams->count())->toBe(9);
+test('return number of iterators', function (): void {
+    expect($this->streams->numberOfIterators)->toBe(3);
+});
+
+test('return number of events', function (): void {
+    expect($this->streams->numberOfEvents)->toBe(9);
+});
+
+test('count total of events across valid streams', function (): void {
+    expect($this->streams->count())
+        ->toBe(9)
+        ->and($this->streams->numberOfEvents)->toBe(9);
+
+    while ($this->streams->valid()) {
+        $this->streams->next();
+    }
+
+    expect($this->streams->count())
+        ->toBe(0)
+        ->and($this->streams->numberOfEvents)->toBe(9);
 });
