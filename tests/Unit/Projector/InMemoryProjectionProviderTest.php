@@ -19,11 +19,11 @@ beforeEach(function (): void {
     $this->provider = new InMemoryProjectionProvider($this->clock);
 });
 
-test('in memory projection provider instance', function () {
+it('test instance', function () {
     $this->assertNull($this->provider->retrieve('customer'));
 });
 
-test('create projection with status', function (ProjectionStatus $status): void {
+it('create projection with status', function (ProjectionStatus $status): void {
     $this->provider->createProjection('customer', $status->value);
 
     expect($this->provider->exists('customer'))->toBeTrue();
@@ -39,7 +39,7 @@ test('create projection with status', function (ProjectionStatus $status): void 
         ->and($projection->lockedUntil())->toBeNull();
 })->with('projection status');
 
-test('acquire lock with status', function (ProjectionStatus $status): void {
+it('acquire lock with status', function (ProjectionStatus $status): void {
     $nowToString = PointInTimeFactory::nowToString();
 
     $this->clock->expects($this->never())->method('isGreaterThan');
@@ -55,7 +55,7 @@ test('acquire lock with status', function (ProjectionStatus $status): void {
         ->and($projection->lockedUntil())->toBe($nowToString);
 })->with('projection status');
 
-test('acquire lock failed when another process has lock', function (): void {
+it('acquire lock failed when another process has lock', function (): void {
     $lockedUntil = PointInTimeFactory::nowToString();
 
     $this->clock->expects($this->once())->method('isGreaterThanNow')->with($lockedUntil)->willReturn(false);
@@ -69,11 +69,11 @@ test('acquire lock failed when another process has lock', function (): void {
     $this->provider->acquireLock('customer', 'running', $lockedUntil);
 })->throws(ProjectionAlreadyRunning::class, 'Acquiring lock failed for stream name: customer: another projection process is already running or wait till the stopping process complete');
 
-test('acquire lock with projection not found', function (): void {
+it('acquire lock with projection not found', function (): void {
     $this->provider->acquireLock('customer', 'running', PointInTimeFactory::nowToString());
 })->throws(ProjectionNotFound::class);
 
-test('update projection with projection not locked', function (): void {
+it('update projection with projection not locked', function (): void {
     $this->clock->expects($this->never())->method('isGreaterThan');
 
     $this->provider->createProjection('customer', 'idle');
@@ -81,7 +81,7 @@ test('update projection with projection not locked', function (): void {
     $this->provider->updateProjection('customer', 'running');
 })->throws(InMemoryProjectionFailed::class, 'Projection lock must be acquired before updating projection customer');
 
-test('delete projection', function (): void {
+it('delete projection', function (): void {
     $this->provider->createProjection('customer', 'idle');
 
     expect($this->provider->exists('customer'))->toBeTrue();
@@ -91,13 +91,13 @@ test('delete projection', function (): void {
     expect($this->provider->exists('customer'))->toBeFalse();
 });
 
-test('delete projection with projection not found', function (): void {
+it('delete projection with projection not found', function (): void {
     expect($this->provider->exists('customer'))->toBeFalse();
 
     $this->provider->deleteProjection('customer');
 })->throws(ProjectionNotFound::class);
 
-test('update projection', function (): void {
+it('update projection', function (): void {
     $this->provider->createProjection('customer', 'idle');
 
     $lockedUntil = PointInTimeFactory::nowToString();
@@ -114,7 +114,7 @@ test('update projection', function (): void {
         ->and($projection->lockedUntil())->toBe($newLockedUntil);
 });
 
-test('update projection with locked until', function (string|false|null $lockedUntil) {
+it('update projection with locked until', function (string|false|null $lockedUntil) {
     $this->provider->createProjection('customer', 'idle');
 
     $currentLock = PointInTimeFactory::nowToString();
@@ -137,26 +137,22 @@ test('update projection with locked until', function (string|false|null $lockedU
     'locked until as null' => null,
 ]);
 
-test('filter by names in the requested order', function (): void {
+it('filter by names in the requested order', function (): void {
     $this->provider->createProjection('customer', 'idle');
     $this->provider->createProjection('order', 'idle');
 
     $projectionNames = $this->provider->filterByNames('customer', 'order');
 
-    expect($projectionNames)
-        ->toHaveCount(2)
-        ->and($projectionNames)->toBe(['customer', 'order']);
+    expect($projectionNames)->toBe(['customer', 'order']);
 });
 
-test('filter non existent requested names', function (): void {
+it('filter non existent requested names', function (): void {
     $this->provider->createProjection('customer', 'idle');
     $this->provider->createProjection('order', 'idle');
 
     $projectionNames = $this->provider->filterByNames('customer', 'order', 'foo');
 
-    expect($projectionNames)
-        ->toHaveCount(2)
-        ->and($projectionNames)->toBe(['customer', 'order']);
+    expect($projectionNames)->toBe(['customer', 'order']);
 });
 
 it('filter by names return empty array', function (): void {
@@ -168,7 +164,7 @@ it('filter by names return empty array', function (): void {
     expect($projectionNames)->toBeEmpty();
 });
 
-test('projection exists by name', function (): void {
+it('projection exists by name', function (): void {
     $this->provider->createProjection('customer', 'idle');
 
     expect($this->provider->exists('customer'))->toBeTrue()

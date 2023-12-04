@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\GenericSubscription;
+use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
 use Chronhub\Storm\Tests\Uses\TestingGenericSubscription;
 
 uses(TestingGenericSubscription::class);
@@ -30,24 +31,7 @@ it('test default instance', function (): void {
         ->and($this->subscription->currentStatus())->toBe(ProjectionStatus::IDLE);
 });
 
-it('set and get current stream name by reference', function () {
-    // todo remove fn from scope
-    $streamName = 'customer-123';
-
-    $this->subscription->setStreamName($streamName);
-
-    $fn = function (): string {
-        return $this->subscription->currentStreamName();
-    };
-
-    expect($fn())->toBe('customer-123');
-
-    $streamName = 'customer-456';
-
-    expect($fn())->toBe('customer-456');
-});
-
-it('set current stream name by reference 2', function () {
+it('set current stream name by reference', function () {
     $streamName = 'customer-123';
 
     $this->subscription->setStreamName($streamName);
@@ -70,3 +54,48 @@ it('set and get status', function (ProjectionStatus $expectedStatus) {
 
     expect($this->subscription->currentStatus())->toBe($expectedStatus);
 })->with('projection status');
+
+it('can set state', function () {
+    expect($this->subscription->state()->get())->toBeEmpty();
+
+    $this->subscription->state()->put(['foo' => 'bar']);
+
+    expect($this->subscription->state()->get())->toBe(['foo' => 'bar']);
+});
+
+it('can initialize again state to his original state', function () {
+    expect($this->subscription->state()->get())->toBeEmpty();
+
+    $this->context->expects($this->once())->method('userState')->willReturn(fn (): array => ['count' => 1]);
+
+    $this->subscription->state()->put(['foo' => 'bar']);
+
+    $this->subscription->initializeAgain();
+
+    expect($this->subscription->state()->get())->toBe(['count' => 1]);
+});
+
+it('can compose subscription', function (bool $inBackground) {
+    expect($this->subscription->sprint()->inProgress())->toBeFalse()
+        ->and($this->subscription->sprint()->inBackground())->toBeFalse()
+        ->and($this->subscription->state()->get())->toBeEmpty();
+
+    $this->subscription->sprint()->runInBackground($inBackground);
+
+    $this->context->expects($this->once())->method('userState')->willReturn(fn (): array => ['count' => 1]);
+
+    $this->subscription->start($inBackground);
+
+    expect($this->subscription->state()->get())->toBe(['count' => 1])
+        ->and($this->subscription->sprint()->inProgress())->toBeTrue()
+        ->and($this->subscription->sprint()->inBackground())->toBe($inBackground);
+})->with(['run in background' => [true], 'run once' => [false]]);
+
+it('can set and pull loaded streams', function () {
+    $streamIterator = MergeStreamIteratorFactory::getIterator();
+
+    $this->subscription->setStreamIterator($streamIterator);
+
+    expect($this->subscription->pullStreamIterator())->toBe($streamIterator)
+        ->and($this->subscription->pullStreamIterator())->toBeNull();
+});

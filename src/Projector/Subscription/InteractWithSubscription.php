@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -17,9 +16,9 @@ use Chronhub\Storm\Projector\Scheme\Sprint;
 
 trait InteractWithSubscription
 {
-    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    public function start(bool $keepRunning): void
     {
-        $this->subscription->compose($projectorScope, $keepRunning);
+        $this->subscription->start($keepRunning);
     }
 
     public function initializeAgain(): void
@@ -90,10 +89,5 @@ trait InteractWithSubscription
     public function chronicler(): Chronicler
     {
         return $this->subscription->chronicler();
-    }
-
-    public function scope(): ProjectorScope
-    {
-        return $this->subscription->scope();
     }
 }

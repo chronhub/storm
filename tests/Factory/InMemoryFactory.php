@@ -46,15 +46,6 @@ class InMemoryFactory
         $this->readModel = new InMemoryReadModel();
     }
 
-    public static function withEventStoreType(string $eventStoreType): self
-    {
-        $self = new static();
-
-        $self->eventStoreType = $eventStoreType;
-
-        return $self;
-    }
-
     public function getFactory(): SubscriptionFactory
     {
         $clock = new PointInTime();

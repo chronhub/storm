@@ -21,6 +21,8 @@ trait TestingProjectorMonitor
 
     protected ProjectorMonitor $projectorMonitor;
 
+    protected string $projectionName = 'foo';
+
     protected function setupProjectorMonitor(): void
     {
         /** @var TestCase $this */
@@ -35,19 +37,19 @@ trait TestingProjectorMonitor
     {
         switch ($status) {
             case 'stopping':
-                $this->projectorMonitor->markAsStop('projection_name');
+                $this->projectorMonitor->markAsStop($this->projectionName);
 
                 break;
             case 'resetting':
-                $this->projectorMonitor->markAsReset('projection_name');
+                $this->projectorMonitor->markAsReset($this->projectionName);
 
                 break;
             case 'deleting':
-                $this->projectorMonitor->markAsDelete('projection_name', false);
+                $this->projectorMonitor->markAsDelete($this->projectionName, false);
 
                 break;
             case 'deleting_with_emitted_events':
-                $this->projectorMonitor->markAsDelete('projection_name', true);
+                $this->projectorMonitor->markAsDelete($this->projectionName, true);
 
                 break;
         }
@@ -60,21 +62,21 @@ trait TestingProjectorMonitor
             case 'status':
                 $this->model->expects($this->once())->method('status')->willReturn('running');
 
-                expect($this->projectorMonitor->statusOf('projection_name'))->toBe('running');
+                expect($this->projectorMonitor->statusOf($this->projectionName))->toBe('running');
 
                 break;
             case 'positions':
                 $this->model->expects($this->once())->method('position')->willReturn('{"foo": 1}');
                 $this->serializer->expects($this->once())->method('decode')->with('{"foo": 1}')->willReturn(['foo' => 1]);
 
-                expect($this->projectorMonitor->streamPositionsOf('projection_name'))->toBe(['foo' => 1]);
+                expect($this->projectorMonitor->streamPositionsOf($this->projectionName))->toBe(['foo' => 1]);
 
                 break;
             case 'state':
                 $this->model->expects($this->once())->method('state')->willReturn('{"foo": 1}');
                 $this->serializer->expects($this->once())->method('decode')->with('{"foo": 1}')->willReturn(['foo' => 1]);
 
-                expect($this->projectorMonitor->stateOf('projection_name'))->toBe(['foo' => 1]);
+                expect($this->projectorMonitor->stateOf($this->projectionName))->toBe(['foo' => 1]);
 
                 break;
         }
@@ -87,17 +89,17 @@ trait TestingProjectorMonitor
         switch ($getter) {
             case 'status':
                 $this->model->expects($this->never())->method('status');
-                $this->projectorMonitor->statusOf('projection_name');
+                $this->projectorMonitor->statusOf($this->projectionName);
 
                 break;
             case 'positions':
                 $this->model->expects($this->never())->method('position');
-                $this->projectorMonitor->streamPositionsOf('projection_name');
+                $this->projectorMonitor->streamPositionsOf($this->projectionName);
 
                 break;
             case 'state':
                 $this->model->expects($this->never())->method('state');
-                $this->projectorMonitor->stateOf('projection_name');
+                $this->projectorMonitor->stateOf($this->projectionName);
 
                 break;
         }

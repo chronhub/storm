@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\InMemoryProjection;
 
-test('create projection', function (): void {
+it('create projection', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
     expect($projection)->toBeInstanceOf(ProjectionModel::class)
@@ -18,7 +18,7 @@ test('create projection', function (): void {
         ->and($projection->lockedUntil())->toBeNull();
 });
 
-test('update state', function (): void {
+it('update state', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
     expect($projection->state())->toBe('{}');
@@ -28,7 +28,7 @@ test('update state', function (): void {
     expect($projection->state())->toBe('{"count":1}');
 });
 
-test('update position', function (): void {
+it('update position', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
     expect($projection->position())->toBe('{}');
@@ -38,7 +38,7 @@ test('update position', function (): void {
     expect($projection->position())->toBe('{foo:1}');
 });
 
-test('update status', function (): void {
+it('update status', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
     expect($projection->status())->toBe('running');
@@ -48,7 +48,7 @@ test('update status', function (): void {
     expect($projection->status())->toBe('idle');
 });
 
-test('update locked until', function (?string $value): void {
+it('update locked until', function (?string $value): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
     expect($projection->status())->toBe('running');
@@ -56,4 +56,4 @@ test('update locked until', function (?string $value): void {
     $projection->setLockedUntil($value);
 
     expect($projection->lockedUntil())->toBe($value);
-})->with(['string' => 'datetime',    'null' => null]);
+})->with(['string' => 'datetime', 'null' => null]);

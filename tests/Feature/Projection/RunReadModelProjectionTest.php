@@ -8,6 +8,7 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
+use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
@@ -101,14 +102,12 @@ it('can stop read model projection', function () {
 });
 
 it('can run read model projection from many streams', function () {
-    // feed our event store
     // fake data where debit event time is all less than credit event time
     $eventId = Uuid::v4()->toRfc4122();
     $stream1 = $this->testFactory->getStream('debit', 10, '-10 second', $eventId);
     $this->eventStore->firstCommit($stream1);
 
-    $factory = InMemoryFactory::withEventStoreType(AnotherEvent::class);
-    $stream2 = $factory->getStream('credit', 10, '+ 50 seconds', $eventId, AnotherEvent::class);
+    $stream2 = $this->testFactory->getStream('credit', 10, '+ 50 seconds', $eventId, AnotherEvent::class);
     $this->eventStore->firstCommit($stream2);
 
     // create a projection
@@ -189,6 +188,7 @@ it('can run read model projection with limit in query filter', function () {
     $readModel = $this->testFactory->readModel;
     $projector = $this->projectorManager->newReadModel('customer', $readModel);
     $queryFilter = $this->projectorManager->queryScope()->fromIncludedPosition();
+    expect($queryFilter)->toBeInstanceOf(LoadLimiterProjectionQueryFilter::class);
     $queryFilter->setLimit(5);
 
     // run projection
@@ -221,4 +221,4 @@ it('raise exception when query filter is not a projection query filter', functio
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);
-})->throws(RuntimeException::class, 'Read model subscription requires a projection query filter');
+})->throws(RuntimeException::class, 'Persistent projection requires a projection query filter');

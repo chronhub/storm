@@ -10,7 +10,6 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
@@ -24,8 +23,6 @@ use function is_array;
 final class GenericSubscription implements Subscription
 {
     private ?string $currentStreamName = null;
-
-    private ?ProjectorScope $scope = null;
 
     private ?MergeStreamIterator $streamIterator = null;
 
@@ -54,10 +51,8 @@ final class GenericSubscription implements Subscription
         $this->sprint = new Sprint();
     }
 
-    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    public function start(bool $keepRunning): void
     {
-        $this->scope = $projectorScope;
-
         $this->setOriginalUserState();
 
         $this->sprint->runInBackground($keepRunning);
@@ -134,11 +129,6 @@ final class GenericSubscription implements Subscription
     public function clock(): SystemClock
     {
         return $this->clock;
-    }
-
-    public function scope(): ProjectorScope
-    {
-        return $this->scope;
     }
 
     public function chronicler(): Chronicler

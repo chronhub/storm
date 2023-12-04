@@ -50,7 +50,6 @@ trait TestingSubscriptionFactory
         $this->state = new ProjectionState(); // mock
         $this->sprint = new Sprint();
 
-        $this->subscription->method('scope')->willReturn($this->projectorScope);
         $this->subscription->method('option')->willReturn($this->option);
         $this->subscription->method('streamManager')->willReturn($this->streamManager);
         $this->subscription->method('context')->willReturn($this->context);

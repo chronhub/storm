@@ -12,6 +12,7 @@ use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
+use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
@@ -28,7 +29,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->getScope(), $inBackground);
+        $this->subscription->start($inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -71,7 +72,12 @@ final readonly class ProjectQuery implements QueryProjector
             new RunUntil(),
             new RiseQueryProjection(),
             new LoadStreams(),
-            new HandleStreamEvent(),
+            new HandleStreamEvent(
+                new EventProcessor(
+                    $this->context()->reactors(),
+                    $this->getScope()
+                )
+            ),
             new DispatchSignal(),
         ];
 

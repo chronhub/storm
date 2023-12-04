@@ -49,13 +49,13 @@ function getInstance(): object
     };
 }
 
-it('first cycle return true on new instance', function (): void {
+it('assert first cycle return true on new instance', function (): void {
     $instance = getInstance();
 
     $this->assertTrue($instance->getFirstCycle());
 });
 
-it('first cycle return false when disable flag', function (): void {
+it('assert first cycle return false when disable flag', function (): void {
     $instance = getInstance();
 
     $this->assertTrue($instance->getFirstCycle());
@@ -156,7 +156,7 @@ it('discover other status with no interaction', function (bool $firstExecution, 
     ->with('is first cycle')
     ->with([[ProjectionStatus::RUNNING], [ProjectionStatus::IDLE]]);
 
-test('call should stop on discovering status set first execution to false', function (): void {
+it('call should stop on discovering status and set first execution to false', function (): void {
     $instance = getInstance();
 
     expect($instance->getFirstCycle())->toBeTrue();
@@ -168,7 +168,7 @@ test('call should stop on discovering status set first execution to false', func
     expect($instance->getFirstCycle())->toBeFalse();
 });
 
-test('call discover status set first execution to false', function (): void {
+it('call discover status and set first execution to false', function (): void {
     $instance = getInstance();
 
     expect($instance->getFirstCycle())->toBeTrue();

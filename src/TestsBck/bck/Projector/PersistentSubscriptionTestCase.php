@@ -72,7 +72,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $this->repository->expects($this->once())->method('exists')->willReturn(false);
         $this->repository->expects($this->once())->method('create')->with(ProjectionStatus::IDLE);
@@ -104,7 +104,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             ->with(['stream_name' => 25], ['counter' => 10]);
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $subscription->store();
     }
@@ -121,7 +121,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             ->with(['stream_name' => 25], ['counter' => 10]);
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
         $subscription->setStatus(ProjectionStatus::RUNNING);
 
         $this->assertTrue($subscription->sprint()->inProgress());
@@ -141,7 +141,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $this->repository->expects($this->once())->method('startAgain');
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
         $subscription->setStatus(ProjectionStatus::IDLE);
 
         $this->assertTrue($subscription->sprint()->inProgress());
@@ -157,7 +157,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $this->repository->expects($this->once())->method('loadDetail')->willReturn(
             [['stream_name' => 25], ['counter' => 100]]
@@ -177,7 +177,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $context = $this->defineContext();
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $subscription->streamManager()->bind('stream_name', 25);
 
@@ -198,7 +198,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $subscription = $this->newSubscription();
         $subscription->setStatus(ProjectionStatus::RUNNING);
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $this->repository->expects($this->once())->method('release')->willReturn(true);
 
@@ -214,7 +214,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
 
         $subscription = $this->newSubscription();
         $subscription->setStatus(ProjectionStatus::RUNNING);
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $this->repository->expects($this->once())->method('loadStatus')->willReturn($status);
 
@@ -233,7 +233,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $context->withQueryFilter($queryFilter);
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
     }
 
     public function testGetProjectionName(): void
@@ -254,7 +254,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
             ->willReturn(true);
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $this->caster, false);
+        $subscription->start($context, $this->caster, false);
 
         $subscription->state()->put(['counter' => 10]);
 
@@ -272,7 +272,7 @@ abstract class PersistentSubscriptionTestCase extends UnitTestCase
         $this->repository->expects($this->once())->method('delete');
 
         $subscription = $this->newSubscription();
-        $subscription->compose($context, $caster, false);
+        $subscription->start($context, $caster, false);
 
         $subscription->state()->put(['counter' => 10]);
 

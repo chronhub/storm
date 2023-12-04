@@ -106,7 +106,7 @@ final class HandlePersistedStreamEventTest extends UnitTestCase
             $this->subscription->currentStreamName
         );
 
-        $this->subscription->compose($context, $caster, false);
+        $this->subscription->start($context, $caster, false);
 
         $next = static fn (Subscription $subscription) => true;
 

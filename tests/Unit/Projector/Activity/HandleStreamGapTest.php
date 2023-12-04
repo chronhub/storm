@@ -29,7 +29,7 @@ it('sleep and store stream positions and user state when gap is detected', funct
     $this->subscription->expects($this->exactly(2))->method('streamManager')->willReturn($this->streamManager);
     $this->subscription->expects($this->once())->method('store');
 
-    $returned = $this->activity->__invoke($this->subscription, $this->next);
+    $returned = ($this->activity)($this->subscription, $this->next);
 
     expect($returned())->toBe(42);
 });
@@ -43,7 +43,7 @@ it('sleep but not store when gap is detected and no event handled', function () 
     $this->subscription->expects($this->exactly(2))->method('streamManager')->willReturn($this->streamManager);
     $this->subscription->expects($this->never())->method('store');
 
-    $returned = $this->activity->__invoke($this->subscription, $this->next);
+    $returned = ($this->activity)($this->subscription, $this->next);
 
     expect($returned())->toBe(42);
 });

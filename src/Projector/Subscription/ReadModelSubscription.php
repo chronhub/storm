@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
 final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription {
-        compose as protected composeDefault;
+        start as protected composeDefault;
     }
 
     public function __construct(
@@ -27,13 +24,9 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
     ) {
     }
 
-    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    public function start(bool $keepRunning): void
     {
-        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Read model subscription requires a projection query filter');
-        }
-
-        $this->composeDefault($projectorScope, $keepRunning);
+        $this->composeDefault($keepRunning);
     }
 
     public function rise(): void

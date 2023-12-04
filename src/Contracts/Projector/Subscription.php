@@ -15,12 +15,7 @@ interface Subscription
     /**
      * Composes the subscription.
      */
-    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void;
-
-    /**
-     * Get the projector scope
-     */
-    public function scope(): ProjectorScope;
+    public function start(bool $keepRunning): void;
 
     /**
      * Reset user state to his original state.

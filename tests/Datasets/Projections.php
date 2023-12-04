@@ -22,6 +22,13 @@ dataset('projection status', [
     'deleting with emitted events' => ProjectionStatus::DELETING_WITH_EMITTED_EVENTS,
 ]);
 
+dataset('projection status monitored', [
+    'stopping' => [ProjectionStatus::STOPPING->value],
+    'resetting' => [ProjectionStatus::RESETTING->value],
+    'deleting' => [ProjectionStatus::DELETING->value],
+    'deleting_with_emitted_events' => [ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value],
+]);
+
 dataset('projection dispatcher events', [
     'created' => ProjectionCreated::class,
     'started' => ProjectionStarted::class,

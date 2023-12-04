@@ -8,7 +8,6 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Stream\StreamName;
@@ -17,7 +16,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription {
-        compose as protected composeDefault;
+        start as protected composeDefault;
     }
 
     private bool $isStreamFixed = false;
@@ -29,13 +28,13 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     ) {
     }
 
-    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    public function start(bool $keepRunning): void
     {
         if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
             throw new RuntimeException('Emitter subscription requires a projection query filter');
         }
 
-        $this->composeDefault($projectorScope, $keepRunning);
+        $this->composeDefault($keepRunning);
     }
 
     public function rise(): void
