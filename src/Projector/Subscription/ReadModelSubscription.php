@@ -4,41 +4,36 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 
 final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
-    use InteractWithSubscription;
-
-    protected ProjectionStateInterface $state;
-
-    protected Sprint $sprint;
-
-    protected Chronicler $chronicler;
+    use InteractWithSubscription {
+        compose as protected composeDefault;
+    }
 
     public function __construct(
+        protected readonly GenericSubscription $subscription,
         protected ProjectionRepositoryInterface $repository,
-        protected StreamManagerInterface $streamManager,
-        protected ProjectionOption $option,
-        protected SystemClock $clock,
         protected EventCounter $eventCounter,
         private readonly ReadModel $readModel,
-        Chronicler $chronicler,
     ) {
-        $this->chronicler = $this->resolveInnerMostChronicler($chronicler);
-        $this->state = new ProjectionState();
-        $this->sprint = new Sprint();
+    }
+
+    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    {
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Read model subscription requires a projection query filter');
+        }
+
+        $this->composeDefault($projectorScope, $keepRunning);
     }
 
     public function rise(): void
@@ -49,21 +44,25 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             $this->readModel->initialize();
         }
 
-        $this->syncStreamsOnRise();
+        $this->streamManager()->discover($this->context()->queries());
+
+        $this->synchronise();
     }
 
     public function store(): void
     {
-        $this->repository->persist($this->persistProjectionDetail(), null);
+        $this->repository->persist($this->getProjectionDetail(), null);
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        $this->resetProjection();
+        $this->streamManager()->resets();
 
-        $this->repository->reset($this->persistProjectionDetail(), $this->currentStatus());
+        $this->initializeAgain();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
 
         $this->readModel->reset();
     }
@@ -76,8 +75,10 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             $this->readModel->down();
         }
 
-        $this->sprint->stop();
+        $this->sprint()->stop();
 
-        $this->resetProjection();
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
     }
 }

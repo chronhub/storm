@@ -18,7 +18,7 @@ use function array_values;
 class MergeStreamIteratorFactory
 {
     /**
-     * @return array<string, Generator>
+     * @return array<string,Generator>
      */
     public static function getData(): array
     {
@@ -69,7 +69,7 @@ class MergeStreamIteratorFactory
     }
 
     /**
-     * @return array<string, StreamIterator>
+     * @return array<string,StreamIterator>
      */
     protected static function getStreams(): array
     {

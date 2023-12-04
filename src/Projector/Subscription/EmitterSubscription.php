@@ -5,54 +5,51 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionOption;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Stream\StreamName;
 
 final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
-    use InteractWithSubscription;
-
-    protected Chronicler $chronicler;
-
-    protected ProjectionStateInterface $state;
-
-    protected Sprint $sprint;
+    use InteractWithSubscription {
+        compose as protected composeDefault;
+    }
 
     private bool $isStreamFixed = false;
 
     public function __construct(
+        protected readonly GenericSubscription $subscription,
         protected ProjectionRepositoryInterface $repository,
-        protected StreamManagerInterface $streamManager,
-        protected ProjectionOption $option,
-        protected SystemClock $clock,
         protected EventCounter $eventCounter,
-        Chronicler $chronicler,
     ) {
-        $this->chronicler = $this->resolveInnerMostChronicler($chronicler);
-        $this->state = new ProjectionState();
-        $this->sprint = new Sprint();
+    }
+
+    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
+    {
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Emitter subscription requires a projection query filter');
+        }
+
+        $this->composeDefault($projectorScope, $keepRunning);
     }
 
     public function rise(): void
     {
         $this->mountProjection();
 
-        $this->syncStreamsOnRise();
+        $this->streamManager()->discover($this->context()->queries());
+
+        $this->synchronise();
     }
 
     public function store(): void
     {
-        $this->repository->persist($this->persistProjectionDetail(), null);
+        $this->repository->persist($this->getProjectionDetail(), null);
     }
 
     public function discard(bool $withEmittedEvents): void
@@ -63,16 +60,20 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
             $this->deleteStream();
         }
 
-        $this->sprint->stop();
+        $this->sprint()->stop();
 
-        $this->resetProjection();
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
     }
 
     public function revise(): void
     {
-        $this->resetProjection();
+        $this->streamManager()->resets();
 
-        $this->repository->reset($this->persistProjectionDetail(), $this->currentStatus());
+        $this->initializeAgain();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
 
         $this->deleteStream();
     }
@@ -95,7 +96,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     private function deleteStream(): void
     {
         try {
-            $this->chronicler->delete(new StreamName($this->getName()));
+            $this->chronicler()->delete(new StreamName($this->getName()));
         } catch (StreamNotFound) {
             // fail silently
         }

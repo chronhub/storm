@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
@@ -24,13 +23,12 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function __construct(
         protected QuerySubscriptionInterface $subscription,
-        protected ContextReaderInterface $context,
     ) {
     }
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
+        $this->subscription->compose($this->getScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 
@@ -56,7 +54,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     private function getScope(): ProjectorScope
     {
-        $userScope = $this->context->userScope();
+        $userScope = $this->context()->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);

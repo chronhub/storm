@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -20,18 +21,13 @@ use Closure;
 
 use function is_array;
 
-/**
- * @deprecated
- */
 final class GenericSubscription implements Subscription
 {
-    private ?MergeStreamIterator $streamIterator = null;
-
     private ?string $currentStreamName = null;
 
-    protected ?ProjectorScope $scope = null;
+    private ?ProjectorScope $scope = null;
 
-    private ContextReaderInterface $context;
+    private ?MergeStreamIterator $streamIterator = null;
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
@@ -39,19 +35,27 @@ final class GenericSubscription implements Subscription
 
     private readonly Sprint $sprint;
 
+    private readonly Chronicler $chronicler;
+
     public function __construct(
-        private readonly ProjectionOption $option,
+        private readonly ContextReaderInterface $context,
         private readonly StreamManagerInterface $streamManager,
         private readonly SystemClock $clock,
-        private readonly Chronicler $chronicler
+        private readonly ProjectionOption $option,
+        Chronicler $chronicler,
+
     ) {
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
+        }
+
+        $this->chronicler = $chronicler;
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
     }
 
-    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void
+    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void
     {
-        $this->context = $context;
         $this->scope = $projectorScope;
 
         $this->setOriginalUserState();

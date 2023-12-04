@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -209,3 +211,14 @@ it('can run read model projection with limit in query filter', function () {
     expect($projector->getState())->toBe(['positions' => [1, 2, 3, 4, 5]])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 5]]);
 });
+
+it('raise exception when query filter is not a projection query filter', function () {
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+
+    $projector
+        ->fromStreams('user')
+        ->withQueryFilter($this->createMock(QueryFilter::class))
+        ->when(function (DomainEvent $event): void {
+        })->run(false);
+})->throws(RuntimeException::class, 'Read model subscription requires a projection query filter');

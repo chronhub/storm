@@ -51,35 +51,26 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriptionInterface
     {
         return new QuerySubscription(
-            $this->createStreamManager($option),
-            $option,
-            $this->clock,
-            $this->chronicler
+            $this->createGenericSubscription($option),
         );
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriptionInterface
     {
         return new EmitterSubscription(
+            $this->createGenericSubscription($option),
             $this->createSubscriptionManagement($streamName, $option),
-            $this->createStreamManager($option),
-            $option,
-            $this->clock,
             $this->createEventCounter($option),
-            $this->chronicler,
         );
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface
     {
         return new ReadModelSubscription(
+            $this->createGenericSubscription($option),
             $this->createSubscriptionManagement($streamName, $option),
-            $this->createStreamManager($option),
-            $option,
-            $this->clock,
             $this->createEventCounter($option),
             $readModel,
-            $this->chronicler,
         );
     }
 
@@ -100,11 +91,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         }
 
         return new DefaultOption(...$this->options);
-    }
-
-    public function createContextBuilder(): ContextReaderInterface
-    {
-        return new Context();
     }
 
     public function createStreamCache(ProjectionOption $option): StreamCacheInterface
@@ -129,9 +115,20 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
-    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository
+    protected function createGenericSubscription(ProjectionOption $option): GenericSubscription
     {
-        return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
+        return new GenericSubscription(
+            $this->createContextBuilder(),
+            $this->createStreamManager($option),
+            $this->clock,
+            $option,
+            $this->chronicler,
+        );
+    }
+
+    protected function createContextBuilder(): ContextReaderInterface
+    {
+        return new Context();
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager
@@ -152,5 +149,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createEventCounter(ProjectionOption $options): EventCounter
     {
         return new EventCounter($options->getBlockSize());
+    }
+
+    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository
+    {
+        return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 }

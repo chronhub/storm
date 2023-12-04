@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\GenericSubscription;
 use Chronhub\Storm\Tests\Uses\TestingGenericSubscription;
-use Error;
 
 uses(TestingGenericSubscription::class);
 
@@ -23,6 +22,7 @@ it('test default instance', function (): void {
         ->and($this->subscription->streamManager())->toBe($this->streamManager)
         ->and($this->subscription->clock())->toBe($this->clock)
         ->and($this->subscription->chronicler())->toBe($this->chronicler)
+        ->and($this->subscription->context())->toBe($this->context)
         ->and($this->subscription->state()->get())->toBeEmpty()
         ->and($this->subscription->sprint()->inProgress())->toBeFalse()
         ->and($this->subscription->sprint()->inBackground())->toBeFalse()
@@ -70,7 +70,3 @@ it('set and get status', function (ProjectionStatus $expectedStatus) {
 
     expect($this->subscription->currentStatus())->toBe($expectedStatus);
 })->with('projection status');
-
-it('fails get context when not composed and raise error exception', function (): void {
-    $nope = $this->subscription->context();
-})->throws(Error::class, 'Typed property Chronhub\Storm\Projector\Subscription\GenericSubscription::$context must not be accessed before initialization');

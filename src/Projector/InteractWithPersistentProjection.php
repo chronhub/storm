@@ -22,7 +22,7 @@ trait InteractWithPersistentProjection
 {
     public function run(bool $inBackground): void
     {
-        $this->subscription->compose($this->context, $this->getScope(), $inBackground);
+        $this->subscription->compose($this->getScope(), $inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
 

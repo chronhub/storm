@@ -15,7 +15,7 @@ interface Subscription
     /**
      * Composes the subscription.
      */
-    public function compose(ContextReaderInterface $context, ProjectorScope $projectorScope, bool $keepRunning): void;
+    public function compose(ProjectorScope $projectorScope, bool $keepRunning): void;
 
     /**
      * Get the projector scope

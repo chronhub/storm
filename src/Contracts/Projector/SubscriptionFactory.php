@@ -15,8 +15,6 @@ interface SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface;
 
-    public function createContextBuilder(): ContextReaderInterface;
-
     public function createStreamCache(ProjectionOption $option): StreamCacheInterface;
 
     /**

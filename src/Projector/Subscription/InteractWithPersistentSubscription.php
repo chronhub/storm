@@ -28,7 +28,7 @@ trait InteractWithPersistentSubscription
     {
         $idleStatus = ProjectionStatus::IDLE;
 
-        $this->repository->stop($this->persistProjectionDetail(), $idleStatus);
+        $this->repository->stop($this->getProjectionDetail(), $idleStatus);
 
         $this->setStatus($idleStatus);
 
@@ -37,7 +37,7 @@ trait InteractWithPersistentSubscription
 
     public function restart(): void
     {
-        $this->sprint->continue();
+        $this->sprint()->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
 
@@ -55,12 +55,12 @@ trait InteractWithPersistentSubscription
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamManager->merge($projectionDetail->streamPositions);
+        $this->streamManager()->merge($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
         if ($state !== []) {
-            $this->state->put($state);
+            $this->state()->put($state);
         }
     }
 
@@ -76,7 +76,7 @@ trait InteractWithPersistentSubscription
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
             if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
-                $this->sprint->stop();
+                $this->sprint()->stop();
             }
         }
     }
@@ -93,7 +93,7 @@ trait InteractWithPersistentSubscription
 
     protected function mountProjection(): void
     {
-        $this->sprint->continue();
+        $this->sprint()->continue();
 
         if (! $this->repository->exists()) {
             $this->repository->create($this->currentStatus());
@@ -106,23 +106,9 @@ trait InteractWithPersistentSubscription
         $this->setStatus($status);
     }
 
-    protected function syncStreamsOnRise(): void
+    protected function getProjectionDetail(): ProjectionDetail
     {
-        $this->streamManager->discover($this->context->queries());
-
-        $this->synchronise();
-    }
-
-    protected function resetProjection(): void
-    {
-        $this->streamManager->resets();
-
-        $this->initializeAgain();
-    }
-
-    protected function persistProjectionDetail(): ProjectionDetail
-    {
-        $streamPositions = $this->streamManager->jsonSerialize();
+        $streamPositions = $this->streamManager()->jsonSerialize();
 
         return new ProjectionDetail($streamPositions, $this->state()->get());
     }

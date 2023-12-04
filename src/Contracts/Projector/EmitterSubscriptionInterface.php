@@ -19,8 +19,8 @@ interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
     /**
      * Unset the emitted event to false.
      *
-     * only happens when the stream is deleted
-     * checkMe probably not required as deleting the stream will put down the projection
+     * Only happens when the stream is deleted.
+     * checkMe: probably not required as deleting the stream will put down the projection
      */
     public function unsetEmitted(): void;
 }

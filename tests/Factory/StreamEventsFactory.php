@@ -26,7 +26,7 @@ readonly class StreamEventsFactory
     }
 
     /**
-     * Return a cloned factory with the event given
+     * Return factory with the event given
      *
      * @param class-string<DomainEvent> $event
      */

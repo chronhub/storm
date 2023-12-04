@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Uses;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Subscription\GenericSubscription;
@@ -17,11 +18,13 @@ trait TestingGenericSubscription
 {
     protected GenericSubscription $subscription;
 
-    protected ProjectionOption|MockObject $option;
+    protected ContextReaderInterface|MockObject $context;
 
     protected StreamManagerInterface|MockObject $streamManager;
 
     protected SystemClock|MockObject $clock;
+
+    protected ProjectionOption|MockObject $option;
 
     protected Chronicler|MockObject $chronicler;
 
@@ -29,10 +32,11 @@ trait TestingGenericSubscription
     {
         /** @var TestCase $this */
         $this->subscription = GenericSubscriptionFactory::mock(
-            $this->option = $this->createMock(ProjectionOption::class),
+            $this->context = $this->createMock(ContextReaderInterface::class),
             $this->streamManager = $this->createMock(StreamManagerInterface::class),
             $this->clock = $this->createMock(SystemClock::class),
-            $this->chronicler = $this->createMock(Chronicler::class)
+            $this->option = $this->createMock(ProjectionOption::class),
+            $this->chronicler = $this->createMock(Chronicler::class),
         );
     }
 }

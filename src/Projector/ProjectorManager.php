@@ -27,7 +27,6 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         return new ProjectQuery(
             $this->subscriptionFactory->createQuerySubscription($options),
-            $this->subscriptionFactory->createContextBuilder(),
         );
     }
 
@@ -37,7 +36,6 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         return new ProjectEmitter(
             $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
-            $this->subscriptionFactory->createContextBuilder(),
             $this->subscriptionFactory->createStreamCache($options),
         );
     }
@@ -48,7 +46,6 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         return new ProjectReadModel(
             $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
-            $this->subscriptionFactory->createContextBuilder(),
             $readModel
         );
     }

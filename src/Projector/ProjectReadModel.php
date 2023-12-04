@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
@@ -19,7 +18,6 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function __construct(
         protected ReadModelSubscriptionInterface $subscription,
-        protected ContextReaderInterface $context,
         private ReadModel $readModel
     ) {
     }
@@ -31,7 +29,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     protected function getScope(): ReadModelProjectorScopeInterface
     {
-        $userScope = $this->context->userScope();
+        $userScope = $this->context()->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);

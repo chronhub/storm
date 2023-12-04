@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
@@ -23,7 +22,6 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
-        protected ContextReaderInterface $context,
         private StreamCacheInterface $streamCache
     ) {
     }
@@ -56,7 +54,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     protected function getScope(): EmitterProjectorScopeInterface
     {
-        $userScope = $this->context->userScope();
+        $userScope = $this->context()->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);
