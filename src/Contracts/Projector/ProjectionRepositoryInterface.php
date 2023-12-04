@@ -31,7 +31,7 @@ interface ProjectionRepositoryInterface
     /**
      * Persists projection data
      *
-     * Projection status only meant to be IDLE when projection is stopped
+     * @param ?ProjectionStatus $projectionStatus only meant to be IDLE when projection is stopped
      *
      * @throws ProjectionFailed When projection data cannot be stored.
      */
@@ -61,7 +61,7 @@ interface ProjectionRepositoryInterface
     /**
      * Deletes the projection.
      *
-     * @param bool $withEmittedEvents only use as flag to dispatch event
+     * @param bool $withEmittedEvents only use as a flag when dispatching internal event
      *
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection data cannot be deleted.
@@ -69,7 +69,7 @@ interface ProjectionRepositoryInterface
     public function delete(bool $withEmittedEvents): void;
 
     /**
-     * Update lock when lock threshold is reached
+     * Update lock when the lock threshold is reached
      */
     public function updateLock(): void;
 
@@ -80,15 +80,13 @@ interface ProjectionRepositoryInterface
 
     /**
      * Loads the projection status.
-     *
-     * @return ProjectionStatus The projection status.
      */
     public function loadStatus(): ProjectionStatus;
 
     /**
      * Loads the projection state and stream positions.
      *
-     * @throws ProjectionNotFound If the projection cannot be found in the repository.
+     * @throws ProjectionNotFound When the projection doesn't exist.
      */
     public function loadDetail(): ProjectionDetail;
 
@@ -100,7 +98,7 @@ interface ProjectionRepositoryInterface
     /**
      * Returns the name of the projection.
      *
-     * @return non-empty-string The projection name.
+     * @return non-empty-string
      */
     public function projectionName(): string;
 }

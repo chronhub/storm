@@ -12,18 +12,15 @@ final class RefreshProjection
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        // checkMe use shared class instead of trait
-        $this->disableFlag();
-
         /**
          * Depending on the discovered status, the projection
          * can be stopped, restarted if in the background or just keep going
          */
-        $this->discoverStatus($subscription);
+        $this->refreshStatus($subscription);
 
         /**
          * Watch again for event streams which may have
-         * been added or deleted after the first watch.
+         * changed after the first watch.
          */
         $queries = $subscription->context()->queries();
         $subscription->streamManager()->discover($queries);

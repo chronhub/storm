@@ -22,7 +22,7 @@ interface ProjectionProvider
      * Acquire a lock on a projection with the given name and status.
      *
      * @throws ProjectionNotFound       When a projection with the given name doesn't exist.
-     * @throws ProjectionAlreadyRunning When a projection with the given name is already running.
+     * @throws ProjectionAlreadyRunning When a projection fails to acquire the lock.
      */
     public function acquireLock(string $projectionName, string $status, string $lockedUntil): void;
 
@@ -57,7 +57,7 @@ interface ProjectionProvider
     /**
      * Filter projections by their names.
      *
-     * @return array<string> An array of string projection names that match the given names.
+     * @return array<string|empty> An array of string projection names that match the given names.
      */
     public function filterByNames(string ...$projectionNames): array;
 

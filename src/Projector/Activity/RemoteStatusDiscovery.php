@@ -20,19 +20,16 @@ trait RemoteStatusDiscovery
         return $shouldStop;
     }
 
-    protected function discoverStatus(PersistentSubscriptionInterface $subscription): void
+    protected function refreshStatus(PersistentSubscriptionInterface $subscription): void
     {
+        $this->isFirstCycle = false;
+
         $this->discovering($subscription);
     }
 
     protected function isFirstCycle(): bool
     {
         return $this->isFirstCycle;
-    }
-
-    protected function disableFlag(): void
-    {
-        $this->isFirstCycle = false;
     }
 
     private function onStopping(PersistentSubscriptionInterface $subscription): bool

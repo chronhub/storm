@@ -162,13 +162,13 @@ it('can run read model projection from many streams and sort events by ascending
 
     // run projection
     $projector
-        ->initialize(fn () => ['order' => [], 'count' => 0])
+        ->initialize(fn () => ['order' => [], 'index' => 0])
         ->fromStreams('debit', 'credit')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
-            $state['order'][$scope->streamName()][$state['count'] + 1] = $event::class;
+            $state['order'][$scope->streamName()][$state['index'] + 1] = $event::class;
 
-            $state['count']++;
+            $state['index']++;
 
             return $state;
         })->run(false);

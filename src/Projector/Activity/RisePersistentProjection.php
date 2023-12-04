@@ -14,7 +14,8 @@ final class RisePersistentProjection
     {
         if ($this->isFirstCycle()) {
             /**
-             * Depending on the discovered status, the projection can be stopped early.
+             * Depending on the discovered status, the projection can be stopped early,
+             * on stopping and on deleting.
              */
             if ($this->shouldStopOnDiscoveringStatus($subscription)) {
                 return false;
