@@ -11,8 +11,8 @@ use Closure;
 use DateInterval;
 
 /**
- * @template TState of array
- * @template TReactor of array<DomainEvent, TState>|array<DomainEvent>
+ * @template TState of array|null
+ * @template TReactor of array{DomainEvent,TState,ProjectorScope}|array<DomainEvent,ProjectorScope>
  */
 interface ContextReaderInterface extends ContextInterface
 {
@@ -26,7 +26,7 @@ interface ContextReaderInterface extends ContextInterface
     /**
      * Get the event handlers as an array to be called when an event is received.
      *
-     * @return Closure(TReactor): ?TState $reactors
+     * @return Closure(TReactor): ?TState
      *
      * @throws InvalidArgumentException When reactors are not set
      */

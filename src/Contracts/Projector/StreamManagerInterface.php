@@ -57,7 +57,7 @@ interface StreamManagerInterface extends JsonSerializable
     public function hasGap(): bool;
 
     /**
-     * Check if there is still retries available.
+     * Check if there is still retry available.
      */
     public function hasRetry(): bool;
 

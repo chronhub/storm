@@ -18,9 +18,9 @@ class EventStreamLoader
 
     /**
      * @param  array{'all'?: bool, 'categories'?: string[], 'names'?: string[]} $queries
-     * @return Collection<array<non-empty-string>>
+     * @return Collection<non-empty-string>
      *
-     * @throws RuntimeException when local or remote stream names is empty or not unique
+     * @throws RuntimeException when local or remote stream names are empty or not unique
      */
     public function loadFrom(array $queries): Collection
     {

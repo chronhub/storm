@@ -41,6 +41,9 @@ final class StreamCache implements StreamCacheInterface
         return in_array($streamName, $this->buffer, true);
     }
 
+    /**
+     * @return array<int<0,max>,string|null>
+     */
     public function jsonSerialize(): array
     {
         return $this->buffer;

@@ -18,7 +18,7 @@ trait ProvideOption
     protected readonly int $cacheSize;
 
     /**
-     * @var int<1,max>
+     * @var positive-int
      */
     protected readonly int $timeout;
 
@@ -43,7 +43,7 @@ trait ProvideOption
     protected readonly array $retries;
 
     /**
-     * @var int<1,max>|null
+     * @var positive-int|null
      */
     protected readonly ?int $loads;
 

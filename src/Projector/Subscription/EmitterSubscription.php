@@ -16,7 +16,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription {
-        start as protected composeDefault;
+        start as protected startDefault;
     }
 
     private bool $isStreamFixed = false;
@@ -34,7 +34,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
             throw new RuntimeException('Emitter subscription requires a projection query filter');
         }
 
-        $this->composeDefault($keepRunning);
+        $this->startDefault($keepRunning);
     }
 
     public function rise(): void

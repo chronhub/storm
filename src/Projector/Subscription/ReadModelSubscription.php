@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
 final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription {
-        start as protected composeDefault;
+        start as protected startDefault;
     }
 
     public function __construct(
@@ -26,7 +28,11 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
 
     public function start(bool $keepRunning): void
     {
-        $this->composeDefault($keepRunning);
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Read model subscription requires a projection query filter');
+        }
+
+        $this->startDefault($keepRunning);
     }
 
     public function rise(): void

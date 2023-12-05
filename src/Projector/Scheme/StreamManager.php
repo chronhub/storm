@@ -43,7 +43,6 @@ final class StreamManager implements StreamManagerInterface
             ->loadFrom($queries)
             ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]);
 
-        // todo tests add streams and delete streams
         $this->streamPosition = $container->merge($this->streamPosition);
     }
 
@@ -54,8 +53,6 @@ final class StreamManager implements StreamManagerInterface
 
     public function bind(string $streamName, int $expectedPosition, DateTimeImmutable|string|false $eventTime): bool
     {
-        // checkMe: should we throw exception when the expected position is less or equal than the current?
-
         if (! $this->streamPosition->has($streamName)) {
             throw new RuntimeException("Stream $streamName is not watched");
         }

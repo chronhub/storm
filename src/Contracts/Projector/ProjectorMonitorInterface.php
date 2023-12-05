@@ -12,7 +12,7 @@ interface ProjectorMonitorInterface
     /**
      * Stop the projection.
      *
-     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionNotFound when projection is not found
      * @throws ProjectionFailed   when update projection status failed
      */
     public function markAsStop(string $projectionName): void;
@@ -20,7 +20,7 @@ interface ProjectorMonitorInterface
     /**
      * Reset the projection.
      *
-     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionNotFound when projection is not found
      * @throws ProjectionFailed   when update projection status failed
      */
     public function markAsReset(string $projectionName): void;
@@ -28,7 +28,7 @@ interface ProjectorMonitorInterface
     /**
      * Delete the projection and optionally delete emitted events.
      *
-     * @throws ProjectionNotFound when projection not found
+     * @throws ProjectionNotFound when projection is not found
      * @throws ProjectionFailed   when update projection status failed
      */
     public function markAsDelete(string $projectionName, bool $withEmittedEvents): void;
@@ -59,14 +59,14 @@ interface ProjectorMonitorInterface
     public function stateOf(string $projectionName): array;
 
     /**
-     * Filter projection names which exists.
+     * Filter projection names which exist.
      *
      * @return array<string>
      */
     public function filterNames(string ...$streamNames): array;
 
     /**
-     * Check if projection exists.
+     * Check if the projection exists.
      */
     public function exists(string $projectionName): bool;
 }

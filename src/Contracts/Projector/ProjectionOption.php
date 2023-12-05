@@ -59,15 +59,15 @@ interface ProjectionOption extends JsonSerializable
     public function getSignal(): bool;
 
     /**
-     * Get the number of stream to keep in cache
-     * only apply for emitter projection
+     * Get the number of streams to keep in cache
+     * to only apply for emitter projection
      *
      * @return positive-int
      */
     public function getCacheSize(): int;
 
     /**
-     * Get threshold of events to keep in memory before persisting
+     * Get the threshold of events to keep in memory before persisting
      *
      * @return positive-int
      */
@@ -76,7 +76,7 @@ interface ProjectionOption extends JsonSerializable
     /**
      * Get lock timeout in milliseconds
      *
-     * @return int<1,max>
+     * @return positive-int
      */
     public function getTimeout(): int;
 
@@ -111,10 +111,10 @@ interface ProjectionOption extends JsonSerializable
     /**
      * Get loads limiter for the query filter
      *
-     * null limiter will either allow to dynamically set the limiter
+     * Null limiter will either allow to dynamically set the limiter
      * or means no limit
      *
-     * @return int<1,max>|null
+     * @return positive-int|null
      *
      * @see LoadLimiterProjectionQueryFilter
      */

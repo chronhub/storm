@@ -180,6 +180,7 @@ final class Context implements ContextReaderInterface
 
     private function assertNotStaticClosure(Closure $callback): void
     {
+        // todo remove
         $reflection = new ReflectionFunction($callback);
 
         if ($reflection->isStatic()) {

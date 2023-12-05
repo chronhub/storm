@@ -27,9 +27,4 @@ interface StreamCacheInterface extends JsonSerializable
      * @param non-empty-string $streamName
      */
     public function has(string $streamName): bool;
-
-    /**
-     * @return array<int<0,max>,string|null>
-     */
-    public function jsonSerialize(): array;
 }

@@ -40,27 +40,31 @@ final readonly class EventProcessor
             $subscription->eventCounter()->increment();
         }
 
-        // ensure to pass user state when it has been initialized
-        $userState = $subscription->context()->userState() instanceof Closure
-            ? $subscription->state()->get() : null;
+        $this->processEvent($subscription, $event);
 
-        // handle event and user state if it has been initialized and returned
-        if ($userState === null) {
-            $currentState = ($this->reactors)($event, $this->scope);
-        } else {
-            $currentState = ($this->reactors)($event, $userState, $this->scope);
-        }
-
-        if ($userState !== null && is_array($currentState)) {
-            $subscription->state()->put($currentState);
-        }
-
-        // when block size is reached, persist data
+        // when option block size is reached, persist data
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->persistWhenCounterIsReached();
         }
 
         return $subscription->sprint()->inProgress();
+    }
+
+    private function processEvent(Subscription $subscription, DomainEvent $event): void
+    {
+        // ensure to pass user state only if it has been initialized
+        $userState = $subscription->context()->userState() instanceof Closure
+            ? $subscription->state()->get() : null;
+
+        // handle event
+        $currentState = $userState === null
+            ? ($this->reactors)($event, $this->scope)
+            : ($this->reactors)($event, $userState, $this->scope);
+
+        // update user state if it has been initialized and returned
+        if ($userState !== null && is_array($currentState)) {
+            $subscription->state()->put($currentState);
+        }
     }
 
     /**

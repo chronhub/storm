@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
@@ -16,7 +15,6 @@ use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
@@ -25,10 +23,6 @@ trait InteractWithPersistentProjection
 {
     public function run(bool $inBackground): void
     {
-        if (! $this->subscription->context()->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Persistent projection requires a projection query filter');
-        }
-
         $this->subscription->start($inBackground);
 
         $project = new RunProjection($this->subscription, $this->newWorkflow());
