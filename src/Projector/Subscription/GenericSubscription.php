@@ -40,7 +40,6 @@ final class GenericSubscription implements Subscription
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         Chronicler $chronicler,
-
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();

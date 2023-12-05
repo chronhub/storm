@@ -23,7 +23,7 @@ final readonly class EventProcessor
     }
 
     /**
-     * @param int<1,max> $expectedPosition
+     * @param positive-int $expectedPosition
      */
     public function __invoke(Subscription $subscription, DomainEvent $event, int $expectedPosition): bool
     {
@@ -36,21 +36,26 @@ final readonly class EventProcessor
             return false;
         }
 
+        $this->reactOn($event, $subscription);
+
+        // event handled and increment counter
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->eventCounter()->increment();
         }
-
-        $this->processEvent($subscription, $event);
 
         // when option block size is reached, persist data
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->persistWhenCounterIsReached();
         }
 
+        /**
+         * Can return false to stop processing as it may have stopped
+         * from a signal or monitor command
+         */
         return $subscription->sprint()->inProgress();
     }
 
-    private function processEvent(Subscription $subscription, DomainEvent $event): void
+    private function reactOn(DomainEvent $event, Subscription $subscription): void
     {
         // ensure to pass user state only if it has been initialized
         $userState = $subscription->context()->userState() instanceof Closure

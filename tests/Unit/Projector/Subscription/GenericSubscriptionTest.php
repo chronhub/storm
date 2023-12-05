@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\GenericSubscription;
@@ -29,6 +30,12 @@ it('test default instance', function (): void {
         ->and($this->subscription->sprint()->inBackground())->toBeFalse()
         ->and($this->subscription->currentStreamName())->toBeNull()
         ->and($this->subscription->currentStatus())->toBe(ProjectionStatus::IDLE);
+});
+
+it('retrieve innermost chronicler in constructor', function (): void {
+    $this->setUpAndAndAssertInnerMostChronicler();
+
+    expect($this->subscription->chronicler())->not()->toBeInstanceOf(ChroniclerDecorator::class);
 });
 
 it('set current stream name by reference', function () {

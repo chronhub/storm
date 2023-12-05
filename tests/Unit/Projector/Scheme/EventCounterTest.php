@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Scheme\EventCounter;
 test('new instance', function (): void {
     $counter = new EventCounter(3);
 
-    expect($counter->current())->toBe(0)
+    expect($counter->count())->toBe(0)
         ->and($counter->limit)->toBe(3)
         ->and($counter->isReset())->toBeTrue()
         ->and($counter->isReached())->toBeFalse();
@@ -27,14 +27,14 @@ it('can increment counter', function (): void {
     $count = 0;
 
     $counter = new EventCounter($limit);
-    expect($counter->current())->toBe(0);
+    expect($counter->count())->toBe(0);
 
     while ($limit > 0) {
         $counter->increment();
         $limit--;
         $count++;
 
-        expect($counter->current())->toBe($count);
+        expect($counter->count())->toBe($count);
     }
 });
 
@@ -47,10 +47,10 @@ it('can increment counter beyond the limit', function (): void {
         $limit--;
     }
 
-    expect($counter->current())->toBe(3);
+    expect($counter->count())->toBe(3);
 
     $counter->increment();
-    expect($counter->current())->toBe(4);
+    expect($counter->count())->toBe(4);
 });
 
 it('can reset counter', function (): void {
@@ -65,7 +65,7 @@ it('can reset counter', function (): void {
     }
 
     $counter->reset();
-    expect($counter->current())->toBe(0)
+    expect($counter->count())->toBe(0)
         ->and($counter->isReset())->toBeTrue()
         ->and($counter->isReached())->toBeFalse();
 });
@@ -74,7 +74,7 @@ it('return true when limit is reached', function (): void {
     $limit = 3;
     $counter = new EventCounter($limit);
 
-    while ($counter->current() < $limit) {
+    while ($counter->count() < $limit) {
         $counter->increment();
         expect($counter->isReached())->toBeFalse();
 
@@ -89,7 +89,7 @@ it('return true when incremented counter is greater than limit', function (): vo
     $limit = 3;
     $counter = new EventCounter($limit);
 
-    while ($counter->current() < $limit) {
+    while ($counter->count() < $limit) {
         $counter->increment();
         expect($counter->isReached())->toBeFalse();
 

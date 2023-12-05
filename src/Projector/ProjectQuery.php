@@ -4,36 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
-use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
-use Chronhub\Storm\Projector\Activity\RunUntil;
-use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
-use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
 
 final readonly class ProjectQuery implements QueryProjector
 {
-    use InteractWithContext;
+    use InteractWithProjection;
 
     public function __construct(
         protected QuerySubscriptionInterface $subscription,
     ) {
-    }
-
-    public function run(bool $inBackground): void
-    {
-        $this->subscription->start($inBackground);
-
-        $project = new RunProjection($this->subscription, $this->newWorkflow());
-
-        $project->beginCycle();
     }
 
     public function stop(): void
@@ -48,12 +31,7 @@ final readonly class ProjectQuery implements QueryProjector
         $this->subscription->initializeAgain();
     }
 
-    public function getState(): array
-    {
-        return $this->subscription->state()->get();
-    }
-
-    private function getScope(): ProjectorScope
+    public function getScope(): QueryProjectorScope
     {
         $userScope = $this->context()->userScope();
 
@@ -66,20 +44,9 @@ final readonly class ProjectQuery implements QueryProjector
         );
     }
 
-    private function newWorkflow(): Workflow
+    protected function newWorkflow(): Workflow
     {
-        $activities = [
-            new RunUntil(),
-            new RiseQueryProjection(),
-            new LoadStreams(),
-            new HandleStreamEvent(
-                new EventProcessor(
-                    $this->context()->reactors(),
-                    $this->getScope()
-                )
-            ),
-            new DispatchSignal(),
-        ];
+        $activities = ProvideActivities::query($this);
 
         return new Workflow($this->subscription, $activities);
     }

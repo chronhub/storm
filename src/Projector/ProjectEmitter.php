@@ -17,8 +17,8 @@ use Closure;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {
-    use InteractWithContext;
     use InteractWithPersistentProjection;
+    use InteractWithProjection;
 
     public function __construct(
         protected EmitterSubscriptionInterface $subscription,
@@ -52,7 +52,7 @@ final readonly class ProjectEmitter implements EmitterProjector
             : $this->chronicler()->firstCommit($stream);
     }
 
-    protected function getScope(): EmitterProjectorScopeInterface
+    public function getScope(): EmitterProjectorScopeInterface
     {
         $userScope = $this->context()->userScope();
 

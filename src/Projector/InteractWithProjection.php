@@ -6,10 +6,14 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Scheme\RunProjection;
+use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
 use DateInterval;
 
-trait InteractWithContext
+trait InteractWithProjection
 {
     public function initialize(Closure $userState): static
     {
@@ -67,8 +71,37 @@ trait InteractWithContext
         return $this;
     }
 
+    public function run(bool $inBackground): void
+    {
+        $this->subscription->start($inBackground);
+
+        $project = new RunProjection($this->subscription, $this->newWorkflow());
+
+        $project->beginCycle();
+    }
+
+    public function getState(): array
+    {
+        return $this->subscription->state()->get();
+    }
+
+    /**
+     * @internal
+     */
+    public function subscription(): Subscription
+    {
+        return $this->subscription;
+    }
+
     protected function context(): ContextReaderInterface
     {
         return $this->subscription->context();
     }
+
+    /**
+     * @internal
+     */
+    abstract public function getScope(): ProjectorScope;
+
+    abstract protected function newWorkflow(): Workflow;
 }

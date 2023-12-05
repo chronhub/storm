@@ -13,8 +13,8 @@ use Closure;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
-    use InteractWithContext;
     use InteractWithPersistentProjection;
+    use InteractWithProjection;
 
     public function __construct(
         protected ReadModelSubscriptionInterface $subscription,
@@ -27,7 +27,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
         return $this->readModel;
     }
 
-    protected function getScope(): ReadModelProjectorScopeInterface
+    public function getScope(): ReadModelProjectorScopeInterface
     {
         $userScope = $this->context()->userScope();
 

@@ -16,8 +16,7 @@ final readonly class PersistOrUpdate
             /**
              * The event counter is reset when no event has been handled,
              * and, when persistWhenThresholdReached was successfully called,
-             * so, we sleep and try updating the lock.
-             * Or we store the new data
+             * so, we sleep and try updating the lock or, we store the data
              */
             if ($subscription->eventCounter()->isReset()) {
                 usleep(microseconds: $subscription->option()->getSleep());

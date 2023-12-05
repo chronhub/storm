@@ -6,13 +6,13 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Projector\InteractWithContext;
+use Chronhub\Storm\Projector\InteractWithProjection;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 
-#[CoversClass(InteractWithContext::class)]
+#[CoversClass(InteractWithProjection::class)]
 final class InteractWithContextTest extends UnitTestCase
 {
     private ContextReaderInterface|MockObject $context;
@@ -83,7 +83,7 @@ final class InteractWithContextTest extends UnitTestCase
 
         return new class($context)
         {
-            use InteractWithContext;
+            use InteractWithProjection;
 
             public function __construct(protected ContextReaderInterface $context)
             {

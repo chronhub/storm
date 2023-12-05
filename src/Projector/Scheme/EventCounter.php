@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Countable;
 
-final class EventCounter
+final class EventCounter implements Countable
 {
     /**
      * @var int<0,max>
@@ -44,7 +45,7 @@ final class EventCounter
         return $this->counter >= $this->limit;
     }
 
-    public function current(): int
+    public function count(): int
     {
         return $this->counter;
     }

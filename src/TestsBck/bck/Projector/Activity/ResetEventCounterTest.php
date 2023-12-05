@@ -20,7 +20,7 @@ final class ResetEventCounterTest extends UnitTestCase
         $eventCounter = new EventCounter(5);
         $eventCounter->increment();
         $eventCounter->increment();
-        $this->assertSame(2, $eventCounter->current());
+        $this->assertSame(2, $eventCounter->count());
 
         $subscription->expects($this->exactly(2))->method('eventCounter')->willReturn($eventCounter);
 
