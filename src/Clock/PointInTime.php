@@ -103,6 +103,7 @@ final readonly class PointInTime implements SystemClock
             }
 
             $pointInTime = $pointInTime->format(self::DATE_TIME_FORMAT);
+
         }
 
         if (! preg_match(self::PATTERN, $pointInTime)) {

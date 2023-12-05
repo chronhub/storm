@@ -55,7 +55,7 @@ it('set and get status', function (ProjectionStatus $expectedStatus) {
     expect($this->subscription->currentStatus())->toBe($expectedStatus);
 })->with('projection status');
 
-it('can set state', function () {
+it('can set and get state', function () {
     expect($this->subscription->state()->get())->toBeEmpty();
 
     $this->subscription->state()->put(['foo' => 'bar']);
@@ -70,12 +70,14 @@ it('can initialize again state to his original state', function () {
 
     $this->subscription->state()->put(['foo' => 'bar']);
 
+    expect($this->subscription->state()->get())->toBe(['foo' => 'bar']);
+
     $this->subscription->initializeAgain();
 
     expect($this->subscription->state()->get())->toBe(['count' => 1]);
 });
 
-it('can compose subscription', function (bool $inBackground) {
+it('can start subscription', function (bool $inBackground) {
     expect($this->subscription->sprint()->inProgress())->toBeFalse()
         ->and($this->subscription->sprint()->inBackground())->toBeFalse()
         ->and($this->subscription->state()->get())->toBeEmpty();

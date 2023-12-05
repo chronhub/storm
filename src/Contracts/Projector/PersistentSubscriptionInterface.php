@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Activity\RemoteStatusDiscovery;
+use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -30,9 +30,9 @@ interface PersistentSubscriptionInterface extends Subscription
      * Synchronize the current state and positions of the projection,
      * on rising or stopping projection (discover status) during the first run.
      *
-     * @see RemoteStatusDiscovery
-     *
      * @throws ProjectionNotFound
+     *
+     *@see MonitorRemoteStatus
      */
     public function synchronise(): void;
 

@@ -112,7 +112,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
     /**
      * Determine a chunk size based on the total number of events.
-     * produce chunk size of 32, 64, 128, 256, 512 ...
+     * Produce chunk size of 32, 64, 128, 256, 512 ...
      */
     private function calculateDynamicChunkSize(Collection $iterators): int
     {

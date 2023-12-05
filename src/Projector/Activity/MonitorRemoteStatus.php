@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
-trait RemoteStatusDiscovery
+trait MonitorRemoteStatus
 {
     private bool $isFirstCycle = true;
 

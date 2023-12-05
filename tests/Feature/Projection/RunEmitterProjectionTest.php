@@ -160,7 +160,6 @@ it('can link event to new categories', function (): void {
 
     // create a projection
     $emitter = $this->projectorManager->newEmitter('customer');
-
     // run projection
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])

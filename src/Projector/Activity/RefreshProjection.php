@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 
 final class RefreshProjection
 {
-    use RemoteStatusDiscovery;
+    use MonitorRemoteStatus;
 
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {

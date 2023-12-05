@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
-use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;
@@ -16,7 +15,7 @@ use function is_callable;
 final class HandleStreamEvent
 {
     /**
-     * @var callable{<Subscription,DomainEvent,int<1,max>>}|EventProcessor
+     * @var callable{Subscription,DomainEvent,int<1,max>}
      */
     private $eventProcessor;
 

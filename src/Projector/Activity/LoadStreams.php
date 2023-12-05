@@ -32,7 +32,7 @@ final class LoadStreams
     }
 
     /**
-     * @return array<string, StreamIterator>
+     * @return array<string,StreamIterator>
      */
     private function getStreams(Subscription $subscription): array
     {

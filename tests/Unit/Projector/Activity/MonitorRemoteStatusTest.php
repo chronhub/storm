@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Projector\Activity\RemoteStatusDiscovery;
+use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
@@ -20,7 +20,7 @@ function getInstance(): object
 {
     return new class
     {
-        use RemoteStatusDiscovery;
+        use MonitorRemoteStatus;
 
         public function getFirstCycle(): bool
         {
