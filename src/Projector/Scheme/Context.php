@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
 use DateInterval;
-use ReflectionFunction;
 
 use function is_int;
 use function is_string;
@@ -35,8 +34,6 @@ final class Context implements ContextReaderInterface
         if ($this->userState instanceof Closure) {
             throw new InvalidArgumentException('Projection already initialized');
         }
-
-        $this->assertNotStaticClosure($userState);
 
         $this->userState = Closure::bind($userState, $this);
 
@@ -109,8 +106,6 @@ final class Context implements ContextReaderInterface
             throw new InvalidArgumentException('Projection reactors already set');
         }
 
-        $this->assertNotStaticClosure($reactors);
-
         $this->reactors = $reactors;
 
         return $this;
@@ -175,16 +170,6 @@ final class Context implements ContextReaderInterface
     {
         if ($this->queries !== []) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
-        }
-    }
-
-    private function assertNotStaticClosure(Closure $callback): void
-    {
-        // todo remove
-        $reflection = new ReflectionFunction($callback);
-
-        if ($reflection->isStatic()) {
-            throw new InvalidArgumentException('Static closure is not allowed in user state and reactors');
         }
     }
 }

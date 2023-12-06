@@ -10,10 +10,8 @@ final class HandleStreamGap
 {
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-        /**
-         * When a gap is detected and still retry left,
-         * we sleep and store the projection if some event(s) has been handled
-         */
+        // When a gap is detected and still retry left,
+        // we sleep and store the projection if some event(s) has been handled
         if ($subscription->streamManager()->hasGap()) {
             $subscription->streamManager()->sleep();
 

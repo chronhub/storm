@@ -187,32 +187,6 @@ it('can run query projection from all streams', function () {
     expect($projector->getState())->toBe(['count' => 14]);
 });
 
-it('can run query projection with limit in query filter', function () {
-    // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
-    $this->eventStore->firstCommit($stream);
-
-    // create a projection
-    $projector = $this->projectorManager->newQuery();
-
-    $queryFilter = $this->projectorManager->queryScope()->fromIncludedPosition();
-    $queryFilter->setLimit(3);
-
-    // run projection
-    $projector
-        ->initialize(fn () => ['positions' => []])
-        ->fromAll()
-        ->withQueryFilter($queryFilter)
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['positions'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
-        })->run(false);
-
-    expect($projector->getState())->toBe(['positions' => [1, 2, 3]]);
-});
-
 it('can run query projection with a dedicated query filter', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();

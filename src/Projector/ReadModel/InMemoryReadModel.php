@@ -16,7 +16,7 @@ final class InMemoryReadModel implements ReadModel
     private bool $initialized = false;
 
     /**
-     * @var Collection<string, array>
+     * @var Collection<string,array>
      */
     private Collection $container;
 

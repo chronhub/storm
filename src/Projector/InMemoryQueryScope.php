@@ -46,11 +46,6 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
             public function setLimit(int $limit): void
             {
-                // allow override limit from option loads
-                if ($this->limit !== null) {
-                    return;
-                }
-
                 if ($limit < 0) {
                     throw new InvalidArgumentException('Limit must be greater than 0');
                 }

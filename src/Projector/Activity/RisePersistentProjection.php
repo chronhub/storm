@@ -13,10 +13,8 @@ final class RisePersistentProjection
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if ($this->isFirstCycle()) {
-            /**
-             * Depending on the discovered status, the projection can be stopped early,
-             * on stopping and on deleting.
-             */
+            // Depending on the discovered status, the projection can be stopped early,
+            // on stopping and on deleting.
             if ($this->shouldStopOnDiscoveringStatus($subscription)) {
                 return false;
             }

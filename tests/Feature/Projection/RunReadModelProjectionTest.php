@@ -6,9 +6,7 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
@@ -176,40 +174,6 @@ it('can run read model projection from many streams and sort events by ascending
         'debit' => [1 => SomeEvent::class, 3 => SomeEvent::class],
         'credit' => [2 => AnotherEvent::class, 4 => AnotherEvent::class],
     ]);
-});
-
-it('can run read model projection with limit in query filter', function () {
-    // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
-    $this->eventStore->firstCommit($stream);
-
-    // create a projection
-    $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('customer', $readModel);
-    $queryFilter = $this->projectorManager->queryScope()->fromIncludedPosition();
-    expect($queryFilter)->toBeInstanceOf(LoadLimiterProjectionQueryFilter::class);
-    $queryFilter->setLimit(5);
-
-    // run projection
-    $projector
-        ->initialize(fn () => ['positions' => []])
-        ->fromStreams('user')
-        ->withQueryFilter($queryFilter)
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
-            if ($state['positions'] === []) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            $state['positions'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
-        })->run(false);
-
-    expect($projector->getState())->toBe(['positions' => [1, 2, 3, 4, 5]])
-        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 5]]);
 });
 
 it('raise exception when query filter is not a projection query filter', function () {

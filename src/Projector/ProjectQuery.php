@@ -14,9 +14,8 @@ final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithProjection;
 
-    public function __construct(
-        protected QuerySubscriptionInterface $subscription,
-    ) {
+    public function __construct(protected QuerySubscriptionInterface $subscription)
+    {
     }
 
     public function stop(): void

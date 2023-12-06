@@ -18,8 +18,8 @@ final class InMemoryOption implements ProjectionOption
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
         array|string $retries = [],
+        protected readonly ?int $loads = 100,
         protected readonly ?string $detectionWindows = null,
-        protected readonly ?int $loads = 100
     ) {
         $this->setUpRetries($retries);
     }
