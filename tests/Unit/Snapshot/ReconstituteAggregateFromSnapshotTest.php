@@ -71,11 +71,11 @@ final class ReconstituteAggregateFromSnapshotTest extends UnitTestCase
     {
         return new class
         {
-           use ReconstituteAggregateFromSnapshot;
+            use ReconstituteAggregateFromSnapshot;
 
-           protected function apply(object $event): void
-           {
-           }
+            protected function apply(object $event): void
+            {
+            }
         };
     }
 

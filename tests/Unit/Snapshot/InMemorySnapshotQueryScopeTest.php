@@ -20,7 +20,7 @@ final class InMemorySnapshotQueryScopeTest extends UnitTestCase
 
     protected function setUp(): void
     {
-       $this->aggregateId = $this->createMock(AggregateIdentity::class);
+        $this->aggregateId = $this->createMock(AggregateIdentity::class);
     }
 
     public function testMatchAggregateGreaterThanVersionInstance(): void

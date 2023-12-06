@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Message\MessageAliasNotFound;
 use Chronhub\Storm\Reporter\DomainEvent;
+
 use function is_callable;
 
 final readonly class ProcessArrayEvent extends AbstractEventProcessor

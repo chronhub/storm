@@ -16,7 +16,7 @@ final class InMemoryQueryScope implements ProjectionQueryScope
     // unless we pass all events to the query scope
     public function fromIncludedPosition(int $limit = 500): ProjectionQueryFilter
     {
-        return new class() implements ProjectionQueryFilter, InMemoryQueryFilter
+        return new class() implements InMemoryQueryFilter, ProjectionQueryFilter
         {
             use ExtractEventHeader;
 

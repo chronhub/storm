@@ -12,6 +12,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function iterator_to_array;
 
 #[CoversClass(HasAggregateBehaviour::class)]

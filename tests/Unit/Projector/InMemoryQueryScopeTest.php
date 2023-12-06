@@ -15,6 +15,7 @@ use Generator;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function count;
 use function iterator_to_array;
 
@@ -35,7 +36,7 @@ final class InMemoryQueryScopeTest extends UnitTestCase
 
         $filteredEvents = $events
             ->sortBy(
-                static fn (DomainEvent $event): int => $event->header(EventHeader::INTERNAL_POSITION), SORT_NUMERIC, 'desc' === $queryFilter->orderBy()
+                static fn (DomainEvent $event): int => $event->header(EventHeader::INTERNAL_POSITION), SORT_NUMERIC, $queryFilter->orderBy() === 'desc'
             )
             ->filter($queryFilter->apply());
 

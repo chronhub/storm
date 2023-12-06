@@ -90,7 +90,7 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
 
                 /** @phpstan-ignore-next-line */
                 return $this->decorateChronicler($chronicler, $streamTracker);
-        });
+            });
 
         $chronicler = $factory->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.default']]);
 
@@ -119,7 +119,7 @@ final class ProvideChroniclerFactoryTest extends UnitTestCase
 
                 /** @phpstan-ignore-next-line */
                 return $this->decorateChronicler($chronicler, $streamTracker);
-        });
+            });
 
         $chronicler = $factory->createEventStore('foo', ['tracking' => ['tracker_id' => 'tracker.stream.transactional']]);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Stream;
 
 use Generator;
+
 use function count;
 
 final class Stream

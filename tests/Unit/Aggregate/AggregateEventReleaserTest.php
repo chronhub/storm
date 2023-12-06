@@ -15,6 +15,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function iterator_to_array;
 
 final class AggregateEventReleaserTest extends UnitTestCase

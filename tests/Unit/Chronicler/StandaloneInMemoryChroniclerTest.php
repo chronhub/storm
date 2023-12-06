@@ -26,6 +26,7 @@ use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function array_map;
 use function array_reverse;
 use function count;
@@ -175,7 +176,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
 
         $range = range(1, 5);
 
-        if ('desc' === $sortDirection) {
+        if ($sortDirection === 'desc') {
             $range = array_reverse($range);
         }
 
@@ -388,7 +389,7 @@ final class StandaloneInMemoryChroniclerTest extends UnitTestCase
     {
         $version = 0;
 
-        while (0 !== $limit) {
+        while ($limit !== 0) {
             $headers = [
                 EventHeader::INTERNAL_POSITION => $currentVersion = ++$version,
                 EventHeader::AGGREGATE_VERSION => $currentVersion,

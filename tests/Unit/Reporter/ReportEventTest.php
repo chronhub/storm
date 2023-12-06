@@ -217,7 +217,7 @@ final class ReportEventTest extends UnitTestCase
                     Reporter::DISPATCH_EVENT,
                     function (MessageStory $story): void {
                         $story->withConsumers($this->consumers);
-                }, OnDispatchPriority::ROUTE->value);
+                    }, OnDispatchPriority::ROUTE->value);
             }
         };
     }

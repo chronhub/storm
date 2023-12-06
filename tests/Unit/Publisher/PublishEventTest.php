@@ -13,6 +13,7 @@ use Chronhub\Storm\Tests\Util\ReflectionProperty;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+
 use function iterator_count;
 
 #[CoversClass(PublishEvent::class)]

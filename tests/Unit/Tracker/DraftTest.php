@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use React\Promise\PromiseInterface;
 use RuntimeException;
 use stdClass;
+
 use function iterator_to_array;
 
 #[CoversClass(Draft::class)]

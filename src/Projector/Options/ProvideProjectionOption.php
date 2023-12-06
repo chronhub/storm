@@ -48,7 +48,7 @@ trait ProvideProjectionOption
     /**
      * Detection windows as a string interval
      */
-    protected readonly string|null $detectionWindows;
+    protected readonly ?string $detectionWindows;
 
     public function getSignal(): bool
     {

@@ -25,6 +25,7 @@ use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
+
 use function iterator_to_array;
 
 #[CoversClass(GenericAggregateRepository::class)]

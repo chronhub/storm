@@ -33,5 +33,5 @@ interface ContextReader
     /**
      * Get the timer interval to run the projection.
      */
-    public function timer(): null|DateInterval;
+    public function timer(): ?DateInterval;
 }

@@ -224,10 +224,10 @@ final class FindRouteTest extends UnitTestCase
     {
         return new class
         {
-             public function command(): int
-             {
-                 return 74;
-             }
+            public function command(): int
+            {
+                return 74;
+            }
         };
     }
 

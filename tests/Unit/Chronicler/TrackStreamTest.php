@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 final class TrackStreamTest extends UnitTestCase
 {
     #[DataProvider('provideEventName')]
-    public function testNewStoryInstance(?string $eventName = null): void
+    public function testNewStoryInstance(string $eventName = null): void
     {
         $tracker = new TrackStream();
 

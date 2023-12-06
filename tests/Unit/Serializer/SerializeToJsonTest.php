@@ -8,6 +8,7 @@ use Chronhub\Storm\Serializer\SerializeToJson;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+
 use function is_string;
 
 #[CoversClass(SerializeToJson::class)]

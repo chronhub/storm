@@ -139,14 +139,14 @@ final class VersioningSnapshotProviderTest extends UnitTestCase
 
             if ($eventVersion !== 1 && $expectedVersion === $eventVersion) {
                 //dump($expectedVersion);
-//                $snapshot = $this->provideSnapshot($expectedVersion);
-//                $this->snapshotStore->save($snapshot);
+                //                $snapshot = $this->provideSnapshot($expectedVersion);
+                //                $this->snapshotStore->save($snapshot);
 
-                  $this->restoreAggregate
-                      ->expects($this->exactly(5))
-                      ->method('fromSnapshot')
-                      ->with($this->isInstanceOf(Snapshot::class), $expectedVersion)
-                      ->willReturn($this->provideAggregateWithVersion($expectedVersion));
+                $this->restoreAggregate
+                    ->expects($this->exactly(5))
+                    ->method('fromSnapshot')
+                    ->with($this->isInstanceOf(Snapshot::class), $expectedVersion)
+                    ->willReturn($this->provideAggregateWithVersion($expectedVersion));
             }
 
             $snapshotProvider = $this->newSnapshotProvider(10);

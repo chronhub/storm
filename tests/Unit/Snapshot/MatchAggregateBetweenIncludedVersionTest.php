@@ -10,6 +10,7 @@ use Chronhub\Storm\Snapshot\MatchAggregateBetweenIncludedVersion;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function array_filter;
 
 #[CoversClass(MatchAggregateBetweenIncludedVersion::class)]

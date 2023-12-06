@@ -9,6 +9,7 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Stream\Stream;
 use Generator;
 use Illuminate\Support\Collection;
+
 use function iterator_to_array;
 
 final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler

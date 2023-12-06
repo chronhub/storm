@@ -32,7 +32,7 @@ final class StopWhenRunningOnceTest extends UnitTestCase
             ->willReturn($sprint);
 
         $next = function (Subscription $subscription) {
-           return $subscription->sprint()->inProgress();
+            return $subscription->sprint()->inProgress();
         };
 
         $projector = $this->createMock(PersistentProjector::class);

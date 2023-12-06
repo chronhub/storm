@@ -13,6 +13,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
+
 use function array_filter;
 use function array_map;
 use function array_values;

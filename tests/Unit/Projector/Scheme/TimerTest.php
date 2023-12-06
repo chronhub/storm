@@ -17,7 +17,7 @@ final class TimerTest extends UnitTestCase
 
     protected function setUp(): void
     {
-       $this->clock = new PointInTime();
+        $this->clock = new PointInTime();
     }
 
     public function testElapseTime(): void

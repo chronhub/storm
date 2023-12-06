@@ -25,6 +25,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+
 use function count;
 use function is_countable;
 

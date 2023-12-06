@@ -11,6 +11,7 @@ use Chronhub\Storm\Tests\Stubs\AggregateRootStub;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+
 use function serialize;
 use function unserialize;
 
