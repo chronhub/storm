@@ -13,7 +13,7 @@ final readonly class PersistOrUpdate
     public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
         if (! $subscription->streamManager()->hasGap()) {
-            // The event counter is reset when no event has been handled,
+            // The event counter is reset when no event has been loaded,
             // and, when persistWhenThresholdReached was successfully called,
             // so, we sleep and try updating the lock or, we store the data
             if ($subscription->eventCounter()->isReset()) {
