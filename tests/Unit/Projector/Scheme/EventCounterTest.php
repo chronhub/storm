@@ -6,63 +6,99 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(EventCounter::class)]
-final class EventCounterTest extends UnitTestCase
-{
-    public function testIncrementCounter(): void
-    {
-        $counter = new EventCounter(3);
-        $this->assertEquals(0, $counter->current());
+test('new instance', function (): void {
+    $counter = new EventCounter(3);
 
+    expect($counter->count())->toBe(0)
+        ->and($counter->limit)->toBe(3)
+        ->and($counter->isReset())->toBeTrue()
+        ->and($counter->isReached())->toBeFalse();
+});
+
+it('raise exception when limit is less than one', function (int $limit): void {
+    new EventCounter($limit);
+})
+    ->with([[0, -1, -10]])
+    ->throws(InvalidArgumentException::class, 'Event counter limit must be greater than');
+
+it('can increment counter', function (): void {
+    $limit = 3;
+    $count = 0;
+
+    $counter = new EventCounter($limit);
+    expect($counter->count())->toBe(0);
+
+    while ($limit > 0) {
         $counter->increment();
-        $this->assertEquals(1, $counter->current());
+        $limit--;
+        $count++;
 
-        $counter->increment();
-        $this->assertEquals(2, $counter->current());
+        expect($counter->count())->toBe($count);
+    }
+});
 
+it('can increment counter beyond the limit', function (): void {
+    $limit = 3;
+    $counter = new EventCounter(3);
+
+    while ($limit > 0) {
         $counter->increment();
-        $this->assertEquals(3, $counter->current());
+        $limit--;
     }
 
-    public function testResetCounter(): void
-    {
-        $counter = new EventCounter(3);
+    expect($counter->count())->toBe(3);
 
-        $counter->increment();
-        $counter->increment();
-        $counter->increment();
+    $counter->increment();
+    expect($counter->count())->toBe(4);
+});
 
-        $this->assertFalse($counter->isReset());
+it('can reset counter', function (): void {
+    $limit = 3;
+    $counter = new EventCounter(3);
 
-        $counter->reset();
-        $this->assertTrue($counter->isReset());
-        $this->assertEquals(0, $counter->current());
+    while ($limit > 0) {
+        $counter->increment();
+        expect($counter->isReset())->toBeFalse();
+
+        $limit--;
     }
 
-    public function testIsReachedReturnsTrueWhenLimitReached(): void
-    {
-        $counter = new EventCounter(3);
+    $counter->reset();
+    expect($counter->count())->toBe(0)
+        ->and($counter->isReset())->toBeTrue()
+        ->and($counter->isReached())->toBeFalse();
+});
 
-        $this->assertFalse($counter->isReached());
+it('return true when limit is reached', function (): void {
+    $limit = 3;
+    $counter = new EventCounter($limit);
 
+    while ($counter->count() < $limit) {
         $counter->increment();
-        $this->assertFalse($counter->isReached());
+        expect($counter->isReached())->toBeFalse();
 
-        $counter->increment();
-        $this->assertFalse($counter->isReached());
-
-        $counter->increment();
-        $this->assertTrue($counter->isReached());
+        $limit--;
     }
 
-    public function testExceptionRaisedWhenLimitIsLessThanOne(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Limit must be greater than 0');
+    $counter->increment();
+    expect($counter->isReached())->toBeTrue();
+});
 
-        new EventCounter(0);
+it('return true when incremented counter is greater than limit', function (): void {
+    $limit = 3;
+    $counter = new EventCounter($limit);
+
+    while ($counter->count() < $limit) {
+        $counter->increment();
+        expect($counter->isReached())->toBeFalse();
+
+        $limit--;
     }
-}
+
+    $counter->increment();
+    expect($counter->isReached())->toBeTrue();
+
+    $counter->increment();
+    expect($counter->isReached())->toBeTrue();
+});

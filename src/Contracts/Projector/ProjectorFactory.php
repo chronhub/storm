@@ -10,49 +10,52 @@ use Closure;
 use DateInterval;
 
 /**
- * @template-covariant TItem of DomainEvent|object
+ * @template TInit of array
+ * @template TWhen of array{DomainEvent,TInit,ProjectorScope}|array<DomainEvent,ProjectorScope>
  */
 interface ProjectorFactory extends Projector
 {
     /**
      * Proxy method to initialize the state.
      *
-     * @see ContextInterface::initialize()
+     * @param Closure():TInit $userState
+     *
+     * @see ContextReaderInterface::initialize()
      */
-    public function initialize(Closure $initCallback): static;
+    public function initialize(Closure $userState): static;
 
     /**
-     * Proxy method to set the streams to fetch events from.
+     * Proxy method to set the streams.
      *
-     * @see ContextInterface::fromStreams()
+     * @see ContextReaderInterface::fromStreams()
      */
     public function fromStreams(string ...$streams): static;
 
     /**
-     * Proxy method to set the categories to fetch events from.
+     * Proxy method to set the categories.
      *
-     * @see ContextInterface::fromCategories()
+     * @see ContextReaderInterface::fromCategories()
      */
     public function fromCategories(string ...$categories): static;
 
     /**
-     * Proxy method to set to fetch events from all streams.
+     * Proxy method to set all streams.
      *
      * @see ContextInterface::fromAll()
      */
     public function fromAll(): static;
 
     /**
-     * Proxy method to set the event handlers to be called when an event is received.
+     * Proxy method to set the reactos.
      *
-     * @template T of Closure(TItem): void|Closure(TItem, array): array
+     * @param Closure(TWhen): ?TInit $reactors
      *
-     * @param array<T> $eventsHandlers
+     * @see ContextInterface::when()
      */
-    public function when(array|Closure $eventsHandlers): static;
+    public function when(Closure $reactors): static;
 
     /**
-     * Proxy method to set the query filter to filter events.
+     * Proxy method to set the query filter.
      *
      * @see ContextInterface::withQueryFilter()
      */
@@ -61,7 +64,16 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the timer interval.
      *
-     * @param int|DateInterval $interval int in seconds or DateInterval
+     * @param DateInterval|string|int<0,max> $interval
+     *
+     * @see ContextInterface::until()
      */
-    public function withTimer(int|DateInterval $interval): static;
+    public function until(DateInterval|string|int $interval): static;
+
+    /**
+     * Proxy method to set the projector scope.
+     *
+     * @see ContextInterface::withScope()
+     */
+    public function withScope(Closure $scope): static;
 }

@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentProjector;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Closure;
+use Chronhub\Storm\Projector\ProjectionStatus;
 
 final readonly class StopWhenRunningOnce
 {
-    public function __construct(private PersistentProjector $projector)
+    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
     {
-    }
-
-    public function __invoke(PersistentSubscriptionInterface $subscription, Closure $next): Closure|bool
-    {
-        if (! $subscription->sprint()->inBackground() && $subscription->sprint()->inProgress()) {
-            $this->projector->stop();
+        if (! $this->shouldKeepRunning($subscription) && $subscription->currentStatus() === ProjectionStatus::RUNNING) {
+            $subscription->close();
         }
 
         return $next($subscription);
+    }
+
+    private function shouldKeepRunning(PersistentSubscriptionInterface $subscription): bool
+    {
+        return $subscription->sprint()->inBackground() && $subscription->sprint()->inProgress();
     }
 }

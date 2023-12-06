@@ -4,37 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\Caster;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
-use Chronhub\Storm\Contracts\Projector\Subscription;
-use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Activity\PrepareQueryRunner;
-use Chronhub\Storm\Projector\Activity\RunUntil;
-use Chronhub\Storm\Projector\Scheme\CastQuery;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
+use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\Workflow;
+use Closure;
 
 final readonly class ProjectQuery implements QueryProjector
 {
-    use InteractWithContext;
+    use InteractWithProjection;
 
-    public function __construct(
-        protected Subscription $subscription,
-        protected ContextInterface $context,
-        private Chronicler $chronicler
-    ) {
-    }
-
-    public function run(bool $inBackground): void
+    public function __construct(protected QuerySubscriptionInterface $subscription)
     {
-        $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
-
-        $project = new RunProjection($this->subscription, $this->newWorkflow());
-
-        $project->beginCycle();
     }
 
     public function stop(): void
@@ -49,26 +30,22 @@ final readonly class ProjectQuery implements QueryProjector
         $this->subscription->initializeAgain();
     }
 
-    public function getState(): array
+    public function getScope(): QueryProjectorScope
     {
-        return $this->subscription->state()->get();
-    }
+        $userScope = $this->context()->userScope();
 
-    protected function getCaster(): Caster
-    {
-        return new CastQuery(
-            $this, $this->subscription->clock(), fn (): ?string => $this->subscription->currentStreamName()
+        if ($userScope instanceof Closure) {
+            return $userScope($this);
+        }
+
+        return new QueryProjectorScope(
+            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
         );
     }
 
-    private function newWorkflow(): Workflow
+    protected function newWorkflow(): Workflow
     {
-        $activities = [
-            new RunUntil(),
-            new PrepareQueryRunner(),
-            new HandleStreamEvent(new LoadStreams($this->chronicler)),
-            new DispatchSignal(),
-        ];
+        $activities = ProvideActivities::query($this);
 
         return new Workflow($this->subscription, $activities);
     }

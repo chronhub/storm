@@ -24,6 +24,10 @@ final class StreamIterator implements Countable, Iterator
      */
     private ArrayIterator $streamEvents;
 
+    /**
+     * Stream events must already sorted by event time in ascending order
+     * todo test if sorted ?again by event time has cost in performance
+     */
     public function __construct(Generator $streamEvents)
     {
         $this->streamEvents = new ArrayIterator(iterator_to_array($streamEvents));
@@ -55,16 +59,16 @@ final class StreamIterator implements Countable, Iterator
         return $this->position;
     }
 
-    public function valid(): bool
-    {
-        return $this->event instanceof DomainEvent;
-    }
-
     public function rewind(): void
     {
         $this->streamEvents->rewind();
 
         $this->next();
+    }
+
+    public function valid(): bool
+    {
+        return $this->event instanceof DomainEvent;
     }
 
     public function count(): int

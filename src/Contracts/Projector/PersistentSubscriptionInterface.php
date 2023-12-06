@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -16,7 +17,7 @@ interface PersistentSubscriptionInterface extends Subscription
     public function rise(): void;
 
     /**
-     * Stop the persistent subscription and the projection.
+     * Stop the projection.
      */
     public function close(): void;
 
@@ -26,11 +27,14 @@ interface PersistentSubscriptionInterface extends Subscription
     public function restart(): void;
 
     /**
-     * Retrieve the current state and positions of the projection.
+     * Synchronize the current state and positions of the projection,
+     * on rising or stopping projection (discover status) during the first run.
      *
      * @throws ProjectionNotFound
+     *
+     *@see MonitorRemoteStatus
      */
-    public function refreshDetail(): void;
+    public function synchronise(): void;
 
     /**
      * Get the current status of the projection.
@@ -38,18 +42,24 @@ interface PersistentSubscriptionInterface extends Subscription
     public function disclose(): ProjectionStatus;
 
     /**
-     * Persist the current state and positions of the projection.
+     * Persist the current projection.
      */
     public function store(): void;
 
     /**
-     * Persist the current state and positions of the projection
-     * when threshold is reached.
+     * Update lock if it can be refreshed.
      */
-    public function persistWhenThresholdIsReached(): void;
+    public function update(): void;
 
     /**
-     * Reset the state and position of the projection.
+     * Persist the current projection when the threshold is reached.
+     *
+     * @see ProjectionOption::BLOCK_SIZE
+     */
+    public function persistWhenCounterIsReached(): void;
+
+    /**
+     * Reset the projection.
      */
     public function revise(): void;
 
@@ -59,11 +69,6 @@ interface PersistentSubscriptionInterface extends Subscription
     public function discard(bool $withEmittedEvents): void;
 
     /**
-     * Update projection lock and stream positions.
-     */
-    public function renew(): void;
-
-    /**
      * Release the projection lock.
      */
     public function freed(): void;
@@ -71,7 +76,7 @@ interface PersistentSubscriptionInterface extends Subscription
     /**
      * Get the projection name.
      */
-    public function projectionName(): string;
+    public function getName(): string;
 
     /**
      * Get the event counter instance.

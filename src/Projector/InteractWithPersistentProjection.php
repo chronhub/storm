@@ -4,30 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\Caster;
-use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Activity\PersistOrUpdateLock;
-use Chronhub\Storm\Projector\Activity\PreparePersistentRunner;
-use Chronhub\Storm\Projector\Activity\RefreshProjection;
-use Chronhub\Storm\Projector\Activity\ResetEventCounter;
-use Chronhub\Storm\Projector\Activity\RunUntil;
-use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentProjection
 {
-    public function run(bool $inBackground): void
-    {
-        $this->subscription->compose($this->context, $this->getCaster(), $inBackground);
-
-        $project = new RunProjection($this->subscription, $this->newWorkflow());
-
-        $project->beginCycle();
-    }
-
     public function stop(): void
     {
         $this->subscription->close();
@@ -43,32 +23,15 @@ trait InteractWithPersistentProjection
         $this->subscription->discard($withEmittedEvents);
     }
 
-    public function getState(): array
+    public function getName(): string
     {
-        return $this->subscription->state()->get();
-    }
-
-    public function getStreamName(): string
-    {
-        return $this->streamName;
+        return $this->subscription->getName();
     }
 
     protected function newWorkflow(): Workflow
     {
-        $activities = [
-            new RunUntil(),
-            new PreparePersistentRunner(),
-            new HandleStreamEvent(new LoadStreams($this->chronicler)),
-            new HandleStreamGap(),
-            new PersistOrUpdateLock(),
-            new ResetEventCounter(),
-            new DispatchSignal(),
-            new RefreshProjection(),
-            new StopWhenRunningOnce($this),
-        ];
+        $activities = ProvideActivities::persistent($this);
 
         return new Workflow($this->subscription, $activities);
     }
-
-    abstract protected function getCaster(): Caster;
 }

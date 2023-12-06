@@ -24,7 +24,7 @@ final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler
             throw StreamAlreadyExists::withStreamName($streamName);
         }
 
-        $this->storeStreamEvents($streamName->toString(), $stream->events());
+        $this->storeStreamEvents($streamName->name, $stream->events());
     }
 
     public function amend(Stream $stream): void
@@ -35,7 +35,7 @@ final class StandaloneInMemoryChronicler extends AbstractInMemoryChronicler
             throw StreamNotFound::withStreamName($streamName);
         }
 
-        $this->storeStreamEvents($streamName->toString(), $stream->events());
+        $this->storeStreamEvents($streamName->name, $stream->events());
     }
 
     private function storeStreamEvents(string $streamName, Generator|Collection $events): void

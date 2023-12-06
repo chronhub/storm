@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\ReadModel;
 trait InteractWithStack
 {
     /**
-     * @var array<string, mixed>
+     * @var array<array<string,mixed>>
      */
     protected array $stack = [];
 

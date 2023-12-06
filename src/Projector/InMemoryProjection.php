@@ -8,9 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 
 final class InMemoryProjection implements ProjectionModel
 {
-    private string $positions = '{}';
-
-    private string $gaps = '{}';
+    private string $position = '{}';
 
     private string $state = '{}';
 
@@ -27,14 +25,9 @@ final class InMemoryProjection implements ProjectionModel
         return new self($name, $status);
     }
 
-    public function setPosition(string $positions): void
+    public function setPosition(string $position): void
     {
-        $this->positions = $positions;
-    }
-
-    public function setGaps(string $gaps): void
-    {
-        $this->gaps = $gaps;
+        $this->position = $position;
     }
 
     public function setState(string $state): void
@@ -57,14 +50,9 @@ final class InMemoryProjection implements ProjectionModel
         return $this->name;
     }
 
-    public function positions(): string
+    public function position(): string
     {
-        return $this->positions;
-    }
-
-    public function gaps(): string
-    {
-        return $this->gaps;
+        return $this->position;
     }
 
     public function state(): string

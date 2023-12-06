@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Iterator;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Countable;
 use DateTimeImmutable;
-use DateTimeZone;
 use Illuminate\Support\Collection;
 use Iterator;
 
@@ -26,23 +26,31 @@ final class MergeStreamIterator implements Countable, Iterator
 
     private Collection $originalIteratorOrder;
 
-    private int $numberOfIterators;
+    public readonly int $numberOfIterators;
 
-    public function __construct(array $streamNames, StreamIterator ...$iterators)
-    {
-        $this->iterators = collect($iterators)->map(fn (StreamIterator $iterator, int $key): array => [$iterator, $streamNames[$key]]);
+    public readonly int $numberOfEvents;
+
+    public function __construct(
+        private readonly SystemClock $clock,
+        array $streamNames,
+        StreamIterator ...$iterators
+    ) {
+        $this->iterators = collect($iterators)->map(
+            fn (StreamIterator $iterator, int $key): array => [$iterator, $streamNames[$key]]
+        );
 
         $this->originalIteratorOrder = $this->iterators;
 
         $this->numberOfIterators = $this->iterators->count();
+        $this->numberOfEvents = $this->iterators->sum(fn (array $stream) => $stream[0]->count());
 
         $this->prioritizeIterators();
     }
 
     public function rewind(): void
     {
-        $this->iterators->each(function (array $iterator): void {
-            $iterator[0]->rewind();
+        $this->iterators->each(function (array $stream): void {
+            $stream[0]->rewind();
         });
 
         $this->prioritizeIterators();
@@ -50,7 +58,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function valid(): bool
     {
-        return $this->iterators->contains(fn (array $iterator): bool => $iterator[0]->valid());
+        return $this->iterators->contains(fn (array $stream): bool => $stream[0]->valid());
     }
 
     public function next(): void
@@ -76,17 +84,20 @@ final class MergeStreamIterator implements Countable, Iterator
         return $this->iterators->first()[0]->key();
     }
 
+    /**
+     * @phpstan-impure
+     */
     public function count(): int
     {
-        return $this->iterators->sum(fn (array $iterator) => $iterator[0]->count());
+        return $this->iterators->sum(fn (array $stream): int => $stream[0]->count());
     }
 
     private function prioritizeIterators(): void
     {
         if ($this->numberOfIterators > 1) {
             $iterators = $this->originalIteratorOrder
-                ->filter(fn (array $iterator): bool => $iterator[0]->valid())
-                ->sortBy(fn (array $iterator): DateTimeImmutable => $this->toDatetime($iterator[0]->current()));
+                ->filter(fn (array $stream): bool => $stream[0]->valid())
+                ->sortBy(fn (array $stream): DateTimeImmutable => $this->toDatetime($stream[0]->current()));
 
             $chunkSize = $this->calculateDynamicChunkSize($iterators);
 
@@ -96,22 +107,16 @@ final class MergeStreamIterator implements Countable, Iterator
 
     private function toDatetime(DomainEvent $event): DateTimeImmutable
     {
-        // todo bring Clock or use facade
-        $eventTime = $event->header(Header::EVENT_TIME);
-
-        if ($eventTime instanceof DateTimeImmutable) {
-            return $eventTime;
-        }
-
-        return new DateTimeImmutable($eventTime, new DateTimeZone('UTC'));
+        return $this->clock->toPointInTime($event->header(Header::EVENT_TIME));
     }
 
     /**
      * Determine a chunk size based on the total number of events.
+     * Produce chunk size of 32, 64, 128, 256, 512 ...
      */
     private function calculateDynamicChunkSize(Collection $iterators): int
     {
-        $totalEvents = $iterators->sum(fn (array $iterator): int => $iterator[0]->count());
+        $totalEvents = $iterators->sum(fn (array $stream): int => $stream[0]->count());
 
         $chunkSize = max(self::CHUNK_SIZE, (int) log($totalEvents, 2));
 

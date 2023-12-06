@@ -5,92 +5,87 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use JsonSerializable;
-use LogicException;
 
 use function array_key_exists;
 use function usleep;
 
-final class StreamManager implements JsonSerializable
+final class StreamManager implements StreamManagerInterface
 {
-    protected int $retries = 0;
+    private int $retries = 0;
 
-    protected bool $gapDetected = false;
-
-    protected GapsCollection $gaps;
+    private bool $gapDetected = false;
 
     /**
      * @var Collection<string,int>
      */
     private Collection $streamPosition;
 
+    /**
+     * @param array<int<0,max>>     $retriesInMs      The array of retry durations in milliseconds.
+     * @param non-empty-string|null $detectionWindows The detection windows.
+     */
     public function __construct(
         private readonly EventStreamLoader $eventStreamLoader,
         private readonly SystemClock $clock,
-        private readonly array $retriesInMs,
-        private readonly ?string $detectionWindows = null
+        public readonly array $retriesInMs,
+        public readonly ?string $detectionWindows = null
     ) {
-        $this->gaps = new GapsCollection();
         $this->streamPosition = new Collection();
     }
 
-    public function detectGap(string $streamName, int $eventPosition, DateTimeImmutable|string $eventTime): bool
+    public function discover(array $queries): void
     {
-        if ($this->retriesInMs === []) {
-            return false;
+        $container = $this->eventStreamLoader
+            ->loadFrom($queries)
+            ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]);
+
+        $this->streamPosition = $container->merge($this->streamPosition);
+    }
+
+    public function merge(array $streamsPositions): void
+    {
+        $this->streamPosition = $this->streamPosition->merge($streamsPositions);
+    }
+
+    public function bind(string $streamName, int $expectedPosition, DateTimeImmutable|string|false $eventTime): bool
+    {
+        if (! $this->streamPosition->has($streamName)) {
+            throw new RuntimeException("Stream $streamName is not watched");
         }
 
-        $gapDetected = $this->isGapDetected($streamName, $eventPosition);
+        if (! $eventTime || $this->isGapFilled($streamName, $expectedPosition, $eventTime)) {
+            $this->streamPosition[$streamName] = $expectedPosition;
 
-        if (! $gapDetected) {
             $this->resetGap();
 
-            return false;
+            return true;
         }
 
-        // meant to speed up resetting projection
-        if ($this->detectionWindows && ! $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime)) {
-            $this->resetGap();
-
-            return false;
-        }
-
-        return $this->gapDetected = true;
-    }
-
-    /**
-     * @param array $streamGaps<int>
-     */
-    public function mergeGaps(array $streamGaps): void
-    {
-        $this->gaps->merge($streamGaps);
-    }
-
-    public function confirmedGaps(): array
-    {
-        return $this->gaps->filterConfirmedGaps();
-    }
-
-    public function hasGap(): bool
-    {
-        return $this->gapDetected;
+        return false;
     }
 
     public function sleep(): void
     {
-        if ($this->retriesInMs === []) {
-            return;
+        if (! $this->hasGap()) {
+            throw new RuntimeException('No gap detected');
         }
 
         if (! $this->hasRetry()) {
-            throw new LogicException('No more retries');
+            throw new RuntimeException('No more retries');
         }
 
         usleep($this->retriesInMs[$this->retries]);
 
         $this->retries++;
+    }
+
+    public function hasGap(): bool
+    {
+        return $this->gapDetected;
     }
 
     public function hasRetry(): bool
@@ -103,55 +98,44 @@ final class StreamManager implements JsonSerializable
         return $this->retries;
     }
 
-    public function watchStreams(array $queries): void
-    {
-        $container = $this->eventStreamLoader
-            ->loadFrom($queries)
-            ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]);
-
-        $this->streamPosition = $container->merge($this->streamPosition);
-    }
-
-    /**
-     * @param array<string,int> $streamsPositions
-     */
-    public function discoverStreams(array $streamsPositions): void
-    {
-        $this->streamPosition = $this->streamPosition->merge($streamsPositions);
-    }
-
-    public function bind(string $streamName, int $position): void
-    {
-        $this->streamPosition[$streamName] = $position;
-    }
-
     public function resets(): void
     {
         $this->streamPosition = new Collection();
 
-        $this->gaps = new GapsCollection();
+        $this->resetGap();
     }
 
-    public function jsonSerialize(): array
+    public function all(): array
     {
         return $this->streamPosition->toArray();
     }
 
-    private function isGapDetected(string $streamName, int $eventPosition): bool
+    public function jsonSerialize(): array
     {
-        $hasNextPosition = $eventPosition === $this->streamPosition[$streamName] + 1;
+        return $this->all();
+    }
 
-        if ($hasNextPosition) {
-            $this->gaps->remove($eventPosition);
-
-            $this->resetGap();
-
-            return false;
+    private function isGapFilled(string $streamName, int $expectedPosition, DateTimeImmutable|string $eventTime): bool
+    {
+        if ($this->retriesInMs === []) {
+            return true;
         }
 
-        $this->gaps->put($eventPosition, ! $this->hasRetry());
+        if ($expectedPosition === $this->streamPosition[$streamName] + 1) {
+            return true;
+        }
 
-        return ! $this->hasRetry();
+        if (! $this->hasRetry()) {
+            return true;
+        }
+
+        if ($this->detectionWindows && ! $this->clock->isNowSubGreaterThan($this->detectionWindows, $eventTime)) {
+            return true;
+        }
+
+        $this->gapDetected = true;
+
+        return false;
     }
 
     private function resetGap(): void

@@ -4,12 +4,36 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
 
-final class ReadModelSubscription extends AbstractPersistentSubscription implements ReadModelSubscriptionInterface
+final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
-    private ReadModel $readModel;
+    use InteractWithPersistentSubscription;
+    use InteractWithSubscription {
+        start as protected startDefault;
+    }
+
+    public function __construct(
+        protected readonly GenericSubscription $subscription,
+        protected ProjectionRepositoryInterface $repository,
+        protected EventCounter $eventCounter,
+        private readonly ReadModel $readModel,
+    ) {
+    }
+
+    public function start(bool $keepRunning): void
+    {
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Read model subscription requires a projection query filter');
+        }
+
+        $this->startDefault($keepRunning);
+    }
 
     public function rise(): void
     {
@@ -19,26 +43,32 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
             $this->readModel->initialize();
         }
 
-        $this->discoverStreams();
+        $this->streamManager()->discover($this->context()->queries());
+
+        $this->synchronise();
     }
 
     public function store(): void
     {
-        parent::store();
+        $this->repository->persist($this->getProjectionDetail(), null);
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        parent::revise();
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
 
         $this->readModel->reset();
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete(); // todo propagate $withEmittedEvents as info for dispatcher
+        $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->readModel->down();
@@ -46,11 +76,8 @@ final class ReadModelSubscription extends AbstractPersistentSubscription impleme
 
         $this->sprint()->stop();
 
-        $this->resetProjection();
-    }
+        $this->streamManager()->resets();
 
-    public function setReadModel(ReadModel $readModel): void
-    {
-        $this->readModel = $readModel;
+        $this->initializeAgain();
     }
 }

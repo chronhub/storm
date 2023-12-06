@@ -5,64 +5,50 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(ProjectionState::class)]
-final class ProjectionStateTest extends UnitTestCase
-{
-    public function testInstance(): void
-    {
-        $state = new ProjectionState();
+beforeEach(function () {
+    $this->state = new ProjectionState();
+});
 
-        $this->assertSame([], $state->get());
-    }
+it('can be instantiated', function () {
+    expect($this->state->get())->toBe([]);
+});
 
-    public function testSetState(): void
-    {
-        $state = new ProjectionState();
+it('can set state', function (array $state) {
+    $this->state->put($state);
 
-        $state->put(['foo' => 'bar']);
+    expect($this->state->get())->toBe($state);
+})->with([
+    'empty' => [[]],
+    'not empty' => [['foo' => 'bar']],
+]);
 
-        $this->assertSame(['foo' => 'bar'], $state->get());
-    }
+it('can override state', function () {
+    $this->state->put(['foo' => 'bar']);
 
-    public function testOverrideState(): void
-    {
-        $state = new ProjectionState();
+    expect($this->state->get())->toBe(['foo' => 'bar']);
 
-        $state->put(['foo' => 'bar']);
+    $this->state->put(['baz' => 'foo_bar']);
 
-        $this->assertSame(['foo' => 'bar'], $state->get());
+    expect($this->state->get())->toBe(['baz' => 'foo_bar']);
+});
 
-        $state->put(['baz' => 'foo_bar']);
+it('can set empty state', function () {
+    $this->state->put(['foo' => 'bar']);
 
-        $this->assertSame(['baz' => 'foo_bar'], $state->get());
-    }
+    expect($this->state->get())->toBe(['foo' => 'bar']);
 
-    public function testSetEmptyState(): void
-    {
-        $state = new ProjectionState();
+    $this->state->put([]);
 
-        $state->put(['foo' => 'bar']);
+    expect($this->state->get())->toBe([]);
+});
 
-        $this->assertSame(['foo' => 'bar'], $state->get());
+it('can reset state', function () {
+    $this->state->put(['foo' => 'bar']);
 
-        $state->put([]);
+    expect($this->state->get())->toBe(['foo' => 'bar']);
 
-        $this->assertSame([], $state->get());
-    }
+    $this->state->reset();
 
-    public function testResetState(): void
-    {
-        $state = new ProjectionState();
-
-        $state->put(['foo' => 'bar']);
-
-        $this->assertSame(['foo' => 'bar'], $state->get());
-
-        $state->reset();
-
-        $this->assertSame([], $state->get());
-    }
-}
+    expect($this->state->get())->toBe([]);
+});

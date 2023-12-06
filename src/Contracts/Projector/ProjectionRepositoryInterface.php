@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
@@ -14,92 +16,89 @@ interface ProjectionRepositoryInterface
     /**
      * Creates a new projection with the given status.
      *
-     * @param  ProjectionStatus $status The projection status.
-     * @return bool             True if the operation was successful, false otherwise.
+     * @throws ProjectionAlreadyExists When a projection with the given name already exists.
      */
-    public function create(ProjectionStatus $status): bool;
+    public function create(ProjectionStatus $status): void;
 
     /**
-     * Stops the projection and saves the stream positions and state.
-     */
-    public function stop(ProjectionDetail $projectionDetail): bool;
-
-    /**
-     * Starts the projection again after it has been stopped or reset.
+     * Starts the projection by acquiring the lock.
      *
-     * @return bool True if the operation was successful, false otherwise.
+     * @throws ProjectionAlreadyRunning When another projection has already acquired the lock.
+     * @throws ProjectionFailed         When the lock cannot be acquired.
      */
-    public function startAgain(): bool;
+    public function start(ProjectionStatus $projectionStatus): void;
 
     /**
-     * Saves the stream positions and state.
+     * Persists projection data
+     *
+     * @param ?ProjectionStatus $projectionStatus only meant to be IDLE when projection is stopped
+     *
+     * @throws ProjectionFailed When projection data cannot be stored.
      */
-    public function persist(ProjectionDetail $projectionDetail): bool;
+    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void;
 
     /**
-     * Resets stream positions and state.
+     * Stops the projection and store data.
+     *
+     * @throws ProjectionNotFound When a projection with the given name doesn't exist.
+     * @throws ProjectionFailed   When projection data cannot be stored.
      */
-    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool;
+    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void;
+
+    /**
+     * Starts the projection again.
+     *
+     * @throws ProjectionNotFound When a projection with the given name doesn't exist.
+     * @throws ProjectionFailed   When projection failed to update data.
+     */
+    public function startAgain(ProjectionStatus $projectionStatus): void;
+
+    /**
+     * Resets projection data.
+     */
+    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void;
 
     /**
      * Deletes the projection.
      *
-     * @return bool True if the operation was successful, false otherwise.
+     * @param bool $withEmittedEvents only use as a flag when dispatching internal event
+     *
+     * @throws ProjectionNotFound When a projection with the given name doesn't exist.
+     * @throws ProjectionFailed   When projection data cannot be deleted.
      */
-    public function delete(): bool;
+    public function delete(bool $withEmittedEvents): void;
 
     /**
-     * Acquires a lock for the projection.
-     *
-     * @return bool True if the lock was acquired, false otherwise.
-     *
-     * @throws ProjectionAlreadyRunning If the projection is already running.
+     * Update lock when the lock threshold is reached
      */
-    public function acquireLock(): bool;
-
-    /**
-     * Updates the lock for the projection if no gap.
-     *
-     * todo we always return true
-     *
-     * @param  array $streamPositions The stream positions to update the lock with.
-     * @return bool  True if the operation was successful, false otherwise.
-     */
-    public function attemptUpdateStreamPositions(array $streamPositions): bool;
+    public function updateLock(): void;
 
     /**
      * Releases the lock for the projection.
-     *
-     * @return bool True if the operation was successful, false otherwise.
      */
-    public function releaseLock(): bool;
+    public function release(): void;
 
     /**
      * Loads the projection status.
-     *
-     * @return ProjectionStatus The projection status.
      */
     public function loadStatus(): ProjectionStatus;
 
     /**
      * Loads the projection state and stream positions.
      *
-     *
-     * @throws ProjectionNotFound If the projection cannot be found in the repository.
+     * @throws ProjectionNotFound When the projection doesn't exist.
      */
     public function loadDetail(): ProjectionDetail;
 
     /**
      * Checks if the projection exists.
-     *
-     * @return bool True if the projection exists, false otherwise.
      */
     public function exists(): bool;
 
     /**
      * Returns the name of the projection.
      *
-     * @return string The projection name.
+     * @return non-empty-string
      */
     public function projectionName(): string;
 }

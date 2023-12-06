@@ -6,72 +6,54 @@ namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\InMemoryProjection;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(InMemoryProjection::class)]
-final class InMemoryProjectionTest extends UnitTestCase
-{
-    public function testCreateProjection(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
-        $this->assertInstanceOf(ProjectionModel::class, $projection);
+it('create projection', function (): void {
+    $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertSame('projection', $projection->name());
-        $this->assertSame('running', $projection->status());
-        $this->assertSame('{}', $projection->positions());
-        $this->assertSame('{}', $projection->state());
-        $this->assertNull($projection->lockedUntil());
-    }
+    expect($projection)->toBeInstanceOf(ProjectionModel::class)
+        ->and($projection->name())->toBe('projection')
+        ->and($projection->status())->toBe('running')
+        ->and($projection->position())->toBe('{}')
+        ->and($projection->state())->toBe('{}')
+        ->and($projection->lockedUntil())->toBeNull();
+});
 
-    public function testUpdateState(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
+it('update state', function (): void {
+    $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertSame('{}', $projection->state());
-        $projection->setState('{"count":1}');
-        $this->assertSame('{"count":1}', $projection->state());
-    }
+    expect($projection->state())->toBe('{}');
 
-    public function testUpdatePosition(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
+    $projection->setState('{"count":1}');
 
-        $this->assertSame('{}', $projection->positions());
-        $projection->setPosition('{foo:1}');
-        $this->assertSame('{foo:1}', $projection->positions());
-    }
+    expect($projection->state())->toBe('{"count":1}');
+});
 
-    public function testUpdateStatus(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
+it('update position', function (): void {
+    $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertSame('running', $projection->status());
-        $projection->setStatus('idle');
-        $this->assertSame('idle', $projection->status());
-    }
+    expect($projection->position())->toBe('{}');
 
-    public function testUpdateLockedUntil(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
+    $projection->setPosition('{foo:1}');
 
-        $this->assertSame('running', $projection->status());
-        $projection->setLockedUntil('datetime');
-        $this->assertSame('datetime', $projection->lockedUntil());
-    }
+    expect($projection->position())->toBe('{foo:1}');
+});
 
-    public function testUpdateNullLockedUntil(): void
-    {
-        $projection = InMemoryProjection::create('projection', 'running');
+it('update status', function (): void {
+    $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertSame('running', $projection->status());
+    expect($projection->status())->toBe('running');
 
-        $projection->setLockedUntil('datetime');
+    $projection->setStatus('idle');
 
-        $this->assertSame('datetime', $projection->lockedUntil());
+    expect($projection->status())->toBe('idle');
+});
 
-        $projection->setLockedUntil(null);
+it('update locked until', function (?string $value): void {
+    $projection = InMemoryProjection::create('projection', 'running');
 
-        $this->assertNull($projection->lockedUntil());
-    }
-}
+    expect($projection->status())->toBe('running');
+
+    $projection->setLockedUntil($value);
+
+    expect($projection->lockedUntil())->toBe($value);
+})->with(['string' => 'datetime', 'null' => null]);

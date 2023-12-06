@@ -5,53 +5,45 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Scheme\StreamGapManager;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Closure;
 
-#[CoversClass(HandleStreamGap::class)]
-final class HandleStreamGapTest extends UnitTestCase
-{
-    private PersistentSubscriptionInterface|MockObject $subscription;
+beforeEach(function () {
+    $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
+    $this->streamManager = $this->createMock(StreamManagerInterface::class);
+    $this->eventCounter = new EventCounter(10);
 
-    private StreamGapManager|MockObject $gapDetector;
+    $this->activity = new HandleStreamGap();
+    $this->next = fn (): Closure => fn (): int => 42;
+});
 
-    protected function setUp(): void
-    {
-        $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
-        $this->gapDetector = $this->createMock(StreamGapManager::class);
-    }
+it('sleep and store stream positions and user state when gap is detected', function () {
+    $this->streamManager->expects($this->once())->method('hasGap')->willReturn(true);
+    $this->streamManager->expects($this->once())->method('sleep');
 
-    public function testItDoesNotDetectStreamGap(): void
-    {
-        $this->subscription->expects($this->never())->method('store');
-        $this->subscription->expects($this->once())->method('gap')->willReturn($this->gapDetector);
-        $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(false);
+    // fake an event handled
+    $this->eventCounter->increment();
+    $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
+    $this->subscription->expects($this->exactly(2))->method('streamManager')->willReturn($this->streamManager);
+    $this->subscription->expects($this->once())->method('store');
 
-        $handleStreamGap = new HandleStreamGap();
+    $returned = ($this->activity)($this->subscription, $this->next);
 
-        $next = static fn ($subscription) => true;
+    expect($returned())->toBe(42);
+});
 
-        $handleStreamGap($this->subscription, $next);
+it('sleep but not store when gap is detected and no event handled', function () {
+    $this->streamManager->expects($this->once())->method('hasGap')->willReturn(true);
+    $this->streamManager->expects($this->once())->method('sleep');
 
-        $this->assertTrue(true);
-    }
+    expect($this->eventCounter->isReset())->toBeTrue();
+    $this->subscription->expects($this->once())->method('eventCounter')->willReturn($this->eventCounter);
+    $this->subscription->expects($this->exactly(2))->method('streamManager')->willReturn($this->streamManager);
+    $this->subscription->expects($this->never())->method('store');
 
-    public function testItDetectStreamGap(): void
-    {
-        $this->subscription->expects($this->once())->method('store');
-        $this->subscription->expects($this->exactly(2))->method('gap')->willReturn($this->gapDetector);
-        $this->gapDetector->expects($this->once())->method('hasGap')->willReturn(true);
-        $this->gapDetector->expects($this->once())->method('sleep');
+    $returned = ($this->activity)($this->subscription, $this->next);
 
-        $handleStreamGap = new HandleStreamGap();
-
-        $next = static fn ($subscription) => true;
-
-        $handleStreamGap($this->subscription, $next);
-
-        $this->assertTrue(true);
-    }
-}
+    expect($returned())->toBe(42);
+});

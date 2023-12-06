@@ -5,26 +5,55 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Stream\StreamName;
 
-final class EmitterSubscription extends AbstractPersistentSubscription implements EmitterSubscriptionInterface
+final class EmitterSubscription implements EmitterSubscriptionInterface
 {
-    private Chronicler $chronicler;
+    use InteractWithPersistentSubscription;
+    use InteractWithSubscription {
+        start as protected startDefault;
+    }
 
-    private bool $streamFixed = false;
+    private bool $isStreamFixed = false;
 
-    public function revise(): void
+    public function __construct(
+        protected readonly GenericSubscription $subscription,
+        protected ProjectionRepositoryInterface $repository,
+        protected EventCounter $eventCounter,
+    ) {
+    }
+
+    public function start(bool $keepRunning): void
     {
-        parent::revise();
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Emitter subscription requires a projection query filter');
+        }
 
-        $this->deleteStream();
+        $this->startDefault($keepRunning);
+    }
+
+    public function rise(): void
+    {
+        $this->mountProjection();
+
+        $this->streamManager()->discover($this->context()->queries());
+
+        $this->synchronise();
+    }
+
+    public function store(): void
+    {
+        $this->repository->persist($this->getProjectionDetail(), null);
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete();
+        $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->deleteStream();
@@ -32,37 +61,45 @@ final class EmitterSubscription extends AbstractPersistentSubscription implement
 
         $this->sprint()->stop();
 
-        $this->resetProjection();
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
     }
 
-    public function isFixed(): bool
+    public function revise(): void
     {
-        return $this->streamFixed;
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
+
+        $this->deleteStream();
     }
 
-    public function fixe(): void
+    public function wasEmitted(): bool
     {
-        $this->streamFixed = true;
+        return $this->isStreamFixed;
     }
 
-    public function unfix(): void
+    public function eventEmitted(): void
     {
-        $this->streamFixed = false;
+        $this->isStreamFixed = true;
     }
 
-    public function setChronicler(Chronicler $chronicler): void
+    public function unsetEmitted(): void
     {
-        $this->chronicler = $chronicler;
+        $this->isStreamFixed = false;
     }
 
     private function deleteStream(): void
     {
         try {
-            $this->chronicler->delete(new StreamName($this->projectionName()));
+            $this->chronicler()->delete(new StreamName($this->getName()));
         } catch (StreamNotFound) {
             // fail silently
         }
 
-        $this->unfix();
+        $this->unsetEmitted();
     }
 }

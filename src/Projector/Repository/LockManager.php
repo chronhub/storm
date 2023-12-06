@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 
 class LockManager
@@ -12,97 +13,61 @@ class LockManager
     private ?DateTimeImmutable $lastLock = null;
 
     /**
-     * @param int<0,max> $lockTimeoutMs The duration for which a lock is valid, in milliseconds
-     * @param int<0,max> $lockThreshold The duration after which a lock should be refreshed, in milliseconds
+     * @param positive-int $lockTimeout   The duration for which a lock is valid, in milliseconds
+     * @param int<0,max>   $lockThreshold The duration after which a lock should be refreshed, in milliseconds
      */
     public function __construct(
-        private readonly SystemClock $clock,
-        private readonly int $lockTimeoutMs,
-        private readonly int $lockThreshold
+        protected readonly SystemClock $clock,
+        public readonly int $lockTimeout,
+        public readonly int $lockThreshold
     ) {
     }
 
     /**
      * Acquires a lock and returns the new lock value.
-     *
-     * @return string The new lock value.
      */
     public function acquire(): string
     {
         $this->lastLock = $this->clock->now();
 
-        return $this->increment();
+        return $this->current();
     }
 
     /**
-     * Attempts to set or update the lock if it has exceeded the lock threshold.
-     *
-     * @return bool Whether the lock was updated.
-     */
-    public function tryUpdate(): bool
-    {
-        $now = $this->clock->now();
-
-        if ($this->shouldUpdateLock($now)) {
-            $this->lastLock = $now;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Refreshes the lock with current time and returns the new lock value.
-     *
-     * @return string The new lock value.
+     * Refreshes the lock returns the new lock value.
      */
     public function refresh(): string
     {
-        return $this->updateLockWithTimeout($this->clock->now());
+        $this->lastLock = $this->clock->now()->modify('+'.$this->lockTimeout.' milliseconds');
+
+        return $this->current();
     }
 
     /**
-     * Increments the lock and returns the new lock value.
-     *
-     * @return string The new lock value.
+     * Determines whether the lock should be refreshed.
      */
-    public function increment(): string
+    public function shouldRefresh(): bool
     {
-        return $this->updateLockWithTimeout($this->lastLock);
+        if ($this->lastLock === null || $this->lockThreshold === 0) {
+            return true;
+        }
+
+        $adjustedLock = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
+
+        return $adjustedLock < $this->clock->now();
     }
 
     /**
      * Returns the current lock value.
      *
-     * @return string The current lock value
+     * @throws RuntimeException When lock is not acquired
      */
     public function current(): string
     {
-        return $this->lastLock->format($this->clock->getFormat());
-    }
-
-    /**
-     * Updates the lock with a new timeout and returns the new lock value.
-     *
-     * @param  DateTimeImmutable $dateTime The new expiration time.
-     * @return string            The new lock value.
-     */
-    private function updateLockWithTimeout(DateTimeImmutable $dateTime): string
-    {
-        $this->lastLock = $dateTime->modify('+'.$this->lockTimeoutMs.' milliseconds');
-
-        return $this->current();
-    }
-
-    private function shouldUpdateLock(DateTimeImmutable $currentTime): bool
-    {
-        if ($this->lastLock === null || $this->lockTimeoutMs === 0) {
-            return true;
+        if ($this->lastLock === null) {
+            throw new RuntimeException('Lock is not acquired');
         }
 
-        $incrementedLock = $this->lastLock->modify('+'.$this->lockThreshold.' milliseconds');
-
-        return $this->clock->isGreaterThan($incrementedLock, $currentTime);
+        return $this->lastLock->format($this->clock->getFormat());
     }
 }

@@ -10,7 +10,7 @@ use Throwable;
 
 class ProjectionFailed extends RuntimeException implements ProjectorFailed
 {
-    public static function fromProjectionException(Throwable $exception, string $message = null): self
+    public static function from(Throwable $exception, string $message = null): self
     {
         return new static(
             $message ?? $exception->getMessage(),
@@ -77,6 +77,6 @@ class ProjectionFailed extends RuntimeException implements ProjectorFailed
     {
         $message = "Unable to update projection status for stream name $streamName and status $status->value";
 
-        return self::fromProjectionException($exception, $message);
+        return self::from($exception, $message);
     }
 }

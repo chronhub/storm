@@ -5,54 +5,68 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\Caster;
-use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Closure;
 use DateInterval;
-use ReflectionFunction;
 
-use function is_array;
 use function is_int;
 use function is_string;
 use function mb_strtoupper;
 use function sprintf;
 
-final class Context implements ContextInterface
+final class Context implements ContextReaderInterface
 {
-    private array|Closure|null $eventHandlers = null;
+    private array $queries = [];
+
+    private ?Closure $userState = null;
+
+    private ?Closure $reactors = null;
 
     private ?QueryFilter $queryFilter = null;
 
-    private ?Closure $initState = null;
+    private DateInterval|string|int|null $timer = null;
 
-    private array $queries = [];
+    private ?Closure $userScope = null;
 
-    private null|int|DateInterval $timer = null;
-
-    public function initialize(Closure $initState): self
+    public function initialize(Closure $userState): self
     {
-        $this->assertNotAlreadyInitialized();
+        if ($this->userState instanceof Closure) {
+            throw new InvalidArgumentException('Projection already initialized');
+        }
 
-        $this->assertNotStaticClosure($initState);
-
-        $this->initState = $initState;
+        $this->userState = Closure::bind($userState, $this);
 
         return $this;
     }
 
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
-        $this->assertQueryFilterNotSet();
+        if ($this->queryFilter instanceof QueryFilter) {
+            throw new InvalidArgumentException('Projection query filter already set');
+        }
 
         $this->queryFilter = $queryFilter;
 
         return $this;
     }
 
-    public function until(DateInterval|string|int $interval): ContextInterface
+    public function withScope(Closure $scope): self
     {
-        $this->assertTimerNotSet();
+        if ($this->userScope instanceof Closure) {
+            throw new InvalidArgumentException('Projection scope already set');
+        }
+
+        $this->userScope = $scope;
+
+        return $this;
+    }
+
+    public function until(DateInterval|string|int $interval): self
+    {
+        if ($this->timer !== null) {
+            throw new InvalidArgumentException('Projection timer already set');
+        }
 
         $this->timer = $this->normalizeInterval($interval);
 
@@ -86,39 +100,50 @@ final class Context implements ContextInterface
         return $this;
     }
 
-    public function when(array|Closure $eventHandlers): self
+    public function when(Closure $reactors): self
     {
-        $this->assertEventHandlersNotSet();
+        if ($this->reactors !== null) {
+            throw new InvalidArgumentException('Projection reactors already set');
+        }
 
-        $this->validateEventHandlers($eventHandlers);
-
-        $this->eventHandlers = $eventHandlers;
+        $this->reactors = $reactors;
 
         return $this;
     }
 
-    public function initCallback(): ?Closure
+    public function userState(): ?Closure
     {
-        return $this->initState;
+        return $this->userState;
     }
 
-    public function eventHandlers(): callable
+    public function userScope(): ?Closure
     {
-        $this->assertEventHandlersSet();
+        return $this->userScope;
+    }
 
-        return $this->createEventHandlers();
+    public function reactors(): Closure
+    {
+        if ($this->reactors === null) {
+            throw new InvalidArgumentException('Projection reactors not set');
+        }
+
+        return $this->reactors;
     }
 
     public function queries(): array
     {
-        $this->assertQueriesSet();
+        if ($this->queries === []) {
+            throw new InvalidArgumentException('Projection streams all|names|categories not set');
+        }
 
         return $this->queries;
     }
 
     public function queryFilter(): QueryFilter
     {
-        $this->assertQueryFilterSet();
+        if ($this->queryFilter === null) {
+            throw new InvalidArgumentException('Projection query filter not set');
+        }
 
         return $this->queryFilter;
     }
@@ -126,57 +151,6 @@ final class Context implements ContextInterface
     public function timer(): ?DateInterval
     {
         return $this->timer;
-    }
-
-    /**
-     * @internal
-     */
-    public function castEventHandlers(Caster $caster): void
-    {
-        if ($this->eventHandlers instanceof Closure) {
-            $this->eventHandlers = Closure::bind($this->eventHandlers, $caster, Caster::class);
-        } else {
-            $this->bindEventHandlers($caster);
-        }
-    }
-
-    /**
-     * @internal
-     */
-    public function castInitCallback(Caster $caster): array
-    {
-        if ($this->initState instanceof Closure) {
-            $callback = Closure::bind($this->initState, $caster, Caster::class);
-
-            $result = $callback();
-
-            $this->initState = $callback;
-
-            return $result;
-        }
-
-        return [];
-    }
-
-    private function assertNotAlreadyInitialized(): void
-    {
-        if ($this->initState instanceof Closure) {
-            throw new InvalidArgumentException('Projection already initialized');
-        }
-    }
-
-    private function assertQueryFilterNotSet(): void
-    {
-        if ($this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter already set');
-        }
-    }
-
-    private function assertTimerNotSet(): void
-    {
-        if ($this->timer !== null) {
-            throw new InvalidArgumentException('Projection timer already set');
-        }
     }
 
     private function normalizeInterval(DateInterval|string|int $interval): DateInterval
@@ -192,74 +166,10 @@ final class Context implements ContextInterface
         return $interval;
     }
 
-    private function validateEventHandlers(array|Closure $eventHandlers): void
-    {
-        if (is_array($eventHandlers)) {
-            foreach ($eventHandlers as $eventHandler) {
-                $this->assertNotStaticClosure($eventHandler);
-            }
-        } else {
-            $this->assertNotStaticClosure($eventHandlers);
-        }
-    }
-
     private function assertQueriesNotSet(): void
     {
         if ($this->queries !== []) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
-        }
-    }
-
-    private function assertEventHandlersNotSet(): void
-    {
-        if ($this->eventHandlers !== null) {
-            throw new InvalidArgumentException('Projection event handlers already set');
-        }
-    }
-
-    private function assertEventHandlersSet(): void
-    {
-        if ($this->eventHandlers === null) {
-            throw new InvalidArgumentException('Projection event handlers not set');
-        }
-    }
-
-    private function createEventHandlers(): callable
-    {
-        if (is_array($this->eventHandlers)) {
-            return new ProcessArrayEvent($this->eventHandlers);
-        }
-
-        return new ProcessClosureEvent($this->eventHandlers);
-    }
-
-    private function assertQueriesSet(): void
-    {
-        if ($this->queries === []) {
-            throw new InvalidArgumentException('Projection streams all|names|categories not set');
-        }
-    }
-
-    private function assertQueryFilterSet(): void
-    {
-        if (! $this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter not set');
-        }
-    }
-
-    private function bindEventHandlers(Caster $caster): void
-    {
-        foreach ($this->eventHandlers as &$eventHandler) {
-            $eventHandler = Closure::bind($eventHandler, $caster, Caster::class);
-        }
-    }
-
-    private function assertNotStaticClosure(Closure $callback): void
-    {
-        $reflection = new ReflectionFunction($callback);
-
-        if ($reflection->isStatic()) {
-            throw new InvalidArgumentException('Static closure is not allowed');
         }
     }
 }

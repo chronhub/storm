@@ -5,31 +5,52 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
+use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\ExtractEventHeader;
 
 final class InMemoryQueryScope implements ProjectionQueryScope
 {
-    //fixMe: limit not used in in memory query scope
-    // unless we pass all events to the query scope
-    public function fromIncludedPosition(int $limit = 500): ProjectionQueryFilter
+    public function fromIncludedPosition(): ProjectionQueryFilter
     {
-        return new class() implements InMemoryQueryFilter, ProjectionQueryFilter
+        return new class() implements InMemoryQueryFilter, LoadLimiterProjectionQueryFilter
         {
             use ExtractEventHeader;
+
+            private ?int $limit = null;
+
+            private int $counter = 0;
 
             private int $currentPosition = 0;
 
             public function apply(): callable
             {
-                return fn (DomainEvent $event): ?DomainEvent => $this->extractInternalPosition($event) >= $this->currentPosition ? $event : null;
+                return function (DomainEvent $event): bool {
+                    if ($this->counter === $this->limit) {
+                        return false;
+                    }
+
+                    $this->counter++;
+
+                    return $this->extractInternalPosition($event) >= $this->currentPosition;
+                };
             }
 
             public function setCurrentPosition(int $streamPosition): void
             {
                 $this->currentPosition = $streamPosition;
+            }
+
+            public function setLimit(int $limit): void
+            {
+                if ($limit < 0) {
+                    throw new InvalidArgumentException('Limit must be greater than 0');
+                }
+
+                $this->limit = $limit === 0 ? PHP_INT_MAX : $limit;
             }
 
             public function orderBy(): string

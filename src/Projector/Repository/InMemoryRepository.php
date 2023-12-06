@@ -4,148 +4,128 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionModel;
+use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
+use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Throwable;
 
 final readonly class InMemoryRepository implements ProjectionRepositoryInterface
 {
-    public function __construct(private ProjectionRepositoryInterface $repository)
-    {
+    public function __construct(
+        public ProjectionProvider $provider,
+        public LockManager $lockManager,
+        public JsonSerializer $serializer,
+        public string $streamName
+    ) {
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function create(ProjectionStatus $status): bool
+    public function create(ProjectionStatus $status): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->create($status),
-            'Failed on create'
+        $this->provider->createProjection($this->streamName, $status->value);
+    }
+
+    public function start(ProjectionStatus $projectionStatus): void
+    {
+        $this->provider->acquireLock(
+            $this->streamName,
+            $projectionStatus->value,
+            $this->lockManager->acquire(),
         );
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function stop(ProjectionDetail $projectionDetail): bool
+    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->stop($projectionDetail),
-            'Failed on stop'
+        $this->persist($projectionDetail, $projectionStatus);
+    }
+
+    public function release(): void
+    {
+        $this->provider->updateProjection(
+            $this->streamName,
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null,
         );
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function startAgain(): bool
+    public function startAgain(ProjectionStatus $projectionStatus): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->startAgain(),
-            'Failed on start again'
+        $this->provider->updateProjection(
+            $this->streamName,
+            status: $projectionStatus->value,
+            lockedUntil: $this->lockManager->acquire(),
         );
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function persist(ProjectionDetail $projectionDetail): bool
+    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->persist($projectionDetail),
-            'Failed on persist'
+        $this->provider->updateProjection(
+            $this->streamName,
+            status: $projectionStatus?->value,
+            state: $this->serializer->encode($projectionDetail->state),
+            position: $this->serializer->encode($projectionDetail->streamPositions),
+            lockedUntil: $this->lockManager->refresh()
         );
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): bool
+    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->reset($projectionDetail, $currentStatus),
-            'Failed on reset'
+        $this->provider->updateProjection(
+            $this->streamName,
+            status: $currentStatus->value,
+            state: $this->serializer->encode($projectionDetail->state),
+            position: $this->serializer->encode($projectionDetail->streamPositions),
         );
     }
 
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function delete(): bool
+    public function delete(bool $withEmittedEvents): void
     {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->delete(),
-            'Failed on delete'
-        );
-    }
-
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function acquireLock(): bool
-    {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->acquireLock(),
-            'Failed on acquire lock'
-        );
-    }
-
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function attemptUpdateStreamPositions(array $streamPositions): bool
-    {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->attemptUpdateStreamPositions($streamPositions),
-            'Failed on update lock'
-        );
-    }
-
-    /**
-     * @throws InMemoryProjectionFailed
-     */
-    public function releaseLock(): bool
-    {
-        return $this->tryOperation(
-            fn (): bool => $this->repository->releaseLock(),
-            'Failed on release lock'
-        );
+        $this->provider->deleteProjection($this->streamName);
     }
 
     public function loadDetail(): ProjectionDetail
     {
-        return $this->repository->loadDetail();
+        $projection = $this->provider->retrieve($this->streamName);
+
+        if (! $projection instanceof ProjectionModel) {
+            throw ProjectionNotFound::withName($this->streamName);
+        }
+
+        return new ProjectionDetail(
+            $this->serializer->decode($projection->position()),
+            $this->serializer->decode($projection->state()),
+        );
+    }
+
+    public function updateLock(): void
+    {
+        if ($this->lockManager->shouldRefresh()) {
+            $this->provider->updateProjection(
+                $this->streamName,
+                lockedUntil: $this->lockManager->refresh()
+            );
+        }
     }
 
     public function loadStatus(): ProjectionStatus
     {
-        return $this->repository->loadStatus();
+        $projection = $this->provider->retrieve($this->streamName);
+
+        if (! $projection instanceof ProjectionModel) {
+            return ProjectionStatus::RUNNING;
+        }
+
+        return ProjectionStatus::from($projection->status());
     }
 
     public function exists(): bool
     {
-        return $this->repository->exists();
+        return $this->provider->exists($this->streamName);
     }
 
     public function projectionName(): string
     {
-        return $this->repository->projectionName();
-    }
-
-    private function tryOperation(callable $operation, string $failedMessage): bool
-    {
-        try {
-            $result = $operation();
-        } catch (Throwable $exception) {
-            throw InMemoryProjectionFailed::fromProjectionException($exception, $failedMessage);
-        }
-
-        if ($result === true) {
-            return true;
-        }
-
-       throw InMemoryProjectionFailed::failedOnOperation($failedMessage.' for projection name '.$this->projectionName());
+        return $this->streamName;
     }
 }

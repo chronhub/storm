@@ -5,10 +5,14 @@ parameters:
 
     paths:
         - src
+        - tests
 
     level: 5
 
     ignoreErrors:
         - '#Unsafe usage of new static#'
+        - '#Undefined variable: \$this#'
 
     checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: true

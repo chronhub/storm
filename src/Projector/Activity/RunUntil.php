@@ -6,20 +6,19 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\Timer;
-use Closure;
 
 final class RunUntil
 {
     private bool $started = false;
 
-    private Timer $timer;
+    private ?Timer $timer = null;
 
-    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $timer = $subscription->context()->timer();
+        $interval = $subscription->context()->timer();
 
-        if ($timer && ! $this->started) {
-            $this->timer = new Timer($subscription->clock(), $timer);
+        if ($interval && ! $this->started) {
+            $this->timer = new Timer($subscription->clock(), $interval);
 
             $this->timer->start();
 

@@ -16,8 +16,8 @@
     "psr/container": "dev-master",
     "react/promise": "^2.9",
     "symfony/uid": "6.3.x",
-    "symfony/clock": "^6.3",
-    "symfony/serializer": "^6.3",
+    "symfony/clock": "^6.4",
+    "symfony/serializer": "^6.4",
     "ext-pcntl": "*"
   },
   "require-dev": {

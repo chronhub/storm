@@ -4,84 +4,102 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
-use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
-use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\UnitTestCase;
 use Generator;
-use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(StreamIterator::class)]
-final class StreamIteratorTest extends UnitTestCase
-{
-    public function testEmptyGenerator(): void
-    {
-        $streamEvents = $this->provideEmptyGenerator();
+test('empty generator set iterator as not valid', function (): void {
+    $streamEvents = StreamEventsFactory::fromEmpty();
 
-        $iterator = new StreamIterator($streamEvents);
+    $iterator = new StreamIterator($streamEvents);
 
-        $this->assertNull($iterator->current());
-        $this->assertNull($iterator->key());
-        $this->assertFalse($iterator->valid());
-    }
+    expect($iterator->valid())->toBeFalse()
+        ->and($iterator->current())->toBeNull()
+        ->and($iterator->key())->toBeNull();
+});
 
-    public function testIteratorNextOnInstantiation(): void
-    {
-        $streamEvents = $this->provideStreamEvens();
+test('iterator cursor advance on constructor', function (): void {
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
 
-        $iterator = new StreamIterator($streamEvents);
+    $iterator = new StreamIterator($streamEvents);
 
-        $this->assertInstanceOf(SomeEvent::class, $iterator->current());
-        $this->assertSame(1, $iterator->key());
-        $this->assertTrue($iterator->valid());
+    expect($iterator->valid())->toBeTrue()
+        ->and($iterator->current())->toBeInstanceOf(SomeEvent::class)
+        ->and($iterator->key())->toBe(1);
+});
 
-        $lastEvent = null;
-        while ($iterator->valid()) {
-            $iterator->next();
+test('can iterate with internal position as key and event as value', function (): void {
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(5);
 
-            if ($iterator->current() instanceof DomainEvent) {
-                $lastEvent = $iterator->current();
-            }
-        }
+    $iterator = new StreamIterator($streamEvents);
 
-        $this->assertSame(10, $lastEvent->header(EventHeader::INTERNAL_POSITION));
-    }
+    $internalPosition = 1;
 
-    public function testRewind(): void
-    {
-        $streamEvents = $this->provideStreamEvens();
+    while ($iterator->valid()) {
+        expect($iterator->current())->toBeInstanceOf(SomeEvent::class)
+            ->and($iterator->key())->toBe($internalPosition);
 
-        $iterator = new StreamIterator($streamEvents);
-
-        $this->assertSame(1, $iterator->current()->header(EventHeader::INTERNAL_POSITION));
+        $internalPosition++;
 
         $iterator->next();
+    }
+
+    expect($iterator->valid())->toBeFalse()
+        ->and($iterator->current())->toBeNull()
+        ->and($iterator->key())->toBeNull();
+});
+
+test('can rewind', function (): void {
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
+
+    $iterator = new StreamIterator($streamEvents);
+
+    expect($iterator->current())->toBeInstanceOf(SomeEvent::class)
+        ->and($iterator->key())->toBe(1);
+
+    $iterator->next();
+    $iterator->next();
+
+    expect($iterator->current())->toBeInstanceOf(SomeEvent::class)
+        ->and($iterator->key())->toBe(3);
+
+    $iterator->rewind();
+
+    expect($iterator->current())->toBeInstanceOf(SomeEvent::class)
+        ->and($iterator->key())->toBe(1);
+});
+
+test('can rewind when iterator is no longer valid', function () {
+    $streamEvents = StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10);
+
+    $iterator = new StreamIterator($streamEvents);
+
+    $iterator->next();
+    $iterator->next();
+
+    $iterator->rewind();
+
+    expect($iterator->valid())->toBeTrue();
+
+    while ($iterator->valid()) {
         $iterator->next();
-        $iterator->next();
-        $iterator->rewind();
-
-        $this->assertSame(1, $iterator->current()->header(EventHeader::INTERNAL_POSITION));
     }
 
-    private function provideStreamEvens(): Generator
-    {
-        $count = 1;
-        while ($count !== 11) {
-            $headers = [EventHeader::INTERNAL_POSITION => $count];
+    expect($iterator->valid())->toBeFalse();
 
-            yield SomeEvent::fromContent([])->withHeaders($headers);
+    $iterator->rewind();
 
-            $count++;
-        }
+    expect($iterator->valid())->toBeTrue();
+});
 
-        return $count;
-    }
+test('count total of events', function (Generator $streamEvents, int $expectedCount): void {
+    $iterator = new StreamIterator($streamEvents);
 
-    private function provideEmptyGenerator(): Generator
-    {
-        yield from [];
-
-        return 0;
-    }
-}
+    expect($iterator->count())->toBe($expectedCount);
+})->with(
+    [
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(5), 5],
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(10), 10],
+        [fn () => StreamEventsFactory::withEvent(SomeEvent::class)->fromInternalPosition(20), 20],
+    ]);

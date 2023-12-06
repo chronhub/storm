@@ -4,150 +4,121 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Iterator;
 
-use Chronhub\Storm\Contracts\Message\EventHeader;
+use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
+use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
+use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
-use Chronhub\Storm\Tests\UnitTestCase;
-use DateTimeImmutable;
-use Generator;
+use TypeError;
 
-use function array_keys;
-use function array_shift;
-use function array_values;
+beforeEach(function (): void {
+    $this->clock = new PointInTime();
+    $this->streams = MergeStreamIteratorFactory::getIterator($this->clock);
+});
 
-class MergeStreamsTest extends UnitTestCase
-{
-    public function testAdvancePointerOnConstructor(): void
-    {
-        $streams = $this->getStreams();
+test('empty stream events raise type error', function (): void {
+    $iterator = new MergeStreamIterator($this->clock, ['foo'], new StreamIterator(StreamEventsFactory::fromEmpty()));
 
-        $mergeStreams = new MergeStreamIterator(array_keys($streams), ...array_values($streams));
-
-        $this->assertEquals('stream3', $mergeStreams->streamName());
-    }
-
-    public function testMergeStreams(): void
-    {
-        // note: all provided events must have already sorted by event time
-
-        $streams = $this->getStreams();
-
-        $expectedStreamsOrder = [
-            'stream3', 'stream1', 'stream2',
-            'stream1', 'stream3', 'stream2',
-            'stream2', 'stream1', 'stream3',
-        ];
-
-        $mergeStreams = new MergeStreamIterator(array_keys($streams), ...array_values($streams));
-
-        $previousEventTime = null;
-
-        while ($mergeStreams->valid()) {
-            $expectedStreamName = array_shift($expectedStreamsOrder);
-
-            $this->assertEquals($expectedStreamName, $mergeStreams->streamName());
-
-            $eventTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u', $mergeStreams->current()->header(Header::EVENT_TIME));
-
-            $this->assertTrue($previousEventTime === null || $eventTime > $previousEventTime);
-
-            $previousEventTime = $eventTime;
-
-            $mergeStreams->next();
-        }
-    }
+    expect($iterator->streamName())->toBe('foo')
+        ->and($iterator->valid())->toBeFalse()
+        ->and($iterator->current())->toBeNull();
 
     /**
-     * @test
+     * Generator from streamIterator should always
+     * raise a StreamNotFound exception on empty stream events
      */
-    public function testIterateOverKeyAsEventPosition(): void
-    {
-        $streams = $this->getStreams();
+    $iterator->key();
+})->throws(TypeError::class, 'Chronhub\Storm\Projector\Iterator\MergeStreamIterator::key(): Return value must be of type int, null returned');
 
-        $mergeStreams = new MergeStreamIterator(array_keys($streams), ...array_values($streams));
+test('raised stream not found exception in constructor send by generator', function (): void {
+    new MergeStreamIterator($this->clock, [], new StreamIterator(StreamEventsFactory::fromEmptyAndRaiseStreamNotFoundException('foo')));
+})->throws(StreamNotFound::class, 'Stream foo not found');
 
-        $expectedPosition = [3, 1, 5, 4, 8, 7, 2, 6, 9];
+test('iterator cursor advance in constructor', function (): void {
+    expect($this->streams->streamName())->toBe('stream2')
+        ->and($this->streams->key())->toBe(5)
+        ->and($this->streams->current())->toBeInstanceOf(SomeEvent::class)
+        ->and($this->streams->current()->header(Header::EVENT_TIME))->toBe('2023-05-10T10:15:19.000000');
+});
 
-        while ($mergeStreams->valid()) {
-            $this->assertEquals(array_shift($expectedPosition), $mergeStreams->key());
+test('can iterate by ordered event time across streams', function () {
+    $streamsOrder = [];
 
-            $mergeStreams->next();
-        }
+    $previousEventTime = null;
+
+    while ($this->streams->valid()) {
+        $streamsOrder[] = $this->streams->streamName();
+
+        $eventTime = $this->clock->toPointInTime($this->streams->current()->header(Header::EVENT_TIME));
+
+        $this->assertTrue($previousEventTime === null || $eventTime > $previousEventTime);
+
+        $previousEventTime = $eventTime;
+
+        $this->streams->next();
     }
 
-    /**
-     * @test
-     */
-    public function testCountTotalOfEvents(): void
-    {
-        $streams = $this->getStreams();
+    expect($streamsOrder)->toBe(MergeStreamIteratorFactory::expectedIteratorOrder());
+});
 
-        $mergeStreams = new MergeStreamIterator(array_keys($streams), ...array_values($streams));
+test('can iterate over key representing event position', function (): void {
+    $eventPositions = [];
+    while ($this->streams->valid()) {
+        $eventPositions[] = $this->streams->key();
 
-        $this->assertSame(9, $mergeStreams->count());
+        $this->streams->next();
     }
 
-    /**
-     * @test
-     */
-    public function testCanRewind(): void
-    {
-        $streams = $this->getStreams();
-        $mergeStreams = new MergeStreamIterator(array_keys($streams), ...array_values($streams));
+    expect($eventPositions)->toBe(MergeStreamIteratorFactory::expectedIteratorPosition());
+});
 
-        $this->assertSame('stream3', $mergeStreams->streamName());
+test('can rewind streams', function (): void {
+    expect($this->streams->streamName())->toBe('stream2');
 
-        $mergeStreams->next();
+    $this->streams->next();
+    $this->streams->next();
+    $this->streams->next();
 
-        $this->assertSame('stream1', $mergeStreams->streamName());
+    expect($this->streams->streamName())->toBe('stream3');
 
-        $mergeStreams->next();
+    $this->streams->rewind();
 
-        $this->assertSame('stream2', $mergeStreams->streamName());
+    expect($this->streams->streamName())->toBe('stream2');
+});
 
-        $mergeStreams->rewind();
-
-        $this->assertSame('stream3', $mergeStreams->streamName());
+test('failed rewind streams when all streams are no longer valid', function () {
+    while ($this->streams->valid()) {
+        $this->streams->next();
     }
 
-    private function provideEventsForStream1(): Generator
-    {
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 1, Header::EVENT_TIME => '2023-05-10T10:15:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 4, Header::EVENT_TIME => '2023-05-10T10:17:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 6, Header::EVENT_TIME => '2023-05-10T10:24:19.000']);
+    expect($this->streams->valid())->toBeFalse();
 
-        return 3;
+    $this->streams->rewind();
+
+    expect($this->streams->valid())->toBeFalse();
+});
+
+test('return number of iterators', function (): void {
+    expect($this->streams->numberOfIterators)->toBe(3);
+});
+
+test('return number of events', function (): void {
+    expect($this->streams->numberOfEvents)->toBe(9);
+});
+
+test('count total of events across valid streams', function (): void {
+    expect($this->streams->count())
+        ->toBe(9)
+        ->and($this->streams->numberOfEvents)->toBe(9);
+
+    while ($this->streams->valid()) {
+        $this->streams->next();
     }
 
-    private function provideEventsForStream2(): Generator
-    {
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 5, Header::EVENT_TIME => '2023-05-10T10:16:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 7, Header::EVENT_TIME => '2023-05-10T10:20:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 2, Header::EVENT_TIME => '2023-05-10T10:22:19.000']);
-
-        return 3;
-    }
-
-    private function provideEventsForStream3(): Generator
-    {
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 3, Header::EVENT_TIME => '2023-05-10T10:14:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 8, Header::EVENT_TIME => '2023-05-10T10:19:19.000']);
-        yield SomeEvent::fromContent([])->withHeaders([EventHeader::INTERNAL_POSITION => 9, Header::EVENT_TIME => '2023-05-10T10:26:19.000']);
-
-        return 3;
-    }
-
-    /**
-     * @return array<string, StreamIterator>
-     */
-    private function getStreams(): array
-    {
-        return [
-            'stream2' => new StreamIterator($this->provideEventsForStream2()),
-            'stream1' => new StreamIterator($this->provideEventsForStream1()),
-            'stream3' => new StreamIterator($this->provideEventsForStream3()),
-        ];
-    }
-}
+    expect($this->streams->count())
+        ->toBe(0)
+        ->and($this->streams->numberOfEvents)->toBe(9);
+});

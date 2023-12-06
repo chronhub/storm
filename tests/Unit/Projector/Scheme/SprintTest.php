@@ -5,43 +5,40 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(Sprint::class)]
-final class SprintTest extends UnitTestCase
-{
-    public function testInstance(): void
-    {
-        $sprint = new Sprint();
+beforeEach(function (): void {
+    $this->sprint = new Sprint();
+});
 
-        $this->assertFalse($sprint->inBackground());
-        $this->assertFalse($sprint->inProgress());
-    }
+test('new instance', function (): void {
+    expect($this->sprint->inBackground())->toBeFalse()
+        ->and($this->sprint->inProgress())->toBeFalse();
+});
 
-    public function testStopSprint(): void
-    {
-        $sprint = new Sprint();
+test('start sprint', function (): void {
+    expect($this->sprint->inProgress())->toBeFalse();
 
-        $sprint->continue();
+    $this->sprint->continue();
 
-        $this->assertTrue($sprint->inProgress());
+    expect($this->sprint->inProgress())->toBeTrue();
+});
 
-        $sprint->stop();
+test('run in background', function (): void {
+    $this->sprint->runInBackground(true);
 
-        $this->assertFalse($sprint->inProgress());
-    }
+    expect($this->sprint->inBackground())->toBeTrue();
 
-    public function testRunInBackground(): void
-    {
-        $sprint = new Sprint();
+    $this->sprint->runInBackground(false);
 
-        $sprint->runInBackground(true);
+    expect($this->sprint->inBackground())->toBeFalse();
+});
 
-        $this->assertTrue($sprint->inBackground());
+test('stop sprint', function (): void {
+    $this->sprint->continue();
 
-        $sprint->runInBackground(false);
+    expect($this->sprint->inProgress())->toBeTrue();
 
-        $this->assertFalse($sprint->inBackground());
-    }
-}
+    $this->sprint->stop();
+
+    expect($this->sprint->inProgress())->toBeFalse();
+});

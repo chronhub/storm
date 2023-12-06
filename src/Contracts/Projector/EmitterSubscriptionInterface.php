@@ -7,17 +7,20 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
 {
     /**
-     * Check if the subscription is fixed to the projector.
+     * Check if an event has been emitted.
      */
-    public function isFixed(): bool;
+    public function wasEmitted(): bool;
 
     /**
-     * Fix the subscription to the projector.
+     * Set the emitted event to true.
      */
-    public function fixe(): void;
+    public function eventEmitted(): void;
 
     /**
-     * Unfix the subscription from the projector.
+     * Unset the emitted event to false.
+     *
+     * Only happens when the stream is deleted.
+     * checkMe: probably not required as deleting the stream will put down the projection
      */
-    public function unfix(): void;
+    public function unsetEmitted(): void;
 }

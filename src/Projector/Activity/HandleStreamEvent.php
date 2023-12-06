@@ -5,45 +5,43 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Reporter\DomainEvent;
-use Closure;
 
 use function gc_collect_cycles;
 
-final readonly class HandleStreamEvent
+final class HandleStreamEvent
 {
-    public function __construct(private LoadStreams $loadStreams)
+    /**
+     * @var callable{Subscription,DomainEvent,int<0,max>}
+     */
+    private $eventProcessor;
+
+    public function __construct(callable $eventProcessor)
     {
+        $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(Subscription $subscription, Closure $next): Closure|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $streams = $this->loadStreams->batch(
-            $subscription->streamManager()->jsonSerialize(),
-            $subscription->context()->queryFilter()
-        );
+        $streams = $subscription->pullStreamIterator();
 
-        foreach ($streams as $eventPosition => $event) {
-            $subscription->setCurrentStreamName($streams->streamName());
+        if ($streams instanceof MergeStreamIterator) {
+            foreach ($streams as $position => $event) {
+                $streamName = $streams->streamName();
 
-            $eventHandled = $this->processEvent($subscription, $event, $eventPosition);
+                $subscription->setStreamName($streamName);
 
-            if (! $eventHandled || ! $subscription->sprint()->inProgress()) {
-                gc_collect_cycles();
+                $continue = ($this->eventProcessor)($subscription, $event, $position);
 
-                return $next($subscription);
+                if (! $continue || ! $subscription->sprint()->inProgress()) {
+                    break;
+                }
             }
+
+            gc_collect_cycles();
         }
 
-        gc_collect_cycles();
-
         return $next($subscription);
-    }
-
-    private function processEvent(Subscription $subscription, DomainEvent $event, int $eventPosition): bool
-    {
-        $eventProcessor = $subscription->context()->eventHandlers();
-
-        return $eventProcessor($subscription, $event, $eventPosition);
     }
 }
