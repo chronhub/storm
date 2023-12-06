@@ -61,6 +61,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->createGenericSubscription($option),
             $this->createSubscriptionManagement($streamName, $option),
             $this->createEventCounter($option),
+            $this->createStreamCache($option),
         );
     }
 
@@ -91,11 +92,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         }
 
         return new DefaultOption(...$this->options);
-    }
-
-    public function createStreamCache(ProjectionOption $option): StreamCacheInterface
-    {
-        return new StreamCache($option->getCacheSize());
     }
 
     public function getProjectionProvider(): ProjectionProvider
@@ -149,6 +145,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createEventCounter(ProjectionOption $options): EventCounter
     {
         return new EventCounter($options->getBlockSize());
+    }
+
+    protected function createStreamCache(ProjectionOption $option): StreamCacheInterface
+    {
+        return new StreamCache($option->getCacheSize());
     }
 
     protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository

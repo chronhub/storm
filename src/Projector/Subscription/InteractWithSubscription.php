@@ -9,18 +9,15 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithSubscription
 {
-    public function start(bool $keepRunning): void
-    {
-        $this->subscription->start($keepRunning);
-    }
-
     public function initializeAgain(): void
     {
         $this->subscription->initializeAgain();
@@ -90,4 +87,11 @@ trait InteractWithSubscription
     {
         return $this->subscription->chronicler();
     }
+
+    /**
+     * @internal
+     */
+    abstract public function getScope(): ProjectorScope;
+
+    abstract protected function newWorkflow(): Workflow;
 }

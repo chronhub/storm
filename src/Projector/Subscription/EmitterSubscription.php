@@ -5,19 +5,26 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\ProvideActivities;
+use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\RunProjection;
+use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
+use Closure;
 
 final class EmitterSubscription implements EmitterSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
-    use InteractWithSubscription {
-        start as protected startDefault;
-    }
+    use InteractWithSubscription;
 
     private bool $isStreamFixed = false;
 
@@ -25,6 +32,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         protected readonly GenericSubscription $subscription,
         protected ProjectionRepositoryInterface $repository,
         protected EventCounter $eventCounter,
+        private readonly StreamCacheInterface $streamCache
     ) {
     }
 
@@ -34,7 +42,37 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
             throw new RuntimeException('Emitter subscription requires a projection query filter');
         }
 
-        $this->startDefault($keepRunning);
+        $this->subscription->start($keepRunning);
+
+        $project = new RunProjection($this, $this->newWorkflow());
+
+        $project->beginCycle();
+    }
+
+    public function emit(DomainEvent $event): void
+    {
+        $streamName = new StreamName($this->getName());
+
+        // First commit the stream name without the event
+        if ($this->streamNotEmittedAndNotExists($streamName)) {
+            $this->chronicler()->firstCommit(new Stream($streamName));
+
+            $this->isStreamFixed = true;
+        }
+
+        // Append the stream with the event
+        $this->linkTo($this->getName(), $event);
+    }
+
+    public function linkTo(string $streamName, DomainEvent $event): void
+    {
+        $newStreamName = new StreamName($streamName);
+
+        $stream = new Stream($newStreamName, [$event]);
+
+        $this->streamIsCachedOrExists($newStreamName)
+            ? $this->chronicler()->amend($stream)
+            : $this->chronicler()->firstCommit($stream);
     }
 
     public function rise(): void
@@ -77,19 +115,20 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         $this->deleteStream();
     }
 
-    public function wasEmitted(): bool
+    private function streamNotEmittedAndNotExists(StreamName $streamName): bool
     {
-        return $this->isStreamFixed;
+        return ! $this->isStreamFixed && ! $this->chronicler()->hasStream($streamName);
     }
 
-    public function eventEmitted(): void
+    private function streamIsCachedOrExists(StreamName $streamName): bool
     {
-        $this->isStreamFixed = true;
-    }
+        if ($this->streamCache->has($streamName->name)) {
+            return true;
+        }
 
-    public function unsetEmitted(): void
-    {
-        $this->isStreamFixed = false;
+        $this->streamCache->push($streamName->name);
+
+        return $this->chronicler()->hasStream($streamName);
     }
 
     private function deleteStream(): void
@@ -100,6 +139,26 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
             // fail silently
         }
 
-        $this->unsetEmitted();
+        $this->isStreamFixed = false;
+    }
+
+    protected function newWorkflow(): Workflow
+    {
+        $activities = ProvideActivities::persistent($this);
+
+        return new Workflow($this, $activities);
+    }
+
+    public function getScope(): EmitterProjectorScopeInterface
+    {
+        $userScope = $this->context()->userScope();
+
+        if ($userScope instanceof Closure) {
+            return $userScope($this);
+        }
+
+        return new EmitterProjectorScope(
+            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
+        );
     }
 }

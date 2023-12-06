@@ -15,8 +15,6 @@ interface SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface;
 
-    public function createStreamCache(ProjectionOption $option): StreamCacheInterface;
-
     /**
      * Creates a ProjectionOption instance with the specified options.
      *

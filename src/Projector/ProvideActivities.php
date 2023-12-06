@@ -16,13 +16,16 @@ use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
+use Chronhub\Storm\Projector\Subscription\QuerySubscription;
+use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 
 final class ProvideActivities
 {
     /**
      * @return array<callable>
      */
-    public static function persistent(ProjectEmitter|ProjectReadModel $projector): array
+    public static function persistent(EmitterSubscription|ReadModelSubscription $projector): array
     {
         return [
             new RunUntil(),
@@ -41,7 +44,7 @@ final class ProvideActivities
     /**
      * @return array<callable>
      */
-    public static function query(ProjectQuery $projector): array
+    public static function query(QuerySubscription $projector): array
     {
         return [
             new RunUntil(),
@@ -52,11 +55,11 @@ final class ProvideActivities
         ];
     }
 
-    private static function makeStreamEventHandler(ProjectQuery|ProjectEmitter|ProjectReadModel $projector): callable
+    private static function makeStreamEventHandler(EmitterSubscription|ReadModelSubscription|QuerySubscription $projector): callable
     {
         return new HandleStreamEvent(
             new EventProcessor(
-                $projector->subscription()->context()->reactors(),
+                $projector->context()->reactors(),
                 $projector->getScope()
             )
         );

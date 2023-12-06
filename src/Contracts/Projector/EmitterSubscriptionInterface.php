@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Reporter\DomainEvent;
+
 interface EmitterSubscriptionInterface extends PersistentSubscriptionInterface
 {
     /**
-     * Check if an event has been emitted.
+     * Create or amend to a (new) stream under the current projection name.
      */
-    public function wasEmitted(): bool;
+    public function emit(DomainEvent $event): void;
 
     /**
-     * Set the emitted event to true.
+     * Create or amend to a (new) stream with the given stream name.
      */
-    public function eventEmitted(): void;
-
-    /**
-     * Unset the emitted event to false.
-     *
-     * Only happens when the stream is deleted.
-     * checkMe: probably not required as deleting the stream will put down the projection
-     */
-    public function unsetEmitted(): void;
+    public function linkTo(string $streamName, DomainEvent $event): void;
 }

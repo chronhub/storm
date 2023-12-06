@@ -7,16 +7,20 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\ProvideActivities;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
+use Chronhub\Storm\Projector\Scheme\RunProjection;
+use Chronhub\Storm\Projector\Scheme\Workflow;
+use Closure;
 
 final class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
-    use InteractWithSubscription {
-        start as protected startDefault;
-    }
+    use InteractWithSubscription;
 
     public function __construct(
         protected readonly GenericSubscription $subscription,
@@ -32,7 +36,11 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             throw new RuntimeException('Read model subscription requires a projection query filter');
         }
 
-        $this->startDefault($keepRunning);
+        $this->subscription->start($keepRunning);
+
+        $project = new RunProjection($this, $this->newWorkflow());
+
+        $project->beginCycle();
     }
 
     public function rise(): void
@@ -79,5 +87,30 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
         $this->streamManager()->resets();
 
         $this->initializeAgain();
+    }
+
+    public function readModel(): ReadModel
+    {
+        return $this->readModel;
+    }
+
+    protected function newWorkflow(): Workflow
+    {
+        $activities = ProvideActivities::persistent($this);
+
+        return new Workflow($this, $activities);
+    }
+
+    public function getScope(): ReadModelProjectorScopeInterface
+    {
+        $userScope = $this->context()->userScope();
+
+        if ($userScope instanceof Closure) {
+            return $userScope($this);
+        }
+
+        return new ReadModelProjectorScope(
+            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
+        );
     }
 }

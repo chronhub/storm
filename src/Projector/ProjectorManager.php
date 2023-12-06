@@ -35,8 +35,7 @@ final class ProjectorManager implements ProjectorManagerInterface
         $options = $this->subscriptionFactory->createOption($options);
 
         return new ProjectEmitter(
-            $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
-            $this->subscriptionFactory->createStreamCache($options),
+            $this->subscriptionFactory->createEmitterSubscription($streamName, $options)
         );
     }
 
@@ -46,7 +45,6 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         return new ProjectReadModel(
             $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
-            $readModel
         );
     }
 

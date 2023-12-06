@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface ReadModelProjectorScopeInterface extends ProjectorScope
 {
     /**
-     * Return read model instance.
+     * Return the read model instance.
      */
     public function readModel(): ReadModel;
 }
