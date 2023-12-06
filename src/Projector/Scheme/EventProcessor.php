@@ -36,22 +36,37 @@ final readonly class EventProcessor
             return false;
         }
 
-        $this->reactOn($event, $subscription);
+        // assume event "handled" and increment counter
+        // in fact, with closure reactors, event(s) may have been skipped
+        // which make us store the same data, that was the pros of array reactors.
 
-        // event handled and increment counter
+        // the easiest would be to add concerned events in context factory,
+        // and increment counter only if event is concerned.
+        //  - pros: easy to implement, dev can use these events to optimize query filter
+        //  - cons: pita when too many events, can slow down queries filter if used, and if not set, operation store and persist vary
+        // this must be handled by the handle stream activity in_array($event->type(), $this->concernedEvents)
+
+        // in next cases, we need to refactor how we detect gap and bind stream and also handle null in handle stream event from the event process
+        // cannot bind a stream which is not considered as handled!
+
+        // some solution:
+        //   - fetch position and state and compare after reactor if they have changed => user state can be altered or not in too many ways
+        //   - bring back array reactors but even more cumbersome now as we do not change the scope anymore.
+        //   - make us aware of event handled from scope $scope->eventHandled() and reset it but too much side effect.
+        //   - allow return false from closure reactor, but we lost the simplicity of closure as we need to return state or null each time to finally return false
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->eventCounter()->increment();
         }
+
+        $this->reactOn($event, $subscription);
 
         // when option block size is reached, persist data
         if ($subscription instanceof PersistentSubscriptionInterface) {
             $subscription->persistWhenCounterIsReached();
         }
 
-        /**
-         * Can return false to stop processing as it may have stopped
-         * from a signal or monitor command
-         */
+        // can return false to stop processing as it may have stopped
+        // from a signal or monitor command
         return $subscription->sprint()->inProgress();
     }
 
@@ -77,7 +92,8 @@ final readonly class EventProcessor
      */
     private function bindStream(Subscription $subscription, DomainEvent $event, int $nextPosition): bool
     {
-        // query subscription does not mind of gaps
+        // query subscription does not mind of a gap,
+        // so bind stream to the next position will always return true
         $eventTime = $subscription instanceof PersistentSubscriptionInterface
             ? $event->header(Header::EVENT_TIME) : false;
 
