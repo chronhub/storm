@@ -20,11 +20,6 @@ final readonly class ProjectQuery implements QueryProjector
         $this->subscription->start($inBackground);
     }
 
-    public function stop(): void
-    {
-        $this->subscription->sprint()->stop();
-    }
-
     public function reset(): void
     {
         $this->subscription->streamManager()->resets();

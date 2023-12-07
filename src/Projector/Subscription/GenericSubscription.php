@@ -28,17 +28,17 @@ final class GenericSubscription implements Subscription
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    private readonly ProjectionStateInterface $state;
+    public readonly ProjectionStateInterface $state;
 
-    private readonly Sprint $sprint;
+    public readonly Sprint $sprint;
 
-    private readonly Chronicler $chronicler;
+    public readonly Chronicler $chronicler;
 
     public function __construct(
-        private readonly ContextReaderInterface $context,
+        public readonly ContextReaderInterface $context,
         private readonly StreamManagerInterface $streamManager,
-        private readonly SystemClock $clock,
-        private readonly ProjectionOption $option,
+        public readonly SystemClock $clock,
+        public readonly ProjectionOption $option,
         Chronicler $chronicler,
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {

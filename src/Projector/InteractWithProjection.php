@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Closure;
 use DateInterval;
 
@@ -13,56 +12,56 @@ trait InteractWithProjection
 {
     public function initialize(Closure $userState): static
     {
-        $this->context()->initialize($userState);
+        $this->subscription->context()->initialize($userState);
 
         return $this;
     }
 
     public function fromStreams(string ...$streams): static
     {
-        $this->context()->fromStreams(...$streams);
+        $this->subscription->context()->fromStreams(...$streams);
 
         return $this;
     }
 
     public function fromCategories(string ...$categories): static
     {
-        $this->context()->fromCategories(...$categories);
+        $this->subscription->context()->fromCategories(...$categories);
 
         return $this;
     }
 
     public function fromAll(): static
     {
-        $this->context()->fromAll();
+        $this->subscription->context()->fromAll();
 
         return $this;
     }
 
     public function when(Closure $reactors): static
     {
-        $this->context()->when($reactors);
+        $this->subscription->context()->when($reactors);
 
         return $this;
     }
 
     public function withQueryFilter(QueryFilter $queryFilter): static
     {
-        $this->context()->withQueryFilter($queryFilter);
+        $this->subscription->context()->withQueryFilter($queryFilter);
 
         return $this;
     }
 
     public function until(DateInterval|string|int $interval): static
     {
-        $this->context()->until($interval);
+        $this->subscription->context()->until($interval);
 
         return $this;
     }
 
     public function withScope(Closure $scope): static
     {
-        $this->context()->withScope($scope);
+        $this->subscription->context()->withScope($scope);
 
         return $this;
     }
@@ -70,10 +69,5 @@ trait InteractWithProjection
     public function getState(): array
     {
         return $this->subscription->state()->get();
-    }
-
-    protected function context(): ContextReaderInterface
-    {
-        return $this->subscription->context();
     }
 }

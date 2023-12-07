@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
 use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
+use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\ProvideActivities;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
@@ -29,9 +30,9 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
     private bool $isStreamFixed = false;
 
     public function __construct(
-        protected readonly GenericSubscription $subscription,
-        protected ProjectionRepositoryInterface $repository,
-        protected EventCounter $eventCounter,
+        protected readonly Subscription $subscription,
+        protected readonly ProjectionRepositoryInterface $repository,
+        protected readonly EventCounter $eventCounter,
         private readonly StreamCacheInterface $streamCache
     ) {
     }
@@ -89,6 +90,17 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         $this->repository->persist($this->getProjectionDetail(), null);
     }
 
+    public function revise(): void
+    {
+        $this->streamManager()->resets();
+
+        $this->initializeAgain();
+
+        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
+
+        $this->deleteStream();
+    }
+
     public function discard(bool $withEmittedEvents): void
     {
         $this->repository->delete($withEmittedEvents);
@@ -102,17 +114,6 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         $this->streamManager()->resets();
 
         $this->initializeAgain();
-    }
-
-    public function revise(): void
-    {
-        $this->streamManager()->resets();
-
-        $this->initializeAgain();
-
-        $this->repository->reset($this->getProjectionDetail(), $this->currentStatus());
-
-        $this->deleteStream();
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool
@@ -136,7 +137,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
         try {
             $this->chronicler()->delete(new StreamName($this->getName()));
         } catch (StreamNotFound) {
-            // fail silently
+            // ignore
         }
 
         $this->isStreamFixed = false;
@@ -144,7 +145,7 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ProvideActivities::persistent($this);
+        $activities = ProvideActivities::forPersistence($this);
 
         return new Workflow($this, $activities);
     }
@@ -157,8 +158,6 @@ final class EmitterSubscription implements EmitterSubscriptionInterface
             return $userScope($this);
         }
 
-        return new EmitterProjectorScope(
-            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
-        );
+        return new EmitterProjectorScope($this);
     }
 }

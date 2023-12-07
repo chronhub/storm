@@ -15,9 +15,8 @@ interface ProjectorScope
 
     /**
      * Return the current stream name
-     * Only null on setup but available at the first event.
      */
-    public function streamName(): ?string;
+    public function streamName(): string;
 
     /**
      * Return the clock implementation.

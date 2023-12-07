@@ -17,16 +17,16 @@ use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
 
-final class ReadModelSubscription implements ReadModelSubscriptionInterface
+final readonly class ReadModelSubscription implements ReadModelSubscriptionInterface
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription;
 
     public function __construct(
-        protected readonly GenericSubscription $subscription,
+        protected GenericSubscription $subscription,
         protected ProjectionRepositoryInterface $repository,
         protected EventCounter $eventCounter,
-        private readonly ReadModel $readModel,
+        private ReadModel $readModel,
     ) {
     }
 
@@ -96,7 +96,7 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ProvideActivities::persistent($this);
+        $activities = ProvideActivities::forPersistence($this);
 
         return new Workflow($this, $activities);
     }
@@ -109,8 +109,6 @@ final class ReadModelSubscription implements ReadModelSubscriptionInterface
             return $userScope($this);
         }
 
-        return new ReadModelProjectorScope(
-            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
-        );
+        return new ReadModelProjectorScope($this);
     }
 }

@@ -36,14 +36,12 @@ final class QuerySubscription implements QuerySubscriptionInterface
             return $userScope($this);
         }
 
-        return new QueryProjectorScope(
-            $this, $this->subscription->clock(), fn (): string => $this->subscription->currentStreamName()
-        );
+        return new QueryProjectorScope($this);
     }
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ProvideActivities::query($this);
+        $activities = ProvideActivities::forQuery($this);
 
         return new Workflow($this, $activities);
     }

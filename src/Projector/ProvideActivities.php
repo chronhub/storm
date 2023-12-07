@@ -25,13 +25,13 @@ final class ProvideActivities
     /**
      * @return array<callable>
      */
-    public static function persistent(EmitterSubscription|ReadModelSubscription $projector): array
+    public static function forPersistence(EmitterSubscription|ReadModelSubscription $subscription): array
     {
         return [
             new RunUntil(),
             new RisePersistentProjection(),
             new LoadStreams(),
-            self::makeStreamEventHandler($projector),
+            self::makeStreamEventHandler($subscription),
             new HandleStreamGap(),
             new PersistOrUpdate(),
             new ResetEventCounter(),
@@ -44,23 +44,23 @@ final class ProvideActivities
     /**
      * @return array<callable>
      */
-    public static function query(QuerySubscription $projector): array
+    public static function forQuery(QuerySubscription $subscription): array
     {
         return [
             new RunUntil(),
             new RiseQueryProjection(),
             new LoadStreams(),
-            self::makeStreamEventHandler($projector),
+            self::makeStreamEventHandler($subscription),
             new DispatchSignal(),
         ];
     }
 
-    private static function makeStreamEventHandler(EmitterSubscription|ReadModelSubscription|QuerySubscription $projector): callable
+    private static function makeStreamEventHandler(EmitterSubscription|ReadModelSubscription|QuerySubscription $subscription): callable
     {
         return new HandleStreamEvent(
             new EventProcessor(
-                $projector->context()->reactors(),
-                $projector->getScope()
+                $subscription->context()->reactors(),
+                $subscription->getScope()
             )
         );
     }
