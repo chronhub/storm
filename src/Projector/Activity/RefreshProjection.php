@@ -19,6 +19,7 @@ final class RefreshProjection
         // watch again for event streams which may have
         // changed after the first watch.
         $queries = $subscription->context()->queries();
+
         $subscription->streamManager()->discover($queries);
 
         return $next($subscription);

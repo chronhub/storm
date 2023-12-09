@@ -26,21 +26,23 @@ final class HandleStreamEvent
     {
         $streams = $subscription->pullStreamIterator();
 
-        if ($streams instanceof MergeStreamIterator) {
-            foreach ($streams as $position => $event) {
-                $streamName = $streams->streamName();
-
-                $subscription->setStreamName($streamName);
-
-                $continue = ($this->eventProcessor)($subscription, $event, $position);
-
-                if (! $continue || ! $subscription->sprint()->inProgress()) {
-                    break;
-                }
-            }
-
-            gc_collect_cycles();
+        if (! $streams instanceof MergeStreamIterator) {
+            return $next($subscription);
         }
+
+        foreach ($streams as $position => $event) {
+            $streamName = $streams->streamName();
+
+            $subscription->setStreamName($streamName);
+
+            $continue = ($this->eventProcessor)($subscription, $event, $position);
+
+            if (! $continue || ! $subscription->sprint()->inProgress()) {
+                break;
+            }
+        }
+
+        gc_collect_cycles();
 
         return $next($subscription);
     }

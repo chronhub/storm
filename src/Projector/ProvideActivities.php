@@ -16,6 +16,7 @@ use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Projector\Scheme\Stats;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
@@ -46,9 +47,11 @@ final class ProvideActivities
      */
     public static function forQuery(QuerySubscription $subscription): array
     {
+        $stats = new Stats();
+
         return [
             new RunUntil(),
-            new RiseQueryProjection(),
+            new RiseQueryProjection($stats),
             new LoadStreams(),
             self::makeStreamEventHandler($subscription),
             new DispatchSignal(),

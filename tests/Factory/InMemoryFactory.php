@@ -82,11 +82,12 @@ class InMemoryFactory
         int $numberOfEvents,
         string $eventTimeModifier = null,
         Uuid|string $eventId = null,
-        string $eventType = SomeEvent::class
+        string $eventType = SomeEvent::class,
+        int $positionStartAt = 1
     ): Stream {
         $factory = StreamEventsFactory::withEvent($eventType);
 
-        $streamEvents = $factory->timesWithHeaders($numberOfEvents, $eventTimeModifier, $eventId);
+        $streamEvents = $factory->timesWithHeaders($numberOfEvents, $eventTimeModifier, $eventId, $positionStartAt);
 
         return new Stream(new StreamName($streamName), $streamEvents);
     }

@@ -36,7 +36,7 @@ final class GenericSubscription implements Subscription
 
     public function __construct(
         public readonly ContextReaderInterface $context,
-        private readonly StreamManagerInterface $streamManager,
+        public readonly StreamManagerInterface $streamManager,
         public readonly SystemClock $clock,
         public readonly ProjectionOption $option,
         Chronicler $chronicler,
@@ -145,6 +145,8 @@ final class GenericSubscription implements Subscription
             if (is_array($userState)) {
                 $this->state->put($userState);
             }
+        } else {
+            $this->state->put([]);
         }
     }
 }

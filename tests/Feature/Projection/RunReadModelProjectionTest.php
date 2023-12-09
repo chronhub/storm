@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
@@ -97,6 +98,47 @@ it('can stop read model projection', function () {
     expect($projector->getState())
         ->toBe(['count' => 7])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 7]]);
+});
+
+it('can rerun read model projection by catchup', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
+            if ($state['count'] === 1) {
+                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), ['count' => $event->header(EventHeader::INTERNAL_POSITION)]);
+            } else {
+                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->header(EventHeader::INTERNAL_POSITION));
+            }
+
+            $state['count']++;
+
+            return $state;
+        })->run(false);
+
+    expect($projector->getState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+
+    $stream1 = $this->testFactory->getStream('user', 10, null, $eventId, SomeEvent::class, 11);
+    $this->eventStore->amend($stream1);
+
+    $projector->run(false);
+
+    expect($projector->getState())
+        ->toBe(['count' => 20])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
 
 it('can run read model projection from many streams', function () {

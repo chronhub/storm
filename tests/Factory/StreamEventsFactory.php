@@ -101,12 +101,12 @@ readonly class StreamEventsFactory
         return $this->makeEvent($headers, $content);
     }
 
-    public function timesWithHeaders(int $times, string $modifier = null, Uuid|string $eventId = null): Generator
+    public function timesWithHeaders(int $times, string $modifier = null, Uuid|string $eventId = null, int $positionStartAt = 1): Generator
     {
-        $count = 1;
+        $count = $positionStartAt;
         $now = PointInTimeFactory::now();
 
-        while ($count < $times + 1) {
+        while ($count < $times + $positionStartAt) {
             $now = $now->modify($modifier ?? '+10 seconds');
 
             yield self::makeEvent([
@@ -115,7 +115,7 @@ readonly class StreamEventsFactory
                 Header::EVENT_TIME => $now->format(PointInTime::DATE_TIME_FORMAT),
                 EventHeader::AGGREGATE_VERSION => $count,
                 EventHeader::INTERNAL_POSITION => $count,
-            ], ['count' => $count]);
+            ], ['count' => $count - $positionStartAt + 1]);
 
             $count++;
         }

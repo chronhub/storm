@@ -42,7 +42,7 @@ final class LoadStreams
         $loadLimiter = $subscription->option()->getLoads();
 
         foreach ($subscription->streamManager()->jsonSerialize() as $streamName => $position) {
-            // todo stream name aware should only be used by query projection
+            // todo stream name aware should only be used by query projection and api
             // cannot filter events for persistent projection,as we need to be consistent
             // with the stream position and gap detection
             if ($queryFilter instanceof StreamNameAwareQueryFilter) {
