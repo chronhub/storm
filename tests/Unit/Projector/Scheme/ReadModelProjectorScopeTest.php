@@ -6,11 +6,11 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
 
 beforeEach(function () {
-    $this->subscription = $this->createMock(ReadModelSubscriptionInterface::class);
+    $this->subscription = $this->createMock(ReadModelSubscriber::class);
 });
 
 it('can stop subscription', function () {

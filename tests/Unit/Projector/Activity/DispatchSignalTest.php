@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Activity;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 
 use function pcntl_signal;
@@ -14,10 +14,10 @@ use function posix_kill;
 
 beforeEach(function () {
     $this->activity = new DispatchSignal();
-    $this->subscription = $this->createMock(Subscription::class);
+    $this->subscription = $this->createMock(StateManagement::class);
     $this->option = $this->createMock(ProjectionOption::class);
     $this->subscription->expects($this->once())->method('option')->willReturn($this->option);
-    $this->next = function (Subscription $subscription) {
+    $this->next = function (StateManagement $subscription) {
         return fn () => $subscription;
     };
 });

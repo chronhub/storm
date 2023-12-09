@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 
-final class ResetEventCounter
+final readonly class ResetEventCounter
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
+    public function __construct(private EventCounter $eventCounter)
     {
-        $subscription->eventCounter()->reset();
+    }
 
-        return $next($subscription);
+    public function __invoke(Beacon $manager, callable $next): callable|bool
+    {
+        $this->eventCounter->reset();
+
+        return $next($manager);
     }
 }

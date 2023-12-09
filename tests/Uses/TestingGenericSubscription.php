@@ -10,13 +10,13 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
-use Chronhub\Storm\Projector\Subscription\GenericSubscription;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 use PHPUnit\Framework\MockObject\MockObject;
 use tests\TestCase;
 
 trait TestingGenericSubscription
 {
-    protected GenericSubscription $subscription;
+    protected Beacon $subscription;
 
     protected ContextReaderInterface|MockObject $context;
 
@@ -37,7 +37,7 @@ trait TestingGenericSubscription
         $this->option = $this->createMock(ProjectionOption::class);
         $this->chronicler = $this->createMock(Chronicler::class);
 
-        $this->subscription = new GenericSubscription(
+        $this->subscription = new Beacon(
             $this->context, $this->streamManager, $this->clock,
             $this->option, $this->chronicler,
         );
@@ -55,7 +55,7 @@ trait TestingGenericSubscription
         $innerChronicler = $this->createMock(ChroniclerDecorator::class);
         $innerChronicler->expects($this->once())->method('innerChronicler')->willReturn($chronicler);
 
-        $this->subscription = new GenericSubscription(
+        $this->subscription = new Beacon(
             $this->context, $this->streamManager, $this->clock,
             $this->option, $innerChronicler,
         );

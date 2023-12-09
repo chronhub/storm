@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Subscription\GenericSubscription;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
 use Chronhub\Storm\Tests\Uses\TestingGenericSubscription;
 
@@ -18,8 +18,8 @@ beforeEach(function (): void {
 });
 
 it('test default instance', function (): void {
-    expect($this->subscription)->toBeInstanceOf(GenericSubscription::class)
-        ->and($this->subscription)->toBeInstanceOf(Subscription::class)
+    expect($this->subscription)->toBeInstanceOf(Beacon::class)
+        ->and($this->subscription)->toBeInstanceOf(StateManagement::class)
         ->and($this->subscription->option())->toBe($this->option)
         ->and($this->subscription->streamManager())->toBe($this->streamManager)
         ->and($this->subscription->clock())->toBe($this->clock)

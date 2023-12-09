@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Closure;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,7 +26,7 @@ final class Profiler
     {
     }
 
-    public function start(Subscription $subscription): void
+    public function start(StateManagement $subscription): void
     {
         if (! $this->isValid()) {
             return;
@@ -81,7 +81,7 @@ final class Profiler
         }
     }
 
-    public function end(Subscription $subscription, Throwable $exception = null): void
+    public function end(StateManagement $subscription, Throwable $exception = null): void
     {
         if (! $this->isValid()) {
             return;
@@ -135,7 +135,7 @@ final class Profiler
         return $this->index === count($this->cycles);
     }
 
-    private function provideData(Subscription $subscription): array
+    private function provideData(StateManagement $subscription): array
     {
         return [
             'status' => $subscription->currentStatus(),

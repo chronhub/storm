@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Profiler;
 use RuntimeException;
 
 beforeEach(function () {
     $this->profiler = new Profiler();
-    $this->subscription = $this->createMock(Subscription::class);
+    $this->subscription = $this->createMock(StateManagement::class);
 });
 
 it('start cycle', function () {

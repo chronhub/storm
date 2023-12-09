@@ -4,9 +4,20 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Projector\Activity\DispatchSignal;
+use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
+use Chronhub\Storm\Projector\Activity\HandleStreamGap;
+use Chronhub\Storm\Projector\Activity\LoadStreams;
+use Chronhub\Storm\Projector\Activity\PersistOrUpdate;
+use Chronhub\Storm\Projector\Activity\RefreshProjection;
+use Chronhub\Storm\Projector\Activity\ResetEventCounter;
+use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
+use Chronhub\Storm\Projector\Activity\RunUntil;
+use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\EventProcessor;
 
 use function in_array;
 
@@ -21,7 +32,7 @@ trait InteractWithPersistentSubscription
     {
         $this->repository->release();
 
-        $this->setStatus(ProjectionStatus::IDLE);
+        $this->manager->setStatus(ProjectionStatus::IDLE);
     }
 
     public function close(): void
@@ -30,20 +41,20 @@ trait InteractWithPersistentSubscription
 
         $this->repository->stop($this->getProjectionDetail(), $idleStatus);
 
-        $this->setStatus($idleStatus);
+        $this->manager->setStatus($idleStatus);
 
-        $this->sprint()->stop();
+        $this->manager->sprint->stop();
     }
 
     public function restart(): void
     {
-        $this->sprint()->continue();
+        $this->manager->sprint->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
 
         $this->repository->startAgain($runningStatus);
 
-        $this->setStatus($runningStatus);
+        $this->manager->setStatus($runningStatus);
     }
 
     public function disclose(): ProjectionStatus
@@ -55,12 +66,12 @@ trait InteractWithPersistentSubscription
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->streamManager()->merge($projectionDetail->streamPositions);
+        $this->manager->streamBinder->merge($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
         if ($state !== []) {
-            $this->state()->put($state);
+            $this->manager->state()->put($state);
         }
     }
 
@@ -71,12 +82,12 @@ trait InteractWithPersistentSubscription
 
             $this->eventCounter->reset();
 
-            $this->setStatus($this->disclose());
+            $this->manager->setStatus($this->disclose());
 
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->currentStatus(), $keepProjectionRunning, true)) {
-                $this->sprint()->stop();
+            if (! in_array($this->manager->currentStatus(), $keepProjectionRunning, true)) {
+                $this->manager->sprint->stop();
             }
         }
     }
@@ -93,23 +104,43 @@ trait InteractWithPersistentSubscription
 
     protected function mountProjection(): void
     {
-        $this->sprint()->continue();
+        $this->manager->sprint->continue();
 
         if (! $this->repository->exists()) {
-            $this->repository->create($this->currentStatus());
+            $this->repository->create(
+                $this->manager->currentStatus()
+            );
         }
 
         $status = ProjectionStatus::RUNNING;
 
         $this->repository->start($status);
 
-        $this->setStatus($status);
+        $this->manager->setStatus($status);
     }
 
     protected function getProjectionDetail(): ProjectionDetail
     {
-        $streamPositions = $this->streamManager()->jsonSerialize();
+        $streamPositions = $this->manager->streamBinder->jsonSerialize();
 
-        return new ProjectionDetail($streamPositions, $this->state()->get());
+        return new ProjectionDetail($streamPositions, $this->manager->state()->get());
+    }
+
+    protected function getActivities(): array
+    {
+        return [
+            new RunUntil(),
+            new RisePersistentProjection($this),
+            new LoadStreams(),
+            new HandleStreamEvent(
+                new EventProcessor($this, $this->manager->context->reactors(), $this->getScope())
+            ),
+            new HandleStreamGap($this),
+            new PersistOrUpdate($this),
+            new ResetEventCounter($this->eventCounter),
+            new DispatchSignal(),
+            new RefreshProjection($this),
+            new StopWhenRunningOnce($this),
+        ];
     }
 }

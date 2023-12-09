@@ -12,9 +12,9 @@ use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Tests\Factory\StreamEventsFactory;
@@ -22,7 +22,7 @@ use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Generator;
 
 beforeEach(function (): void {
-    $this->subscription = $this->createMock(Subscription::class);
+    $this->subscription = $this->createMock(StateManagement::class);
     $this->streamManager = $this->createMock(StreamManagerInterface::class);
     $this->context = $this->createMock(ContextReaderInterface::class);
     $this->option = $this->createMock(ProjectionOption::class);
@@ -31,7 +31,7 @@ beforeEach(function (): void {
     $this->subscription->expects($this->once())->method('streamManager')->willReturn($this->streamManager);
     $this->subscription->method('chronicler')->willReturn($this->chronicler);
     $this->activity = new LoadStreams();
-    $this->next = fn (Subscription $subscription) => fn () => 42;
+    $this->next = fn (StateManagement $subscription) => fn () => 42;
 });
 
 function getLimiterQueryFilter(?int $limit): LoadLimiterProjectionQueryFilter

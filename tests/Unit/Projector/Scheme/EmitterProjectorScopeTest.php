@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 
 beforeEach(function () {
-    $this->subscription = $this->createMock(EmitterSubscriptionInterface::class);
+    $this->subscription = $this->createMock(EmitterSubscriber::class);
 });
 
 it('can emit event', function () {

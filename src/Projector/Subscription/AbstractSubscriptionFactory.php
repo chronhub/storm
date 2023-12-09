@@ -8,15 +8,15 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionOptionImmutable;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
@@ -27,8 +27,8 @@ use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scheme\Context;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
+use Chronhub\Storm\Projector\Scheme\StreamBinder;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
-use Chronhub\Storm\Projector\Scheme\StreamManager;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function array_merge;
@@ -48,14 +48,14 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     ) {
     }
 
-    public function createQuerySubscription(ProjectionOption $option): QuerySubscriptionInterface
+    public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
         return new QuerySubscription(
             $this->createGenericSubscription($option),
         );
     }
 
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriptionInterface
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         return new EmitterSubscription(
             $this->createGenericSubscription($option),
@@ -65,7 +65,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         );
     }
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
         return new ReadModelSubscription(
             $this->createGenericSubscription($option),
@@ -111,9 +111,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
 
-    protected function createGenericSubscription(ProjectionOption $option): GenericSubscription
+    protected function createGenericSubscription(ProjectionOption $option): Beacon
     {
-        return new GenericSubscription(
+        return new Beacon(
             $this->createContextBuilder(),
             $this->createStreamManager($option),
             $this->clock,
@@ -134,7 +134,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function createStreamManager(ProjectionOption $options): StreamManagerInterface
     {
-        return new StreamManager(
+        return new StreamBinder(
             new EventStreamLoader($this->eventStreamProvider),
             $this->clock,
             $options->getRetries(),

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Uses;
 
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -18,7 +18,7 @@ use tests\TestCase;
 
 trait TestingSubscriptionFactory
 {
-    protected Subscription&MockObject $subscription;
+    protected StateManagement&MockObject $subscription;
 
     protected ProjectorScope&MockObject $projectorScope;
 
@@ -59,7 +59,7 @@ trait TestingSubscriptionFactory
         // should be defined in test
         $this->subscription->method('currentStreamName')->willReturn($this->currentStreamName);
 
-        if ($this->subscription instanceof PersistentSubscriptionInterface) {
+        if ($this->subscription instanceof PersistentSubscriber) {
             $this->eventCounter = new EventCounter($this->eventCounterLimit);
 
             $this->subscription->method('eventCounter')->willReturn($this->eventCounter);

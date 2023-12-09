@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Throwable;
 
 final readonly class RunProjection
 {
     public function __construct(
-        private Subscription $subscription,
-        private Workflow $workflow
+        private Workflow $workflow,
+        private Sprint $sprint,
+        private ?PersistentSubscriber $subscription,
     ) {
     }
 
@@ -22,9 +23,9 @@ final readonly class RunProjection
         try {
             do {
                 $inProgress = $this->workflow->process(
-                    static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+                    fn (StateManagement $subscription): bool => $this->sprint->inProgress()
                 );
-            } while ($this->subscription->sprint()->inBackground() && $inProgress);
+            } while ($this->sprint->inBackground() && $inProgress);
         } catch (Throwable $exception) {
             $error = $exception;
         } finally {
@@ -34,7 +35,7 @@ final readonly class RunProjection
 
     private function tryReleaseLock(?Throwable $exception): void
     {
-        if (! $exception instanceof ProjectionAlreadyRunning && $this->subscription instanceof PersistentSubscriptionInterface) {
+        if (! $exception instanceof ProjectionAlreadyRunning && $this->subscription) {
             try {
                 $this->subscription->freed();
             } catch (Throwable) {

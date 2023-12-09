@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
-interface Subscription
+interface StateManagement
 {
     /**
      * Composes the subscription.
@@ -60,7 +60,7 @@ interface Subscription
     /**
      * Get the sprint instance.
      */
-    public function sprint(): Sprint;
+    // public function sprint(): Sprint;
 
     /**
      * Get the state instance.
@@ -70,20 +70,20 @@ interface Subscription
     /**
      * Get the option instance.
      */
-    public function option(): ProjectionOption;
+    //public function option(): ProjectionOption;
 
     /**
      * Get the stream manager instance.
      */
-    public function streamManager(): StreamManagerInterface;
+    //public function streamManager(): StreamManagerInterface;
 
     /**
      * Get the system clock instance.
      */
-    public function clock(): SystemClock;
+    //public function clock(): SystemClock;
 
     /**
      * Get the chronicler instance.
      */
-    public function chronicler(): Chronicler;
+    //public function chronicler(): Chronicler;
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -26,7 +26,7 @@ function getInstance(bool $shouldHandled, bool $inProgress, int $stopAt = null, 
         ) {
         }
 
-        public function __invoke(Subscription $subscription, DomainEvent $event, $position): bool
+        public function __invoke(StateManagement $subscription, DomainEvent $event, $position): bool
         {
             if (! $this->shouldHandled) {
                 return false;
@@ -55,7 +55,7 @@ function getInstance(bool $shouldHandled, bool $inProgress, int $stopAt = null, 
 
 beforeEach(function (): void {
     $this->sprint = new Sprint();
-    $this->subscription = $this->createMock(Subscription::class);
+    $this->subscription = $this->createMock(StateManagement::class);
     $this->iterator = MergeStreamIteratorFactory::getIterator();
     $this->next = fn () => fn () => 42;
 });

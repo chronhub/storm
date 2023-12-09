@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
 beforeEach(function (): void {
-    $this->subscription = $this->createMock(PersistentSubscriptionInterface::class);
+    $this->subscription = $this->createMock(PersistentSubscriber::class);
     $this->sprint = new Sprint();
 });
 
@@ -32,17 +32,17 @@ function getInstance(): object
             $this->isFirstCycle = false;
         }
 
-        public function shouldStop(PersistentSubscriptionInterface $subscription): bool
+        public function shouldStop(PersistentSubscriber $subscription): bool
         {
             return $this->shouldStopOnDiscoveringStatus($subscription);
         }
 
-        public function refresh(PersistentSubscriptionInterface $subscription): void
+        public function refresh(PersistentSubscriber $subscription): void
         {
             $this->refreshStatus($subscription);
         }
 
-        public function onDiscovering(PersistentSubscriptionInterface $subscription): bool
+        public function onDiscovering(PersistentSubscriber $subscription): bool
         {
             return $this->discovering($subscription);
         }

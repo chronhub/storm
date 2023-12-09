@@ -9,11 +9,11 @@ use Chronhub\Storm\Projector\Options\DefaultOption;
 
 interface SubscriptionFactory
 {
-    public function createQuerySubscription(ProjectionOption $option): QuerySubscriptionInterface;
+    public function createQuerySubscription(ProjectionOption $option): QuerySubscriber;
 
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriptionInterface;
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber;
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriptionInterface;
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber;
 
     /**
      * Creates a ProjectionOption instance with the specified options.

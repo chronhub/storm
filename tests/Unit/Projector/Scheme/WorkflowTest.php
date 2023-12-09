@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
+use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
 
 beforeEach(function (): void {
     $this->sprint = new Sprint();
-    $this->subscription = $this->createMock(Subscription::class);
+    $this->subscription = $this->createMock(StateManagement::class);
     $this->subscription->expects($this->any())->method('sprint')->willReturn($this->sprint);
 });
 
 function getActivities(&$called): array
 {
     return [
-        function (Subscription $subscription, Closure $next) use (&$called): Closure|bool {
+        function (StateManagement $subscription, Closure $next) use (&$called): Closure|bool {
             $called++;
 
             if (! $subscription->sprint()->inProgress()) {
@@ -27,7 +27,7 @@ function getActivities(&$called): array
 
             return $next($subscription);
         },
-        function (Subscription $subscription, Closure $next) use (&$called): Closure|bool {
+        function (StateManagement $subscription, Closure $next) use (&$called): Closure|bool {
             $called++;
 
             $subscription->sprint()->stop();
@@ -47,7 +47,7 @@ it('process workflow', function (): void {
     $workflow = new Workflow($this->subscription, $activities);
 
     $inProgress = $workflow->process(
-        static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        static fn (StateManagement $subscription): bool => $subscription->sprint()->inProgress()
     );
 
     expect($inProgress)
@@ -65,7 +65,7 @@ it('process workflow can be stopped', function (): void {
     $workflow = new Workflow($this->subscription, $activities);
 
     $inProgress = $workflow->process(
-        static fn (Subscription $subscription): bool => $subscription->sprint()->inProgress()
+        static fn (StateManagement $subscription): bool => $subscription->sprint()->inProgress()
     );
 
     expect($inProgress)

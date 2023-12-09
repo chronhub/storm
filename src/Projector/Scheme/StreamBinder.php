@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 use function array_key_exists;
 use function usleep;
 
-final class StreamManager implements StreamManagerInterface
+final class StreamBinder implements StreamManagerInterface
 {
     private int $retries = 0;
 

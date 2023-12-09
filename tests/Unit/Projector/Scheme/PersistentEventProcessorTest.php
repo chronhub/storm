@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -21,7 +21,7 @@ use function posix_kill;
 uses(TestingSubscriptionFactory::class);
 
 beforeEach(function () {
-    $this->setUpWithSubscription(PersistentSubscriptionInterface::class, ProjectorScope::class);
+    $this->setUpWithSubscription(PersistentSubscriber::class, ProjectorScope::class);
     $this->event = SomeEvent::fromContent(['name' => 'steph'])->withHeader(Header::EVENT_TIME, 'some_event_time');
 });
 

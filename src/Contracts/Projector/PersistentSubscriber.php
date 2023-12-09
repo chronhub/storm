@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
-interface PersistentSubscriptionInterface extends Subscription
+interface PersistentSubscriber
 {
     /**
      * Start the persistent subscription and resume the projection.
@@ -76,7 +76,7 @@ interface PersistentSubscriptionInterface extends Subscription
     /**
      * Get the projection name.
      */
-    public function getName(): string;
+    //public function getName(): string;
 
     /**
      * Get the event counter instance.

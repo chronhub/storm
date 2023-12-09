@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 final readonly class EmitterProjectorScope implements EmitterProjectorScopeInterface
 {
-    public function __construct(private EmitterSubscriptionInterface $subscription)
+    public function __construct(private EmitterSubscriber $subscription)
     {
     }
 
@@ -32,11 +32,11 @@ final readonly class EmitterProjectorScope implements EmitterProjectorScopeInter
 
     public function streamName(): string
     {
-        return $this->subscription->currentStreamName();
+        return $this->subscription->inner()->currentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscription->clock();
+        return $this->subscription->inner()->clock;
     }
 }

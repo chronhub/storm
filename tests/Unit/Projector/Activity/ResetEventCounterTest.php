@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 
@@ -12,7 +12,7 @@ use function count;
 
 it('reset event counter even if is already reset', function () {
     $eventCounter = new EventCounter(5);
-    $subscription = $this->createMock(PersistentSubscriptionInterface::class);
+    $subscription = $this->createMock(PersistentSubscriber::class);
     $subscription->expects($this->once())->method('eventCounter')->willReturn($eventCounter);
 
     expect($eventCounter->isReset())->toBeTrue();
@@ -27,7 +27,7 @@ it('reset event counter even if is already reset', function () {
 
 it('reset incremented event counter', function (int $count) {
     $eventCounter = new EventCounter(5);
-    $subscription = $this->createMock(PersistentSubscriptionInterface::class);
+    $subscription = $this->createMock(PersistentSubscriber::class);
     $subscription->expects($this->once())->method('eventCounter')->willReturn($eventCounter);
 
     $inc = $count;

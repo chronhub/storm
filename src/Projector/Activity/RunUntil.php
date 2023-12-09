@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Scheme\Timer;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 
 final class RunUntil
 {
@@ -13,22 +13,22 @@ final class RunUntil
 
     private ?Timer $timer = null;
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Beacon $manager, callable $next): callable|bool
     {
-        $interval = $subscription->context()->timer();
+        $interval = $manager->context()->timer();
 
         if ($interval && ! $this->started) {
-            $this->timer = new Timer($subscription->clock(), $interval);
+            $this->timer = new Timer($manager->clock, $interval);
 
             $this->timer->start();
 
             $this->started = true;
         }
 
-        $response = $next($subscription);
+        $response = $next($manager);
 
         if ($this->started && $this->timer->isElapsed()) {
-            $subscription->sprint()->stop();
+            $manager->sprint->stop();
         }
 
         return $response;

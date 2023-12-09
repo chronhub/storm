@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface QuerySubscriptionInterface extends Subscription
+interface QuerySubscriber
 {
+    public function resets(): void;
 }

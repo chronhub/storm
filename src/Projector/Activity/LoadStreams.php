@@ -8,9 +8,9 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
-use Chronhub\Storm\Contracts\Projector\Subscription;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
@@ -18,30 +18,31 @@ use function array_values;
 
 final class LoadStreams
 {
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Beacon $manager, callable $next): callable|bool
     {
-        $streams = $this->getStreams($subscription);
+        $streams = $this->readStreams($manager);
 
         if ($streams !== []) {
-            $iterator = new MergeStreamIterator($subscription->clock(), array_keys($streams), ...array_values($streams));
+            $iterator = new MergeStreamIterator($manager->clock, array_keys($streams), ...array_values($streams));
+            // todo use setter for clock
 
-            $subscription->setStreamIterator($iterator);
+            $manager->setStreamIterator($iterator);
         }
 
-        return $next($subscription);
+        return $next($manager);
     }
 
     /**
      * @return array<string,StreamIterator>
      */
-    private function getStreams(Subscription $subscription): array
+    private function readStreams(Beacon $manager): array
     {
         $streams = [];
 
-        $queryFilter = $subscription->context()->queryFilter();
-        $loadLimiter = $subscription->option()->getLoads();
+        $queryFilter = $manager->context()->queryFilter();
+        $loadLimiter = $manager->option->getLoads();
 
-        foreach ($subscription->streamManager()->jsonSerialize() as $streamName => $position) {
+        foreach ($manager->streamBinder->jsonSerialize() as $streamName => $position) {
             // todo stream name aware should only be used by query projection and api
             // cannot filter events for persistent projection,as we need to be consistent
             // with the stream position and gap detection
@@ -58,7 +59,7 @@ final class LoadStreams
             }
 
             try {
-                $events = $subscription->chronicler()->retrieveFiltered(new StreamName($streamName), $queryFilter);
+                $events = $manager->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
 
                 $streams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {

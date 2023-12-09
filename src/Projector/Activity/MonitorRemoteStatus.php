@@ -4,27 +4,26 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
 trait MonitorRemoteStatus
 {
     private bool $isFirstCycle = true;
 
-    protected function shouldStopOnDiscoveringStatus(PersistentSubscriptionInterface $subscription): bool
+    protected function shouldStopOnDiscoveringStatus(): bool
     {
-        $shouldStop = $this->discovering($subscription);
+        $shouldStop = $this->discovering();
 
         $this->isFirstCycle = false;
 
         return $shouldStop;
     }
 
-    protected function refreshStatus(PersistentSubscriptionInterface $subscription): void
+    protected function refreshStatus(): void
     {
         $this->isFirstCycle = false;
 
-        $this->discovering($subscription);
+        $this->discovering();
     }
 
     protected function isFirstCycle(): bool
@@ -32,42 +31,42 @@ trait MonitorRemoteStatus
         return $this->isFirstCycle;
     }
 
-    private function onStopping(PersistentSubscriptionInterface $subscription): bool
+    private function onStopping(): bool
     {
         if ($this->isFirstCycle) {
-            $subscription->synchronise();
+            $this->subscription->synchronise();
         }
 
-        $subscription->close();
+        $this->subscription->close();
 
         return $this->isFirstCycle;
     }
 
-    private function onResetting(PersistentSubscriptionInterface $subscription): bool
+    private function onResetting(): bool
     {
-        $subscription->revise();
+        $this->subscription->revise();
 
-        if (! $this->isFirstCycle && $subscription->sprint()->inBackground()) {
-            $subscription->restart();
+        if (! $this->isFirstCycle && $this->sprint->inBackground()) {
+            $this->subscription->restart();
         }
 
         return false;
     }
 
-    private function onDeleting(PersistentSubscriptionInterface $subscription, bool $shouldDiscardEvents): bool
+    private function onDeleting(bool $shouldDiscardEvents): bool
     {
-        $subscription->discard($shouldDiscardEvents);
+        $this->subscription->discard($shouldDiscardEvents);
 
         return $this->isFirstCycle;
     }
 
-    private function discovering(PersistentSubscriptionInterface $subscription): bool
+    private function discovering(): bool
     {
-        return match ($subscription->disclose()->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping($subscription),
-            ProjectionStatus::RESETTING->value => $this->onResetting($subscription),
-            ProjectionStatus::DELETING->value => $this->onDeleting($subscription, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($subscription, true),
+        return match ($this->subscription->disclose()->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping(),
+            ProjectionStatus::RESETTING->value => $this->onResetting(),
+            ProjectionStatus::DELETING->value => $this->onDeleting(false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting(true),
             default => false,
         };
     }

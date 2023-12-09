@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
 beforeEach(function () {
-    $this->subscription = $this->createMock(QuerySubscriptionInterface::class);
+    $this->subscription = $this->createMock(QuerySubscriber::class);
     $this->sprint = new Sprint();
 });
 

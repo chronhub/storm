@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionInterface;
+use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
+use Chronhub\Storm\Projector\Subscription\Beacon;
 
-final class HandleStreamGap
+final readonly class HandleStreamGap
 {
-    public function __invoke(PersistentSubscriptionInterface $subscription, callable $next): callable|bool
+    public function __construct(private PersistentSubscriber $subscription)
+    {
+    }
+
+    public function __invoke(Beacon $manager, callable $next): callable|bool
     {
         // When a gap is detected and still retry left,
         // we sleep and store the projection if some event(s) has been handled
-        if ($subscription->streamManager()->hasGap()) {
-            $subscription->streamManager()->sleep();
+        if ($manager->streamBinder->hasGap()) {
+            $manager->streamBinder->sleep();
 
-            if (! $subscription->eventCounter()->isReset()) {
-                $subscription->store();
+            if (! $this->subscription->eventCounter()->isReset()) {
+                $this->subscription->store();
             }
         }
 
-        return $next($subscription);
+        return $next($manager);
     }
 }
