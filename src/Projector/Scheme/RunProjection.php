@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Contracts\Projector\StateManagement;
+use Chronhub\Storm\Contracts\Projector\Subscriber;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Throwable;
 
@@ -13,8 +13,8 @@ final readonly class RunProjection
 {
     public function __construct(
         private Workflow $workflow,
-        private Sprint $sprint,
-        private ?PersistentSubscriber $subscription,
+        private bool $keepRunning,
+        private ?SubscriptionManagement $subscription,
     ) {
     }
 
@@ -23,9 +23,9 @@ final readonly class RunProjection
         try {
             do {
                 $inProgress = $this->workflow->process(
-                    fn (StateManagement $subscription): bool => $this->sprint->inProgress()
+                    fn (Subscriber $subscriber): bool => $subscriber->sprint->inProgress()
                 );
-            } while ($this->sprint->inBackground() && $inProgress);
+            } while ($this->keepRunning && $inProgress);
         } catch (Throwable $exception) {
             $error = $exception;
         } finally {

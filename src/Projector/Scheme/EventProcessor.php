@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Projector\Scheme;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
-use Chronhub\Storm\Projector\Subscription\Beacon;
+use Chronhub\Storm\Contracts\Projector\Subscriber;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -18,47 +18,46 @@ use function pcntl_signal_dispatch;
 final readonly class EventProcessor
 {
     public function __construct(
-        private QuerySubscriber|PersistentSubscriber $subscription,
         private Closure $reactors,
-        private ProjectorScope $scope
+        private ProjectorScope $scope,
+        private ?SubscriptionManagement $subscription = null,
     ) {
     }
 
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(Beacon $manager, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(Subscriber $subscriber, DomainEvent $event, int $expectedPosition): bool
     {
-        if ($manager->option->getSignal()) {
+        if ($subscriber->option->getSignal()) {
             pcntl_signal_dispatch();
         }
 
         // gap has been detected for persistent subscription
-        if (! $this->bindStream($manager, $event, $expectedPosition)) {
+        if (! $this->bindStream($subscriber, $event, $expectedPosition)) {
             return false;
         }
 
-        if ($this->subscription instanceof PersistentSubscriber) {
-            $this->subscription->eventCounter()->increment();
+        if ($subscriber instanceof PersistentSubscriber) {
+            $subscriber->eventCounter->increment();
         }
 
-        $this->reactOn($event, $manager);
+        // react on event
+        $this->reactOn($event, $subscriber);
 
         // when option block size is reached, persist data
-        if ($this->subscription instanceof PersistentSubscriber) {
-            $this->subscription->persistWhenCounterIsReached();
-        }
+        $this->subscription?->persistWhenCounterIsReached();
 
         // can return false to stop processing as it may have stopped
         // from a signal or monitor command
-        return $manager->sprint->inProgress();
+        return $subscriber->sprint->inProgress();
     }
 
-    private function reactOn(DomainEvent $event, Beacon $manager): void
+    private function reactOn(DomainEvent $event, Subscriber $subscriber): void
     {
         // ensure to pass user state only if it has been initialized
-        $userState = $manager->context()->userState() instanceof Closure
-            ? $manager->state()->get() : null;
+        $userState = $subscriber->context()->userState() instanceof Closure
+            ? $subscriber->state->get() : null;
 
         // handle event
         $currentState = $userState === null
@@ -67,20 +66,19 @@ final readonly class EventProcessor
 
         // update user state if it has been initialized and returned
         if ($userState !== null && is_array($currentState)) {
-            $manager->state()->put($currentState);
+            $subscriber->state->put($currentState);
         }
     }
 
     /**
      * Bind the current stream name to the expected position if match
      */
-    private function bindStream(Beacon $manager, DomainEvent $event, int $nextPosition): bool
+    private function bindStream(Subscriber $subscriber, DomainEvent $event, int $nextPosition): bool
     {
         // query subscription does not mind of a gap,
         // so bind stream to the next position will always return true
-        $eventTime = $this->subscription instanceof PersistentSubscriber
-            ? $event->header(Header::EVENT_TIME) : false;
+        $eventTime = $this->subscription !== null ? $event->header(Header::EVENT_TIME) : false;
 
-        return $manager->streamBinder->bind($manager->currentStreamName(), $nextPosition, $eventTime);
+        return $subscriber->streamBinder->bind($subscriber->currentStreamName(), $nextPosition, $eventTime);
     }
 }

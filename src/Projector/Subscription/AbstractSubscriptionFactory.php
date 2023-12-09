@@ -51,14 +51,22 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
         return new QuerySubscription(
-            $this->createGenericSubscription($option),
+            $this->createContextBuilder(),
+            $this->createStreamManager($option),
+            $this->clock,
+            $option,
+            $this->chronicler,
         );
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         return new EmitterSubscription(
-            $this->createGenericSubscription($option),
+            $this->createContextBuilder(),
+            $this->createStreamManager($option),
+            $this->clock,
+            $option,
+            $this->chronicler,
             $this->createSubscriptionManagement($streamName, $option),
             $this->createEventCounter($option),
             $this->createStreamCache($option),
@@ -68,7 +76,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
         return new ReadModelSubscription(
-            $this->createGenericSubscription($option),
+            $this->createContextBuilder(),
+            $this->createStreamManager($option),
+            $this->clock,
+            $option,
+            $this->chronicler,
             $this->createSubscriptionManagement($streamName, $option),
             $this->createEventCounter($option),
             $readModel,
@@ -110,17 +122,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     }
 
     abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
-
-    protected function createGenericSubscription(ProjectionOption $option): Beacon
-    {
-        return new Beacon(
-            $this->createContextBuilder(),
-            $this->createStreamManager($option),
-            $this->clock,
-            $option,
-            $this->chronicler,
-        );
-    }
 
     protected function createContextBuilder(): ContextReaderInterface
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
@@ -14,133 +15,55 @@ use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
-use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\ProjectionDetail;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
-
-use function in_array;
+use Chronhub\Storm\Projector\Scheme\RunProjection;
+use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentSubscription
 {
-    public function update(): void
+    public function start(bool $keepRunning): void
     {
-        $this->repository->updateLock();
-    }
-
-    public function freed(): void
-    {
-        $this->repository->release();
-
-        $this->manager->setStatus(ProjectionStatus::IDLE);
-    }
-
-    public function close(): void
-    {
-        $idleStatus = ProjectionStatus::IDLE;
-
-        $this->repository->stop($this->getProjectionDetail(), $idleStatus);
-
-        $this->manager->setStatus($idleStatus);
-
-        $this->manager->sprint->stop();
-    }
-
-    public function restart(): void
-    {
-        $this->manager->sprint->continue();
-
-        $runningStatus = ProjectionStatus::RUNNING;
-
-        $this->repository->startAgain($runningStatus);
-
-        $this->manager->setStatus($runningStatus);
-    }
-
-    public function disclose(): ProjectionStatus
-    {
-        return $this->repository->loadStatus();
-    }
-
-    public function synchronise(): void
-    {
-        $projectionDetail = $this->repository->loadDetail();
-
-        $this->manager->streamBinder->merge($projectionDetail->streamPositions);
-
-        $state = $projectionDetail->state;
-
-        if ($state !== []) {
-            $this->manager->state()->put($state);
+        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Persistent subscription requires a projection query filter');
         }
-    }
 
-    public function persistWhenCounterIsReached(): void
-    {
-        if ($this->eventCounter->isReached()) {
-            $this->store();
+        $this->setOriginalUserState();
 
-            $this->eventCounter->reset();
+        $this->sprint->runInBackground($keepRunning);
 
-            $this->manager->setStatus($this->disclose());
+        $this->sprint->continue();
 
-            $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
+        $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
 
-            if (! in_array($this->manager->currentStatus(), $keepProjectionRunning, true)) {
-                $this->manager->sprint->stop();
-            }
-        }
+        $project->beginCycle();
     }
 
     public function getName(): string
     {
-        return $this->repository->projectionName();
+        return $this->management->getName();
     }
 
-    public function eventCounter(): EventCounter
+    protected function newWorkflow(): Workflow
     {
-        return $this->eventCounter;
-    }
-
-    protected function mountProjection(): void
-    {
-        $this->manager->sprint->continue();
-
-        if (! $this->repository->exists()) {
-            $this->repository->create(
-                $this->manager->currentStatus()
-            );
-        }
-
-        $status = ProjectionStatus::RUNNING;
-
-        $this->repository->start($status);
-
-        $this->manager->setStatus($status);
-    }
-
-    protected function getProjectionDetail(): ProjectionDetail
-    {
-        $streamPositions = $this->manager->streamBinder->jsonSerialize();
-
-        return new ProjectionDetail($streamPositions, $this->manager->state()->get());
+        return new Workflow($this, $this->getActivities());
     }
 
     protected function getActivities(): array
     {
         return [
             new RunUntil(),
-            new RisePersistentProjection($this),
+            new RisePersistentProjection($this->management),
             new LoadStreams(),
             new HandleStreamEvent(
-                new EventProcessor($this, $this->manager->context->reactors(), $this->getScope())
+                new EventProcessor($this->context->reactors(), $this->getScope(), $this->management)
             ),
-            new HandleStreamGap($this),
-            new PersistOrUpdate($this),
-            new ResetEventCounter($this->eventCounter),
+            new HandleStreamGap($this->management),
+            new PersistOrUpdate($this->management),
+            new ResetEventCounter(),
             new DispatchSignal(),
-            new RefreshProjection($this),
-            new StopWhenRunningOnce($this),
+            new RefreshProjection($this->management),
+            new StopWhenRunningOnce($this->management),
         ];
     }
 }

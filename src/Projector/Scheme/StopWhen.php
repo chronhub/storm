@@ -26,7 +26,7 @@ readonly class StopWhen
 
     public function counterIsReached(PersistentSubscriber $subscription, int $limit): bool
     {
-        return $subscription->eventCounter()->count() === $limit;
+        return $subscription->eventCounter->count() === $limit;
     }
 
     public function gapIsDetected(PersistentSubscriber $subscription): bool

@@ -68,6 +68,6 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscription->state()->get();
+        return $this->subscription->outputState();
     }
 }

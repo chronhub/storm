@@ -4,64 +4,82 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
-use Chronhub\Storm\Contracts\Projector\StateManagement;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Projector\Scheme\EmittedStream;
 use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 use Closure;
 
-final class EmitterSubscription implements EmitterSubscriber
+final readonly class EmitterSubscription implements EmitterSubscriber
 {
     use InteractWithPersistentSubscription;
     use InteractWithSubscription;
 
-    private bool $isStreamFixed = false;
+    public Sprint $sprint;
+
+    public Chronicler $chronicler;
+
+    public EmitterManagement $management;
+
+    public ProjectionStateInterface $state;
+
+    protected SubscriptionHolder $holder;
+
+    protected EmittedStream $emittedStream;
 
     public function __construct(
-        protected readonly StateManagement $manager,
-        protected readonly ProjectionRepositoryInterface $repository,
-        protected readonly EventCounter $eventCounter,
-        private readonly StreamCacheInterface $streamCache
+        public ContextReaderInterface $context,
+        public StreamManagerInterface $streamBinder,
+        public SystemClock $clock,
+        public ProjectionOption $option,
+        Chronicler $chronicler,
+        ProjectionRepositoryInterface $repository,
+        public EventCounter $eventCounter,
+        private StreamCacheInterface $streamCache,
     ) {
-    }
-
-    public function start(bool $keepRunning): void
-    {
-        if (! $this->manager->context()->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Emitter subscription requires a projection query filter');
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
         }
 
-        $this->manager->start($keepRunning);
+        $this->chronicler = $chronicler;
+        $this->state = new ProjectionState();
+        $this->sprint = new Sprint();
+        $this->management = new EmitterManagement($this, $repository);
+        $this->holder = new SubscriptionHolder();
+        $this->emittedStream = new EmittedStream();
 
-        $project = new RunProjection($this->newWorkflow(), $this->manager->sprint, $this);
-
-        $project->beginCycle();
+        // todo can not reset emitted stream,
+        // if projection stop (run once, delete ...) , rerun will hold the state of emitted stream
     }
 
     public function emit(DomainEvent $event): void
     {
-        $streamName = new StreamName($this->getName());
+        $streamName = new StreamName($this->management->getName());
 
         // First commit the stream name without the event
         if ($this->streamNotEmittedAndNotExists($streamName)) {
-            $this->manager->chronicler->firstCommit(new Stream($streamName));
+            $this->chronicler->firstCommit(new Stream($streamName));
 
-            $this->isStreamFixed = true;
+            $this->emittedStream->emitted();
         }
 
         // Append the stream with the event
-        $this->linkTo($this->getName(), $event);
+        $this->linkTo($this->management->getName(), $event);
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
@@ -71,53 +89,13 @@ final class EmitterSubscription implements EmitterSubscriber
         $stream = new Stream($newStreamName, [$event]);
 
         $this->streamIsCachedOrExists($newStreamName)
-            ? $this->manager->chronicler->amend($stream)
-            : $this->manager->chronicler->firstCommit($stream);
-    }
-
-    public function rise(): void
-    {
-        $this->mountProjection();
-
-        $this->manager->streamBinder->discover($this->manager->context()->queries());
-
-        $this->synchronise();
-    }
-
-    public function store(): void
-    {
-        $this->repository->persist($this->getProjectionDetail(), null);
-    }
-
-    public function revise(): void
-    {
-        $this->manager->streamBinder->resets();
-
-        $this->manager->initializeAgain();
-
-        $this->repository->reset($this->getProjectionDetail(), $this->manager->currentStatus());
-
-        $this->deleteStream();
-    }
-
-    public function discard(bool $withEmittedEvents): void
-    {
-        $this->repository->delete($withEmittedEvents);
-
-        if ($withEmittedEvents) {
-            $this->deleteStream();
-        }
-
-        $this->manager->sprint->stop();
-
-        $this->manager->streamBinder->resets();
-
-        $this->manager->initializeAgain();
+            ? $this->chronicler->amend($stream)
+            : $this->chronicler->firstCommit($stream);
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool
     {
-        return ! $this->isStreamFixed && ! $this->manager->chronicler->hasStream($streamName);
+        return ! $this->emittedStream->wasEmitted() && ! $this->chronicler->hasStream($streamName);
     }
 
     private function streamIsCachedOrExists(StreamName $streamName): bool
@@ -128,33 +106,17 @@ final class EmitterSubscription implements EmitterSubscriber
 
         $this->streamCache->push($streamName->name);
 
-        return $this->manager->chronicler->hasStream($streamName);
-    }
-
-    private function deleteStream(): void
-    {
-        try {
-            $this->manager->chronicler->delete(new StreamName($this->getName()));
-        } catch (StreamNotFound) {
-            // ignore
-        }
-
-        $this->isStreamFixed = false;
-    }
-
-    protected function newWorkflow(): Workflow
-    {
-        return new Workflow($this->manager, $this->getActivities());
+        return $this->chronicler->hasStream($streamName);
     }
 
     public function getScope(): EmitterProjectorScopeInterface
     {
-        $userScope = $this->manager->context->userScope();
+        $userScope = $this->context->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);
         }
 
-        return new EmitterProjectorScope($this);
+        return new EmitterProjectorScope($this->management, $this);
     }
 }

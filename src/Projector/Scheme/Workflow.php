@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\StateManagement;
+use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Closure;
 
 use function array_reduce;
@@ -16,7 +16,7 @@ final readonly class Workflow
      * @param array<callable> $activities
      */
     public function __construct(
-        private StateManagement $subscription,
+        private Subscriber $subscription,
         private array $activities
     ) {
     }
@@ -34,11 +34,11 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (StateManagement $subscription) => $destination($subscription);
+        return fn (Subscriber $subscription) => $destination($subscription);
     }
 
     private function carry(): Closure
     {
-        return fn ($stack, $activity) => fn (StateManagement $subscription) => $activity($subscription, $stack);
+        return fn ($stack, $activity) => fn (Subscriber $subscription) => $activity($subscription, $stack);
     }
 }

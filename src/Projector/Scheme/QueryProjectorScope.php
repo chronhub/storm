@@ -16,16 +16,16 @@ final readonly class QueryProjectorScope implements QueryProjectorScopeInterface
 
     public function stop(): void
     {
-        $this->subscription->inner()->sprint->stop();
+        $this->subscription->sprint->stop();
     }
 
     public function streamName(): string
     {
-        return $this->subscription->inner()->currentStreamName();
+        return $this->subscription->currentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscription->inner()->clock;
+        return $this->subscription->clock;
     }
 }

@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Projector\Subscription\Beacon;
+use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
 use function usleep;
 
 final readonly class PersistOrUpdate
 {
-    public function __construct(private PersistentSubscriber $subscription)
+    public function __construct(private SubscriptionManagement $subscription)
     {
     }
 
-    public function __invoke(Beacon $manager, callable $next): callable|bool
+    public function __invoke(PersistentSubscriber $subscriber, callable $next): callable|bool
     {
-        if (! $manager->streamBinder->hasGap()) {
+        if (! $subscriber->streamBinder->hasGap()) {
             // The event counter is reset when no event has been loaded,
             // and, when persistWhenThresholdReached was successfully called,
             // so, we sleep and try updating the lock or, we store the data
-            if ($this->subscription->eventCounter()->isReset()) {
-                usleep(microseconds: $manager->option->getSleep());
+            if ($subscriber->eventCounter->isReset()) {
+                usleep(microseconds: $subscriber->option->getSleep());
 
                 $this->subscription->update();
             } else {
@@ -30,6 +30,6 @@ final readonly class PersistOrUpdate
             }
         }
 
-        return $next($manager);
+        return $next($subscriber);
     }
 }

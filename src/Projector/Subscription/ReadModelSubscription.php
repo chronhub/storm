@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
-use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Scheme\Sprint;
 use Closure;
 
 final readonly class ReadModelSubscription implements ReadModelSubscriber
@@ -21,73 +26,35 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
     use InteractWithPersistentSubscription;
     use InteractWithSubscription;
 
+    public Sprint $sprint;
+
+    public Chronicler $chronicler;
+
+    public ProjectionStateInterface $state;
+
+    public ReadModelManagement $management;
+
+    protected SubscriptionHolder $holder;
+
     public function __construct(
-        protected Beacon $manager,
-        protected ProjectionRepositoryInterface $repository,
-        protected EventCounter $eventCounter,
+        public ContextReaderInterface $context,
+        public StreamManagerInterface $streamBinder,
+        public SystemClock $clock,
+        public ProjectionOption $option,
+        Chronicler $chronicler,
+        ProjectionRepositoryInterface $repository,
+        public EventCounter $eventCounter,
         private ReadModel $readModel,
     ) {
-    }
-
-    public function start(bool $keepRunning): void
-    {
-        if (! $this->manager->context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Read model subscription requires a projection query filter');
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
         }
 
-        $this->manager->start($keepRunning);
-
-        $project = new RunProjection($this->newWorkflow(), $this->manager->sprint, $this);
-
-        $project->beginCycle();
-    }
-
-    public function rise(): void
-    {
-        $this->mountProjection();
-
-        if (! $this->readModel->isInitialized()) {
-            $this->readModel->initialize();
-        }
-
-        $this->manager->streamBinder->discover(
-            $this->manager->context->queries()
-        );
-
-        $this->synchronise();
-    }
-
-    public function store(): void
-    {
-        $this->repository->persist($this->getProjectionDetail(), null);
-
-        $this->readModel->persist();
-    }
-
-    public function revise(): void
-    {
-        $this->manager->streamBinder->resets();
-
-        $this->manager->initializeAgain();
-
-        $this->repository->reset($this->getProjectionDetail(), $this->manager->currentStatus());
-
-        $this->readModel->reset();
-    }
-
-    public function discard(bool $withEmittedEvents): void
-    {
-        $this->repository->delete($withEmittedEvents);
-
-        if ($withEmittedEvents) {
-            $this->readModel->down();
-        }
-
-        $this->manager->sprint->stop();
-
-        $this->manager->streamBinder->resets();
-
-        $this->manager->initializeAgain();
+        $this->chronicler = $chronicler;
+        $this->state = new ProjectionState();
+        $this->sprint = new Sprint();
+        $this->management = new ReadModelManagement($this, $repository);
+        $this->holder = new SubscriptionHolder();
     }
 
     public function readModel(): ReadModel
@@ -95,19 +62,14 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
         return $this->readModel;
     }
 
-    protected function newWorkflow(): Workflow
-    {
-        return new Workflow($this->manager, $this->getActivities());
-    }
-
     public function getScope(): ReadModelProjectorScopeInterface
     {
-        $userScope = $this->manager->context()->userScope();
+        $userScope = $this->context->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);
         }
 
-        return new ReadModelProjectorScope($this);
+        return new ReadModelProjectorScope($this->management, $this);
     }
 }

@@ -227,4 +227,4 @@ it('raise exception when query filter is not a projection query filter', functio
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);
-})->throws(RuntimeException::class, 'Read model subscription requires a projection query filter');
+})->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');

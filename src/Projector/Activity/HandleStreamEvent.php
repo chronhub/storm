@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
+use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
-use Chronhub\Storm\Projector\Subscription\Beacon;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;
@@ -13,7 +13,7 @@ use function gc_collect_cycles;
 final class HandleStreamEvent
 {
     /**
-     * @var callable{Beacon,DomainEvent,int<0,max>}
+     * @var callable{Subscriber,DomainEvent,int<0,max>}
      */
     private $eventProcessor;
 
@@ -22,28 +22,28 @@ final class HandleStreamEvent
         $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(Beacon $manager, callable $next): callable|bool
+    public function __invoke(Subscriber $subscriber, callable $next): callable|bool
     {
-        $streams = $manager->pullStreamIterator();
+        $streams = $subscriber->pullStreamIterator();
 
         if (! $streams instanceof MergeStreamIterator) {
-            return $next($manager);
+            return $next($subscriber);
         }
 
         foreach ($streams as $position => $event) {
             $streamName = $streams->streamName();
 
-            $manager->setStreamName($streamName);
+            $subscriber->setStreamName($streamName);
 
-            $continue = ($this->eventProcessor)($manager, $event, $position);
+            $continue = ($this->eventProcessor)($subscriber, $event, $position);
 
-            if (! $continue || ! $manager->sprint->inProgress()) {
+            if (! $continue || ! $subscriber->sprint->inProgress()) {
                 break;
             }
         }
 
         gc_collect_cycles();
 
-        return $next($manager);
+        return $next($subscriber);
     }
 }
