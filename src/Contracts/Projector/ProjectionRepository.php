@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 
-interface ProjectionRepositoryInterface
+interface ProjectionRepository
 {
     /**
      * Creates a new projection with the given status.

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 
-readonly class ReadModelManagement implements SubscriptionManagement
+final readonly class ReadModelManagement implements SubscriptionManagement
 {
     use InteractWithManagement;
 
     public function __construct(
-        protected ReadModelSubscription $subscription,
-        protected ProjectionRepositoryInterface $repository
+        protected Subscription $subscription,
+        protected ProjectionRepository $repository
     ) {
     }
 
@@ -21,13 +21,11 @@ readonly class ReadModelManagement implements SubscriptionManagement
     {
         $this->mountProjection();
 
-        if (! $this->subscription->readModel()->isInitialized()) {
-            $this->subscription->readModel()->initialize();
+        if (! $this->subscription->readModel->isInitialized()) {
+            $this->subscription->readModel->initialize();
         }
 
-        $this->subscription->streamBinder->discover(
-            $this->subscription->context->queries()
-        );
+        $this->subscription->discoverStreams();
 
         $this->synchronise();
     }
@@ -36,18 +34,18 @@ readonly class ReadModelManagement implements SubscriptionManagement
     {
         $this->repository->persist($this->getProjectionDetail(), null);
 
-        $this->subscription->readModel()->persist();
+        $this->subscription->readModel->persist();
     }
 
     public function revise(): void
     {
-        $this->subscription->streamBinder->resets();
+        $this->subscription->streamManager->resets();
 
         $this->subscription->initializeAgain();
 
         $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
 
-        $this->subscription->readModel()->reset();
+        $this->subscription->readModel->reset();
     }
 
     public function discard(bool $withEmittedEvents): void
@@ -55,12 +53,12 @@ readonly class ReadModelManagement implements SubscriptionManagement
         $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
-            $this->subscription->readModel()->down();
+            $this->subscription->readModel->down();
         }
 
         $this->subscription->sprint->stop();
 
-        $this->subscription->streamBinder->resets();
+        $this->subscription->streamManager->resets();
 
         $this->subscription->initializeAgain();
     }

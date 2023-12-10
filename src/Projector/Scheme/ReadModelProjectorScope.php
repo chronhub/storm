@@ -13,14 +13,14 @@ use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 final readonly class ReadModelProjectorScope implements ReadModelProjectorScopeInterface
 {
     public function __construct(
-        private SubscriptionManagement $subscription,
+        private SubscriptionManagement $management,
         private ReadModelSubscriber $subscriber
     ) {
     }
 
     public function stop(): void
     {
-        $this->subscription->close();
+        $this->management->close();
     }
 
     public function readModel(): ReadModel
@@ -30,11 +30,11 @@ final readonly class ReadModelProjectorScope implements ReadModelProjectorScopeI
 
     public function streamName(): string
     {
-        return $this->subscriber->currentStreamName();
+        return $this->subscriber->subscription->currentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscriber->clock;
+        return $this->subscriber->subscription->clock;
     }
 }

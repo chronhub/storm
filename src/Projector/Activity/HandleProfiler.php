@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Projector\Scheme\Profiler;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Closure;
 use Throwable;
 
@@ -15,20 +15,20 @@ final readonly class HandleProfiler
     {
     }
 
-    public function __invoke(Subscriber $subscriber, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         $response = null;
         $error = null;
 
         try {
-            $this->profiler->start($subscriber);
+            $this->profiler->start($subscription);
 
             /** @var Closure|bool $response */
-            $response = $next($subscriber);
+            $response = $next($subscription);
         } catch (Throwable $e) {
             $error = $e;
         } finally {
-            $this->profiler->end($subscriber, $error ?? null);
+            $this->profiler->end($subscription, $error ?? null);
         }
 
         return $response ?? throw $error;

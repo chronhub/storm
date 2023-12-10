@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Projector\Scheme\Stats;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final readonly class RiseQueryProjection
 {
@@ -13,16 +13,14 @@ final readonly class RiseQueryProjection
     {
     }
 
-    public function __invoke(QuerySubscriber $subscriber, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         if (! $this->stats->hasStarted()) {
-            $queries = $subscriber->context()->queries();
-
-            $subscriber->streamBinder->discover($queries);
+            $subscription->discoverStreams();
         }
 
         $this->stats->inc();
 
-        return $next($subscriber);
+        return $next($subscription);
     }
 }

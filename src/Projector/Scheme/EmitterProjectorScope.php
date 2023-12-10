@@ -13,33 +13,33 @@ use Chronhub\Storm\Reporter\DomainEvent;
 final readonly class EmitterProjectorScope implements EmitterProjectorScopeInterface
 {
     public function __construct(
-        private SubscriptionManagement $subscription,
-        private EmitterSubscriber $emitter,
+        private SubscriptionManagement $management,
+        private EmitterSubscriber $subscriber,
     ) {
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
     {
-        $this->emitter->linkTo($streamName, $event);
+        $this->subscriber->linkTo($streamName, $event);
     }
 
     public function emit(DomainEvent $event): void
     {
-        $this->emitter->emit($event);
+        $this->subscriber->emit($event);
     }
 
     public function stop(): void
     {
-        $this->subscription->close();
+        $this->management->close();
     }
 
     public function streamName(): string
     {
-        return $this->emitter->currentStreamName();
+        return $this->subscriber->subscription->currentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->emitter->clock;
+        return $this->subscriber->subscription->clock;
     }
 }

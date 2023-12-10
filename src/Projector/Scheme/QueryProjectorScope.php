@@ -10,22 +10,22 @@ use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 
 final readonly class QueryProjectorScope implements QueryProjectorScopeInterface
 {
-    public function __construct(private QuerySubscriber $subscription)
+    public function __construct(private QuerySubscriber $subscriber)
     {
     }
 
     public function stop(): void
     {
-        $this->subscription->sprint->stop();
+        $this->subscriber->subscription->sprint->stop();
     }
 
     public function streamName(): string
     {
-        return $this->subscription->currentStreamName();
+        return $this->subscriber->subscription->currentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscription->clock;
+        return $this->subscriber->subscription->clock;
     }
 }

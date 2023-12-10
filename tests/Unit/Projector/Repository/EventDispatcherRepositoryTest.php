@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Repository;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionCreated;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionDeleted;
@@ -23,7 +23,7 @@ uses(TestingEventDispatcherRepository::class);
 
 beforeEach(function (): void {
     $this->eventDispatcher = new Dispatcher();
-    $this->repository = $this->createMock(ProjectionRepositoryInterface::class);
+    $this->repository = $this->createMock(ProjectionRepository::class);
     $this->eventRepository = new EventDispatcherRepository($this->repository, $this->eventDispatcher);
 });
 

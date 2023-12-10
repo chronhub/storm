@@ -13,22 +13,24 @@ use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionOptionImmutable;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Projector\Scheme\EmittedStream;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
 use Chronhub\Storm\Projector\Scheme\StreamBinder;
 use Chronhub\Storm\Projector\Scheme\StreamCache;
+use Chronhub\Storm\Projector\Scheme\StreamGap;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function array_merge;
@@ -48,43 +50,42 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     ) {
     }
 
+    // todo provide persistent subscription withNoGapDetection
+    //  or does a flag in the option is enough ?
+    //  by now, we use a method in subscription to check if gap detection is enabled
+
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        return new QuerySubscription(
-            $this->createContextBuilder(),
-            $this->createStreamManager($option),
-            $this->clock,
-            $option,
-            $this->chronicler,
-        );
+        $subscription = $this->createSubscription($option);
+
+        return new QuerySubscription($subscription);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        return new EmitterSubscription(
-            $this->createContextBuilder(),
-            $this->createStreamManager($option),
-            $this->clock,
-            $option,
-            $this->chronicler,
-            $this->createSubscriptionManagement($streamName, $option),
-            $this->createEventCounter($option),
-            $this->createStreamCache($option),
-        );
+        $subscription = $this->createSubscriptionWithGapDetection($option);
+        $subscription->setEventCounter($this->createEventCounter($option));
+        $subscription->setStreamCache($this->createStreamCache($option));
+        $subscription->setEmittedStream(new EmittedStream());
+
+        $repository = $this->createProjectionRepository($streamName, $option);
+
+        $management = new EmitterManagement($subscription, $repository);
+
+        return new EmitterSubscription($subscription, $management);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        return new ReadModelSubscription(
-            $this->createContextBuilder(),
-            $this->createStreamManager($option),
-            $this->clock,
-            $option,
-            $this->chronicler,
-            $this->createSubscriptionManagement($streamName, $option),
-            $this->createEventCounter($option),
-            $readModel,
-        );
+        $subscription = $this->createSubscriptionWithGapDetection($option);
+        $subscription->setEventCounter($this->createEventCounter($option));
+        $subscription->setReadModel($readModel);
+
+        $repository = $this->createProjectionRepository($streamName, $option);
+
+        $management = new ReadModelManagement($subscription, $repository);
+
+        return new ReadModelSubscription($subscription, $management);
     }
 
     public function createOption(array $options = []): ProjectionOption
@@ -121,7 +122,29 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $this->queryScope;
     }
 
-    abstract protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface;
+    protected function createSubscription(ProjectionOption $option): Subscription
+    {
+        return new Subscription(
+            $this->createContextBuilder(),
+            $this->createStreamManager(),
+            $this->clock,
+            $option,
+            $this->chronicler,
+        );
+    }
+
+    protected function createSubscriptionWithGapDetection(ProjectionOption $option): Subscription
+    {
+        return new Subscription(
+            $this->createContextBuilder(),
+            $this->createStreamGapManager($option),
+            $this->clock,
+            $option,
+            $this->chronicler,
+        );
+    }
+
+    abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
     protected function createContextBuilder(): ContextReaderInterface
     {
@@ -133,10 +156,15 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createStreamManager(ProjectionOption $options): StreamManagerInterface
+    protected function createStreamManager(): StreamManager
     {
-        return new StreamBinder(
-            new EventStreamLoader($this->eventStreamProvider),
+        return new StreamBinder(new EventStreamLoader($this->eventStreamProvider));
+    }
+
+    protected function createStreamGapManager(ProjectionOption $options): StreamManager
+    {
+        return new StreamGap(
+            $this->createStreamManager(),
             $this->clock,
             $options->getRetries(),
             $options->getDetectionWindows()
@@ -153,7 +181,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new StreamCache($option->getCacheSize());
     }
 
-    protected function createDispatcherRepository(ProjectionRepositoryInterface $projectionRepository): EventDispatcherRepository
+    protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository
     {
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }

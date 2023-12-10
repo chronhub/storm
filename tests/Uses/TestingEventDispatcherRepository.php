@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Uses;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionError;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionEventMap;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -17,7 +17,7 @@ trait TestingEventDispatcherRepository
 
     protected Dispatcher $eventDispatcher;
 
-    protected ProjectionRepositoryInterface|MockObject $repository;
+    protected ProjectionRepository|MockObject $repository;
 
     protected object $eventSubscriber;
 

@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Closure;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(PersistentSubscriber::class);
-    $this->streamManager = $this->createMock(StreamManagerInterface::class);
+    $this->streamManager = $this->createMock(StreamManager::class);
     $this->eventCounter = new EventCounter(10);
 
     $this->activity = new HandleStreamGap();

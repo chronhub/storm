@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector\Repository;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
-final readonly class InMemoryRepository implements ProjectionRepositoryInterface
+final readonly class InMemoryRepository implements ProjectionRepository
 {
     public function __construct(
         public ProjectionProvider $provider,

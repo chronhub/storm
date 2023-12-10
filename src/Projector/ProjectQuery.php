@@ -11,17 +11,17 @@ final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithProjection;
 
-    public function __construct(protected QuerySubscriber $subscription)
+    public function __construct(protected QuerySubscriber $subscriber)
     {
     }
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->start($inBackground);
+        $this->subscriber->start($inBackground);
     }
 
     public function reset(): void
     {
-        $this->subscription->resets();
+        $this->subscriber->resets();
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Stream\StreamName;
 
@@ -14,8 +14,8 @@ final readonly class EmitterManagement implements SubscriptionManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected EmitterSubscription $subscription,
-        protected ProjectionRepositoryInterface $repository,
+        protected Subscription $subscription,
+        protected ProjectionRepository $repository,
     ) {
     }
 
@@ -23,7 +23,7 @@ final readonly class EmitterManagement implements SubscriptionManagement
     {
         $this->mountProjection();
 
-        $this->subscription->streamBinder->discover($this->subscription->context->queries());
+        $this->subscription->discoverStreams();
 
         $this->synchronise();
     }
@@ -35,7 +35,7 @@ final readonly class EmitterManagement implements SubscriptionManagement
 
     public function revise(): void
     {
-        $this->subscription->streamBinder->resets();
+        $this->subscription->streamManager->resets();
 
         $this->subscription->initializeAgain();
 
@@ -54,7 +54,7 @@ final readonly class EmitterManagement implements SubscriptionManagement
 
         $this->subscription->sprint->stop();
 
-        $this->subscription->streamBinder->resets();
+        $this->subscription->streamManager->resets();
 
         $this->subscription->initializeAgain();
     }
@@ -62,9 +62,9 @@ final readonly class EmitterManagement implements SubscriptionManagement
     private function deleteStream(): void
     {
         try {
-            $this->subscription->chronicler->delete(
-                new StreamName($this->repository->projectionName())
-            );
+            $streamName = new StreamName($this->repository->projectionName());
+
+            $this->subscription->chronicler->delete($streamName);
         } catch (StreamNotFound) {
             // ignore
         }

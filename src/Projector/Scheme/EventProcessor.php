@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -20,65 +18,54 @@ final readonly class EventProcessor
     public function __construct(
         private Closure $reactors,
         private ProjectorScope $scope,
-        private ?SubscriptionManagement $subscription = null,
+        private ?SubscriptionManagement $management,
     ) {
     }
 
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(Subscriber $subscriber, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(Subscription $subscription, DomainEvent $event, int $expectedPosition): bool
     {
-        if ($subscriber->option->getSignal()) {
+        if ($subscription->option->getSignal()) {
             pcntl_signal_dispatch();
         }
 
-        // gap has been detected for persistent subscription
-        if (! $this->bindStream($subscriber, $event, $expectedPosition)) {
+        // gap has been detected
+        if (! $subscription->streamManager->bind($subscription->currentStreamName(), $expectedPosition, $event)) {
             return false;
         }
 
-        if ($subscriber instanceof PersistentSubscriber) {
-            $subscriber->eventCounter->increment();
+        // each event is counted
+        if ($this->management) {
+            $subscription->eventCounter->increment();
         }
 
         // react on event
-        $this->reactOn($event, $subscriber);
+        $this->reactOn($event, $subscription);
 
         // when option block size is reached, persist data
-        $this->subscription?->persistWhenCounterIsReached();
+        $this->management?->persistWhenCounterIsReached();
 
         // can return false to stop processing as it may have stopped
         // from a signal or monitor command
-        return $subscriber->sprint->inProgress();
+        return $subscription->sprint->inProgress();
     }
 
-    private function reactOn(DomainEvent $event, Subscriber $subscriber): void
+    private function reactOn(DomainEvent $event, Subscription $subscription): void
     {
         // ensure to pass user state only if it has been initialized
-        $userState = $subscriber->context()->userState() instanceof Closure
-            ? $subscriber->state->get() : null;
+        $userState = $subscription->context->userState() instanceof Closure
+            ? $subscription->state->get() : null;
 
         // handle event
-        $currentState = $userState === null
+        $currentState = ! is_array($userState)
             ? ($this->reactors)($event, $this->scope)
             : ($this->reactors)($event, $userState, $this->scope);
 
         // update user state if it has been initialized and returned
-        if ($userState !== null && is_array($currentState)) {
-            $subscriber->state->put($currentState);
+        if (is_array($userState) && is_array($currentState)) {
+            $subscription->state->put($currentState);
         }
-    }
-
-    /**
-     * Bind the current stream name to the expected position if match
-     */
-    private function bindStream(Subscriber $subscriber, DomainEvent $event, int $nextPosition): bool
-    {
-        // query subscription does not mind of a gap,
-        // so bind stream to the next position will always return true
-        $eventTime = $this->subscription !== null ? $event->header(Header::EVENT_TIME) : false;
-
-        return $subscriber->streamBinder->bind($subscriber->currentStreamName(), $nextPosition, $eventTime);
     }
 }

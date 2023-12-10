@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -24,7 +24,7 @@ trait TestingSubscriptionFactory
 
     protected ProjectionOption&MockObject $option;
 
-    protected StreamManagerInterface&MockObject $streamManager;
+    protected StreamManager&MockObject $streamManager;
 
     protected ContextReaderInterface&MockObject $context;
 
@@ -45,7 +45,7 @@ trait TestingSubscriptionFactory
         $this->projectorScope = $this->createMock($projectorScope);
 
         $this->option = $this->createMock(ProjectionOption::class);
-        $this->streamManager = $this->createMock(StreamManagerInterface::class);
+        $this->streamManager = $this->createMock(StreamManager::class);
         $this->context = $this->createMock(ContextReaderInterface::class);
         $this->state = new ProjectionState(); // mock
         $this->sprint = new Sprint();

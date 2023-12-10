@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionCreated;
 use Chronhub\Storm\Projector\Repository\Event\ProjectionDeleted;
@@ -18,10 +18,10 @@ use Chronhub\Storm\Projector\Repository\Event\ProjectionStopped;
 use Illuminate\Contracts\Events\Dispatcher;
 use Throwable;
 
-final readonly class EventDispatcherRepository implements ProjectionRepositoryInterface
+final readonly class EventDispatcherRepository implements ProjectionRepository
 {
     public function __construct(
-        private ProjectionRepositoryInterface $repository,
+        private ProjectionRepository $repository,
         private Dispatcher $eventDispatcher
     ) {
     }

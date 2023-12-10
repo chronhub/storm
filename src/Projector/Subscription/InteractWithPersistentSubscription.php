@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
+use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
@@ -24,15 +25,15 @@ trait InteractWithPersistentSubscription
 {
     public function start(bool $keepRunning): void
     {
-        if (! $this->context()->queryFilter() instanceof ProjectionQueryFilter) {
+        if (! $this->subscription->context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new RuntimeException('Persistent subscription requires a projection query filter');
         }
 
-        $this->setOriginalUserState();
+        $this->subscription->setOriginalUserState();
 
-        $this->sprint->runInBackground($keepRunning);
+        $this->subscription->sprint->runInBackground($keepRunning);
 
-        $this->sprint->continue();
+        $this->subscription->sprint->continue();
 
         $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
 
@@ -46,7 +47,7 @@ trait InteractWithPersistentSubscription
 
     protected function newWorkflow(): Workflow
     {
-        return new Workflow($this, $this->getActivities());
+        return new Workflow($this->subscription, $this->getActivities());
     }
 
     protected function getActivities(): array
@@ -56,14 +57,19 @@ trait InteractWithPersistentSubscription
             new RisePersistentProjection($this->management),
             new LoadStreams(),
             new HandleStreamEvent(
-                new EventProcessor($this->context->reactors(), $this->getScope(), $this->management)
+                new EventProcessor($this->subscription->context->reactors(), $this->getScope(), $this->management)
             ),
             new HandleStreamGap($this->management),
             new PersistOrUpdate($this->management),
             new ResetEventCounter(),
             new DispatchSignal(),
             new RefreshProjection($this->management),
-            new StopWhenRunningOnce($this->management),
+            //new StopWhenRunningOnce($this->management),
         ];
     }
+
+    /**
+     * @internal
+     */
+    abstract public function getScope(): ProjectorScope;
 }

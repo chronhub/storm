@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;
@@ -22,28 +23,28 @@ final class HandleStreamEvent
         $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(Subscriber $subscriber, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $streams = $subscriber->pullStreamIterator();
+        $streams = $subscription->pullStreamIterator();
 
         if (! $streams instanceof MergeStreamIterator) {
-            return $next($subscriber);
+            return $next($subscription);
         }
 
         foreach ($streams as $position => $event) {
             $streamName = $streams->streamName();
 
-            $subscriber->setStreamName($streamName);
+            $subscription->setStreamName($streamName);
 
-            $continue = ($this->eventProcessor)($subscriber, $event, $position);
+            $continue = ($this->eventProcessor)($subscription, $event, $position);
 
-            if (! $continue || ! $subscriber->sprint->inProgress()) {
+            if (! $continue || ! $subscription->sprint->inProgress()) {
                 break;
             }
         }
 
         gc_collect_cycles();
 
-        return $next($subscriber);
+        return $next($subscription);
     }
 }

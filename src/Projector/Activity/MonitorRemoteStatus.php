@@ -34,20 +34,20 @@ trait MonitorRemoteStatus
     private function onStopping(): bool
     {
         if ($this->isFirstCycle) {
-            $this->subscription->synchronise();
+            $this->management->synchronise();
         }
 
-        $this->subscription->close();
+        $this->management->close();
 
         return $this->isFirstCycle;
     }
 
     private function onResetting(): bool
     {
-        $this->subscription->revise();
+        $this->management->revise();
 
         if (! $this->isFirstCycle && $this->sprint->inBackground()) {
-            $this->subscription->restart();
+            $this->management->restart();
         }
 
         return false;
@@ -55,14 +55,14 @@ trait MonitorRemoteStatus
 
     private function onDeleting(bool $shouldDiscardEvents): bool
     {
-        $this->subscription->discard($shouldDiscardEvents);
+        $this->management->discard($shouldDiscardEvents);
 
         return $this->isFirstCycle;
     }
 
     private function discovering(): bool
     {
-        return match ($this->subscription->disclose()->value) {
+        return match ($this->management->disclose()->value) {
             ProjectionStatus::STOPPING->value => $this->onStopping(),
             ProjectionStatus::RESETTING->value => $this->onResetting(),
             ProjectionStatus::DELETING->value => $this->onDeleting(false),

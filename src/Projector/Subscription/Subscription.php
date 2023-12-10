@@ -10,36 +10,48 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
-use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
+use Chronhub\Storm\Contracts\Projector\StreamGapManager;
+use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Scheme\EmittedStream;
+use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Closure;
 
 use function is_array;
 
-final class Beacon implements StateManagement
+final class Subscription
 {
+    public readonly Sprint $sprint;
+
+    public readonly Chronicler $chronicler;
+
+    public readonly ProjectionStateInterface $state;
+
+    public readonly ?ReadModel $readModel;
+
+    public readonly ?EventCounter $eventCounter;
+
+    public readonly ?StreamCacheInterface $streamCache;
+
+    public readonly ?EmittedStream $emittedStream;
+
     private ?string $currentStreamName = null;
 
     private ?MergeStreamIterator $streamIterator = null;
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    private readonly ProjectionStateInterface $state;
-
-    public readonly Sprint $sprint;
-
-    public readonly Chronicler $chronicler;
-
     public function __construct(
         public readonly ContextReaderInterface $context,
-        public readonly StreamManagerInterface $streamBinder,
+        public readonly StreamManager|StreamGapManager $streamManager,
         public readonly SystemClock $clock,
         public readonly ProjectionOption $option,
-        Chronicler $chronicler // todo move
+        Chronicler $chronicler,
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();
@@ -48,22 +60,6 @@ final class Beacon implements StateManagement
         $this->chronicler = $chronicler;
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
-    }
-
-    public function start(bool $keepRunning): void
-    {
-        $this->setOriginalUserState();
-
-        $this->sprint->runInBackground($keepRunning);
-
-        $this->sprint->continue();
-    }
-
-    public function initializeAgain(): void
-    {
-        $this->state->reset();
-
-        $this->setOriginalUserState();
     }
 
     public function &currentStreamName(): ?string
@@ -100,17 +96,34 @@ final class Beacon implements StateManagement
         return $streamIterator;
     }
 
-    public function context(): ContextReaderInterface
+    public function setReadModel(ReadModel $readModel): void
     {
-        return $this->context;
+        $this->readModel = $readModel;
     }
 
-    public function state(): ProjectionStateInterface
+    public function setEventCounter(EventCounter $eventCounter): void
     {
-        return $this->state;
+        $this->eventCounter = $eventCounter;
     }
 
-    private function setOriginalUserState(): void
+    public function setEmittedStream(EmittedStream $emittedStream): void
+    {
+        $this->emittedStream = $emittedStream;
+    }
+
+    public function setStreamCache(StreamCacheInterface $streamCache): void
+    {
+        $this->streamCache = $streamCache;
+    }
+
+    public function initializeAgain(): void
+    {
+        $this->state->reset();
+
+        $this->setOriginalUserState();
+    }
+
+    public function setOriginalUserState(): void
     {
         $callback = $this->context->userState();
 
@@ -123,5 +136,18 @@ final class Beacon implements StateManagement
         } else {
             $this->state->put([]);
         }
+    }
+
+    /**
+     * Shortcut to discover streams from queries.
+     */
+    public function discoverStreams(): void
+    {
+        $this->streamManager->discover($this->context->queries());
+    }
+
+    public function hasGapDetection(): bool
+    {
+        return $this->streamManager instanceof StreamGapManager;
     }
 }

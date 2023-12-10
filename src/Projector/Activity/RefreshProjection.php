@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final class RefreshProjection
 {
@@ -14,13 +14,13 @@ final class RefreshProjection
 
     protected Sprint $sprint;
 
-    public function __construct(protected SubscriptionManagement $subscription)
+    public function __construct(protected SubscriptionManagement $management)
     {
     }
 
-    public function __invoke(PersistentSubscriber $subscriber, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $this->sprint = $subscriber->sprint; // todo
+        $this->sprint = $subscription->sprint; // todo
 
         // depending on the discovered status, the projection
         // can be stopped, restarted if in the background or just keep going.
@@ -28,10 +28,8 @@ final class RefreshProjection
 
         // watch again for event streams which may have
         // changed after the first watch.
-        // todo encapsulate in a method
-        $queries = $subscriber->context()->queries();
-        $subscriber->streamBinder->discover($queries);
+        $subscription->discoverStreams();
 
-        return $next($subscriber);
+        return $next($subscription);
     }
 }

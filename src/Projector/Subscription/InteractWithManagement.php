@@ -54,7 +54,7 @@ trait InteractWithManagement
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->subscription->streamBinder->merge($projectionDetail->streamPositions);
+        $this->subscription->streamManager->merge($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 
@@ -104,8 +104,8 @@ trait InteractWithManagement
 
     protected function getProjectionDetail(): ProjectionDetail
     {
-        $streamPositions = $this->subscription->streamBinder->jsonSerialize();
+        $streamPositions = $this->subscription->streamManager->jsonSerialize();
 
-        return new ProjectionDetail($streamPositions, $this->subscription->outputState());
+        return new ProjectionDetail($streamPositions, $this->subscription->state->get());
     }
 }

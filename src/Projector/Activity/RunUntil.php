@@ -4,31 +4,27 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Projector\Scheme\Timer;
+use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final class RunUntil
 {
-    private bool $started = false;
-
     private ?Timer $timer = null;
 
-    public function __invoke(Subscriber $subscriber, callable $next): callable|bool
+    public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $interval = $subscriber->context()->timer();
+        $interval = $subscription->context->timer();
 
-        if ($interval && ! $this->started) {
-            $this->timer = new Timer($subscriber->clock, $interval);
+        if ($interval && $this->timer === null) {
+            $this->timer = new Timer($subscription->clock, $interval);
 
             $this->timer->start();
-
-            $this->started = true;
         }
 
-        $response = $next($subscriber);
+        $response = $next($subscription);
 
-        if ($this->started && $this->timer->isElapsed()) {
-            $subscriber->sprint->stop();
+        if ($this->timer && $this->timer->isElapsed()) {
+            $subscription->sprint->stop();
         }
 
         return $response;

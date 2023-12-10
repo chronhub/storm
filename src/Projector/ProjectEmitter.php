@@ -11,17 +11,17 @@ final readonly class ProjectEmitter implements EmitterProjector
 {
     use InteractWithProjection;
 
-    public function __construct(protected EmitterSubscriber $subscription)
+    public function __construct(protected EmitterSubscriber $subscriber)
     {
     }
 
     public function run(bool $inBackground): void
     {
-        $this->subscription->start($inBackground);
+        $this->subscriber->start($inBackground);
     }
 
     public function getName(): string
     {
-        return $this->subscription->getName();
+        return $this->subscriber->getName();
     }
 }

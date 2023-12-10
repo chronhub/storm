@@ -13,7 +13,7 @@ use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Contracts\Projector\StreamManagerInterface;
+use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
@@ -23,7 +23,7 @@ use Generator;
 
 beforeEach(function (): void {
     $this->subscription = $this->createMock(StateManagement::class);
-    $this->streamManager = $this->createMock(StreamManagerInterface::class);
+    $this->streamManager = $this->createMock(StreamManager::class);
     $this->context = $this->createMock(ContextReaderInterface::class);
     $this->option = $this->createMock(ProjectionOption::class);
     $this->chronicler = $this->createMock(Chronicler::class);

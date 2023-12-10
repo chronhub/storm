@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionRepositoryInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Projector\Repository\InMemoryRepository;
 
 final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
@@ -17,7 +17,7 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
         $this->useEvents = $useEvents;
     }
 
-    protected function createSubscriptionManagement(string $streamName, ProjectionOption $options): ProjectionRepositoryInterface
+    protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository
     {
         $repository = new InMemoryRepository(
             $this->projectionProvider,
