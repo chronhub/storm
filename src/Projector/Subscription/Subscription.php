@@ -55,16 +55,13 @@ final class Subscription
         $this->sprint = new Sprint();
     }
 
-    public function setContext(ContextReaderInterface $context): void
+    public function setContext(ContextReaderInterface $context, bool $allowRerun): void
     {
         if ($this->context === null) {
-            // @todo reset exception
-            //throw new RuntimeException('Rerunning projection is not allowed');
-
             $this->context = $context;
+        } elseif ($allowRerun === false) {
+            throw new RuntimeException('Rerunning projection is not allowed');
         }
-
-        // $this->context = $context;
     }
 
     public function context(): ContextReaderInterface
