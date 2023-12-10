@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionManagement;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
@@ -19,8 +20,10 @@ use Closure;
 
 final readonly class QuerySubscription implements QuerySubscriber
 {
-    public function __construct(public Subscription $subscription)
-    {
+    public function __construct(
+        public Subscription $subscription,
+        protected QuerySubscriptionManagement $management,
+    ) {
     }
 
     public function start(bool $keepRunning): void
@@ -61,7 +64,7 @@ final readonly class QuerySubscription implements QuerySubscriber
             return $userScope($this);
         }
 
-        return new QueryProjectorScope($this);
+        return new QueryProjectorScope($this->management);
     }
 
     protected function newWorkflow(): Workflow

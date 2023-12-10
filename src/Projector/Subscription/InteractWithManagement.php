@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionDetail;
 
@@ -83,6 +84,16 @@ trait InteractWithManagement
     public function getName(): string
     {
         return $this->repository->projectionName();
+    }
+
+    public function getClock(): SystemClock
+    {
+        return $this->subscription->clock;
+    }
+
+    public function getCurrentStreamName(): string
+    {
+        return $this->subscription->currentStreamName();
     }
 
     protected function mountProjection(): void

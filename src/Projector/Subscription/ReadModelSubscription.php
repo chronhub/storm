@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
@@ -20,11 +19,6 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
     ) {
     }
 
-    public function readModel(): ReadModel
-    {
-        return $this->subscription->readModel;
-    }
-
     public function getScope(): ReadModelProjectorScopeInterface
     {
         $userScope = $this->subscription->context->userScope();
@@ -33,6 +27,6 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
             return $userScope($this);
         }
 
-        return new ReadModelProjectorScope($this->management, $this);
+        return new ReadModelProjectorScope($this->management);
     }
 }

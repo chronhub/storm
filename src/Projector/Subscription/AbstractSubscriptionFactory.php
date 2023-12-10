@@ -50,6 +50,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     ) {
     }
 
+    // todo persistent subscription holder with eventCounter
+
     // todo provide persistent subscription withNoGapDetection
     //  or does a flag in the option is enough ?
     //  by now, we use a method in subscription to check if gap detection is enabled
@@ -58,19 +60,22 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscription = $this->createSubscription($option);
 
-        return new QuerySubscription($subscription);
+        return new QuerySubscription($subscription, new QueryManagement($subscription));
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         $subscription = $this->createSubscriptionWithGapDetection($option);
         $subscription->setEventCounter($this->createEventCounter($option));
-        $subscription->setStreamCache($this->createStreamCache($option));
-        $subscription->setEmittedStream(new EmittedStream());
 
         $repository = $this->createProjectionRepository($streamName, $option);
 
-        $management = new EmitterManagement($subscription, $repository);
+        $management = new EmitterManagement(
+            $subscription,
+            $repository,
+            $this->createStreamCache($option),
+            new EmittedStream()
+        );
 
         return new EmitterSubscription($subscription, $management);
     }
@@ -79,11 +84,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscription = $this->createSubscriptionWithGapDetection($option);
         $subscription->setEventCounter($this->createEventCounter($option));
-        $subscription->setReadModel($readModel);
 
         $repository = $this->createProjectionRepository($streamName, $option);
 
-        $management = new ReadModelManagement($subscription, $repository);
+        $management = new ReadModelManagement($subscription, $repository, $readModel);
 
         return new ReadModelSubscription($subscription, $management);
     }

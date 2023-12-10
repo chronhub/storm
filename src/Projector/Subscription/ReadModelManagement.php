@@ -5,24 +5,31 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ReadModel;
+use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionManagement;
 
-final readonly class ReadModelManagement implements SubscriptionManagement
+final readonly class ReadModelManagement implements ReadModelSubscriptionManagement
 {
     use InteractWithManagement;
 
     public function __construct(
         protected Subscription $subscription,
-        protected ProjectionRepository $repository
+        protected ProjectionRepository $repository,
+        private ReadModel $readModel
     ) {
+    }
+
+    public function getReadModel(): ReadModel
+    {
+        return $this->readModel;
     }
 
     public function rise(): void
     {
         $this->mountProjection();
 
-        if (! $this->subscription->readModel->isInitialized()) {
-            $this->subscription->readModel->initialize();
+        if (! $this->readModel->isInitialized()) {
+            $this->readModel->initialize();
         }
 
         $this->subscription->discoverStreams();
@@ -34,7 +41,7 @@ final readonly class ReadModelManagement implements SubscriptionManagement
     {
         $this->repository->persist($this->getProjectionDetail(), null);
 
-        $this->subscription->readModel->persist();
+        $this->readModel->persist();
     }
 
     public function revise(): void
@@ -45,7 +52,7 @@ final readonly class ReadModelManagement implements SubscriptionManagement
 
         $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
 
-        $this->subscription->readModel->reset();
+        $this->readModel->reset();
     }
 
     public function discard(bool $withEmittedEvents): void
@@ -53,7 +60,7 @@ final readonly class ReadModelManagement implements SubscriptionManagement
         $this->repository->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
-            $this->subscription->readModel->down();
+            $this->readModel->down();
         }
 
         $this->subscription->sprint->stop();

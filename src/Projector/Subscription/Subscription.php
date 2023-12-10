@@ -10,13 +10,10 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
-use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
 use Chronhub\Storm\Contracts\Projector\StreamGapManager;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Scheme\EmittedStream;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
@@ -32,13 +29,7 @@ final class Subscription
 
     public readonly ProjectionStateInterface $state;
 
-    public readonly ?ReadModel $readModel;
-
     public readonly ?EventCounter $eventCounter;
-
-    public readonly ?StreamCacheInterface $streamCache;
-
-    public readonly ?EmittedStream $emittedStream;
 
     private ?string $currentStreamName = null;
 
@@ -96,24 +87,9 @@ final class Subscription
         return $streamIterator;
     }
 
-    public function setReadModel(ReadModel $readModel): void
-    {
-        $this->readModel = $readModel;
-    }
-
     public function setEventCounter(EventCounter $eventCounter): void
     {
         $this->eventCounter = $eventCounter;
-    }
-
-    public function setEmittedStream(EmittedStream $emittedStream): void
-    {
-        $this->emittedStream = $emittedStream;
-    }
-
-    public function setStreamCache(StreamCacheInterface $streamCache): void
-    {
-        $this->streamCache = $streamCache;
     }
 
     public function initializeAgain(): void

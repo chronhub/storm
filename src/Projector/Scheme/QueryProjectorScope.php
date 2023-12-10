@@ -6,26 +6,26 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
+use Chronhub\Storm\Contracts\Projector\QuerySubscriptionManagement;
 
 final readonly class QueryProjectorScope implements QueryProjectorScopeInterface
 {
-    public function __construct(private QuerySubscriber $subscriber)
+    public function __construct(private QuerySubscriptionManagement $query)
     {
     }
 
     public function stop(): void
     {
-        $this->subscriber->subscription->sprint->stop();
+        $this->query->stop();
     }
 
     public function streamName(): string
     {
-        return $this->subscriber->subscription->currentStreamName();
+        return $this->query->getCurrentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->subscriber->subscription->clock;
+        return $this->query->getClock();
     }
 }
