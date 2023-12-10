@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
+use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
 use Closure;
 
 final readonly class ReadModelSubscription implements ReadModelSubscriber
@@ -14,19 +14,19 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
     use InteractWithPersistentSubscription;
 
     public function __construct(
-        public Subscription $subscription,
-        public ReadModelManagement $management,
+        protected Subscription $subscription,
+        protected ReadingModelManagement $management,
     ) {
     }
 
-    public function getScope(): ReadModelProjectorScopeInterface
+    public function getScope(): ReadModelScope
     {
-        $userScope = $this->subscription->context->userScope();
+        $userScope = $this->subscription->context()->userScope();
 
         if ($userScope instanceof Closure) {
             return $userScope($this);
         }
 
-        return new ReadModelProjectorScope($this->management);
+        return new ReadModelAccess($this->management);
     }
 }

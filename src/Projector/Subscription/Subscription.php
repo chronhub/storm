@@ -12,6 +12,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
 use Chronhub\Storm\Contracts\Projector\StreamGapManager;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
@@ -31,6 +32,8 @@ final class Subscription
 
     public readonly ?EventCounter $eventCounter;
 
+    private ?ContextReaderInterface $context = null;
+
     private ?string $currentStreamName = null;
 
     private ?MergeStreamIterator $streamIterator = null;
@@ -38,7 +41,6 @@ final class Subscription
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public function __construct(
-        public readonly ContextReaderInterface $context,
         public readonly StreamManager|StreamGapManager $streamManager,
         public readonly SystemClock $clock,
         public readonly ProjectionOption $option,
@@ -51,6 +53,28 @@ final class Subscription
         $this->chronicler = $chronicler;
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
+    }
+
+    public function setContext(ContextReaderInterface $context): void
+    {
+        if ($this->context === null) {
+            // @todo reset exception
+            //throw new RuntimeException('Rerunning projection is not allowed');
+
+            $this->context = $context;
+        }
+
+        // $this->context = $context;
+    }
+
+    public function context(): ContextReaderInterface
+    {
+        return $this->context;
+    }
+
+    public function isContextInitialized(): bool
+    {
+        return $this->context !== null;
     }
 
     public function &currentStreamName(): ?string
@@ -122,6 +146,9 @@ final class Subscription
         $this->streamManager->discover($this->context->queries());
     }
 
+    /**
+     * Check if the stream manager has gap detection.
+     */
     public function hasGapDetection(): bool
     {
         return $this->streamManager instanceof StreamGapManager;

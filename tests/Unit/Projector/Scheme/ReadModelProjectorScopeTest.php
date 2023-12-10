@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
+use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(ReadModelSubscriber::class);
@@ -16,7 +16,7 @@ beforeEach(function () {
 it('can stop subscription', function () {
     $this->subscription->expects($this->once())->method('close');
 
-    $scope = new ReadModelProjectorScope($this->subscription);
+    $scope = new ReadModelAccess($this->subscription);
 
     $scope->stop();
 });
@@ -24,7 +24,7 @@ it('can stop subscription', function () {
 it('can get current stream name', function () {
     $this->subscription->expects($this->once())->method('currentStreamName')->willReturn('customer');
 
-    $scope = new ReadModelProjectorScope($this->subscription);
+    $scope = new ReadModelAccess($this->subscription);
 
     expect($scope->streamName())->toBe('customer');
 });
@@ -34,7 +34,7 @@ it('can get clock', function () {
 
     $this->subscription->expects($this->once())->method('clock')->willReturn($clock);
 
-    $scope = new ReadModelProjectorScope($this->subscription);
+    $scope = new ReadModelAccess($this->subscription);
 
     expect($scope->clock())->toBe($clock);
 });
@@ -44,7 +44,7 @@ it('can get read model', function () {
 
     $this->subscription->expects($this->once())->method('readModel')->willReturn($readModel);
 
-    $scope = new ReadModelProjectorScope($this->subscription);
+    $scope = new ReadModelAccess($this->subscription);
 
     expect($scope->readModel())->toBe($readModel);
 });

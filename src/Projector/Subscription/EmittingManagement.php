@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
+use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Scheme\EmittedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
 
-final readonly class EmitterManagement implements EmitterSubscriptionManagement
+final readonly class EmittingManagement implements EmitterManagement
 {
     use InteractWithManagement;
 
     public function __construct(
         protected Subscription $subscription,
         protected ProjectionRepository $repository,
-        private StreamCacheInterface $streamCache,
+        private StreamCache $streamCache,
         private EmittedStream $emittedStream
     ) {
     }

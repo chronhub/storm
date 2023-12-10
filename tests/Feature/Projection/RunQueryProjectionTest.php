@@ -8,8 +8,8 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
-use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
+use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
+use Chronhub\Storm\Projector\Scheme\QueryAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -28,18 +28,18 @@ it('can run query projection', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
             $state['count']++;
 
             if ($state['count'] === 1) {
-                expect($scope)->toBeInstanceOf(QueryProjectorScope::class)
+                expect($scope)->toBeInstanceOf(QueryAccess::class)
                     ->and($scope->streamName())->toBe('user')
                     ->and($scope->clock())->toBeInstanceOf(PointInTime::class);
             }
@@ -47,7 +47,7 @@ it('can run query projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->outputState())->toBe(['count' => 10]);
 });
 
 it('can stop query projection', function () {
@@ -57,14 +57,14 @@ it('can stop query projection', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
             $state['count']++;
 
             if ($state['count'] === 5) {
@@ -74,7 +74,7 @@ it('can stop query projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 5]);
+    expect($projector->outputState())->toBe(['count' => 5]);
 });
 
 it('can run query projection in background with timer', function () {
@@ -84,7 +84,7 @@ it('can run query projection in background with timer', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -98,7 +98,7 @@ it('can run query projection in background with timer', function () {
             return $state;
         })->run(true);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->outputState())->toBe(['count' => 10]);
 });
 
 it('rerun a completed query projection will return the original initialized state', function () {
@@ -108,7 +108,7 @@ it('rerun a completed query projection will return the original initialized stat
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -121,11 +121,11 @@ it('rerun a completed query projection will return the original initialized stat
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 5]);
+    expect($projector->outputState())->toBe(['count' => 5]);
 
     $projector->run(false);
 
-    expect($projector->getState())->toBe(['count' => 0]);
+    expect($projector->outputState())->toBe(['count' => 0]);
 });
 
 it('can rerun query projection from incomplete run and override state', function () {
@@ -135,7 +135,7 @@ it('can rerun query projection from incomplete run and override state', function
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // first run
     $projector
@@ -149,7 +149,7 @@ it('can rerun query projection from incomplete run and override state', function
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 5, 'ids' => [1, 2, 3, 4, 5]]);
+    expect($projector->outputState())->toBe(['count' => 5, 'ids' => [1, 2, 3, 4, 5]]);
 
     // append new events
     $appends = $this->testFactory->getStream('user', 3, '+10 seconds', $eventId, SomeEvent::class, 6);
@@ -157,11 +157,11 @@ it('can rerun query projection from incomplete run and override state', function
 
     // second run
     $projector->run(false);
-    expect($projector->getState())->toBe(['count' => 3, 'ids' => [6, 7, 8]]);
+    expect($projector->outputState())->toBe(['count' => 3, 'ids' => [6, 7, 8]]);
 
     // third run from "complete" state
     $projector->run(false);
-    expect($projector->getState())->toBe(['count' => 0, 'ids' => []]);
+    expect($projector->outputState())->toBe(['count' => 0, 'ids' => []]);
 });
 
 it('assert query projection does not handle gap', function () {
@@ -174,7 +174,7 @@ it('assert query projection does not handle gap', function () {
     $this->eventStore->amend($stream1);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run once
     $projector
@@ -188,7 +188,7 @@ it('assert query projection does not handle gap', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 2, 'ids' => [1, 5]]);
+    expect($projector->outputState())->toBe(['count' => 2, 'ids' => [1, 5]]);
 });
 
 it('can rerun query projection and catch up', function () {
@@ -198,7 +198,7 @@ it('can rerun query projection and catch up', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -211,14 +211,14 @@ it('can rerun query projection and catch up', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->outputState())->toBe(['count' => 10]);
 
     $appends = $this->testFactory->getStream('user', 20, '+10 seconds', $eventId, SomeEvent::class, 11);
     $this->eventStore->amend($appends);
 
     $projector->run(false);
 
-    expect($projector->getState())->toBe(['count' => 30]);
+    expect($projector->outputState())->toBe(['count' => 30]);
 })->todo();
 
 it('can reset query projection and re run from scratch', function () {
@@ -228,7 +228,7 @@ it('can reset query projection and re run from scratch', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -241,13 +241,13 @@ it('can reset query projection and re run from scratch', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->outputState())->toBe(['count' => 10]);
 
     $projector->reset();
 
     $projector->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->outputState())->toBe(['count' => 10]);
 });
 
 it('can run query projection from category', function () {
@@ -261,7 +261,7 @@ it('can run query projection from category', function () {
     $this->eventStore->firstCommit($debit);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -274,7 +274,7 @@ it('can run query projection from category', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 4]);
+    expect($projector->outputState())->toBe(['count' => 4]);
 });
 
 it('can run query projection from all streams', function () {
@@ -292,7 +292,7 @@ it('can run query projection from all streams', function () {
     $this->eventStore->firstCommit($debit);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -305,7 +305,7 @@ it('can run query projection from all streams', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 14]);
+    expect($projector->outputState())->toBe(['count' => 14]);
 });
 
 it('can run query projection with a dedicated query filter', function () {
@@ -328,7 +328,7 @@ it('can run query projection with a dedicated query filter', function () {
     };
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -341,7 +341,7 @@ it('can run query projection with a dedicated query filter', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['positions' => [8, 9, 10]]);
+    expect($projector->outputState())->toBe(['positions' => [8, 9, 10]]);
 });
 
 it('can run query projection with user state', function () {
@@ -351,7 +351,7 @@ it('can run query projection with user state', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -366,7 +366,7 @@ it('can run query projection with user state', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 1]);
+    expect($projector->outputState())->toBe(['count' => 1]);
 });
 
 it('can run query projection with empty user state', function () {
@@ -376,7 +376,7 @@ it('can run query projection with empty user state', function () {
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -389,7 +389,7 @@ it('can run query projection with empty user state', function () {
             return ['count' => 1];
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 1]);
+    expect($projector->outputState())->toBe(['count' => 1]);
 });
 
 it('can run query projection with user state and return', function (array $returnState) {
@@ -399,7 +399,7 @@ it('can run query projection with user state and return', function (array $retur
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -414,7 +414,7 @@ it('can run query projection with user state and return', function (array $retur
             return $returnState;
         })->run(false);
 
-    expect($projector->getState())->toBe($returnState);
+    expect($projector->outputState())->toBe($returnState);
 })->with([
     'whatever data' => [['return whatever data']],
     'empty array' => [[]],
@@ -429,7 +429,7 @@ it('can run query projection without user state and return will be ignored', fun
     $this->eventStore->firstCommit($stream);
 
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     // run projection
     $projector
@@ -441,12 +441,12 @@ it('can run query projection without user state and return will be ignored', fun
             return ['foo' => 'bar'];
         })->run(false);
 
-    expect($projector->getState())->toBe([]);
+    expect($projector->outputState())->toBe([]);
 });
 
 it('test state is not altered with no event to handle', function () {
     // create a projection
-    $projector = $this->projectorManager->newQuery();
+    $projector = $this->projectorManager->newQueryProjector();
 
     $outState = ['foo' => 'bar'];
 
@@ -459,5 +459,5 @@ it('test state is not altered with no event to handle', function () {
             return $outState;
         })->run(false);
 
-    expect($projector->getState())->toBe([]);
+    expect($projector->outputState())->toBe([]);
 });

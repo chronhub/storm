@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 
-interface EmitterProjectorScopeInterface extends ProjectorScope
+interface EmitterScope extends ProjectorScope
 {
     public function emit(DomainEvent $event): void;
 

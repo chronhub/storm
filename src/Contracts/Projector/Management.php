@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 
-interface SubscriptionManagement
+interface Management
 {
     /**
      * Get the clock instance.

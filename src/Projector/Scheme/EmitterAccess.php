@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\EmitterProjectorScopeInterface;
-use Chronhub\Storm\Contracts\Projector\EmitterSubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\EmitterManagement;
+use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Reporter\DomainEvent;
 
-final readonly class EmitterProjectorScope implements EmitterProjectorScopeInterface
+final readonly class EmitterAccess implements EmitterScope
 {
-    public function __construct(private EmitterSubscriptionManagement $emitter)
+    public function __construct(private EmitterManagement $emitter)
     {
     }
 

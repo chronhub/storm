@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use phpDocumentor\Reflection\DocBlock\Tags\Deprecated;
@@ -17,7 +17,7 @@ use phpDocumentor\Reflection\DocBlock\Tags\Deprecated;
  */
 final readonly class StopWhenRunningOnce
 {
-    public function __construct(private SubscriptionManagement $subscription)
+    public function __construct(private Management $subscription)
     {
     }
 

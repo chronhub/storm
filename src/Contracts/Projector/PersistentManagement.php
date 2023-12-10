@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
-interface PersistentSubscriptionManagement extends SubscriptionManagement
+interface PersistentManagement extends Management
 {
     /**
      * Start the persistent subscription and resume the projection.
@@ -72,7 +72,7 @@ interface PersistentSubscriptionManagement extends SubscriptionManagement
     public function freed(): void;
 
     /**
-     * Get the projection name (stream name).
+     * Get the projection name (aka stream name).
      */
     public function getName(): string;
 }

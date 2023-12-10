@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
+use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
@@ -18,7 +18,7 @@ final readonly class EventProcessor
     public function __construct(
         private Closure $reactors,
         private ProjectorScope $scope,
-        private ?SubscriptionManagement $management,
+        private ?PersistentManagement $management,
     ) {
     }
 
@@ -36,7 +36,7 @@ final readonly class EventProcessor
             return false;
         }
 
-        // each event is counted
+        // increment event counter for each event
         if ($this->management) {
             $subscription->eventCounter->increment();
         }
@@ -55,7 +55,7 @@ final readonly class EventProcessor
     private function reactOn(DomainEvent $event, Subscription $subscription): void
     {
         // ensure to pass user state only if it has been initialized
-        $userState = $subscription->context->userState() instanceof Closure
+        $userState = $subscription->context()->userState() instanceof Closure
             ? $subscription->state->get() : null;
 
         // handle event

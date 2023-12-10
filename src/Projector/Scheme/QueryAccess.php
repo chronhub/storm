@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorScopeInterface;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\QueryManagement;
+use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 
-final readonly class QueryProjectorScope implements QueryProjectorScopeInterface
+final readonly class QueryAccess implements QueryProjectorScope
 {
-    public function __construct(private QuerySubscriptionManagement $query)
+    public function __construct(private QueryManagement $query)
     {
     }
 

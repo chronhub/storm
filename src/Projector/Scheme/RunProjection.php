@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class RunProjection
     public function __construct(
         private Workflow $workflow,
         private bool $keepRunning,
-        private ?SubscriptionManagement $subscription,
+        private ?Management $subscription,
     ) {
     }
 

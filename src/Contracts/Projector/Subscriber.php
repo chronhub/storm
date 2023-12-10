@@ -11,5 +11,10 @@ use Chronhub\Storm\Projector\Subscription\Subscription;
  */
 interface Subscriber
 {
-    public function start(bool $keepRunning): void;
+    public function start(ContextReaderInterface $context, bool $keepRunning): void;
+
+    /**
+     * Return user state
+     */
+    public function outputState(): array;
 }

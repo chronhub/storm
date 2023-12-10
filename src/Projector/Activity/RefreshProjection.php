@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
@@ -14,7 +14,7 @@ final class RefreshProjection
 
     protected Sprint $sprint;
 
-    public function __construct(protected SubscriptionManagement $management)
+    public function __construct(protected PersistentManagement $management)
     {
     }
 

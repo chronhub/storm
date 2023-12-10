@@ -37,20 +37,16 @@ final class StreamBinder implements StreamManager
 
     public function bind(string $streamName, int $expectedPosition, DomainEvent $event): bool
     {
-        if (! $this->hasStream($streamName)) {
-            throw new RuntimeException("Stream $streamName is not watched");
-        }
+        $this->assertHasStream($streamName);
 
         $this->streamPosition[$streamName] = $expectedPosition;
 
         return true;
     }
 
-    public function isAvailable(string $streamName, int $expectedPosition): bool
+    public function hasNextPosition(string $streamName, int $expectedPosition): bool
     {
-        if (! $this->hasStream($streamName)) {
-            throw new RuntimeException("Stream $streamName is not watched");
-        }
+        $this->assertHasStream($streamName);
 
         return $expectedPosition === $this->streamPosition[$streamName] + 1;
     }
@@ -73,5 +69,12 @@ final class StreamBinder implements StreamManager
     public function jsonSerialize(): array
     {
         return $this->all();
+    }
+
+    private function assertHasStream(string $streamName): void
+    {
+        if (! $this->hasStream($streamName)) {
+            throw new RuntimeException("Stream $streamName is not watched");
+        }
     }
 }

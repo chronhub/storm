@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 use function usleep;
 
 final readonly class PersistOrUpdate
 {
-    public function __construct(private SubscriptionManagement $management)
+    public function __construct(private Management $management)
     {
     }
 

@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 
-final readonly class ReadModelManagement implements ReadModelSubscriptionManagement
+final readonly class ReadingModelManagement implements ReadModelManagement
 {
     use InteractWithManagement;
 
@@ -17,11 +17,6 @@ final readonly class ReadModelManagement implements ReadModelSubscriptionManagem
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
-    }
-
-    public function getReadModel(): ReadModel
-    {
-        return $this->readModel;
     }
 
     public function rise(): void
@@ -68,5 +63,10 @@ final readonly class ReadModelManagement implements ReadModelSubscriptionManagem
         $this->subscription->streamManager->resets();
 
         $this->subscription->initializeAgain();
+    }
+
+    public function getReadModel(): ReadModel
+    {
+        return $this->readModel;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface ReadModelProjectorScopeInterface extends ProjectorScope
+interface ReadModelScope extends ProjectorScope
 {
     /**
      * Return the read model instance.

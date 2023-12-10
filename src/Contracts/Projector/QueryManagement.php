@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface QuerySubscriptionManagement extends SubscriptionManagement
+interface QueryManagement extends Management
 {
     /**
      * Stop the query subscription.

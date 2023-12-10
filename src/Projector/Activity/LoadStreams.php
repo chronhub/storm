@@ -24,7 +24,6 @@ final class LoadStreams
 
         if ($streams !== []) {
             $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
-            // todo use setter for clock
 
             $subscription->setStreamIterator($iterator);
         }
@@ -39,7 +38,7 @@ final class LoadStreams
     {
         $streams = [];
 
-        $queryFilter = $subscription->context->queryFilter();
+        $queryFilter = $subscription->context()->queryFilter();
         $loadLimiter = $subscription->option->getLoads();
 
         foreach ($subscription->streamManager->jsonSerialize() as $streamName => $position) {

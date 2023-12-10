@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
-use Chronhub\Storm\Contracts\Projector\ReadModelSubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
+use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 
-final readonly class ReadModelProjectorScope implements ReadModelProjectorScopeInterface
+final readonly class ReadModelAccess implements ReadModelScope
 {
-    public function __construct(private ReadModelSubscriptionManagement $management)
+    public function __construct(private ReadModelManagement $management)
     {
     }
 

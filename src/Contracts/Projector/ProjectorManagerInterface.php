@@ -11,21 +11,21 @@ interface ProjectorManagerInterface
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function newQuery(array $options = []): QueryProjector;
+    public function newQueryProjector(array $options = []): QueryProjector;
 
     /**
      * Create a new emitter projector.
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function newEmitter(string $streamName, array $options = []): EmitterProjector;
+    public function newEmitterProjector(string $streamName, array $options = []): EmitterProjector;
 
     /**
      * Create a new read model projector.
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      */
-    public function newReadModel(
+    public function newReadModelProjector(
         string $streamName,
         ReadModel $readModel,
         array $options = []): ReadModelProjector;

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface ProjectionQueryScope
 {
     /**
-     * A projection query filter to get events from included position.
+     * A projection query filter to read events from included position.
      */
     public function fromIncludedPosition(): ProjectionQueryFilter;
 }

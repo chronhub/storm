@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
@@ -15,7 +16,6 @@ use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
-use Chronhub\Storm\Projector\Activity\StopWhenRunningOnce;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
@@ -23,26 +23,51 @@ use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentSubscription
 {
-    public function start(bool $keepRunning): void
+    public function start(ContextReaderInterface $context, bool $keepRunning): void
     {
-        if (! $this->subscription->context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Persistent subscription requires a projection query filter');
+        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Persistent subscription requires a projection query filter.');
         }
 
+        // checkMe allow rerunning the projection from subscription by now
+        $this->subscription->setContext($context);
+
         $this->subscription->setOriginalUserState();
-
         $this->subscription->sprint->runInBackground($keepRunning);
-
         $this->subscription->sprint->continue();
 
         $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
+        $project->beginCycle();
+    }
 
+    public function startAgain(bool $keepRunning, bool $fromScratch): void
+    {
+        if (! $this->subscription->isContextInitialized()) {
+            throw new RuntimeException('Run the projection first before running again.');
+        }
+
+        // todo tests from different context and statuses
+        // for query sub , it should be allowed to run again from scratch
+        if ($fromScratch) {
+            $this->subscription->setOriginalUserState();
+            $this->subscription->streamManager->resets();
+        }
+
+        $this->subscription->sprint->runInBackground($keepRunning);
+        $this->subscription->sprint->continue();
+
+        $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
         $project->beginCycle();
     }
 
     public function getName(): string
     {
         return $this->management->getName();
+    }
+
+    public function outputState(): array
+    {
+        return $this->subscription->state->get();
     }
 
     protected function newWorkflow(): Workflow
@@ -57,7 +82,7 @@ trait InteractWithPersistentSubscription
             new RisePersistentProjection($this->management),
             new LoadStreams(),
             new HandleStreamEvent(
-                new EventProcessor($this->subscription->context->reactors(), $this->getScope(), $this->management)
+                new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), $this->management)
             ),
             new HandleStreamGap($this->management),
             new PersistOrUpdate($this->management),

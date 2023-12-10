@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 
-interface EmitterSubscriptionManagement extends PersistentSubscriptionManagement
+interface EmitterManagement extends PersistentManagement
 {
     /**
      * Create or amend to a (new) stream under the current projection name.

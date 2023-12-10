@@ -39,7 +39,7 @@ interface StreamManager extends JsonSerializable
      *
      * @throw RuntimeException When stream name is not watched
      */
-    public function isAvailable(string $streamName, int $expectedPosition): bool;
+    public function hasNextPosition(string $streamName, int $expectedPosition): bool;
 
     /**
      * Check if stream name is watched.

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\QuerySubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\QueryManagement;
 
-final readonly class QueryManagement implements QuerySubscriptionManagement
+final readonly class QueryingManagement implements QueryManagement
 {
     public function __construct(private Subscription $subscription)
     {

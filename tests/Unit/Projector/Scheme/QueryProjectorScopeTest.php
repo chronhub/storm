@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
-use Chronhub\Storm\Projector\Scheme\QueryProjectorScope;
+use Chronhub\Storm\Projector\Scheme\QueryAccess;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 
 beforeEach(function () {
@@ -23,7 +23,7 @@ it('can stop subscription', function () {
 
     $this->subscription->expects($this->once())->method('sprint')->willReturn($this->sprint);
 
-    $scope = new QueryProjectorScope($this->subscription);
+    $scope = new QueryAccess($this->subscription);
 
     $scope->stop();
 });
@@ -31,7 +31,7 @@ it('can stop subscription', function () {
 it('can get current stream name', function () {
     $this->subscription->expects($this->once())->method('currentStreamName')->willReturn('customer');
 
-    $scope = new QueryProjectorScope($this->subscription);
+    $scope = new QueryAccess($this->subscription);
 
     expect($scope->streamName())->toBe('customer');
 });
@@ -41,7 +41,7 @@ it('can get clock', function () {
 
     $this->subscription->expects($this->once())->method('clock')->willReturn($clock);
 
-    $scope = new QueryProjectorScope($this->subscription);
+    $scope = new QueryAccess($this->subscription);
 
     expect($scope->clock())->toBe($clock);
 });

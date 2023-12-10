@@ -61,9 +61,9 @@ final class StreamGap implements StreamGapManager
         return $this->streamManager->hasStream($streamName);
     }
 
-    public function isAvailable(string $streamName, int $expectedPosition): bool
+    public function hasNextPosition(string $streamName, int $expectedPosition): bool
     {
-        return $this->streamManager->isAvailable($streamName, $expectedPosition);
+        return $this->streamManager->hasNextPosition($streamName, $expectedPosition);
     }
 
     public function sleep(): void
@@ -116,7 +116,7 @@ final class StreamGap implements StreamGapManager
     private function isGapFilled(string $streamName, int $expectedPosition, DomainEvent $event): bool
     {
         $noGap = match (true) {
-            $this->isAvailable($streamName, $expectedPosition) => true,
+            $this->hasNextPosition($streamName, $expectedPosition) => true,
             ! $this->hasRetry() => true,
             $this->isPastEventTime($event) => true,
             $this->retriesInMs === [] => true,

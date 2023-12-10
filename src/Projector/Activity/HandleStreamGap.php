@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
-use Chronhub\Storm\Contracts\Projector\SubscriptionManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final readonly class HandleStreamGap
 {
-    public function __construct(private SubscriptionManagement $subscription)
+    public function __construct(private Management $subscription)
     {
     }
 

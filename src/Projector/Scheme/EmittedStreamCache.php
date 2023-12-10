@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\StreamCacheInterface;
+use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function array_fill;
 use function in_array;
 
-final class StreamCache implements StreamCacheInterface
+final class EmittedStreamCache implements StreamCache
 {
     private array $buffer = [];
 

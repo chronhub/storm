@@ -13,7 +13,7 @@ final class RunUntil
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $interval = $subscription->context->timer();
+        $interval = $subscription->context()->timer();
 
         if ($interval && $this->timer === null) {
             $this->timer = new Timer($subscription->clock, $interval);

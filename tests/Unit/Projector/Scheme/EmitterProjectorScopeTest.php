@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
-use Chronhub\Storm\Projector\Scheme\EmitterProjectorScope;
+use Chronhub\Storm\Projector\Scheme\EmitterAccess;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 
 beforeEach(function () {
@@ -18,7 +18,7 @@ it('can emit event', function () {
 
     $this->subscription->expects($this->once())->method('emit')->with($event);
 
-    $scope = new EmitterProjectorScope($this->subscription);
+    $scope = new EmitterAccess($this->subscription);
 
     $scope->emit($event);
 });
@@ -28,7 +28,7 @@ it('can link event to stream', function () {
 
     $this->subscription->expects($this->once())->method('linkTo')->with('customer', $event);
 
-    $scope = new EmitterProjectorScope($this->subscription);
+    $scope = new EmitterAccess($this->subscription);
 
     $scope->linkTo('customer', $event);
 });
@@ -36,7 +36,7 @@ it('can link event to stream', function () {
 it('can stop subscription', function () {
     $this->subscription->expects($this->once())->method('close');
 
-    $scope = new EmitterProjectorScope($this->subscription);
+    $scope = new EmitterAccess($this->subscription);
 
     $scope->stop();
 });
@@ -44,7 +44,7 @@ it('can stop subscription', function () {
 it('can get current stream name', function () {
     $this->subscription->expects($this->once())->method('currentStreamName')->willReturn('customer');
 
-    $scope = new EmitterProjectorScope($this->subscription);
+    $scope = new EmitterAccess($this->subscription);
 
     expect($scope->streamName())->toBe('customer');
 });
@@ -54,7 +54,7 @@ it('can get clock', function () {
 
     $this->subscription->expects($this->once())->method('clock')->willReturn($clock);
 
-    $scope = new EmitterProjectorScope($this->subscription);
+    $scope = new EmitterAccess($this->subscription);
 
     expect($scope->clock())->toBe($clock);
 });

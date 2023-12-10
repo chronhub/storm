@@ -8,9 +8,9 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\ReadModelProjectorScopeInterface;
+use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\ReadModelProjectorScope;
+use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
@@ -31,17 +31,17 @@ it('can run read model projection', function () {
 
     // create a projection
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope) use ($readModel): array {
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope) use ($readModel): array {
             if ($state['count'] === 1) {
                 expect($scope)
-                    ->toBeInstanceOf(ReadModelProjectorScope::class)
+                    ->toBeInstanceOf(ReadModelAccess::class)
                     ->and($scope->streamName())->toBe('user')
                     ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
                     ->and($scope->readModel())->toBe($readModel)
@@ -59,7 +59,7 @@ it('can run read model projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())
+    expect($projector->outputState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
@@ -72,14 +72,14 @@ it('can stop read model projection', function () {
 
     // create a projection
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
             } else {
@@ -95,7 +95,7 @@ it('can stop read model projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())
+    expect($projector->outputState())
         ->toBe(['count' => 7])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 7]]);
 });
@@ -108,14 +108,14 @@ it('can rerun read model projection by catchup', function () {
 
     // create a projection
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), ['count' => $event->header(EventHeader::INTERNAL_POSITION)]);
             } else {
@@ -127,7 +127,7 @@ it('can rerun read model projection by catchup', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())
+    expect($projector->outputState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
@@ -136,7 +136,7 @@ it('can rerun read model projection by catchup', function () {
 
     $projector->run(false);
 
-    expect($projector->getState())
+    expect($projector->outputState())
         ->toBe(['count' => 20])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
@@ -152,14 +152,14 @@ it('can run read model projection from many streams', function () {
 
     // create a projection
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('balance', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('balance', $readModel);
 
     // run projection
     $projector
         ->initialize(fn () => ['count_some_event' => 0, 'count_another_event' => 0])
         ->fromStreams('debit', 'credit')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($scope->streamName() === 'debit') {
                 $state['count_some_event']++;
 
@@ -177,7 +177,7 @@ it('can run read model projection from many streams', function () {
             return $state;
         })->run(false);
 
-    expect($projector->getState())
+    expect($projector->outputState())
         ->toBe(['count_some_event' => 10, 'count_another_event' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
@@ -197,14 +197,14 @@ it('can run read model projection from many streams and sort events by ascending
 
     // create a projection
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('balance', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('balance', $readModel);
 
     // run projection
     $projector
         ->initialize(fn () => ['order' => [], 'index' => 0])
         ->fromStreams('debit', 'credit')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, ReadModelProjectorScopeInterface $scope): array {
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['order'][$scope->streamName()][$state['index'] + 1] = $event::class;
 
             $state['index']++;
@@ -212,7 +212,7 @@ it('can run read model projection from many streams and sort events by ascending
             return $state;
         })->run(false);
 
-    expect($projector->getState()['order'])->toBe([
+    expect($projector->outputState()['order'])->toBe([
         'debit' => [1 => SomeEvent::class, 3 => SomeEvent::class],
         'credit' => [2 => AnotherEvent::class, 4 => AnotherEvent::class],
     ]);
@@ -220,7 +220,7 @@ it('can run read model projection from many streams and sort events by ascending
 
 it('raise exception when query filter is not a projection query filter', function () {
     $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModel('customer', $readModel);
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     $projector
         ->fromStreams('user')
