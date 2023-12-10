@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 /**
- * @property-read Subscription $subscription
+ * @property Subscription $subscription
  */
 interface Subscriber
 {
