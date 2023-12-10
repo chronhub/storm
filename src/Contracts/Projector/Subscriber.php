@@ -46,7 +46,7 @@ interface Subscriber
      */
     public function pullStreamIterator(): ?MergeStreamIterator;
 
-    public function context(): ContextInterface;
+    public function context(): ContextReaderInterface;
 
     public function outputState(): array;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ContextInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -52,7 +53,7 @@ trait InteractWithSubscription
         return $this->holder->pullStreamIterator();
     }
 
-    public function context(): ContextInterface
+    public function context(): ContextReaderInterface
     {
         return $this->context;
     }
