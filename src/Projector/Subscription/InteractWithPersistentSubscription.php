@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
@@ -30,9 +29,7 @@ trait InteractWithPersistentSubscription
             throw new RuntimeException('Persistent subscription requires a projection query filter.');
         }
 
-        // allow rerun projection only for in memory projection
-        $inMemory = $this->subscription->chronicler instanceof InMemoryChronicler;
-        $this->subscription->setContext($context, $inMemory);
+        $this->subscription->setContext($context, true);
 
         $this->subscription->setOriginalUserState();
         $this->subscription->sprint->runInBackground($keepRunning);

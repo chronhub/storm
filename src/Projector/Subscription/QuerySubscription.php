@@ -12,7 +12,6 @@ use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryAccess;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
@@ -30,41 +29,31 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function start(ContextReaderInterface $context, bool $keepRunning): void
     {
-        if ($this->subscription->isContextInitialized()) {
-            throw new RuntimeException('Use run again to rerun the projection.');
+        if (! $this->subscription->isContextInitialized()) {
+            $this->subscription->setContext($context, true);
+            $this->subscription->setOriginalUserState();
+        } elseif (false === true) {
+            // todo check if keepStateOnRerun in context is true
+            //  otherwise, reset the state
         }
 
-        $this->subscription->setContext($context, false);
-        $this->subscription->setOriginalUserState();
+        // in short, when init with fn() =>['count' => 0],
+        // running once will give loaded events will give ['count' => 10]
+        // but running in this method again with no events loaded will give ['count' => 0] because the state is reset
+        // but again, with 5 loaded events, it will give ['count' => 5]
+        // up to dev to aggregate the state
+
+        // instead, use keepStateOnRerun to keep the state from the last known position
+        // will give ['count' => 10] and ['count' => 15] if 5 events loaded
+        // and keep the state up to date
+
+        // can always restart from scratch with resets() method
+
         $this->subscription->sprint->runInBackground($keepRunning);
         $this->subscription->sprint->continue();
 
         $project = new RunProjection($this->newWorkflow(), $keepRunning, null);
 
-        $project->beginCycle();
-    }
-
-    public function startAgain(bool $keepRunning, bool $fromScratch): void
-    {
-        if (! $this->subscription->isContextInitialized()) {
-            throw new RuntimeException('Run the projection first before running again.');
-        }
-
-        $previousState = $this->subscription->state->get();
-
-        if ($fromScratch) {
-            $this->resets();
-
-            $previousState = [];
-        }
-
-        // keep the previous state in memory if not reset
-        $this->subscription->state->put($previousState);
-
-        $this->subscription->sprint->runInBackground($keepRunning);
-        $this->subscription->sprint->continue();
-
-        $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
         $project->beginCycle();
     }
 
