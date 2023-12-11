@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleLoop;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
@@ -27,21 +26,9 @@ trait InteractWithPersistentSubscription
 {
     public function start(ContextReaderInterface $context, bool $keepRunning): void
     {
-        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Persistent subscription requires a projection query filter.');
-        }
+        $this->initializeContext($context, $keepRunning);
 
-        if ($context->keepState() === true) {
-            throw new RuntimeException('Keep state is only available for query projection.');
-        }
-
-        $this->subscription->setContext($context, true);
-        $this->subscription->setOriginalUserState();
-        $this->subscription->sprint->runInBackground($keepRunning);
-        $this->subscription->sprint->continue();
-
-        $project = new RunProjection($this->newWorkflow(), $keepRunning, $this->management);
-        $project->beginCycle();
+        $this->startProjection($keepRunning);
     }
 
     public function getName(): string
@@ -64,7 +51,6 @@ trait InteractWithPersistentSubscription
         $monitor = new MonitorRemoteStatus();
 
         return [
-            new HandleLoop(),
             new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
             new RisePersistentProjection($monitor, $this->management),
             new LoadStreams(),
@@ -83,4 +69,32 @@ trait InteractWithPersistentSubscription
      * @internal
      */
     abstract public function getScope(): ProjectorScope;
+
+    private function initializeContext(ContextReaderInterface $context, bool $keepRunning): void
+    {
+        $this->validateContext($context);
+
+        $this->subscription->setContext($context, true);
+        $this->subscription->setOriginalUserState();
+        $this->subscription->sprint->runInBackground($keepRunning);
+        $this->subscription->sprint->continue();
+    }
+
+    private function startProjection(bool $keepRunning): void
+    {
+        $project = new RunProjection($this->newWorkflow(), $this->subscription->looper, $keepRunning, $this->management);
+
+        $project->beginCycle();
+    }
+
+    private function validateContext(ContextReaderInterface $context): void
+    {
+        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
+            throw new RuntimeException('Persistent subscription requires a projection query filter.');
+        }
+
+        if ($context->keepState() === true) {
+            throw new RuntimeException('Keep state is only available for query projection.');
+        }
+    }
 }

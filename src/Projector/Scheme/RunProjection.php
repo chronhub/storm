@@ -13,6 +13,7 @@ final readonly class RunProjection
 {
     public function __construct(
         private Workflow $workflow,
+        private Looper $looper,
         private bool $keepRunning,
         private ?PersistentManagement $management,
     ) {
@@ -21,33 +22,70 @@ final readonly class RunProjection
     public function beginCycle(): void
     {
         try {
-            do {
-                $inProgress = $this->workflow->process(
-                    fn (Subscription $subscription): bool => $subscription->sprint->inProgress()
-                );
-            } while ($this->keepRunning && $inProgress);
+            $this->runWorkflowCycle();
         } catch (Throwable $exception) {
-            $error = $exception;
+            $this->handleException($exception);
         } finally {
-            $this->tryReleaseLock($error ?? null);
+            $this->tryReleaseLock();
+        }
+    }
+
+    private function runWorkflowCycle(): void
+    {
+        do {
+            $this->startLooperIfNeeded();
+
+            $inProgress = $this->workflow->process(
+                fn (Subscription $subscription): bool => $subscription->sprint->inProgress()
+            );
+
+            $this->handleCycleEnd($inProgress);
+        } while ($this->keepRunning && $inProgress);
+    }
+
+    private function startLooperIfNeeded(): void
+    {
+        if (! $this->looper->hasStarted()) {
+            $this->looper->start();
+        }
+    }
+
+    private function handleCycleEnd(bool $inProgress): void
+    {
+        if (! $this->keepRunning || ! $inProgress) {
+            $this->looper->reset();
+        } else {
+            $this->looper->next();
         }
     }
 
     /**
      * @throws Throwable
      */
-    private function tryReleaseLock(?Throwable $exception): void
+    private function handleException(Throwable $exception): void
     {
         if (! $exception instanceof ProjectionAlreadyRunning && $this->management) {
-            try {
-                $this->management->freed();
-            } catch (Throwable) {
-                // fail silently
-            }
+            $this->trySilentReleaseLock();
         }
 
-        if ($exception instanceof Throwable) {
-            throw $exception;
+        throw $exception;
+    }
+
+    private function trySilentReleaseLock(): void
+    {
+        try {
+            $this->management->freed();
+        } catch (Throwable) {
+            // Fail silently
         }
+    }
+
+    private function tryReleaseLock(): void
+    {
+        if (! $this->management) {
+            return;
+        }
+
+        $this->trySilentReleaseLock();
     }
 }

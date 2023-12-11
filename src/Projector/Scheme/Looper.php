@@ -13,17 +13,22 @@ final class Looper
 
     private array $laps = [];
 
+    public function __construct(private readonly bool $useMetric = false)
+    {
+    }
+
     public function start(): void
     {
         $this->lap = 1;
 
-        // todo : should be enabled by factory and/or per environment
         $this->initLap();
     }
 
     public function next(): void
     {
-        $this->laps[$this->lap] = array_merge($this->laps[$this->lap], [microtime(true)]);
+        if ($this->useMetric) {
+            $this->laps[$this->lap] = array_merge($this->laps[$this->lap], [microtime(true)]);
+        }
 
         $this->lap++;
 
@@ -52,13 +57,18 @@ final class Looper
         return $this->lap > 0;
     }
 
-    public function laps(): array
+    /**
+     * @return array<int, array<int, float>>
+     */
+    public function metrics(): array
     {
         return $this->laps;
     }
 
     private function initLap(): void
     {
-        $this->laps[$this->lap] = [microtime(true)];
+        if ($this->useMetric) {
+            $this->laps[$this->lap] = [microtime(true)];
+        }
     }
 }
