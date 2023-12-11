@@ -7,6 +7,10 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Closure;
 
+/**
+ * Every activity that interacts with the running process
+ * must be registered in the workflow after this class.
+ */
 final readonly class HandleLoop
 {
     public function __invoke(Subscription $subscription, Closure $next): callable|bool

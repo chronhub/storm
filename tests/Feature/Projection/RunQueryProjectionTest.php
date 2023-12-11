@@ -52,6 +52,52 @@ it('can run query projection 1', function () {
     expect($projector->getState())->toBe(['count' => 10]);
 });
 
+it('can run query projection until and increment loop', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 5, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQueryProjector();
+
+    // force to only handle one event
+    $queryFilter = new class() implements InMemoryQueryFilter, ProjectionQueryFilter
+    {
+        private int $currentPosition = 0;
+
+        public function apply(): callable
+        {
+            return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::INTERNAL_POSITION) === $this->currentPosition;
+        }
+
+        public function orderBy(): string
+        {
+            return 'asc';
+        }
+
+        public function setCurrentPosition(int $streamPosition): void
+        {
+            $this->currentPosition = $streamPosition;
+        }
+    };
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($queryFilter)
+        ->when(function (DomainEvent $event, array $state): array {
+            $state['count']++;
+
+            return $state;
+        })
+        ->until(1)
+        ->run(true);
+
+    expect($projector->getState())->toBe(['count' => 5]);
+})->group('sleep');
+
 it('can stop query projection', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();

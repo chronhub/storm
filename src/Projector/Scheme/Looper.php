@@ -11,28 +11,30 @@ final class Looper
 {
     private int $lap = 0;
 
-    private array $cycles = [];
-
-    public function __construct()
-    {
-    }
+    private array $laps = [];
 
     public function start(): void
     {
         $this->lap = 1;
-        $this->cycles[$this->lap] = [microtime(true)];
+
+        // todo : should be enabled by factory and/or per environment
+        $this->initLap();
     }
 
     public function next(): void
     {
-        $this->cycles[$this->lap] = array_merge($this->cycles[$this->lap], [microtime(true)]);
+        $this->laps[$this->lap] = array_merge($this->laps[$this->lap], [microtime(true)]);
+
         $this->lap++;
+
+        $this->initLap();
     }
 
     public function reset(): void
     {
         $this->lap = 0;
-        $this->cycles = [];
+
+        $this->laps = [];
     }
 
     public function lap(): int
@@ -50,8 +52,13 @@ final class Looper
         return $this->lap > 0;
     }
 
-    public function cycles(): array
+    public function laps(): array
     {
-        return $this->cycles;
+        return $this->laps;
+    }
+
+    private function initLap(): void
+    {
+        $this->laps[$this->lap] = [microtime(true)];
     }
 }

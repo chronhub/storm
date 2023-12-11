@@ -24,7 +24,7 @@ final class RunUntil
         $response = $next($subscription);
 
         if ($this->timer && $this->timer->isElapsed()) {
-            $subscription->sprint->stop();
+            $subscription->sprint->stop(); // checkMe
 
             return false;
         }

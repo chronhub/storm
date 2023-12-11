@@ -10,27 +10,27 @@ use DateTimeImmutable;
 
 class Timer
 {
-    private ?DateTimeImmutable $now = null;
+    private ?DateTimeImmutable $startTime = null;
 
     public function __construct(
-       private readonly SystemClock $clock,
-       private readonly ?DateInterval $interval
+        private readonly SystemClock $clock,
+        private readonly ?DateInterval $interval
     ) {
     }
 
     public function start(): void
     {
-        if ($this->interval && ! $this->now instanceof DateTimeImmutable) {
-            $this->now = $this->clock->now();
+        if ($this->interval && ! $this->startTime instanceof DateTimeImmutable) {
+            $this->startTime = $this->clock->now();
         }
     }
 
     public function isElapsed(): bool
     {
-        if ($this->now === null) {
+        if ($this->startTime === null) {
             return false;
         }
 
-        return $this->clock->isNowSubGreaterThan($this->interval, $this->now);
+        return $this->clock->isNowSubGreaterThan($this->interval, $this->startTime);
     }
 }
