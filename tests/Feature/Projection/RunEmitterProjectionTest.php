@@ -53,7 +53,7 @@ it('can run emitter projection', function (): void {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())->toBe(['count' => 10]);
+    expect($projector->getState())->toBe(['count' => 10]);
 });
 
 it('can emit event to a new stream named from projection', function (): void {
@@ -80,7 +80,7 @@ it('can emit event to a new stream named from projection', function (): void {
             return $state;
         })->run(false);
 
-    expect($emitter->outputState()['events'])->toHaveCount(10)
+    expect($emitter->getState()['events'])->toHaveCount(10)
         ->and($this->eventStore->hasStream(new StreamName('customer')))->toBeTrue();
 
     // query from customer stream
@@ -96,8 +96,8 @@ it('can emit event to a new stream named from projection', function (): void {
             return $state;
         })->run(false);
 
-    expect($query->outputState()['events'])->toHaveCount(10)
-        ->and($query->outputState()['events'])->toBe($emitter->outputState()['events']);
+    expect($query->getState()['events'])->toHaveCount(10)
+        ->and($query->getState()['events'])->toBe($emitter->getState()['events']);
 });
 
 it('can link event to a new stream', function (): void {
@@ -126,8 +126,8 @@ it('can link event to a new stream', function (): void {
             return $state;
         })->run(false);
 
-    expect($emitter->outputState()['odd'])->toHaveCount(5)
-        ->and($emitter->outputState()['even'])->toHaveCount(5)
+    expect($emitter->getState()['odd'])->toHaveCount(5)
+        ->and($emitter->getState()['even'])->toHaveCount(5)
         ->and($this->eventStore->hasStream(new StreamName('user_odd')))->toBeTrue()
         ->and($this->eventStore->hasStream(new StreamName('user_even')))->toBeTrue();
 
@@ -146,7 +146,7 @@ it('can link event to a new stream', function (): void {
             return $state;
         })->run(false);
 
-    expect($query->outputState())->toBe($emitter->outputState());
+    expect($query->getState())->toBe($emitter->getState());
 });
 
 it('can link event to new categories', function (): void {
@@ -175,8 +175,8 @@ it('can link event to new categories', function (): void {
             return $state;
         })->run(false);
 
-    expect($emitter->outputState()['odd'])->toHaveCount(5)
-        ->and($emitter->outputState()['even'])->toHaveCount(5)
+    expect($emitter->getState()['odd'])->toHaveCount(5)
+        ->and($emitter->getState()['even'])->toHaveCount(5)
         ->and($this->eventStore->hasStream(new StreamName('customer-odd')))->toBeTrue()
         ->and($this->eventStore->hasStream(new StreamName('customer-even')))->toBeTrue();
 
@@ -195,7 +195,7 @@ it('can link event to new categories', function (): void {
             return $state;
         })->run(false);
 
-    expect($query->outputState())->toBe($emitter->outputState());
+    expect($query->getState())->toBe($emitter->getState());
 });
 
 it('raise exception when query filter is not a projection query filter', function () {

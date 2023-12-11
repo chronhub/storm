@@ -29,6 +29,8 @@ final class Context implements ContextReaderInterface
 
     private ?Closure $userScope = null;
 
+    private bool $keepState = false;
+
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
@@ -58,6 +60,17 @@ final class Context implements ContextReaderInterface
         }
 
         $this->userScope = $scope;
+
+        return $this;
+    }
+
+    public function withKeepState(): self
+    {
+        if ($this->keepState === true) {
+            throw new InvalidArgumentException('Projection keep state already set');
+        }
+
+        $this->keepState = true;
 
         return $this;
     }
@@ -146,6 +159,11 @@ final class Context implements ContextReaderInterface
         }
 
         return $this->queryFilter;
+    }
+
+    public function keepState(): bool
+    {
+        return $this->keepState;
     }
 
     public function timer(): ?DateInterval

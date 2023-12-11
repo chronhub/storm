@@ -47,8 +47,7 @@ final readonly class EventProcessor
         // when option block size is reached, persist data
         $this->management?->persistWhenCounterIsReached();
 
-        // can return false to stop processing as it may have stopped
-        // from a signal or monitor command
+        // stop gracefully if signal is received
         return $subscription->sprint->inProgress();
     }
 

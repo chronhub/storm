@@ -75,6 +75,15 @@ interface ContextInterface
     public function withScope(Closure $scope): self;
 
     /**
+     * Keep the state in memory for the next run.
+     *
+     * Only available for query projection.
+     * When not set, the state will be reset at each run.
+     * Also, user state must be initialized.
+     */
+    public function withKeepState(): self;
+
+    /**
      * Sets the timer interval to run the projection when it runs in the background.
      *
      * Note that it could not stop projection at the exact time wanted

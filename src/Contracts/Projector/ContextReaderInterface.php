@@ -57,4 +57,11 @@ interface ContextReaderInterface extends ContextInterface
      * When not set, a default scope will be used.
      */
     public function userScope(): ?Closure;
+
+    /**
+     * Check if projection should keep state in memory.
+     *
+     * Default is false
+     */
+    public function keepState(): bool;
 }

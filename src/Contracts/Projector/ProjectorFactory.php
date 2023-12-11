@@ -76,4 +76,11 @@ interface ProjectorFactory extends Projector
      * @see ContextInterface::withScope()
      */
     public function withScope(Closure $scope): static;
+
+    /**
+     * Proxy method to keep the state in memory.
+     *
+     * @see ContextInterface::withKeepState()
+     */
+    public function withKeepState(): static;
 }

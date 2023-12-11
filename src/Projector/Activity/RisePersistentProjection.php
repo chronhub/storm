@@ -5,27 +5,22 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
-final class RisePersistentProjection
+final readonly class RisePersistentProjection
 {
-    use MonitorRemoteStatus;
-
-    protected Sprint $sprint;
-
-    public function __construct(private readonly PersistentManagement $management)
-    {
+    public function __construct(
+        private MonitorRemoteStatus $discovering,
+        private PersistentManagement $management
+    ) {
     }
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if ($this->isFirstCycle()) {
-            $this->sprint = $subscription->sprint;
-
-            // depending on the discovered status, the projection can be stopped early,
-            // on stopping and on deleting.
-            if ($this->shouldStopOnDiscoveringStatus()) {
+        if ($subscription->looper->isFirstLap()) {
+            // depending on the discovered status,
+            // the projection can be stopped early, on stopping and on deleting.
+            if ($this->discovering->shouldStopOnDiscoveringStatus($this->management, $subscription->sprint)) {
                 return false;
             }
 

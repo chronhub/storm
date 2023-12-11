@@ -66,8 +66,15 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function outputState(): array
+    public function withKeepState(): static
     {
-        return $this->subscriber->outputState();
+        $this->context->withKeepState();
+
+        return $this;
+    }
+
+    public function getState(): array
+    {
+        return $this->subscriber->getState();
     }
 }

@@ -4,69 +4,66 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Activity;
 
+use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Scheme\Sprint;
 
-trait MonitorRemoteStatus
+final class MonitorRemoteStatus
 {
-    private bool $isFirstCycle = true;
+    private bool $isFirstLoop = true;
 
-    protected function shouldStopOnDiscoveringStatus(): bool
+    public function shouldStopOnDiscoveringStatus(PersistentManagement $management, Sprint $sprint): bool
     {
-        $shouldStop = $this->discovering();
+        $shouldStop = $this->discovering($management, $sprint);
 
-        $this->isFirstCycle = false;
+        $this->isFirstLoop = false;
 
         return $shouldStop;
     }
 
-    protected function refreshStatus(): void
+    public function refreshStatus(PersistentManagement $management, Sprint $sprint): void
     {
-        $this->isFirstCycle = false;
+        $this->isFirstLoop = false;
 
-        $this->discovering();
+        $this->discovering($management, $sprint);
     }
 
-    protected function isFirstCycle(): bool
+    private function onStopping(PersistentManagement $management): bool
     {
-        return $this->isFirstCycle;
-    }
-
-    private function onStopping(): bool
-    {
-        if ($this->isFirstCycle) {
-            $this->management->synchronise();
+        if ($this->isFirstLoop) {
+            $management->synchronise();
         }
 
-        $this->management->close();
+        $management->close();
 
-        return $this->isFirstCycle;
+        return $this->isFirstLoop;
     }
 
-    private function onResetting(): bool
+    private function onResetting(PersistentManagement $management, Sprint $sprint): bool
     {
-        $this->management->revise();
+        $management->revise();
 
-        if (! $this->isFirstCycle && $this->sprint->inBackground()) {
-            $this->management->restart();
+        if (! $this->isFirstLoop && $sprint->inBackground()) {
+            $management->restart();
         }
 
         return false;
     }
 
-    private function onDeleting(bool $shouldDiscardEvents): bool
+    private function onDeleting(PersistentManagement $management, bool $shouldDiscardEvents): bool
     {
-        $this->management->discard($shouldDiscardEvents);
+        $management->discard($shouldDiscardEvents);
 
-        return $this->isFirstCycle;
+        return $this->isFirstLoop;
     }
 
-    private function discovering(): bool
+    private function discovering(PersistentManagement $management, Sprint $sprint): bool
     {
-        return match ($this->management->disclose()->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping(),
-            ProjectionStatus::RESETTING->value => $this->onResetting(),
-            ProjectionStatus::DELETING->value => $this->onDeleting(false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting(true),
+        return match ($management->disclose()->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping($management),
+            ProjectionStatus::RESETTING->value => $this->onResetting($management, $sprint),
+            ProjectionStatus::DELETING->value => $this->onDeleting($management, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($management, true),
             default => false,
         };
     }

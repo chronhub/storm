@@ -8,9 +8,11 @@ use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Activity\DispatchSignal;
+use Chronhub\Storm\Projector\Activity\HandleLoop;
 use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Activity\LoadStreams;
+use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\Activity\PersistOrUpdate;
 use Chronhub\Storm\Projector\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Activity\ResetEventCounter;
@@ -29,8 +31,11 @@ trait InteractWithPersistentSubscription
             throw new RuntimeException('Persistent subscription requires a projection query filter.');
         }
 
-        $this->subscription->setContext($context, true);
+        if ($context->keepState() === true) {
+            throw new RuntimeException('Keep state is only available for query projection.');
+        }
 
+        $this->subscription->setContext($context, true);
         $this->subscription->setOriginalUserState();
         $this->subscription->sprint->runInBackground($keepRunning);
         $this->subscription->sprint->continue();
@@ -44,7 +49,7 @@ trait InteractWithPersistentSubscription
         return $this->management->getName();
     }
 
-    public function outputState(): array
+    public function getState(): array
     {
         return $this->subscription->state->get();
     }
@@ -56,9 +61,12 @@ trait InteractWithPersistentSubscription
 
     protected function getActivities(): array
     {
+        $monitor = new MonitorRemoteStatus();
+
         return [
+            new HandleLoop(),
             new RunUntil(),
-            new RisePersistentProjection($this->management),
+            new RisePersistentProjection($monitor, $this->management),
             new LoadStreams(),
             new HandleStreamEvent(
                 new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), $this->management)
@@ -67,8 +75,7 @@ trait InteractWithPersistentSubscription
             new PersistOrUpdate($this->management),
             new ResetEventCounter(),
             new DispatchSignal(),
-            new RefreshProjection($this->management),
-            //new StopWhenRunningOnce($this->management),
+            new RefreshProjection($monitor, $this->management),
         ];
     }
 

@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         convertDeprecationsToExceptions="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         stopOnError="false"
+         stopOnFailure="false"
+         verbose="true"
          cacheDirectory=".phpunit.cache"
          bootstrap="vendor/autoload.php"
          executionOrder="depends,defects"
+         processIsolation="false"
          beStrictAboutOutputDuringTests="true"
          colors="true">
   <testsuites>
     <testsuite name="Unit Test">
       <directory>./tests/Unit/</directory>
+    </testsuite>
+    <testsuite name="Feature Test">
+      <directory>./tests/Feature/</directory>
     </testsuite>
   </testsuites>
   <coverage/>

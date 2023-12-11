@@ -25,6 +25,8 @@ final class RunUntil
 
         if ($this->timer && $this->timer->isElapsed()) {
             $subscription->sprint->stop();
+
+            return false;
         }
 
         return $response;

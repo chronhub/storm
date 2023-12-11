@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\Management;
+use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class RunProjection
     public function __construct(
         private Workflow $workflow,
         private bool $keepRunning,
-        private ?Management $subscription,
+        private ?PersistentManagement $management,
     ) {
     }
 
@@ -38,9 +38,9 @@ final readonly class RunProjection
      */
     private function tryReleaseLock(?Throwable $exception): void
     {
-        if (! $exception instanceof ProjectionAlreadyRunning && $this->subscription) {
+        if (! $exception instanceof ProjectionAlreadyRunning && $this->management) {
             try {
-                $this->subscription->freed();
+                $this->management->freed();
             } catch (Throwable) {
                 // fail silently
             }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Closure;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;

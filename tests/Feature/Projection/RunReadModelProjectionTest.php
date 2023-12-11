@@ -23,7 +23,11 @@ beforeEach(function () {
     $this->projectorManager = $this->testFactory->getManager();
 });
 
-it('can run read model projection', function () {
+/**
+ * checkMe: do not use the same prefix for test/it
+ * to expect only one test to run when it's above all other tests
+ */
+test('can run read model projection from one stream', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -42,7 +46,6 @@ it('can run read model projection', function () {
             if ($state['count'] === 1) {
                 expect($scope)
                     ->toBeInstanceOf(ReadModelAccess::class)
-                    ->and($scope->streamName())->toBe('user')
                     ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
                     ->and($scope->readModel())->toBe($readModel)
                     ->and($event)->toBeInstanceOf(SomeEvent::class);
@@ -52,19 +55,19 @@ it('can run read model projection', function () {
                 $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
             }
 
-            expect($scope->streamName())->not()->toBeNull();
-
             $state['count']++;
+
+            expect($scope->streamName())->toBe('user');
 
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
-it('can stop read model projection', function () {
+test('can stop read model projection', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -95,12 +98,12 @@ it('can stop read model projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 7])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 7]]);
 });
 
-it('can reset read model projection', function () {
+test('can reset read model projection', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -127,24 +130,24 @@ it('can reset read model projection', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
     $projector->reset();
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 0])
         ->and($readModel->getContainer())->toBe([]);
 
     $projector->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
-it('can delete read model projection with read model', function () {
+test('can delete read model projection with read model', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -171,25 +174,25 @@ it('can delete read model projection with read model', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
     $projector->delete(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 0])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
     // run again to put the projection back
     $projector->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
-it('can delete read model projection without read model', function () {
+test('can delete read model projection without read model', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -216,25 +219,25 @@ it('can delete read model projection without read model', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
     $projector->delete(true);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 0])
         ->and($readModel->getContainer())->toBe([]);
 
     // run again to put the projection and the read model back
     $projector->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
-it('can rerun read model projection by catchup', function () {
+test('can rerun read model projection by catchup', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -261,7 +264,7 @@ it('can rerun read model projection by catchup', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 
@@ -270,12 +273,12 @@ it('can rerun read model projection by catchup', function () {
 
     $projector->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count' => 20])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
 
-it('can run read model projection from many streams', function () {
+test('can run read model projection from many streams', function () {
     // fake data where debit event time is all less than credit event time
     $eventId = Uuid::v4()->toRfc4122();
     $stream1 = $this->testFactory->getStream('debit', 10, '-10 second', $eventId);
@@ -311,12 +314,12 @@ it('can run read model projection from many streams', function () {
             return $state;
         })->run(false);
 
-    expect($projector->outputState())
+    expect($projector->getState())
         ->toBe(['count_some_event' => 10, 'count_another_event' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
 
-it('can run read model projection from many streams and sort events by ascending order', function () {
+test('can run read model projection from many streams and sort events by ascending order', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream1 = $this->testFactory->getStream('debit', 1, '-50 second', $eventId);
@@ -346,13 +349,13 @@ it('can run read model projection from many streams and sort events by ascending
             return $state;
         })->run(false);
 
-    expect($projector->outputState()['order'])->toBe([
+    expect($projector->getState()['order'])->toBe([
         'debit' => [1 => SomeEvent::class, 3 => SomeEvent::class],
         'credit' => [2 => AnotherEvent::class, 4 => AnotherEvent::class],
     ]);
 });
 
-it('raise exception when query filter is not a projection query filter', function () {
+test('raise exception when query filter is not a projection query filter', function () {
     $readModel = $this->testFactory->readModel;
     $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 

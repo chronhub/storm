@@ -14,5 +14,5 @@ interface Projector
     /**
      * Get the projection state.
      */
-    public function outputState(): array;
+    public function getState(): array;
 }

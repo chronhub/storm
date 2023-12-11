@@ -16,5 +16,5 @@ interface Subscriber
     /**
      * Return user state
      */
-    public function outputState(): array;
+    public function getState(): array;
 }
