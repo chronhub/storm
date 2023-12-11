@@ -18,6 +18,13 @@ use function in_array;
 use function is_bool;
 use function ucfirst;
 
+// todo add date created_at, reset_at, stopped_at, released_at, deleted_at, deleted_with_emitted_events_at
+// by owner later
+// issue: overwritten, lost when deleted
+// could name each process and keep track in another table/collection
+// should be optional
+
+// add lock owner per process, too many side effects
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
     /**
@@ -59,14 +66,14 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
     ): void {
         $projection = $this->tryRetrieve($projectionName);
 
-        if ($projection->lockedUntil() === null) {
-            throw new InMemoryProjectionFailed("Projection lock must be acquired before updating projection $projectionName");
-        }
-
         $data = array_filter(compact('status', 'state', 'position'));
 
         if (! is_bool($lockedUntil)) {
             $data['lockedUntil'] = $lockedUntil;
+        }
+
+        if ($data === []) {
+            throw InMemoryProjectionFailed::failedOnOperation("No data provided to update projection $projectionName");
         }
 
         $this->applyChanges($projection, $data);

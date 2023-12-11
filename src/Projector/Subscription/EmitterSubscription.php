@@ -19,6 +19,16 @@ final readonly class EmitterSubscription implements EmitterSubscriber
     ) {
     }
 
+    public function reset(): void
+    {
+        $this->management->revise();
+    }
+
+    public function delete(bool $withEmittedEvents): void
+    {
+        $this->management->discard($withEmittedEvents);
+    }
+
     public function getScope(): EmitterScope
     {
         $userScope = $this->subscription->context()->userScope();

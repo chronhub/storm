@@ -86,6 +86,7 @@ final class StreamGap implements StreamGapManager
         return $this->gapDetected;
     }
 
+    // checkMe: should be internal
     public function hasRetry(): bool
     {
         return array_key_exists($this->retries, $this->retriesInMs);
@@ -119,7 +120,7 @@ final class StreamGap implements StreamGapManager
             $this->hasNextPosition($streamName, $expectedPosition) => true,
             ! $this->hasRetry() => true,
             $this->isPastEventTime($event) => true,
-            $this->retriesInMs === [] => true,
+            $this->retriesInMs === [] => true, // todo test already cover by hasRetry
             default => false,
         };
 

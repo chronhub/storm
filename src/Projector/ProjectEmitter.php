@@ -23,6 +23,16 @@ final readonly class ProjectEmitter implements EmitterProjector
         $this->subscriber->start($this->context, $inBackground);
     }
 
+    public function reset(): void
+    {
+        $this->subscriber->reset();
+    }
+
+    public function delete(bool $deleteEmittedEvents): void
+    {
+        $this->subscriber->delete($deleteEmittedEvents);
+    }
+
     public function getName(): string
     {
         return $this->subscriber->getName();

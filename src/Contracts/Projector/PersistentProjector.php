@@ -12,4 +12,14 @@ interface PersistentProjector extends ProjectorFactory
      * Projection name is a substitute for stream name
      */
     public function getName(): string;
+
+    /**
+     * Reset the projection.
+     */
+    public function reset(): void;
+
+    /**
+     * Delete the projection.
+     */
+    public function delete(bool $deleteEmittedEvents): void;
 }

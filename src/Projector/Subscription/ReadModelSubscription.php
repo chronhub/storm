@@ -19,6 +19,16 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
     ) {
     }
 
+    public function reset(): void
+    {
+        $this->management->revise();
+    }
+
+    public function delete(bool $withReadModel): void
+    {
+        $this->management->discard($withReadModel);
+    }
+
     public function getScope(): ReadModelScope
     {
         $userScope = $this->subscription->context()->userScope();

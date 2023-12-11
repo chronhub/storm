@@ -100,6 +100,140 @@ it('can stop read model projection', function () {
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 7]]);
 });
 
+it('can reset read model projection', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            if ($state['count'] === 1) {
+                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
+            } else {
+                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
+            }
+
+            $state['count']++;
+
+            return $state;
+        })->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+
+    $projector->reset();
+
+    expect($projector->outputState())
+        ->toBe(['count' => 0])
+        ->and($readModel->getContainer())->toBe([]);
+
+    $projector->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+});
+
+it('can delete read model projection with read model', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            if ($state['count'] === 1) {
+                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
+            } else {
+                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
+            }
+
+            $state['count']++;
+
+            return $state;
+        })->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+
+    $projector->delete(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 0])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+
+    // run again to put the projection back
+    $projector->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+});
+
+it('can delete read model projection without read model', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            if ($state['count'] === 1) {
+                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
+            } else {
+                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
+            }
+
+            $state['count']++;
+
+            return $state;
+        })->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+
+    $projector->delete(true);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 0])
+        ->and($readModel->getContainer())->toBe([]);
+
+    // run again to put the projection and the read model back
+    $projector->run(false);
+
+    expect($projector->outputState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+});
+
 it('can rerun read model projection by catchup', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();

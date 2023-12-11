@@ -35,6 +35,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         } elseif (false === true) {
             // todo check if keepStateOnRerun in context is true
             //  otherwise, reset the state
+            $this->subscription->setOriginalUserState(); // tmp
         }
 
         // in short, when init with fn() =>['count' => 0],
