@@ -17,7 +17,6 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryAccess;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\Stats;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
 
@@ -79,8 +78,8 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         $activities = [
             new HandleLoop(),
-            new RunUntil(),
-            new RiseQueryProjection(new Stats()),
+            new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
+            new RiseQueryProjection(),
             new LoadStreams(),
             new HandleStreamEvent(
                 new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), null)

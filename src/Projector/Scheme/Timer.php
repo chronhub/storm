@@ -8,6 +8,9 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateInterval;
 use DateTimeImmutable;
 
+/**
+ * @deprecated
+ */
 class Timer
 {
     private ?DateTimeImmutable $startTime = null;
@@ -32,5 +35,14 @@ class Timer
         }
 
         return $this->clock->isNowSubGreaterThan($this->interval, $this->startTime);
+    }
+
+    public function isStarted(): bool
+    {
+        if ($this->interval === null) {
+            return true;
+        }
+
+        return $this->startTime instanceof DateTimeImmutable;
     }
 }

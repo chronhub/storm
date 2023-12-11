@@ -65,7 +65,7 @@ trait InteractWithPersistentSubscription
 
         return [
             new HandleLoop(),
-            new RunUntil(),
+            new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
             new RisePersistentProjection($monitor, $this->management),
             new LoadStreams(),
             new HandleStreamEvent(
