@@ -13,7 +13,7 @@ use JsonSerializable;
 interface ProjectionData extends JsonSerializable
 {
     /**
-     * @return array{status?: null|string, state?: null|string, position?: null|string, locked_until?: null|string}
+     * @return array{TKey, TValue}
      */
     public function toArray(): array;
 }
