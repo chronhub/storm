@@ -61,8 +61,6 @@ final class Subscription
 
     public function setContext(ContextReaderInterface $context, bool $allowRerun): void
     {
-        // todo fix runAgain and reset public readonly ContextReaderInterface $context;
-        // should be handled by the subscriber per case
         if ($this->context === null) {
             $this->context = $context;
         } elseif ($allowRerun === false) {

@@ -5,26 +5,17 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ProjectionData;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
-use function array_filter;
-use function compact;
 use function in_array;
-use function is_bool;
-use function ucfirst;
 
-// todo add date created_at, reset_at, stopped_at, released_at, deleted_at, deleted_with_emitted_events_at
-// by owner later
-// issue: overwritten, lost when deleted
-// could name each process and keep track in another table/collection
-// should be optional
-
-// add lock owner per process, too many side effects
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
     /**
@@ -37,16 +28,16 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         $this->projections = new Collection();
     }
 
-    public function createProjection(string $projectionName, string $status): void
+    public function createProjection(string $projectionName, ProjectionData $data): void
     {
         if ($this->exists($projectionName)) {
             throw ProjectionAlreadyExists::withName($projectionName);
         }
 
-        $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $status));
+        $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $data->toArray()['status']));
     }
 
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil): void
+    public function acquireLock(string $projectionName, ProjectionData $data): void
     {
         $projection = $this->tryRetrieve($projectionName);
 
@@ -54,29 +45,14 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
             throw InMemoryProjectionFailed::failedOnAcquireLock($projectionName);
         }
 
-        $this->applyChanges($projection, compact('status', 'lockedUntil'));
+        $this->applyChanges($projection, $data->toArray());
     }
 
-    public function updateProjection(
-        string $projectionName,
-        string $status = null,
-        string $state = null,
-        string $position = null,
-        bool|string|null $lockedUntil = false
-    ): void {
+    public function updateProjection(string $projectionName, ProjectionData $data): void
+    {
         $projection = $this->tryRetrieve($projectionName);
 
-        $data = array_filter(compact('status', 'state', 'position'));
-
-        if (! is_bool($lockedUntil)) {
-            $data['lockedUntil'] = $lockedUntil;
-        }
-
-        if ($data === []) {
-            throw InMemoryProjectionFailed::failedOnOperation("No data provided to update projection $projectionName");
-        }
-
-        $this->applyChanges($projection, $data);
+        $this->applyChanges($projection, $data->toArray());
     }
 
     public function deleteProjection(string $projectionName): void
@@ -128,7 +104,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
     private function applyChanges(InMemoryProjection $projection, array $data): void
     {
         foreach ($data as $key => $value) {
-            $method = 'set'.ucfirst($key);
+            $method = 'set'.Str::studly($key);
 
             $projection->$method($value);
         }

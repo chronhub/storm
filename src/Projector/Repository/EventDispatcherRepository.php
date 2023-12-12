@@ -28,7 +28,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function create(ProjectionStatus $status): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->create($status),
             fn () => $this->eventDispatcher->dispatch(new ProjectionCreated($this->projectionName())),
             ProjectionCreated::class
@@ -37,7 +37,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function start(ProjectionStatus $projectionStatus): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->start($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStarted($this->projectionName())),
             ProjectionStarted::class
@@ -46,7 +46,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->stop($projectionDetail, $projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStopped($this->projectionName())),
             ProjectionStopped::class
@@ -55,7 +55,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function startAgain(ProjectionStatus $projectionStatus): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->startAgain($projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionRestarted($this->projectionName())),
             ProjectionRestarted::class
@@ -64,7 +64,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->reset($projectionDetail, $currentStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionReset($this->projectionName(), $projectionDetail)),
             ProjectionReset::class
@@ -75,7 +75,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
     {
         $event = $withEmittedEvents ? ProjectionDeletedWithEvents::class : ProjectionDeleted::class;
 
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->delete($withEmittedEvents),
             fn () => $this->eventDispatcher->dispatch(new $event($this->projectionName())),
             $event
@@ -84,16 +84,16 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
     public function release(): void
     {
-        $this->wrapErrorHandling(
+        $this->when(
             fn () => $this->repository->release(),
             fn () => $this->eventDispatcher->dispatch(new ProjectionReleased($this->projectionName())),
             ProjectionReleased::class
         );
     }
 
-    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
+    public function persist(ProjectionDetail $projectionDetail): void
     {
-        $this->repository->persist($projectionDetail, $projectionStatus);
+        $this->repository->persist($projectionDetail);
     }
 
     public function updateLock(): void
@@ -126,7 +126,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
      *
      * @throws Throwable
      */
-    private function wrapErrorHandling(callable $operation, callable $onSuccess, string $failedEvent): void
+    private function when(callable $operation, callable $onSuccess, string $failedEvent): void
     {
         try {
             $operation();

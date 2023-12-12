@@ -31,11 +31,9 @@ interface ProjectionRepository
     /**
      * Persists projection data
      *
-     * @param ?ProjectionStatus $projectionStatus only meant to be IDLE when projection is stopped
-     *
      * @throws ProjectionFailed When projection data cannot be stored.
      */
-    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void;
+    public function persist(ProjectionDetail $projectionDetail): void;
 
     /**
      * Stops the projection and store data.

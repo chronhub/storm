@@ -15,11 +15,20 @@ use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
 {
+    private Closure $reactors;
+
+    private ProjectorScope $scope;
+
+    private ?PersistentManagement $management;
+
     public function __construct(
-        private Closure $reactors,
-        private ProjectorScope $scope,
-        private ?PersistentManagement $management,
+        Closure $reactors,
+        ProjectorScope $scope,
+        ?PersistentManagement $management
     ) {
+        $this->reactors = $reactors;
+        $this->scope = $scope;
+        $this->management = $management;
     }
 
     /**
@@ -27,44 +36,62 @@ final readonly class EventProcessor
      */
     public function __invoke(Subscription $subscription, DomainEvent $event, int $expectedPosition): bool
     {
-        if ($subscription->option->getSignal()) {
-            pcntl_signal_dispatch();
-        }
+        $this->dispatchSignalIfRequested($subscription);
 
-        // gap has been detected
         if (! $subscription->streamManager->bind($subscription->currentStreamName(), $expectedPosition, $event)) {
             return false;
         }
 
-        // increment event counter for each event
+        $this->incrementEventCounter($subscription);
+
+        $this->reactOn($event, $subscription);
+
+        $this->persistWhenCounterIsReached();
+
+        return $subscription->sprint->inProgress();
+    }
+
+    private function dispatchSignalIfRequested(Subscription $subscription): void
+    {
+        if ($subscription->option->getSignal()) {
+            pcntl_signal_dispatch();
+        }
+    }
+
+    private function incrementEventCounter(Subscription $subscription): void
+    {
         if ($this->management) {
             $subscription->eventCounter->increment();
         }
-
-        // react on event
-        $this->reactOn($event, $subscription);
-
-        // when option block size is reached, persist data
-        $this->management?->persistWhenCounterIsReached();
-
-        // stop gracefully if signal is received
-        return $subscription->sprint->inProgress();
     }
 
     private function reactOn(DomainEvent $event, Subscription $subscription): void
     {
-        // ensure to pass user state only if it has been initialized
-        $userState = $subscription->context()->userState() instanceof Closure
-            ? $subscription->state->get() : null;
+        $initializedState = $this->getUserState($subscription);
 
-        // handle event
-        $currentState = ! is_array($userState)
-            ? ($this->reactors)($event, $this->scope)
-            : ($this->reactors)($event, $userState, $this->scope);
+        $currentState = is_array($initializedState)
+            ? ($this->reactors)($event, $initializedState, $this->scope)
+            : ($this->reactors)($event, $this->scope);
 
-        // update user state if it has been initialized and returned
-        if (is_array($userState) && is_array($currentState)) {
+        $this->updateUserState($subscription, $initializedState, $currentState);
+    }
+
+    private function getUserState(Subscription $subscription): ?array
+    {
+        return $subscription->context()->userState() instanceof Closure
+            ? $subscription->state->get()
+            : null;
+    }
+
+    private function updateUserState(Subscription $subscription, ?array $initializedState, ?array $currentState): void
+    {
+        if (is_array($initializedState) && is_array($currentState)) {
             $subscription->state->put($currentState);
         }
+    }
+
+    private function persistWhenCounterIsReached(): void
+    {
+        $this->management?->persistWhenCounterIsReached();
     }
 }

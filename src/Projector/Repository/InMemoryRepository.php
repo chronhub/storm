@@ -4,79 +4,97 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
+use Chronhub\Storm\Contracts\Projector\ProjectionData;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Repository\Mapper\CreateDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\PersistDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\ReleaseDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\ResetDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\StartAgainDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\StartDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\StopDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockDataDTO;
 
+// add datetime created_at, stopped_at, updated_at, reset_at, deleted_at, deleted_with_emitted_events_at
+// which should be handled by a ProjectionTimeTracker for storage, log, db, etc...
+// which should also add here the time, according to the operation.
+
+// todo add transformer to transform from/to array which hold the jsonSerializer
 final readonly class InMemoryRepository implements ProjectionRepository
 {
     public function __construct(
-        public ProjectionProvider $provider,
-        public LockManager $lockManager,
-        public JsonSerializer $serializer,
-        public string $streamName
+        private ProjectionProvider $provider,
+        private LockManager $lockManager,
+        private JsonSerializer $serializer,
+        private string $streamName
     ) {
     }
 
     public function create(ProjectionStatus $status): void
     {
-        $this->provider->createProjection($this->streamName, $status->value);
+        $data = new CreateDataDTO($status->value);
+
+        $this->provider->createProjection($this->projectionName(), $data);
     }
 
     public function start(ProjectionStatus $projectionStatus): void
     {
-        $this->provider->acquireLock(
-            $this->streamName,
-            $projectionStatus->value,
-            $this->lockManager->acquire(),
-        );
+        $data = new StartDataDTO($projectionStatus->value, $this->lockManager->acquire());
+
+        $this->provider->acquireLock($this->projectionName(), $data);
     }
 
     public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
     {
-        $this->persist($projectionDetail, $projectionStatus);
+        $data = new StopDataDTO(
+            $projectionStatus->value,
+            $this->serializer->encode($projectionDetail->state),
+            $this->serializer->encode($projectionDetail->streamPositions),
+            $this->lockManager->refresh()
+        );
+
+        $this->updateProjection($data);
     }
 
     public function release(): void
     {
-        $this->provider->updateProjection(
-            $this->streamName,
-            status: ProjectionStatus::IDLE->value,
-            lockedUntil: null,
-        );
+        $data = new ReleaseDataDTO(ProjectionStatus::IDLE->value, null);
+
+        $this->updateProjection($data);
     }
 
     public function startAgain(ProjectionStatus $projectionStatus): void
     {
-        $this->provider->updateProjection(
-            $this->streamName,
-            status: $projectionStatus->value,
-            lockedUntil: $this->lockManager->acquire(),
-        );
+        $data = new StartAgainDataDTO($projectionStatus->value, $this->lockManager->acquire());
+
+        $this->updateProjection($data);
     }
 
-    public function persist(ProjectionDetail $projectionDetail, ?ProjectionStatus $projectionStatus): void
+    public function persist(ProjectionDetail $projectionDetail): void
     {
-        $this->provider->updateProjection(
-            $this->streamName,
-            status: $projectionStatus?->value,
-            state: $this->serializer->encode($projectionDetail->state),
-            position: $this->serializer->encode($projectionDetail->streamPositions),
-            lockedUntil: $this->lockManager->refresh()
+        $data = new PersistDataDTO(
+            $this->serializer->encode($projectionDetail->state),
+            $this->serializer->encode($projectionDetail->streamPositions),
+            $this->lockManager->refresh()
         );
+
+        $this->updateProjection($data);
     }
 
     public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
     {
-        $this->provider->updateProjection(
-            $this->streamName,
-            status: $currentStatus->value,
-            state: $this->serializer->encode($projectionDetail->state),
-            position: $this->serializer->encode($projectionDetail->streamPositions),
+        $data = new ResetDataDTO(
+            $currentStatus->value,
+            $this->serializer->encode($projectionDetail->state),
+            $this->serializer->encode($projectionDetail->streamPositions),
         );
+
+        $this->updateProjection($data);
     }
 
     public function delete(bool $withEmittedEvents): void
@@ -101,10 +119,9 @@ final readonly class InMemoryRepository implements ProjectionRepository
     public function updateLock(): void
     {
         if ($this->lockManager->shouldRefresh()) {
-            $this->provider->updateProjection(
-                $this->streamName,
-                lockedUntil: $this->lockManager->refresh()
-            );
+            $data = new UpdateLockDataDTO($this->lockManager->refresh());
+
+            $this->updateProjection($data);
         }
     }
 
@@ -127,5 +144,10 @@ final readonly class InMemoryRepository implements ProjectionRepository
     public function projectionName(): string
     {
         return $this->streamName;
+    }
+
+    private function updateProjection(ProjectionData $data): void
+    {
+        $this->provider->updateProjection($this->streamName, $data);
     }
 }

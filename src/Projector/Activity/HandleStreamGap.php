@@ -16,7 +16,7 @@ final readonly class HandleStreamGap
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         // When a gap is detected and still retry left,
-        // we sleep and store the projection if some event(s) has been handled
+        // we sleep and store the projection if some event(s) has been loaded and incremented
 
         // @phpstan-ignore-next-line
         if ($subscription->hasGapDetection() && $subscription->streamManager->hasGap()) {

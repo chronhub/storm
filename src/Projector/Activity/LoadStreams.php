@@ -41,7 +41,7 @@ final class LoadStreams
         $queryFilter = $subscription->context()->queryFilter();
         $loadLimiter = $subscription->option->getLoads();
 
-        foreach ($subscription->streamManager->jsonSerialize() as $streamName => $position) {
+        foreach ($subscription->streamManager->jsonSerialize() as $streamName => $lastKnownPosition) {
             // todo stream name aware should only be used by query projection and api
             // cannot filter events for persistent projection,as we need to be consistent
             // with the stream position and gap detection
@@ -54,7 +54,7 @@ final class LoadStreams
             }
 
             if ($queryFilter instanceof ProjectionQueryFilter) {
-                $queryFilter->setCurrentPosition($position + 1);
+                $queryFilter->setCurrentPosition($lastKnownPosition + 1);
             }
 
             try {

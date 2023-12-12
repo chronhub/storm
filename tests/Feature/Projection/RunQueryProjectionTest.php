@@ -291,7 +291,7 @@ it('raise exception when keeping state in memory but user state has not been ini
     expect($projector->getState())->toBe([]);
 
     $projector->run(false);
-})->throws(RuntimeException::class, 'Context is not initialized');
+})->throws(RuntimeException::class, 'Projection context is not initialized');
 
 it('can reset query projection and re run from scratch', function () {
     // feed our event store

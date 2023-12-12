@@ -16,7 +16,7 @@ interface ProjectionProvider
      *
      * @throws ProjectionAlreadyExists When a projection with the given name already exists.
      */
-    public function createProjection(string $projectionName, string $status): void;
+    public function createProjection(string $projectionName, ProjectionData $data): void;
 
     /**
      * Acquire a lock on a projection with the given name and status.
@@ -24,7 +24,7 @@ interface ProjectionProvider
      * @throws ProjectionNotFound       When a projection with the given name doesn't exist.
      * @throws ProjectionAlreadyRunning When a projection fails to acquire the lock.
      */
-    public function acquireLock(string $projectionName, string $status, string $lockedUntil): void;
+    public function acquireLock(string $projectionName, ProjectionData $data): void;
 
     /**
      * Update the data for an existing projection.
@@ -33,13 +33,7 @@ interface ProjectionProvider
      * @throws ProjectionFailed   When the projection has not acquired locked.
      * @throws ProjectionFailed   When the projection data cannot be updated.
      */
-    public function updateProjection(
-        string $projectionName,
-        string $status = null,
-        string $state = null,
-        string $position = null,
-        bool|string|null $lockedUntil = false
-    ): void;
+    public function updateProjection(string $projectionName, ProjectionData $data): void;
 
     /**
      * Delete an existing projection.

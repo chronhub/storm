@@ -62,7 +62,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionDetail(), null);
+        $this->repository->persist($this->getProjectionDetail());
     }
 
     public function revise(): void

@@ -31,6 +31,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     public function start(ContextReaderInterface $context, bool $keepRunning): void
     {
         $this->initializeContext($context, $keepRunning);
+
         $this->startProjection($keepRunning);
     }
 
@@ -75,12 +76,13 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         if (! $this->subscription->isContextInitialized()) {
             $this->subscription->setContext($context, true);
+
             $this->subscription->setOriginalUserState();
         }
 
         if ($this->subscription->context()->keepState() === true) {
             if (! $this->subscription->context()->userState() instanceof Closure) {
-                throw new RuntimeException('Context is not initialized');
+                throw new RuntimeException('Projection context is not initialized. Provide a closure to initialize user state');
             }
         } else {
             $this->subscription->setOriginalUserState();
