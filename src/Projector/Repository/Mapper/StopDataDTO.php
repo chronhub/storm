@@ -14,10 +14,13 @@ final readonly class StopDataDTO extends ProjectionDataDTO
     ) {
     }
 
+    /**
+     * @return array{status: string, state: string, position: string, locked_until: string}
+     */
     public function toArray(): array
     {
         return [
-            'statu' => $this->status,
+            'staus' => $this->status,
             'state' => $this->state,
             'position' => $this->position,
             'locked_until' => $this->lockedUntil,
