@@ -19,6 +19,7 @@ final readonly class RunProjection
     ) {
     }
 
+    // todo: reset exception handler in workflow
     public function beginCycle(): void
     {
         try {
@@ -52,11 +53,8 @@ final readonly class RunProjection
 
     private function handleCycleEnd(bool $inProgress): void
     {
-        if (! $this->keepRunning || ! $inProgress) {
-            $this->looper->reset();
-        } else {
-            $this->looper->next();
-        }
+        (! $this->keepRunning || ! $inProgress)
+            ? $this->looper->reset() : $this->looper->next();
     }
 
     /**

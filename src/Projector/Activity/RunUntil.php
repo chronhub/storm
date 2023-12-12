@@ -21,13 +21,13 @@ final class RunUntil
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if (! $this->isStarted()) {
-            $this->start();
+        if (! $this->isTimerStarted()) {
+            $this->startTimer();
         }
 
         $response = $next($subscription);
 
-        if ($this->isElapsed()) {
+        if ($this->isTimerExpired()) {
             $subscription->sprint->stop(); // checkMe
 
             return false;
@@ -36,14 +36,14 @@ final class RunUntil
         return $response;
     }
 
-    private function start(): void
+    private function startTimer(): void
     {
         if ($this->interval && ! $this->startTime instanceof DateTimeImmutable) {
             $this->startTime = $this->clock->now();
         }
     }
 
-    private function isElapsed(): bool
+    private function isTimerExpired(): bool
     {
         if ($this->startTime === null) {
             return false;
@@ -52,7 +52,7 @@ final class RunUntil
         return $this->clock->isNowSubGreaterThan($this->interval, $this->startTime);
     }
 
-    private function isStarted(): bool
+    private function isTimerStarted(): bool
     {
         if ($this->interval === null) {
             return true;

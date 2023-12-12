@@ -163,13 +163,13 @@ test('can delete read model projection with read model', function () {
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            $state['count']++;
+
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
             } else {
                 $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
             }
-
-            $state['count']++;
 
             return $state;
         })->run(false);

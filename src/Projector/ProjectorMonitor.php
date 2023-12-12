@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorMonitorInterface;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Repository\Mapper\UpdateStatusDataDto;
 use Throwable;
 
 final readonly class ProjectorMonitor implements ProjectorMonitorInterface
@@ -75,7 +76,10 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
     private function applyStatus(string $projectionName, ProjectionStatus $projectionStatus): void
     {
         try {
-            $this->projectionProvider->updateProjection($projectionName, status: $projectionStatus->value);
+            $this->projectionProvider->updateProjection(
+                $projectionName,
+                new UpdateStatusDataDto($projectionStatus->value)
+            );
         } catch (Throwable $exception) {
             if ($exception instanceof ProjectionFailed || $exception instanceof ProjectionNotFound) {
                 throw $exception;
