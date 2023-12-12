@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository\Mapper;
 
-final class StartAgainDataDTO extends ProjectionDataDTO
+final readonly class StartAgainDataDTO extends ProjectionDataDTO
 {
-    public function __construct(string $status, string $lockedUntil)
+    public function __construct(public string $status, public string $lockedUntil)
     {
-        $this->status = $status;
-        $this->lockedUntil = $lockedUntil;
     }
 
     public function toArray(): array

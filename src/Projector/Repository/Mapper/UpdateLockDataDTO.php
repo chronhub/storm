@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository\Mapper;
 
-final class UpdateLockDataDTO extends ProjectionDataDTO
+final readonly class UpdateLockDataDTO extends ProjectionDataDTO
 {
-    public function __construct(string $lockedUntil)
+    public function __construct(public string $lockedUntil)
     {
-        $this->lockedUntil = $lockedUntil;
     }
 
     public function toArray(): array

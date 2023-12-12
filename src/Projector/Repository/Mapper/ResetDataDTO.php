@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository\Mapper;
 
-final class ResetDataDTO extends ProjectionDataDTO
+final readonly class ResetDataDTO extends ProjectionDataDTO
 {
-    public function __construct(string $status, string $state, string $position)
-    {
-        $this->status = $status;
-        $this->state = $state;
-        $this->position = $position;
+    public function __construct(
+        public string $status,
+        public string $state,
+        public string $position
+    ) {
     }
 
     public function toArray(): array

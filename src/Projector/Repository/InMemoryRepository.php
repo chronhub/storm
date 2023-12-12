@@ -22,9 +22,11 @@ use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockDataDTO;
 
 // add datetime created_at, stopped_at, updated_at, reset_at, deleted_at, deleted_with_emitted_events_at
 // which should be handled by a ProjectionTimeTracker for storage, log, db, etc...
-// which should also add here the time, according to the operation.
+// we should also add here the time, according to the operation.
+// but require three migration tables, one for projection with/without times, one for time tracking
 
 // todo add transformer to transform from/to array which hold the jsonSerializer
+// we also need to change type position and state to accept array in projection model
 final readonly class InMemoryRepository implements ProjectionRepository
 {
     public function __construct(
