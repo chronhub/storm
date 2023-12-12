@@ -16,7 +16,7 @@ final class PersistDataDTO extends ProjectionDataDTO
     public function toArray(): array
     {
         return [
-            'stte' => $this->state,
+            'stee' => $this->state,
             'position' => $this->position,
             'locked_until' => $this->lockedUntil,
         ];
