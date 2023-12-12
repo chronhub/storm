@@ -11,7 +11,7 @@ final readonly class CreateDataDTO extends ProjectionDataDTO
     }
 
     /**
-     * @return array<object, string>
+     * @return array{'status', string}
      */
     public function toArray(): array
     {

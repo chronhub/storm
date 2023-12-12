@@ -13,6 +13,9 @@ final readonly class ResetDataDTO extends ProjectionDataDTO
     ) {
     }
 
+    /**
+     * @return array{'status': string, 'state': string, 'position': string}
+     */
     public function toArray(): array
     {
         return [

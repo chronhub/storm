@@ -10,6 +10,9 @@ final readonly class ReleaseDataDTO extends ProjectionDataDTO
     {
     }
 
+    /**
+     * @return array{'status': string, 'locked_until': null}
+     */
     public function toArray(): array
     {
         return [

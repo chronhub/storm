@@ -10,6 +10,9 @@ final readonly class StartAgainDataDTO extends ProjectionDataDTO
     {
     }
 
+    /**
+     * @return array{'status': string, 'locked_until': string}
+     */
     public function toArray(): array
     {
         return [

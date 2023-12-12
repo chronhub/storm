@@ -13,6 +13,9 @@ final readonly class PersistDataDTO extends ProjectionDataDTO
     ) {
     }
 
+    /**
+     * @return array{'state': string, 'position': string, 'locked_until': string}
+     */
     public function toArray(): array
     {
         return [

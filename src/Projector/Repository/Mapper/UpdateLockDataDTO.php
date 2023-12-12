@@ -10,6 +10,9 @@ final readonly class UpdateLockDataDTO extends ProjectionDataDTO
     {
     }
 
+    /**
+     * @return array{'locked_until': string}
+     */
     public function toArray(): array
     {
         return [

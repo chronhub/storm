@@ -71,6 +71,10 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function filterByNames(string ...$projectionNames): array
     {
+        if ($projectionNames === []) {
+            return [];
+        }
+
         $byStreamNames = static fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames, true);
 
         return $this->projections->filter($byStreamNames)->keys()->toArray();
