@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
@@ -15,7 +16,7 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
 
     public function __construct(
         protected Subscription $subscription,
-        protected ReadingModelManagement $management,
+        protected ReadModelManagement $management,
     ) {
     }
 

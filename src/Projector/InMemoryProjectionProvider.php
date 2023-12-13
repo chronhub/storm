@@ -14,6 +14,8 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
+use function array_filter;
+use function array_key_exists;
 use function in_array;
 
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
@@ -57,9 +59,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function deleteProjection(string $projectionName): void
     {
-        if (! $this->exists($projectionName)) {
-            throw ProjectionNotFound::withName($projectionName);
-        }
+        $this->tryRetrieve($projectionName);
 
         $this->projections->forget($projectionName);
     }
@@ -107,10 +107,25 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     private function applyChanges(InMemoryProjection $projection, array $data): void
     {
+        $this->assertUpdateProjectionHasChanges($data, $projection->name());
+
         foreach ($data as $key => $value) {
             $method = 'set'.Str::studly($key);
 
             $projection->$method($value);
+        }
+    }
+
+    private function assertUpdateProjectionHasChanges(array $data, string $name): void
+    {
+        $hasLockedUntil = array_key_exists('locked_until', $data);
+
+        if ($hasLockedUntil) {
+            return;
+        }
+
+        if (array_filter($data) === []) {
+            throw new InMemoryProjectionFailed('Provide at least one change to update named projection: '.$name);
         }
     }
 }

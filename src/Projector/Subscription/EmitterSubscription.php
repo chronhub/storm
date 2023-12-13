@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Projector\Scheme\EmitterAccess;
@@ -15,7 +16,7 @@ final readonly class EmitterSubscription implements EmitterSubscriber
 
     public function __construct(
         protected Subscription $subscription,
-        protected EmittingManagement $management,
+        protected EmitterManagement $management,
     ) {
     }
 
