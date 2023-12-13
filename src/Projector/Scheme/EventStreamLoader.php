@@ -8,41 +8,64 @@ use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Illuminate\Support\Collection;
 
-use function key;
+use function array_unique;
+use function count;
 
 class EventStreamLoader
 {
+    final public const ALL = 'all';
+
+    final public const CATEGORIES = 'categories';
+
+    final public const NAMES = 'names';
+
     public function __construct(protected readonly EventStreamProvider $eventStreamProvider)
     {
     }
 
     /**
      * @param  array{'all'?: bool, 'categories'?: string[], 'names'?: string[]} $queries
-     * @return Collection<non-empty-string>
+     * @return Collection<string>
      *
-     * @throws RuntimeException when local or remote stream names are empty or not unique
+     * todo make an option to raise exception when no event stream return
+     *  this should be part of migration process
+     *  issue with no stream event is that the projection will make a lot of query,
+     *  and only projection option sleep will timeout per cycle.
+     *
+     * @throws RuntimeException when local stream names/categories are empty or not unique
      */
     public function loadFrom(array $queries): Collection
     {
-        return tap($this->matchQuery($queries), function (Collection $streams) {
-            if ($streams->isEmpty()) {
-                throw new RuntimeException('No stream set or found');
-            }
-
-            if ($streams->unique()->count() !== $streams->count()) {
-                throw new RuntimeException('Duplicate stream names is not allowed');
-            }
-        });
+        return collect($queries)->flatMap(fn (bool|array $streams, string $type) => $this->matchQuery($type, $streams));
     }
 
-    private function matchQuery(array $queries): Collection
+    private function matchQuery(string $type, array|bool $streams): array
     {
-        $streams = match (key($queries)) {
-            'all' => $this->eventStreamProvider->allWithoutInternal(),
-            'categories' => $this->eventStreamProvider->filterByAscendantCategories($queries['categories']),
-            default => $queries['names'] ?? [],
-        };
+        if ($type === self::ALL) {
+            return $this->eventStreamProvider->allWithoutInternal();
+        }
 
-        return collect($streams);
+        $this->assertQueriesNotEmpty($type, $streams);
+        $this->assertUniqueStreamNames($type, $streams);
+
+        return match ($type) {
+            self::CATEGORIES => $this->eventStreamProvider->filterByAscendantCategories($streams),
+            self::NAMES => $this->eventStreamProvider->filterByAscendantStreams($streams),
+            default => throw new RuntimeException("Unknown query $type"),
+        };
+    }
+
+    private function assertQueriesNotEmpty(string $type, array $streams): void
+    {
+        if ($streams === []) {
+            throw new RuntimeException("Stream $type cannot be empty");
+        }
+    }
+
+    private function assertUniqueStreamNames(string $key, array $streams): void
+    {
+        if (count($streams) !== count(array_unique($streams))) {
+            throw new RuntimeException("Stream $key must be unique");
+        }
     }
 }

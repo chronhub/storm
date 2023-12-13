@@ -6,20 +6,12 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 use Throwable;
 
-interface ReadModel
+interface ReadModel extends StackedReadModel
 {
     /**
      * Initializes the read model.
      */
     public function initialize(): void;
-
-    /**
-     * Stacks an operation to be applied to the read model.
-     *
-     * @param string $operation    The operation to apply.
-     * @param mixed  ...$arguments The arguments for the operation.
-     */
-    public function stack(string $operation, mixed ...$arguments): void;
 
     /**
      * Persist any changes made to the read model made

@@ -21,6 +21,7 @@ beforeEach(function () {
     $this->testFactory = new InMemoryFactory();
     $this->eventStore = $this->testFactory->getEventStore();
     $this->projectorManager = $this->testFactory->getManager();
+    $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
 /**
@@ -41,7 +42,7 @@ test('can run read model projection from one stream', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope) use ($readModel): array {
             if ($state['count'] === 1) {
                 expect($scope)
@@ -67,6 +68,36 @@ test('can run read model projection from one stream', function () {
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
+test('can run read model with shortcut stack from scope', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('user')
+        ->withQueryFilter($this->fromIncludedPosition)
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            $state['count']++;
+
+            $state['count'] === 1
+                ? $scope->stack('insert', $event->header(Header::EVENT_ID), $event->toContent())
+                : $scope->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
+
+            return $state;
+        })->run(false);
+
+    expect($projector->getState())
+        ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+});
+
 test('can stop read model projection', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
@@ -81,7 +112,7 @@ test('can stop read model projection', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
@@ -117,7 +148,7 @@ test('can reset read model projection', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
@@ -161,7 +192,7 @@ test('can delete read model projection with read model', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['count']++;
 
@@ -206,7 +237,7 @@ test('can delete read model projection without read model', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
@@ -251,7 +282,7 @@ test('can rerun read model projection by catchup', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
                 $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), ['count' => $event->header(EventHeader::INTERNAL_POSITION)]);
@@ -295,7 +326,7 @@ test('can run read model projection from many streams', function () {
     $projector
         ->initialize(fn () => ['count_some_event' => 0, 'count_another_event' => 0])
         ->fromStreams('debit', 'credit')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($scope->streamName() === 'debit') {
                 $state['count_some_event']++;
@@ -340,7 +371,7 @@ test('can run read model projection from many streams and sort events by ascendi
     $projector
         ->initialize(fn () => ['order' => [], 'index' => 0])
         ->fromStreams('debit', 'credit')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['order'][$scope->streamName()][$state['index'] + 1] = $event::class;
 

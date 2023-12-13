@@ -33,4 +33,6 @@ readonly class StopWhen
     {
         return $subscription->streamManager()->hasGap();
     }
+
+    // no events loaded for x cycles
 }

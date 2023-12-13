@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyExists;
+use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -36,15 +37,17 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
             throw ProjectionAlreadyExists::withName($projectionName);
         }
 
-        $this->projections->put($projectionName, InMemoryProjection::create($projectionName, $data->toArray()['status']));
+        $projection = InMemoryProjection::create($projectionName, $data->toArray()['status']);
+
+        $this->projections->put($projectionName, $projection);
     }
 
     public function acquireLock(string $projectionName, ProjectionData $data): void
     {
-        $projection = $this->tryRetrieve($projectionName);
+        $projection = $this->retrieveOrFail($projectionName);
 
         if (! $this->canAcquireLock($projection)) {
-            throw InMemoryProjectionFailed::failedOnAcquireLock($projectionName);
+            throw ProjectionAlreadyRunning::withName($projectionName);
         }
 
         $this->applyChanges($projection, $data->toArray());
@@ -52,14 +55,14 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function updateProjection(string $projectionName, ProjectionData $data): void
     {
-        $projection = $this->tryRetrieve($projectionName);
+        $projection = $this->retrieveOrFail($projectionName);
 
         $this->applyChanges($projection, $data->toArray());
     }
 
     public function deleteProjection(string $projectionName): void
     {
-        $this->tryRetrieve($projectionName);
+        $this->retrieveOrFail($projectionName);
 
         $this->projections->forget($projectionName);
     }
@@ -94,7 +97,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         return $this->clock->isGreaterThanNow($projection->lockedUntil());
     }
 
-    private function tryRetrieve(string $projectionName): InMemoryProjection
+    private function retrieveOrFail(string $projectionName): InMemoryProjection
     {
         $projection = $this->retrieve($projectionName);
 

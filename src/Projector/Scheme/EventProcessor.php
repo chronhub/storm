@@ -43,9 +43,7 @@ final readonly class EventProcessor
         }
 
         $this->incrementEventCounter($subscription);
-
         $this->reactOn($event, $subscription);
-
         $this->persistWhenCounterIsReached();
 
         return $subscription->sprint->inProgress();

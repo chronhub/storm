@@ -21,8 +21,7 @@ final readonly class RefreshProjection
         // can be stopped, restarted if in the background or just keep going.
         $this->discovering->refreshStatus($this->management, $subscription->sprint);
 
-        // watch again for event streams which may have
-        // changed after the first watch.
+        // watch again for event streams which may have changed after the first watch.
         $subscription->discoverStreams();
 
         return $next($subscription);

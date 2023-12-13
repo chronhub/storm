@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
+use Chronhub\Storm\Contracts\Projector\StackedReadModel;
 
 final readonly class ReadModelAccess implements ReadModelScope
 {
@@ -20,9 +20,14 @@ final readonly class ReadModelAccess implements ReadModelScope
         $this->management->close();
     }
 
-    public function readModel(): ReadModel
+    public function readModel(): StackedReadModel
     {
         return $this->management->getReadModel();
+    }
+
+    public function stack(string $operation, ...$arguments): void
+    {
+        $this->management->getReadModel()->stack($operation, ...$arguments);
     }
 
     public function streamName(): string
