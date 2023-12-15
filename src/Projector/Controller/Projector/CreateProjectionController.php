@@ -8,6 +8,5 @@ class CreateProjectionController
 {
     public function __invoke(string $streamName)
     {
-
     }
 }

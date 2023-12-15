@@ -18,11 +18,11 @@ beforeEach(function () {
 it('can run emitter projection 111', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 100, null, $eventId);
+    $stream = $this->testFactory->getStream('user', 10000, null, $eventId);
     $this->eventStore->firstCommit($stream);
 
     $eventId1 = Uuid::v4()->toRfc4122();
-    $stream1 = $this->testFactory->getStream('foo', 50, '+10 seconds', $eventId1);
+    $stream1 = $this->testFactory->getStream('foo', 5000, '+10 seconds', $eventId1);
     $this->eventStore->firstCommit($stream1);
 
     // create a projection
@@ -39,12 +39,12 @@ it('can run emitter projection 111', function (): void {
             $state['count'][$scope->streamName()]++;
             $state['count']['total']++;
 
-            if ($state['count']['total'] === 150) {
+            if ($state['count']['total'] === 15000) {
                 $scope->stop();
             }
 
             return $state;
         })->run(true);
 
-    expect($projector->getState())->toBe(['count' => ['user' => 100, 'foo' => 50, 'total' => 150]]);
+    expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);
 });

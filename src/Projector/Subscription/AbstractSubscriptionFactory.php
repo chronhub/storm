@@ -21,6 +21,8 @@ use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
+use Chronhub\Storm\Projector\Activity\PersistentActivityFactory;
+use Chronhub\Storm\Projector\Activity\QueryActivityFactory;
 use Chronhub\Storm\Projector\Options\DefaultOption;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
@@ -57,7 +59,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscription = $this->createSubscription($option);
+        $subscription = $this->createSubscription($option, false);
 
         return new QuerySubscription($subscription, new QueryingManagement($subscription));
     }
@@ -130,12 +132,13 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $this->queryScope;
     }
 
-    protected function createSubscription(ProjectionOption $option): Subscription
+    protected function createSubscription(ProjectionOption $option, bool $persistent): Subscription
     {
         return new Subscription(
             $this->createStreamManager(),
             $this->clock,
             $option,
+            $persistent ? new PersistentActivityFactory() : new QueryActivityFactory(),
             $this->chronicler,
         );
     }
@@ -146,6 +149,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->createStreamGapManager($option),
             $this->clock,
             $option,
+            new PersistentActivityFactory(),
             $this->chronicler,
         );
     }

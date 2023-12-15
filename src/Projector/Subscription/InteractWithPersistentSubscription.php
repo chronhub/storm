@@ -7,21 +7,8 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
-use Chronhub\Storm\Projector\Activity\PersistOrUpdate;
-use Chronhub\Storm\Projector\Activity\RefreshProjection;
-use Chronhub\Storm\Projector\Activity\ResetEventCounter;
-use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
-use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\EventProcessor;
-use Chronhub\Storm\Projector\Scheme\QueryFilterResolver;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\SleepDuration;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentSubscription
@@ -45,30 +32,9 @@ trait InteractWithPersistentSubscription
 
     protected function newWorkflow(): Workflow
     {
-        return new Workflow($this->subscription, $this->getActivities(), $this->management);
-    }
+        $activities = ($this->subscription->activityFactory)($this->subscription, $this->management, $this->getScope());
 
-    protected function getActivities(): array
-    {
-        $monitor = new MonitorRemoteStatus();
-        $sleepDuration = $this->subscription->option->getSleep() <= 0 ? null : new SleepDuration(
-            $this->subscription->option->getSleep(),
-            $this->subscription->option->getIncrementSleep()
-        );
-
-        return [
-            new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
-            new RisePersistentProjection($monitor, $this->management),
-            new LoadStreams(new QueryFilterResolver($this->subscription->context()->queryFilter()), $sleepDuration),
-            new HandleStreamEvent(
-                new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), $this->management)
-            ),
-            new HandleStreamGap($this->management),
-            new PersistOrUpdate($this->management, $sleepDuration),
-            new ResetEventCounter(),
-            new DispatchSignal(),
-            new RefreshProjection($monitor, $this->management),
-        ];
+        return new Workflow($this->subscription, $activities, $this->management);
     }
 
     /**
@@ -88,11 +54,7 @@ trait InteractWithPersistentSubscription
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection(
-            $this->newWorkflow(),
-            $this->subscription->looper,
-            $keepRunning
-        );
+        $project = new RunProjection($this->newWorkflow(), $this->subscription->looper, $keepRunning);
 
         $project->beginCycle();
     }

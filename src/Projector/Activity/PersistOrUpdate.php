@@ -20,7 +20,6 @@ final readonly class PersistOrUpdate
     {
         // @phpstan-ignore-next-line
         if (! $subscription->hasGapDetection() or ! $subscription->streamManager->hasGap()) {
-
             // The event counter is reset when no event has been loaded,
             // and, when persistWhenThresholdReached was successfully called and no more event "handled",
             // so, we sleep and try updating the lock or, we store the data

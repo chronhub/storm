@@ -24,13 +24,11 @@ class EventStreamLoader
     }
 
     /**
+     * Load stream names from one query type
+     * Note that projection will run blank if event streams are empty
+     *
      * @param  array{'all'?: bool, 'categories'?: string[], 'names'?: string[]} $queries
      * @return Collection<string>
-     *
-     * todo make an option to raise exception when no event stream return
-     *  this should be part of migration process
-     *  issue with no stream event is that the projection will make a lot of query,
-     *  and only projection option sleep will timeout per cycle.
      *
      * @throws RuntimeException when local stream names/categories are empty or not unique
      */

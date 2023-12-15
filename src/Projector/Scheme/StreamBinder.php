@@ -37,7 +37,7 @@ final class StreamBinder implements StreamManager
 
     public function bind(string $streamName, int $expectedPosition, DomainEvent $event): bool
     {
-        $this->assertHasStream($streamName);
+        $this->assertStreamExists($streamName);
 
         $this->streamPosition[$streamName] = $expectedPosition;
 
@@ -46,7 +46,7 @@ final class StreamBinder implements StreamManager
 
     public function hasNextPosition(string $streamName, int $expectedPosition): bool
     {
-        $this->assertHasStream($streamName);
+        $this->assertStreamExists($streamName);
 
         return $expectedPosition === $this->streamPosition[$streamName] + 1;
     }
@@ -71,7 +71,7 @@ final class StreamBinder implements StreamManager
         return $this->all();
     }
 
-    private function assertHasStream(string $streamName): void
+    private function assertStreamExists(string $streamName): void
     {
         if (! $this->hasStream($streamName)) {
             throw new RuntimeException("Stream $streamName is not watched");

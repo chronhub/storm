@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Subscription\Subscription;
 final readonly class RefreshProjection
 {
     public function __construct(
-        private MonitorRemoteStatus $discovering,
+        private MonitorRemoteStatus $monitor,
         private PersistentManagement $management
     ) {
     }
@@ -19,7 +19,7 @@ final readonly class RefreshProjection
     {
         // depending on the discovered status, the projection
         // can be stopped, restarted if in the background or just keep going.
-        $this->discovering->refreshStatus($this->management, $subscription->sprint);
+        $this->monitor->refreshStatus($this->management, $subscription->sprint);
 
         // watch again for event streams which may have changed after the first watch.
         $subscription->discoverStreams();

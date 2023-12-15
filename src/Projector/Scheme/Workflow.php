@@ -34,7 +34,7 @@ final readonly class Workflow
         } catch (Throwable $exception) {
             return false;
         } finally {
-            $this->raiseExceptionAndReleaseLock($exception ?? null);
+            $this->conditionallyReleaseLock($exception ?? null);
         }
     }
 
@@ -60,7 +60,7 @@ final readonly class Workflow
         return fn (callable $stack, callable $activity) => fn (Subscription $subscription) => $activity($subscription, $stack);
     }
 
-    private function raiseExceptionAndReleaseLock(?Throwable $exception): void
+    private function conditionallyReleaseLock(?Throwable $exception): void
     {
         // raise projection already running exception, prevent from releasing lock
         // and put the projection in an idle status.

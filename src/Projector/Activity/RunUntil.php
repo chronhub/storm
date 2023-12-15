@@ -28,7 +28,7 @@ final class RunUntil
         $response = $next($subscription);
 
         if ($this->isTimerExpired()) {
-            $subscription->sprint->stop(); // checkMe
+            $subscription->sprint->stop();
 
             return false;
         }

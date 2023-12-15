@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionStateInterface;
@@ -47,7 +48,9 @@ final class Subscription
         public readonly StreamManager|StreamGapManager $streamManager,
         public readonly SystemClock $clock,
         public readonly ProjectionOption $option,
+        public readonly ?ActivityFactory $activityFactory,
         Chronicler $chronicler,
+
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();

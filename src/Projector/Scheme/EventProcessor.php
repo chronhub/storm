@@ -79,8 +79,7 @@ final readonly class EventProcessor
     private function getUserState(Subscription $subscription): ?array
     {
         return $subscription->context()->userState() instanceof Closure
-            ? $subscription->state->get()
-            : null;
+            ? $subscription->state->get() : null;
     }
 
     private function updateUserState(Subscription $subscription, ?array $initializedState, ?array $currentState): void
