@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Scheme\Sprint;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
 
-function getInstance(bool $shouldHandled, bool $inProgress, int $stopAt = null, int $failedAt = null): object
+function getInstance(bool $shouldHandled, bool $inProgress, ?int $stopAt = null, ?int $failedAt = null): object
 {
     return new class($shouldHandled, $inProgress, $stopAt, $failedAt)
     {

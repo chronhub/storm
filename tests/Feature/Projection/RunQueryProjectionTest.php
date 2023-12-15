@@ -558,7 +558,7 @@ it('can run query projection without user state and return will be ignored', fun
     $projector
         ->fromStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, ProjectorScope $scope, array $state = null): array {
+        ->when(function (DomainEvent $event, ProjectorScope $scope, ?array $state = null): array {
             expect($state)->toBeNull();
 
             return ['foo' => 'bar'];
