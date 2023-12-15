@@ -29,15 +29,15 @@ final readonly class LoadStreams
 
         // checkMe pass stream iterator $next($subscription, $streams);
 
-        if ($streams !== []) {
+        $noStreams = $streams === [];
+
+        if (! $noStreams) {
             $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
 
             $subscription->setStreamIterator($iterator);
-
-            $this->sleepDuration?->reset();
-        } else {
-            $this->sleepDuration?->increment();
         }
+
+        $noStreams ? $this->sleepDuration?->increment() : $this->sleepDuration?->reset();
 
         return $next($subscription);
     }
