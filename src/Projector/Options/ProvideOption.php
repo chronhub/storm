@@ -32,6 +32,8 @@ trait ProvideOption
      */
     protected readonly int $sleep;
 
+    protected readonly int $incrementSleep;
+
     /**
      * @var positive-int
      */
@@ -74,6 +76,11 @@ trait ProvideOption
         return $this->sleep;
     }
 
+    public function getIncrementSleep(): int
+    {
+        return $this->incrementSleep;
+    }
+
     public function getLockout(): int
     {
         return $this->lockout;
@@ -102,6 +109,7 @@ trait ProvideOption
             self::BLOCK_SIZE => $this->getBlockSize(),
             self::TIMEOUT => $this->getTimeout(),
             self::SLEEP => $this->getSleep(),
+            self::INCREMENT_SLEEP => $this->getIncrementSleep(),
             self::LOCKOUT => $this->getLockout(),
             self::RETRIES => $this->getRetries(),
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),

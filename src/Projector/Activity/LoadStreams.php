@@ -10,14 +10,19 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
+use Chronhub\Storm\Projector\Scheme\SleepDuration;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
 use function array_values;
 
-final class LoadStreams
+final readonly class LoadStreams
 {
+    public function __construct(private ?SleepDuration $sleepDuration)
+    {
+    }
+
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
         $streams = $this->readStreams($subscription);
@@ -25,13 +30,13 @@ final class LoadStreams
         // checkMe pass stream iterator $next($subscription, $streams);
 
         if ($streams !== []) {
-            $this->addToMetrics($subscription, $streams);
-
             $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
 
             $subscription->setStreamIterator($iterator);
+
+            $this->sleepDuration?->reset();
         } else {
-            $subscription->metrics->noLoadedEvent->increment();
+            $this->sleepDuration?->increment();
         }
 
         return $next($subscription);
@@ -48,7 +53,6 @@ final class LoadStreams
         $loadLimiter = $subscription->option->getLoads();
 
         foreach ($subscription->streamManager->jsonSerialize() as $streamName => $lastKnownPosition) {
-
             if ($queryFilter instanceof StreamNameAwareQueryFilter) {
                 $queryFilter->setCurrentStreamName($streamName);
             }
@@ -71,16 +75,5 @@ final class LoadStreams
         }
 
         return $streams;
-    }
-
-    private function addToMetrics(Subscription $subscription, array $streams): void
-    {
-        $metrics = [];
-
-        foreach ($streams as $streamName => $stream) {
-            $metrics[$streamName] = $stream->count();
-        }
-
-        $subscription->metrics->addCountStreams($metrics);
     }
 }

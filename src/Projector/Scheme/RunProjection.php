@@ -11,7 +11,6 @@ final readonly class RunProjection
     public function __construct(
         private Workflow $workflow,
         private Looper $looper,
-        private Metrics $metrics,
         private bool $keepRunning,
     ) {
     }
@@ -33,20 +32,13 @@ final readonly class RunProjection
     {
         if (! $this->looper->hasStarted()) {
             $this->looper->start();
-
-            $this->metrics->newCycle();
         }
     }
 
     private function handleCycleEnd(bool $inProgress): void
     {
-        if (! $this->keepRunning || ! $inProgress) {
-            $this->looper->reset();
-            $this->metrics->end();
-            dump($this->metrics->getCycles());
-        } else {
-            $this->looper->next();
-            $this->metrics->increment();
-        }
+        ! $this->keepRunning || ! $inProgress
+           ? $this->looper->reset()
+           : $this->looper->next();
     }
 }

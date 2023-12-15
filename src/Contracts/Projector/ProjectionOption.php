@@ -28,6 +28,8 @@ interface ProjectionOption extends JsonSerializable
      */
     public const SLEEP = 'sleep';
 
+    public const INCREMENT_SLEEP = 'incrementSleep';
+
     /**
      * @var string
      */
@@ -93,6 +95,16 @@ interface ProjectionOption extends JsonSerializable
      * @return int<0,max>
      */
     public function getSleep(): int;
+
+    /**
+     * Get sleep increment in milliseconds when no event loaded
+     *
+     * Disable sleep increment with zero or less.
+     * Only available for persistent projection
+     *
+     * @return int<0,max>
+     */
+    public function getIncrementSleep(): int;
 
     /**
      * Get retries in milliseconds when a gap detected

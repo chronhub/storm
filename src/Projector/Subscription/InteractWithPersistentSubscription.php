@@ -20,6 +20,7 @@ use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
+use Chronhub\Storm\Projector\Scheme\SleepDuration;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 
 trait InteractWithPersistentSubscription
@@ -49,16 +50,20 @@ trait InteractWithPersistentSubscription
     protected function getActivities(): array
     {
         $monitor = new MonitorRemoteStatus();
+        $sleepDuration = $this->subscription->option->getSleep() <= 0 ? null : new SleepDuration(
+            $this->subscription->option->getSleep(),
+            $this->subscription->option->getIncrementSleep()
+        );
 
         return [
             new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
             new RisePersistentProjection($monitor, $this->management),
-            new LoadStreams(),
+            new LoadStreams($sleepDuration),
             new HandleStreamEvent(
                 new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), $this->management)
             ),
             new HandleStreamGap($this->management),
-            new PersistOrUpdate($this->management),
+            new PersistOrUpdate($this->management, $sleepDuration),
             new ResetEventCounter(),
             new DispatchSignal(),
             new RefreshProjection($monitor, $this->management),
@@ -83,8 +88,9 @@ trait InteractWithPersistentSubscription
     private function startProjection(bool $keepRunning): void
     {
         $project = new RunProjection(
-            $this->newWorkflow(), $this->subscription->looper,
-            $this->subscription->metrics, $keepRunning
+            $this->newWorkflow(),
+            $this->subscription->looper,
+            $keepRunning
         );
 
         $project->beginCycle();

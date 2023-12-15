@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Subscription\Subscription;
 final readonly class RisePersistentProjection
 {
     public function __construct(
-        private MonitorRemoteStatus $discovering,
+        private MonitorRemoteStatus $monitorStatus,
         private PersistentManagement $management
     ) {
     }
@@ -20,7 +20,7 @@ final readonly class RisePersistentProjection
         if ($subscription->looper->isFirstLap()) {
             // depending on the discovered status,
             // the projection can be stopped early, on stopping and on deleting.
-            if ($this->discovering->shouldStopOnDiscoveringStatus($this->management, $subscription->sprint)) {
+            if ($this->monitorStatus->shouldStop($this->management, $subscription->sprint)) {
                 return false;
             }
 

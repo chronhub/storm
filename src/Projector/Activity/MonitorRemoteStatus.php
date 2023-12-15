@@ -12,7 +12,7 @@ final class MonitorRemoteStatus
 {
     private bool $isFirstLoop = true;
 
-    public function shouldStopOnDiscoveringStatus(PersistentManagement $management, Sprint $sprint): bool
+    public function shouldStop(PersistentManagement $management, Sprint $sprint): bool
     {
         $shouldStop = $this->discovering($management, $sprint);
 

@@ -17,7 +17,6 @@ use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Scheme\EventCounter;
 use Chronhub\Storm\Projector\Scheme\Looper;
-use Chronhub\Storm\Projector\Scheme\Metrics;
 use Chronhub\Storm\Projector\Scheme\ProjectionState;
 use Chronhub\Storm\Projector\Scheme\Sprint;
 use Closure;
@@ -35,8 +34,6 @@ final class Subscription
     public readonly ?EventCounter $eventCounter; // @phpstan-ignore-line
 
     public readonly Looper $looper;
-
-    public readonly Metrics $metrics;
 
     private ?ContextReaderInterface $context = null;
 
@@ -60,7 +57,6 @@ final class Subscription
         $this->state = new ProjectionState();
         $this->sprint = new Sprint();
         $this->looper = new Looper();
-        $this->metrics = new Metrics($this->looper);
     }
 
     public function setContext(ContextReaderInterface $context, bool $allowRerun): void

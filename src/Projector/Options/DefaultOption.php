@@ -15,6 +15,7 @@ final class DefaultOption implements ProjectionOption
         protected readonly int $cacheSize = 1000,
         protected readonly int $blockSize = 1000,
         protected readonly int $sleep = 100000,
+        protected readonly int $incrementSleep = 10,
         protected readonly int $timeout = 1000,
         protected readonly int $lockout = 100000,
         array|string $retries = [0, 5, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
