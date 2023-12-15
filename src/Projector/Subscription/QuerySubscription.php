@@ -16,6 +16,7 @@ use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\QueryAccess;
+use Chronhub\Storm\Projector\Scheme\QueryFilterResolver;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\Workflow;
 use Closure;
@@ -62,7 +63,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         $activities = [
             new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
             new RiseQueryProjection(),
-            new LoadStreams(),
+            new LoadStreams(new QueryFilterResolver($this->subscription->context()->queryFilter()), null),
             new HandleStreamEvent(
                 new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), null)
             ),

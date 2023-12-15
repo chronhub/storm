@@ -22,7 +22,7 @@ it('can run emitter projection 111', function (): void {
     $this->eventStore->firstCommit($stream);
 
     $eventId1 = Uuid::v4()->toRfc4122();
-    $stream1 = $this->testFactory->getStream('foo', 50, null, $eventId1);
+    $stream1 = $this->testFactory->getStream('foo', 50, '+10 seconds', $eventId1);
     $this->eventStore->firstCommit($stream1);
 
     // create a projection
@@ -30,15 +30,21 @@ it('can run emitter projection 111', function (): void {
 
     // run projection
     $projector
-        ->initialize(fn () => ['count' => 0])
+        ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->fromStreams('user', 'foo')
-        ->until(5)
+        //->until(10)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
-            $state['count']++;
+
+            $state['count'][$scope->streamName()]++;
+            $state['count']['total']++;
+
+            if ($state['count']['total'] === 150) {
+                $scope->stop();
+            }
 
             return $state;
         })->run(true);
 
-    expect($projector->getState())->toBe(['count' => 150]);
+    expect($projector->getState())->toBe(['count' => ['user' => 100, 'foo' => 50, 'total' => 150]]);
 });

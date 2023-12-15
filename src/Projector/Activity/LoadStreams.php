@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
-use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Scheme\SleepDuration;
@@ -17,10 +14,18 @@ use Chronhub\Storm\Stream\StreamName;
 use function array_keys;
 use function array_values;
 
-final readonly class LoadStreams
+final class LoadStreams
 {
-    public function __construct(private ?SleepDuration $sleepDuration)
-    {
+    /**
+     * @var callable
+     */
+    private $queryFilterResolver;
+
+    public function __construct(
+        callable $queryFilterResolver,
+        private readonly ?SleepDuration $sleepDuration
+    ) {
+        $this->queryFilterResolver = $queryFilterResolver;
     }
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
@@ -37,7 +42,7 @@ final readonly class LoadStreams
             $subscription->setStreamIterator($iterator);
         }
 
-        $noStreams ? $this->sleepDuration?->increment() : $this->sleepDuration?->reset();
+        $this->updateSleepDuration($noStreams);
 
         return $next($subscription);
     }
@@ -49,25 +54,13 @@ final readonly class LoadStreams
     {
         $streams = [];
 
-        $queryFilter = $subscription->context()->queryFilter();
         $loadLimiter = $subscription->option->getLoads();
 
-        foreach ($subscription->streamManager->jsonSerialize() as $streamName => $lastKnownPosition) {
-            if ($queryFilter instanceof StreamNameAwareQueryFilter) {
-                $queryFilter->setCurrentStreamName($streamName);
-            }
-
-            if ($loadLimiter !== null && $queryFilter instanceof LoadLimiterProjectionQueryFilter) {
-                $queryFilter->setLimit($loadLimiter);
-            }
-
-            if ($queryFilter instanceof ProjectionQueryFilter) {
-                $queryFilter->setCurrentPosition($lastKnownPosition + 1);
-            }
+        foreach ($subscription->streamManager->jsonSerialize() as $streamName => $streamPosition) {
+            $queryFilter = ($this->queryFilterResolver)($streamName, $streamPosition + 1, $loadLimiter);
 
             try {
                 $events = $subscription->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
-
                 $streams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;
@@ -75,5 +68,12 @@ final readonly class LoadStreams
         }
 
         return $streams;
+    }
+
+    private function updateSleepDuration(bool $noStreams): void
+    {
+        if ($this->sleepDuration) {
+            $noStreams ? $this->sleepDuration->increment() : $this->sleepDuration->reset();
+        }
     }
 }

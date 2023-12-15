@@ -19,6 +19,7 @@ use Chronhub\Storm\Projector\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Activity\RunUntil;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Projector\Scheme\QueryFilterResolver;
 use Chronhub\Storm\Projector\Scheme\RunProjection;
 use Chronhub\Storm\Projector\Scheme\SleepDuration;
 use Chronhub\Storm\Projector\Scheme\Workflow;
@@ -58,7 +59,7 @@ trait InteractWithPersistentSubscription
         return [
             new RunUntil($this->subscription->clock, $this->subscription->context()->timer()),
             new RisePersistentProjection($monitor, $this->management),
-            new LoadStreams($sleepDuration),
+            new LoadStreams(new QueryFilterResolver($this->subscription->context()->queryFilter()), $sleepDuration),
             new HandleStreamEvent(
                 new EventProcessor($this->subscription->context()->reactors(), $this->getScope(), $this->management)
             ),

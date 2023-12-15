@@ -11,5 +11,5 @@ interface ProjectionQueryFilter extends QueryFilter
     /**
      * @param positive-int $streamPosition
      */
-    public function setCurrentPosition(int $streamPosition): void;
+    public function setStreamPosition(int $streamPosition): void;
 }

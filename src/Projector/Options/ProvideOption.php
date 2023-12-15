@@ -45,9 +45,9 @@ trait ProvideOption
     protected readonly array $retries;
 
     /**
-     * @var positive-int|null
+     * @var int<0,max>
      */
-    protected readonly ?int $loads;
+    protected readonly int $loads;
 
     protected readonly ?string $detectionWindows;
 
@@ -91,7 +91,7 @@ trait ProvideOption
         return $this->retries;
     }
 
-    public function getLoads(): ?int
+    public function getLoads(): int
     {
         return $this->loads;
     }

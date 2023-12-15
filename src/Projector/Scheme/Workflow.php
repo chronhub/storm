@@ -63,13 +63,13 @@ final readonly class Workflow
     private function raiseExceptionAndReleaseLock(?Throwable $exception): void
     {
         // raise projection already running exception, prevent from releasing lock
-        // and put the projection in a idle status.
-        if (! $this->management || $exception instanceof ProjectionAlreadyRunning) {
+        // and put the projection in an idle status.
+        if ($exception instanceof ProjectionAlreadyRunning) {
             throw $exception;
         }
 
         try {
-            $this->management->freed();
+            $this->management?->freed();
         } catch (Throwable) {
             // ignore
         }

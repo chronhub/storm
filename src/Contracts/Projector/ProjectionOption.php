@@ -123,12 +123,11 @@ interface ProjectionOption extends JsonSerializable
     /**
      * Get loads limiter for the query filter
      *
-     * Null limiter will either allow to dynamically set the limiter
-     * or means no limit
+     * Zero means no limit
      *
-     * @return positive-int|null
+     * @return int<0,max>
      *
      * @see LoadLimiterProjectionQueryFilter
      */
-    public function getLoads(): ?int;
+    public function getLoads(): int;
 }

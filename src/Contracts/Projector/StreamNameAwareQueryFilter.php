@@ -6,5 +6,5 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 interface StreamNameAwareQueryFilter extends ProjectionQueryFilter
 {
-    public function setCurrentStreamName(string $streamName): void;
+    public function setStreamName(string $streamName): void;
 }

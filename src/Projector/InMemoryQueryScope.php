@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
-use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Reporter\ExtractEventHeader;
 
@@ -20,40 +19,33 @@ final class InMemoryQueryScope implements ProjectionQueryScope
         {
             use ExtractEventHeader;
 
-            private ?int $limit = null;
+            private int $streamPosition;
 
-            private int $counter = 0;
+            private int $loadLimiter;
 
-            private int $currentPosition = 0;
+            private int $maxPosition;
 
             public function apply(): callable
             {
+                $this->maxPosition = $this->loadLimiter <= 0
+                    ? PHP_INT_MAX
+                    : $this->streamPosition + $this->loadLimiter;
+
                 return function (DomainEvent $event): bool {
+                    $eventPosition = $this->extractInternalPosition($event);
 
-                    // fixMe: counter need to be reset per cycle
-                    //  or we need a new instance of this class per cycle
-                    if ($this->counter === $this->limit) {
-                        return false;
-                    }
-
-                    $this->counter++;
-
-                    return $this->extractInternalPosition($event) >= $this->currentPosition;
+                    return $eventPosition >= $this->streamPosition && $eventPosition <= $this->maxPosition;
                 };
             }
 
-            public function setCurrentPosition(int $streamPosition): void
+            public function setLoadLimiter(int $loadLimiter): void
             {
-                $this->currentPosition = $streamPosition;
+                $this->loadLimiter = $loadLimiter;
             }
 
-            public function setLimit(int $limit): void
+            public function setStreamPosition(int $streamPosition): void
             {
-                if ($limit < 0) {
-                    throw new InvalidArgumentException('Limit must be greater than 0');
-                }
-
-                $this->limit = $limit === 0 ? PHP_INT_MAX : $limit;
+                $this->streamPosition = $streamPosition;
             }
 
             public function orderBy(): string

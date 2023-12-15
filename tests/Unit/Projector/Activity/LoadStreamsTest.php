@@ -44,12 +44,12 @@ function getLimiterQueryFilter(?int $limit): LoadLimiterProjectionQueryFilter
         {
         }
 
-        public function setLimit(?int $limit): void
+        public function setLoadLimiter(?int $loadLimiter): void
         {
-            $this->limit = $limit;
+            $this->limit = $loadLimiter;
         }
 
-        public function setCurrentPosition(int $streamPosition): void
+        public function setStreamPosition(int $streamPosition): void
         {
             $this->streamPosition = $streamPosition;
         }
@@ -104,7 +104,7 @@ it('set merge stream iterator', function () {
 
 it('set current stream name on query filter', function () {
     $queryFilter = $this->createMock(StreamNameAwareQueryFilter::class);
-    $queryFilter->expects($this->once())->method('setCurrentStreamName')->with('customer-123');
+    $queryFilter->expects($this->once())->method('setStreamName')->with('customer-123');
 
     $streamEvents = getStreamEvents();
 
@@ -148,7 +148,7 @@ it('set limit on query filter', function (?int $limit) {
 
 it('keep iterate when stream iterator raise stream not found exception', function () {
     $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-    $queryFilter->expects($this->exactly(2))->method('setCurrentPosition');
+    $queryFilter->expects($this->exactly(2))->method('setStreamPosition');
 
     $streamEvents = StreamEventsFactory::fromEmptyAndRaiseStreamNotFoundException('customer-123');
     $streamEvents2 = getStreamEvents();
@@ -175,7 +175,7 @@ it('set current position on query filter incremented by one', function () {
     $queryFilter = $this->createMock(ProjectionQueryFilter::class);
 
     $matcher = $this->exactly(2);
-    $queryFilter->expects($matcher)->method('setCurrentPosition')
+    $queryFilter->expects($matcher)->method('setStreamPosition')
         ->willReturnCallback(function (int $position) use ($matcher) {
             match ($matcher->numberOfInvocations()) {
                 1 => expect($position)->toBe(2),

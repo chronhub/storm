@@ -76,7 +76,7 @@ it('can run query projection until and increment loop', function () {
             return 'asc';
         }
 
-        public function setCurrentPosition(int $streamPosition): void
+        public function setStreamPosition(int $streamPosition): void
         {
             $this->currentPosition = $streamPosition;
         }
@@ -400,7 +400,7 @@ it('can run query projection from current stream position', function () {
             return 'asc';
         }
 
-        public function setCurrentPosition(int $streamPosition): void
+        public function setStreamPosition(int $streamPosition): void
         {
             $this->currentPosition = $streamPosition;
         }
