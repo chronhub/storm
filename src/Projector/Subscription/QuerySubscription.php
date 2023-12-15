@@ -69,7 +69,7 @@ final readonly class QuerySubscription implements QuerySubscriber
             new DispatchSignal(),
         ];
 
-        return new Workflow($this->subscription, $activities);
+        return new Workflow($this->subscription, $activities, null);
     }
 
     private function initializeContext(ContextReaderInterface $context, bool $keepRunning): void
@@ -94,7 +94,10 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection($this->newWorkflow(), $this->subscription->looper, $keepRunning, null);
+        $project = new RunProjection(
+            $this->newWorkflow(), $this->subscription->looper,
+            $this->subscription->metrics, $keepRunning
+        );
 
         $project->beginCycle();
     }

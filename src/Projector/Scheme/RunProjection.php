@@ -4,34 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scheme;
 
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Subscription\Subscription;
-use Throwable;
 
 final readonly class RunProjection
 {
     public function __construct(
         private Workflow $workflow,
         private Looper $looper,
+        private Metrics $metrics,
         private bool $keepRunning,
-        private ?PersistentManagement $management,
     ) {
     }
 
-    // todo: reset exception handler in workflow
     public function beginCycle(): void
-    {
-        try {
-            $this->runWorkflowCycle();
-        } catch (Throwable $exception) {
-            $this->handleException($exception);
-        } finally {
-            $this->tryReleaseLock();
-        }
-    }
-
-    private function runWorkflowCycle(): void
     {
         do {
             $this->startLooperIfNeeded();
@@ -48,42 +33,20 @@ final readonly class RunProjection
     {
         if (! $this->looper->hasStarted()) {
             $this->looper->start();
+
+            $this->metrics->newCycle();
         }
     }
 
     private function handleCycleEnd(bool $inProgress): void
     {
-        (! $this->keepRunning || ! $inProgress)
-            ? $this->looper->reset() : $this->looper->next();
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function handleException(Throwable $exception): void
-    {
-        if (! $exception instanceof ProjectionAlreadyRunning && $this->management) {
-            $this->trySilentReleaseLock();
+        if (! $this->keepRunning || ! $inProgress) {
+            $this->looper->reset();
+            $this->metrics->end();
+            dump($this->metrics->getCycles());
+        } else {
+            $this->looper->next();
+            $this->metrics->increment();
         }
-
-        throw $exception;
-    }
-
-    private function trySilentReleaseLock(): void
-    {
-        try {
-            $this->management->freed();
-        } catch (Throwable) {
-            // Fail silently
-        }
-    }
-
-    private function tryReleaseLock(): void
-    {
-        if (! $this->management) {
-            return;
-        }
-
-        $this->trySilentReleaseLock();
     }
 }

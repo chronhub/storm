@@ -22,10 +22,16 @@ final class LoadStreams
     {
         $streams = $this->readStreams($subscription);
 
+        // checkMe pass stream iterator $next($subscription, $streams);
+
         if ($streams !== []) {
+            $this->addToMetrics($subscription, $streams);
+
             $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
 
             $subscription->setStreamIterator($iterator);
+        } else {
+            $subscription->metrics->noLoadedEvent->increment();
         }
 
         return $next($subscription);
@@ -42,9 +48,7 @@ final class LoadStreams
         $loadLimiter = $subscription->option->getLoads();
 
         foreach ($subscription->streamManager->jsonSerialize() as $streamName => $lastKnownPosition) {
-            // todo stream name aware should only be used by query projection and api
-            // cannot filter events for persistent projection,as we need to be consistent
-            // with the stream position and gap detection
+
             if ($queryFilter instanceof StreamNameAwareQueryFilter) {
                 $queryFilter->setCurrentStreamName($streamName);
             }
@@ -67,5 +71,16 @@ final class LoadStreams
         }
 
         return $streams;
+    }
+
+    private function addToMetrics(Subscription $subscription, array $streams): void
+    {
+        $metrics = [];
+
+        foreach ($streams as $streamName => $stream) {
+            $metrics[$streamName] = $stream->count();
+        }
+
+        $subscription->metrics->addCountStreams($metrics);
     }
 }

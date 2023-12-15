@@ -29,6 +29,9 @@ final class InMemoryQueryScope implements ProjectionQueryScope
             public function apply(): callable
             {
                 return function (DomainEvent $event): bool {
+
+                    // fixMe: counter need to be reset per cycle
+                    //  or we need a new instance of this class per cycle
                     if ($this->counter === $this->limit) {
                         return false;
                     }

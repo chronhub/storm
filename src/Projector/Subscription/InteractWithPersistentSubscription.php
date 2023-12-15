@@ -43,7 +43,7 @@ trait InteractWithPersistentSubscription
 
     protected function newWorkflow(): Workflow
     {
-        return new Workflow($this->subscription, $this->getActivities());
+        return new Workflow($this->subscription, $this->getActivities(), $this->management);
     }
 
     protected function getActivities(): array
@@ -82,7 +82,10 @@ trait InteractWithPersistentSubscription
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection($this->newWorkflow(), $this->subscription->looper, $keepRunning, $this->management);
+        $project = new RunProjection(
+            $this->newWorkflow(), $this->subscription->looper,
+            $this->subscription->metrics, $keepRunning
+        );
 
         $project->beginCycle();
     }

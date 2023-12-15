@@ -8,6 +8,8 @@ interface ReadModelScope extends ProjectorScope
 {
     /**
      * Return the read model instance.
+     *
+     * todo do we need to access the full read model inside reactors?
      */
     public function readModel(): StackedReadModel;
 

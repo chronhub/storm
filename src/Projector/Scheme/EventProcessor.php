@@ -43,8 +43,10 @@ final readonly class EventProcessor
         }
 
         $this->incrementEventCounter($subscription);
+
         $this->reactOn($event, $subscription);
-        $this->persistWhenCounterIsReached();
+
+        $this->management?->persistWhenCounterIsReached();
 
         return $subscription->sprint->inProgress();
     }
@@ -86,10 +88,5 @@ final readonly class EventProcessor
         if (is_array($initializedState) && is_array($currentState)) {
             $subscription->state->put($currentState);
         }
-    }
-
-    private function persistWhenCounterIsReached(): void
-    {
-        $this->management?->persistWhenCounterIsReached();
     }
 }

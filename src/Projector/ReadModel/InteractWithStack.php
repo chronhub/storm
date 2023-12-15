@@ -11,6 +11,8 @@ trait InteractWithStack
      */
     protected array $stack = [];
 
+    // todo add a batch insert?
+
     public function stack(string $operation, mixed ...$arguments): void
     {
         $this->stack[] = [$operation, $arguments];

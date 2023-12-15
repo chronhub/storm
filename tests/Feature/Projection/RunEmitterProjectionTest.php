@@ -23,7 +23,7 @@ beforeEach(function () {
     $this->projectorManager = $this->testFactory->getManager();
 });
 
-it('can run emitter projection', function (): void {
+it('can run emitter projection 111', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
