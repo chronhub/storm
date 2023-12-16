@@ -13,12 +13,11 @@ final class InMemoryOption implements ProjectionOption
     public function __construct(
         protected readonly bool $signal = false,
         protected readonly int $cacheSize = 100,
-        protected readonly int $blockSize = 1,
-        protected readonly int $sleep = 0,
-        protected readonly int $incrementSleep = 0,
+        protected readonly int $blockSize = 100,
+        protected readonly array $sleep = [5, 2.5], // 5 queries every 2 seconds
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
-        protected readonly int $loads = 100,
+        protected readonly int $loads = 20,
         array|string $retries = [],
         protected readonly ?string $detectionWindows = null,
     ) {

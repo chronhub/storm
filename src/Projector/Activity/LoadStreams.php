@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
-use Chronhub\Storm\Projector\Scheme\SleepDuration;
+use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Stream\StreamName;
 
@@ -22,8 +22,8 @@ final class LoadStreams
     private $queryFilterResolver;
 
     public function __construct(
-        callable $queryFilterResolver,
-        private readonly ?SleepDuration $sleepDuration
+        private readonly NoStreamLoadedCounter $noEventCounter,
+        callable $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
     }
@@ -40,10 +40,11 @@ final class LoadStreams
             $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
 
             $subscription->setStreamIterator($iterator);
-        }
 
-        // todo handle duration for query subscription when requested(new activity)
-        $this->updateSleepDuration($noStreams);
+            $this->noEventCounter->reset();
+        } else {
+            $this->noEventCounter->increment();
+        }
 
         return $next($subscription);
     }
@@ -69,10 +70,5 @@ final class LoadStreams
         }
 
         return $streams;
-    }
-
-    private function updateSleepDuration(bool $noStreams): void
-    {
-        $noStreams ? $this->sleepDuration?->increment() : $this->sleepDuration?->reset();
     }
 }

@@ -32,7 +32,7 @@ trait InteractWithPersistentSubscription
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->subscription->activityFactory)($this->subscription, $this->management, $this->getScope());
+        $activities = ($this->subscription->activityFactory)($this->subscription, $this->getScope(), $this->management);
 
         return new Workflow($this->subscription, $activities, $this->management);
     }

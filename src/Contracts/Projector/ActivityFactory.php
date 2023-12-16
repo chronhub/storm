@@ -10,7 +10,7 @@ interface ActivityFactory
 {
     public function __invoke(
         Subscription $subscription,
-        ?PersistentManagement $management,
-        ProjectorScope $scope
+        ProjectorScope $scope,
+        ?PersistentManagement $management
     ): array;
 }

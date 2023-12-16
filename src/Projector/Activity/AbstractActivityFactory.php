@@ -7,20 +7,21 @@ namespace Chronhub\Storm\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Scheme\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
 use Chronhub\Storm\Projector\Scheme\QueryFilterResolver;
-use Chronhub\Storm\Projector\Scheme\SleepDuration;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 use function array_map;
 
 abstract class AbstractActivityFactory implements ActivityFactory
 {
-    public function __invoke(Subscription $subscription, ?PersistentManagement $management, ProjectorScope $scope): array
+    public function __invoke(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
-            $this->activities($subscription, $management, $scope)
+            $this->activities($subscription, $scope, $management)
         );
     }
 
@@ -29,21 +30,19 @@ abstract class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscription->context()->queryFilter());
     }
 
-    protected function getSleepDuration(Subscription $subscription): ?SleepDuration
+    protected function noStreamLoadedCounter(Subscription $subscription): NoStreamLoadedCounter
     {
-        $sleep = $subscription->option->getSleep();
+        [$capacity, $rate] = $subscription->option->getSleep();
 
-        if ($sleep > 0) {
-            return new SleepDuration($subscription->option->getSleep(), $subscription->option->getIncrementSleep());
-        }
+        $tokenBucket = new ConsumeWithSleepToken($capacity, $rate);
 
-        return null;
+        return new NoStreamLoadedCounter($tokenBucket);
     }
 
-    protected function getEventProcessor(Subscription $subscription, ?PersistentManagement $management, ProjectorScope $scope): EventProcessor
+    protected function getEventProcessor(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): EventProcessor
     {
         return new EventProcessor($subscription->context()->reactors(), $scope, $management);
     }
 
-    abstract protected function activities(Subscription $subscription, ?PersistentManagement $management, ProjectorScope $scope): array;
+    abstract protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array;
 }

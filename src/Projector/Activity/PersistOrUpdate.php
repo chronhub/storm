@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Scheme\SleepDuration;
+use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final readonly class PersistOrUpdate
 {
     public function __construct(
         private PersistentManagement $management,
-        private ?SleepDuration $sleepDuration
+        private NoStreamLoadedCounter $noEventCounter,
     ) {
     }
 
@@ -24,13 +24,12 @@ final readonly class PersistOrUpdate
             // and, when persistWhenThresholdReached was successfully called and no more event "handled",
             // so, we sleep and try updating the lock or, we store the data
             if ($subscription->eventCounter->isReset()) {
-                $this->sleepDuration?->sleep();
-
+                $this->noEventCounter->sleep();
                 $this->management->update();
             } else {
+                dump('store');
+                $this->noEventCounter->reset();
                 $this->management->store();
-
-                $this->sleepDuration?->reset();
             }
         }
 

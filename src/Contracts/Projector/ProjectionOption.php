@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
 use JsonSerializable;
 
 interface ProjectionOption extends JsonSerializable
@@ -27,8 +28,6 @@ interface ProjectionOption extends JsonSerializable
      * @var string
      */
     public const SLEEP = 'sleep';
-
-    public const INCREMENT_SLEEP = 'incrementSleep';
 
     /**
      * @var string
@@ -90,21 +89,14 @@ interface ProjectionOption extends JsonSerializable
     public function getLockout(): int;
 
     /**
-     * Get sleep in milliseconds before update lock
+     * Get sleep
      *
-     * @return int<0,max>
+     * @see ConsumeWithSleepToken
+     * @see NoStreamLoadedCounter
+     *
+     * @return array{int|float, int|float}
      */
-    public function getSleep(): int;
-
-    /**
-     * Get sleep increment in milliseconds when no event loaded
-     *
-     * Disable sleep increment with zero or less.
-     * Only available for persistent projection
-     *
-     * @return int<0,max>
-     */
-    public function getIncrementSleep(): int;
+    public function getSleep(): array;
 
     /**
      * Get retries in milliseconds when a gap detected

@@ -386,6 +386,36 @@ test('can run read model projection from many streams and sort events by ascendi
     ]);
 });
 
+test('can no stream event loaded', function () {
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream1 = $this->testFactory->getStream('debit', 50, '+10 second', $eventId);
+    $this->eventStore->firstCommit($stream1);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('balance', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->fromStreams('debit')
+        ->until(20)
+        ->withQueryFilter($this->fromIncludedPosition)
+        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
+            $state['count']++;
+
+            if ($state['count'] === 1) {
+                $scope->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
+            } else {
+                $scope->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
+            }
+
+            return $state;
+        })->run(true);
+
+    expect($projector->getState())->toBe(['count' => 50]);
+});
+
 test('raise exception when query filter is not a projection query filter', function () {
     $readModel = $this->testFactory->readModel;
     $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);

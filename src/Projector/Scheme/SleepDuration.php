@@ -6,6 +6,9 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 use function usleep;
 
+/**
+ * @deprecated
+ */
 final class SleepDuration
 {
     private int $counter = 0;

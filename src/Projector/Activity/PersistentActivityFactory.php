@@ -10,20 +10,20 @@ use Chronhub\Storm\Projector\Subscription\Subscription;
 
 final class PersistentActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(Subscription $subscription, ?PersistentManagement $management, ProjectorScope $scope): array
+    protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
     {
-        $sleepDuration = $this->getSleepDuration($subscription);
-        $eventProcessor = $this->getEventProcessor($subscription, $management, $scope);
+        $noEventCounter = $this->noStreamLoadedCounter($subscription);
+        $eventProcessor = $this->getEventProcessor($subscription, $scope, $management);
         $queryFilterResolver = $this->getQueryFilterResolver($subscription);
         $monitor = $this->getMonitor();
 
         return [
             fn (): callable => new RunUntil($subscription->clock, $subscription->context()->timer()),
             fn (): callable => new RisePersistentProjection($monitor, $management),
-            fn (): callable => new LoadStreams($queryFilterResolver, $sleepDuration),
+            fn (): callable => new LoadStreams($noEventCounter, $queryFilterResolver),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap($management),
-            fn (): callable => new PersistOrUpdate($management, $sleepDuration),
+            fn (): callable => new PersistOrUpdate($management, $noEventCounter),
             fn (): callable => new ResetEventCounter(),
             fn (): callable => new DispatchSignal(),
             fn (): callable => new RefreshProjection($monitor, $management),
