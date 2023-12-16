@@ -42,6 +42,7 @@ final class LoadStreams
             $subscription->setStreamIterator($iterator);
         }
 
+        // todo handle duration for query subscription when requested(new activity)
         $this->updateSleepDuration($noStreams);
 
         return $next($subscription);
@@ -72,8 +73,6 @@ final class LoadStreams
 
     private function updateSleepDuration(bool $noStreams): void
     {
-        if ($this->sleepDuration) {
-            $noStreams ? $this->sleepDuration->increment() : $this->sleepDuration->reset();
-        }
+        $noStreams ? $this->sleepDuration?->increment() : $this->sleepDuration?->reset();
     }
 }
