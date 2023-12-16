@@ -10,7 +10,6 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\ProjectionOptionImmutable;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
@@ -23,7 +22,7 @@ use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Activity\PersistentActivityFactory;
 use Chronhub\Storm\Projector\Activity\QueryActivityFactory;
-use Chronhub\Storm\Projector\Options\DefaultOption;
+use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scheme\Context;
@@ -34,9 +33,6 @@ use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
 use Chronhub\Storm\Projector\Scheme\StreamBinder;
 use Chronhub\Storm\Projector\Scheme\StreamGap;
 use Illuminate\Contracts\Events\Dispatcher;
-
-use function array_merge;
-use function get_class;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -95,21 +91,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createOption(array $options = []): ProjectionOption
     {
-        if ($options !== []) {
-            if ($this->options instanceof ProjectionOption && ! $this->options instanceof ProjectionOptionImmutable) {
-                $optionClass = get_class($this->options);
+        $resolver = new ProjectionOptionResolver($this->options);
 
-                return new $optionClass(...array_merge($this->options->jsonSerialize(), $options));
-            }
-
-            return new DefaultOption(...$options);
-        }
-
-        if ($this->options instanceof ProjectionOption) {
-            return $this->options;
-        }
-
-        return new DefaultOption(...$this->options);
+        return $resolver($options);
     }
 
     public function createContextBuilder(): ContextReaderInterface
@@ -131,6 +115,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         return $this->queryScope;
     }
+
+    abstract protected function useEvents(bool $useEvents): void;
 
     protected function createSubscription(ProjectionOption $option, bool $persistent): Subscription
     {

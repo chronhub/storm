@@ -27,9 +27,7 @@ final class InMemoryQueryScope implements ProjectionQueryScope
 
             public function apply(): callable
             {
-                $this->maxPosition = $this->loadLimiter <= 0
-                    ? PHP_INT_MAX
-                    : $this->streamPosition + $this->loadLimiter;
+                $this->maxPosition = $this->loadLimiter <= 0 ? PHP_INT_MAX : $this->streamPosition + $this->loadLimiter;
 
                 return function (DomainEvent $event): bool {
                     $eventPosition = $this->extractInternalPosition($event);

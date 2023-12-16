@@ -17,50 +17,50 @@ final class ProjectorManager implements ProjectorManagerInterface
 {
     private ?ProjectorMonitorInterface $monitor = null;
 
-    public function __construct(private readonly SubscriptionFactory $subscriptionFactory)
+    public function __construct(private readonly SubscriptionFactory $factory)
     {
     }
 
     public function newQueryProjector(array $options = []): QueryProjector
     {
-        $options = $this->subscriptionFactory->createOption($options);
+        $options = $this->factory->createOption($options);
 
         return new ProjectQuery(
-            $this->subscriptionFactory->createQuerySubscription($options),
-            $this->subscriptionFactory->createContextBuilder(),
+            $this->factory->createQuerySubscription($options),
+            $this->factory->createContextBuilder(),
         );
     }
 
     public function newEmitterProjector(string $streamName, array $options = []): EmitterProjector
     {
-        $options = $this->subscriptionFactory->createOption($options);
+        $options = $this->factory->createOption($options);
 
         return new ProjectEmitter(
-            $this->subscriptionFactory->createEmitterSubscription($streamName, $options),
-            $this->subscriptionFactory->createContextBuilder(),
+            $this->factory->createEmitterSubscription($streamName, $options),
+            $this->factory->createContextBuilder(),
         );
     }
 
     public function newReadModelProjector(string $streamName, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $options = $this->subscriptionFactory->createOption($options);
+        $options = $this->factory->createOption($options);
 
         return new ProjectReadModel(
-            $this->subscriptionFactory->createReadModelSubscription($streamName, $readModel, $options),
-            $this->subscriptionFactory->createContextBuilder(),
+            $this->factory->createReadModelSubscription($streamName, $readModel, $options),
+            $this->factory->createContextBuilder(),
         );
     }
 
     public function queryScope(): ?ProjectionQueryScope
     {
-        return $this->subscriptionFactory->getQueryScope();
+        return $this->factory->getQueryScope();
     }
 
     public function monitor(): ProjectorMonitorInterface
     {
         return $this->monitor ??= new ProjectorMonitor(
-            $this->subscriptionFactory->getProjectionProvider(),
-            $this->subscriptionFactory->getSerializer(),
+            $this->factory->getProjectionProvider(),
+            $this->factory->getSerializer(),
         );
     }
 }

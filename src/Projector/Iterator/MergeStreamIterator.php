@@ -101,6 +101,7 @@ final class MergeStreamIterator implements Countable, Iterator
 
             $chunkSize = $this->calculateDynamicChunkSize($iterators);
 
+            //fixMe: chunk and flatten, what is the purpose ?
             $this->iterators = $iterators->chunk($chunkSize)->flatten(1);
         }
     }
