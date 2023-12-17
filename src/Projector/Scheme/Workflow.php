@@ -38,9 +38,6 @@ final readonly class Workflow
         }
     }
 
-    // todo reimplement then and thenReturn bool
-    // we could have stuff to do in then
-
     private function prepareProcess(Closure $destination): Closure
     {
         return array_reduce(
@@ -62,7 +59,7 @@ final readonly class Workflow
 
     private function conditionallyReleaseLock(?Throwable $exception): void
     {
-        // raise projection already running exception, prevent from releasing lock
+        // raising projection already running exception, prevent from releasing lock
         // and put the projection in an idle status.
         if ($exception instanceof ProjectionAlreadyRunning) {
             throw $exception;

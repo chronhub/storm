@@ -12,12 +12,13 @@ final class QueryActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
     {
+        $timer = $this->getTimer($subscription);
         $eventProcessor = $this->getEventProcessor($subscription, $scope, $management);
         $queryFilterResolver = $this->getQueryFilterResolver($subscription);
-        $noEventCounter = $this->noStreamLoadedCounter($subscription);
+        $noEventCounter = $this->getNoStreamLoadedCounter($subscription);
 
         return [
-            fn (): callable => new RunUntil($subscription->clock, $subscription->context()->timer()),
+            fn (): callable => new RunUntil($timer),
             fn (): callable => new RiseQueryProjection(),
             fn (): callable => new LoadStreams($noEventCounter, $queryFilterResolver),
             fn (): callable => new HandleStreamEvent($eventProcessor),

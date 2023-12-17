@@ -12,13 +12,14 @@ final class PersistentActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
     {
-        $noEventCounter = $this->noStreamLoadedCounter($subscription);
+        $timer = $this->getTimer($subscription);
+        $noEventCounter = $this->getNoStreamLoadedCounter($subscription);
         $eventProcessor = $this->getEventProcessor($subscription, $scope, $management);
         $queryFilterResolver = $this->getQueryFilterResolver($subscription);
         $monitor = $this->getMonitor();
 
         return [
-            fn (): callable => new RunUntil($subscription->clock, $subscription->context()->timer()),
+            fn (): callable => new RunUntil($timer),
             fn (): callable => new RisePersistentProjection($monitor, $management),
             fn (): callable => new LoadStreams($noEventCounter, $queryFilterResolver),
             fn (): callable => new HandleStreamEvent($eventProcessor),

@@ -13,11 +13,14 @@ final class NoStreamLoadedCounter
     public function __construct(private readonly TokenBucket $consumer)
     {
         $this->reset();
+
+        // overflow the bucket to sleep for every increment
+        $this->consumer->consume($this->consumer->getCapacity());
     }
 
-    public function increment(): void
+    public function hasLoadedStreams(bool $hasLoadedStreams): void
     {
-        $this->counter++;
+        $hasLoadedStreams ? $this->reset() : $this->counter++;
     }
 
     public function reset(): void
@@ -27,13 +30,13 @@ final class NoStreamLoadedCounter
 
     public function sleep(): void
     {
+        dump('count '.$this->counter);
+
         match ($this->counter) {
             0 => $this->consumeWhenNoIncrement(),
             1 => $this->consumeCapacity(),
             default => $this->consumeCounter(),
         };
-
-        dump('count '.$this->counter);
 
         if ($this->counter >= $this->consumer->getCapacity()) {
             $this->reset();
@@ -48,24 +51,16 @@ final class NoStreamLoadedCounter
      */
     private function consumeWhenNoIncrement(): void
     {
-        $this->consumeCapacity();
+        $this->consumer->consume();
 
         $this->reset();
     }
 
-    /**
-     * with a capacity of 5, it would produce two requests without sleeping (1+2<5),
-     * so, we fetch all tokens available on the first query,
-     * to actually sleep and share the sleeping time between five queries.
-     */
     private function consumeCapacity(): void
     {
-        $this->consumer->consume($this->consumer->getCapacity());
+        $this->consumer->consume();
     }
 
-    /**
-     * Force sleep per query till the capacity is reached
-     */
     private function consumeCounter(): void
     {
         $this->consumer->consume($this->counter);

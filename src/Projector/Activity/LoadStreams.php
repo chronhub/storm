@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Activity;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
@@ -30,39 +31,44 @@ final class LoadStreams
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $streams = $this->readStreams($subscription);
+        $hasLoadedStreams = $this->handleStreams($subscription);
 
-        // checkMe pass stream iterator $next($subscription, $streams);
-
-        $noStreams = $streams === [];
-
-        if (! $noStreams) {
-            $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
-
-            $subscription->setStreamIterator($iterator);
-
-            $this->noEventCounter->reset();
-        } else {
-            $this->noEventCounter->increment();
-        }
+        $this->noEventCounter->hasLoadedStreams($hasLoadedStreams);
 
         return $next($subscription);
+    }
+
+    private function handleStreams(Subscription $subscription): bool
+    {
+        $streams = $this->catchUpStreams(
+            $subscription->chronicler,
+            $subscription->streamManager->all(),
+            $subscription->option->getLoads()
+        );
+
+        if ($streams === []) {
+            return false;
+        }
+
+        $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
+
+        $subscription->setStreamIterator($iterator);
+
+        return true;
     }
 
     /**
      * @return array<string,StreamIterator>
      */
-    private function readStreams(Subscription $subscription): array
+    private function catchUpStreams(Chronicler $chronicler, array $streamPositions, int $loadLimiter): array
     {
         $streams = [];
 
-        $loadLimiter = $subscription->option->getLoads();
-
-        foreach ($subscription->streamManager->jsonSerialize() as $streamName => $streamPosition) {
+        foreach ($streamPositions as $streamName => $streamPosition) {
             $queryFilter = ($this->queryFilterResolver)($streamName, $streamPosition + 1, $loadLimiter);
 
             try {
-                $events = $subscription->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
+                $events = $chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
                 $streams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;

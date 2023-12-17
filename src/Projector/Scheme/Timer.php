@@ -8,10 +8,7 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateInterval;
 use DateTimeImmutable;
 
-/**
- * @deprecated
- */
-class Timer
+final class Timer
 {
     private ?DateTimeImmutable $startTime = null;
 
@@ -28,7 +25,7 @@ class Timer
         }
     }
 
-    public function isElapsed(): bool
+    public function isExpired(): bool
     {
         if ($this->startTime === null) {
             return false;
@@ -44,5 +41,19 @@ class Timer
         }
 
         return $this->startTime instanceof DateTimeImmutable;
+    }
+
+    /**
+     * Get the current elapsed time since/if the timer was started.
+     */
+    public function getElapsedTime(): ?int
+    {
+        if ($this->startTime === null) {
+            return null;
+        }
+
+        $now = $this->clock->now();
+
+        return $now->getTimestamp() - $this->startTime->getTimestamp();
     }
 }

@@ -11,6 +11,7 @@ use Chronhub\Storm\Projector\Scheme\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Scheme\EventProcessor;
 use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
 use Chronhub\Storm\Projector\Scheme\QueryFilterResolver;
+use Chronhub\Storm\Projector\Scheme\Timer;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 
 use function array_map;
@@ -30,7 +31,7 @@ abstract class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscription->context()->queryFilter());
     }
 
-    protected function noStreamLoadedCounter(Subscription $subscription): NoStreamLoadedCounter
+    protected function getNoStreamLoadedCounter(Subscription $subscription): NoStreamLoadedCounter
     {
         [$capacity, $rate] = $subscription->option->getSleep();
 
@@ -44,5 +45,13 @@ abstract class AbstractActivityFactory implements ActivityFactory
         return new EventProcessor($subscription->context()->reactors(), $scope, $management);
     }
 
+    protected function getTimer(Subscription $subscription): Timer
+    {
+        return new Timer($subscription->clock, $subscription->context()->timer());
+    }
+
+    /**
+     * @return array<callable>
+     */
     abstract protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array;
 }
