@@ -31,9 +31,9 @@ final class LoadStreams
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $this->noEventCounter->hasLoadedStreams(
-            $this->handleStreams($subscription)
-        );
+        $hasLoadedStreams = $this->handleStreams($subscription);
+
+        $this->noEventCounter->hasLoadedStreams($hasLoadedStreams);
 
         return $next($subscription);
     }

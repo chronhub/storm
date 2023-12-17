@@ -43,9 +43,6 @@ final class Timer
         return $this->startTime instanceof DateTimeImmutable;
     }
 
-    /**
-     * Get the current elapsed time since/if the timer was started.
-     */
     public function getElapsedTime(): ?int
     {
         if ($this->startTime === null) {
