@@ -34,7 +34,7 @@ final class NoStreamLoadedCounter
 
         match ($this->counter) {
             0 => $this->consumeWhenNoIncrement(),
-            1 => $this->consumeCapacity(),
+            1 => $this->consumeOneToken(),
             default => $this->consumeCounter(),
         };
 
@@ -56,7 +56,7 @@ final class NoStreamLoadedCounter
         $this->reset();
     }
 
-    private function consumeCapacity(): void
+    private function consumeOneToken(): void
     {
         $this->consumer->consume();
     }
