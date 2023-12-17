@@ -20,11 +20,11 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
         while (! $this->doConsume($tokens)) {
             $remainingTime = $this->getRemainingTimeUntilNextToken($tokens);
 
-            $toSeconds = (int) ($remainingTime * 1000000);
+            $us = (int) ($remainingTime * 1000000);
 
-            dump('Sleep for: '.$remainingTime);
+            // dump('Sleep for: '.$remainingTime);
 
-            usleep($toSeconds);
+            usleep($us);
         }
 
         return true;

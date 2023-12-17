@@ -28,9 +28,9 @@ trait ProvideOption
     protected readonly int $lockout;
 
     /**
-     * @var array<int|float,int|float>
+     * @var int|array<int|float,int|float>
      */
-    protected readonly array $sleep;
+    protected readonly int|array $sleep;
 
     /**
      * @var positive-int
@@ -69,7 +69,7 @@ trait ProvideOption
         return $this->timeout;
     }
 
-    public function getSleep(): array
+    public function getSleep(): int|array
     {
         return $this->sleep;
     }

@@ -94,9 +94,9 @@ interface ProjectionOption extends JsonSerializable
      * @see ConsumeWithSleepToken
      * @see NoStreamLoadedCounter
      *
-     * @return array{int|float, int|float}
+     * @return int|array{int|float, int|float}
      */
-    public function getSleep(): array;
+    public function getSleep(): int|array;
 
     /**
      * Get retries in milliseconds when a gap detected

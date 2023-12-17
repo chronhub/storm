@@ -6,35 +6,35 @@ namespace Chronhub\Storm\Projector\Scheme;
 
 final class Looper
 {
-    private int $lap = 0;
+    private int $loop = 0;
 
     public function start(): void
     {
-        $this->lap = 1;
+        $this->loop = 1;
     }
 
     public function next(): void
     {
-        $this->lap++;
+        $this->loop++;
     }
 
     public function reset(): void
     {
-        $this->lap = 0;
+        $this->loop = 0;
     }
 
-    public function lap(): int
+    public function loop(): int
     {
-        return $this->lap;
+        return $this->loop;
     }
 
-    public function isFirstLap(): bool
+    public function isFirstLoop(): bool
     {
-        return $this->lap === 1;
+        return $this->loop === 1;
     }
 
     public function hasStarted(): bool
     {
-        return $this->lap > 0;
+        return $this->loop > 0;
     }
 }

@@ -10,7 +10,7 @@ final readonly class RiseQueryProjection
 {
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if ($subscription->looper->isFirstLap()) {
+        if ($subscription->looper->isFirstLoop()) {
             $subscription->discoverStreams();
         }
 

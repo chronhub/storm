@@ -14,10 +14,10 @@ final class InMemoryOption implements ProjectionOption
         protected readonly bool $signal = false,
         protected readonly int $cacheSize = 100,
         protected readonly int $blockSize = 100,
-        protected readonly array $sleep = [5, 2.5], // 5 queries every 2 seconds
+        protected readonly int|array $sleep = [5, 2.5], // [5, 2.5] 5 queries every 2 seconds
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
-        protected readonly int $loads = 20,
+        protected readonly int $loads = 100,
         array|string $retries = [],
         protected readonly ?string $detectionWindows = null,
     ) {

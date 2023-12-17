@@ -5,17 +5,28 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\TokenBucket;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+
+use function usleep;
 
 final class NoStreamLoadedCounter
 {
     private int $counter;
 
-    public function __construct(private readonly TokenBucket $consumer)
-    {
+    public function __construct(
+        private readonly ?TokenBucket $bucket,
+        private readonly ?int $fixedSleepTime = null,
+    ) {
+        if ($this->bucket === null && $fixedSleepTime === null) {
+            throw new InvalidArgumentException('Token bucket or fixed sleep time must be provided');
+        }
+
         $this->reset();
 
-        // overflow the bucket to sleep for every increment
-        $this->consumer->consume($this->consumer->getCapacity());
+        // Overflow the bucket to sleep for every increment
+        // issue: on the very first increment which does not sleep at all
+        // because of the exact zero token
+        $this->bucket?->consume($this->bucket->getCapacity());
     }
 
     public function hasLoadedStreams(bool $hasLoadedStreams): void
@@ -30,39 +41,23 @@ final class NoStreamLoadedCounter
 
     public function sleep(): void
     {
-        dump('count '.$this->counter);
+        if ($this->fixedSleepTime !== null) {
+            usleep($this->fixedSleepTime);
 
-        match ($this->counter) {
-            0 => $this->consumeWhenNoIncrement(),
-            1 => $this->consumeOneToken(),
-            default => $this->consumeCounter(),
-        };
+            return;
+        }
 
-        if ($this->counter >= $this->consumer->getCapacity()) {
+        // dump('Consume tokens: '.$this->counter);
+
+        $this->consumeTokens();
+
+        if ($this->counter >= $this->bucket->getCapacity()) {
             $this->reset();
         }
     }
 
-    /**
-     * Happens when a "real" reset of event counter is done,
-     * and increment was never called, or this counter was reset,
-     * so we sleep once and reset the counter.
-     * checkMe: It can be an issue when the first sleep can be very long depends on the parameters.
-     */
-    private function consumeWhenNoIncrement(): void
+    private function consumeTokens(): void
     {
-        $this->consumer->consume();
-
-        $this->reset();
-    }
-
-    private function consumeOneToken(): void
-    {
-        $this->consumer->consume();
-    }
-
-    private function consumeCounter(): void
-    {
-        $this->consumer->consume($this->counter);
+        $this->bucket?->consume($this->counter);
     }
 }

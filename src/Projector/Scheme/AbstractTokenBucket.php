@@ -33,6 +33,11 @@ abstract class AbstractTokenBucket implements TokenBucket
         return $this->handleConsume($tokens);
     }
 
+    public function remainingTokens(): int|float
+    {
+        return $this->tokens;
+    }
+
     public function getCapacity(): int|float
     {
         return $this->capacity;

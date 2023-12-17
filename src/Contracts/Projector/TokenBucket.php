@@ -42,6 +42,8 @@ interface TokenBucket
 {
     public function consume(float $tokens = 1): bool;
 
+    public function remainingTokens(): int|float;
+
     public function getCapacity(): int|float;
 
     public function getRate(): int|float;

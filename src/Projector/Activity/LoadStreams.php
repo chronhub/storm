@@ -31,16 +31,16 @@ final class LoadStreams
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        $hasLoadedStreams = $this->handleStreams($subscription);
-
-        $this->noEventCounter->hasLoadedStreams($hasLoadedStreams);
+        $this->noEventCounter->hasLoadedStreams(
+            $this->handleStreams($subscription)
+        );
 
         return $next($subscription);
     }
 
     private function handleStreams(Subscription $subscription): bool
     {
-        $streams = $this->catchUpStreams(
+        $streams = $this->batchStreams(
             $subscription->chronicler,
             $subscription->streamManager->all(),
             $subscription->option->getLoads()
@@ -51,7 +51,6 @@ final class LoadStreams
         }
 
         $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
-
         $subscription->setStreamIterator($iterator);
 
         return true;
@@ -60,7 +59,7 @@ final class LoadStreams
     /**
      * @return array<string,StreamIterator>
      */
-    private function catchUpStreams(Chronicler $chronicler, array $streamPositions, int $loadLimiter): array
+    private function batchStreams(Chronicler $chronicler, array $streamPositions, int $loadLimiter): array
     {
         $streams = [];
 

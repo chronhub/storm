@@ -17,9 +17,9 @@ final readonly class RisePersistentProjection
 
     public function __invoke(Subscription $subscription, callable $next): callable|bool
     {
-        if ($subscription->looper->isFirstLap()) {
-            // depending on the discovered status,
-            // the projection can be stopped early, on stopping and on deleting.
+        if ($subscription->looper->isFirstLoop()) {
+            // depending on the discovered status, the projection can be stopped early,
+            // on stopping and on deleting.
             if ($this->monitor->shouldStop($this->management, $subscription->sprint)) {
                 return false;
             }

@@ -64,11 +64,11 @@ final class Subscription
 
     public function setContext(ContextReaderInterface $context, bool $allowRerun): void
     {
-        if ($this->context === null) {
-            $this->context = $context;
-        } elseif ($allowRerun === false) {
+        if ($this->context !== null && ! $allowRerun) {
             throw new RuntimeException('Rerunning projection is not allowed');
         }
+
+        $this->context = $context;
     }
 
     public function context(): ContextReaderInterface
