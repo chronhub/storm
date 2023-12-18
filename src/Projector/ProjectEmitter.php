@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 
@@ -14,7 +14,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function __construct(
         protected EmitterSubscriber $subscriber,
-        protected ContextReaderInterface $context
+        protected ContextReader $context
     ) {
     }
 

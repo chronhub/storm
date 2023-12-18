@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\EventStreamLoader;
+use Chronhub\Storm\Projector\Provider\EventStreamLoader;
 
 beforeEach(function () {
     $this->provider = $this->createMock(EventStreamProvider::class);

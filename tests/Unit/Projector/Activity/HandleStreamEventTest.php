@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Projector\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\MergeStreamIteratorFactory;
 

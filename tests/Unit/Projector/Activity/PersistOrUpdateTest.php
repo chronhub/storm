@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionMangagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
-use Chronhub\Storm\Projector\Activity\PersistOrUpdate;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Support\EventCounter;
+use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(PersistentSubscriptionMangagement::class);

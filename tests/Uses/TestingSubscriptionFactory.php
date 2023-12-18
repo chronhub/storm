@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Uses;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
-use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Support\EventCounter;
+use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 use PHPUnit\Framework\MockObject\MockObject;
 use tests\TestCase;
 
@@ -26,9 +26,9 @@ trait TestingSubscriptionFactory
 
     protected StreamManager&MockObject $streamManager;
 
-    protected ContextReaderInterface&MockObject $context;
+    protected ContextReader&MockObject $context;
 
-    protected ProjectionState $state;
+    protected InMemoryUserState $state;
 
     protected Sprint $sprint;
 
@@ -46,8 +46,8 @@ trait TestingSubscriptionFactory
 
         $this->option = $this->createMock(ProjectionOption::class);
         $this->streamManager = $this->createMock(StreamManager::class);
-        $this->context = $this->createMock(ContextReaderInterface::class);
-        $this->state = new ProjectionState(); // mock
+        $this->context = $this->createMock(ContextReader::class);
+        $this->state = new InMemoryUserState(); // mock
         $this->sprint = new Sprint();
 
         $this->subscription->method('option')->willReturn($this->option);

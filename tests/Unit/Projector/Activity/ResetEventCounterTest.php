@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Projector\Activity\ResetEventCounter;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Support\EventCounter;
+use Chronhub\Storm\Projector\Workflow\Activity\ResetEventCounter;
 
 use function count;
 

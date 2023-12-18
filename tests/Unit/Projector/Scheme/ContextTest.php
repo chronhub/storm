@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Scheme\Context;
+use Chronhub\Storm\Projector\Workflow\DefaultContext;
 use Closure;
 use DateInterval;
 
 beforeEach(function () {
-    $this->context = new Context();
+    $this->context = new DefaultContext();
 });
 
 test('can initialize context once', function () {

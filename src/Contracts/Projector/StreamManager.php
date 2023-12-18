@@ -22,7 +22,7 @@ interface StreamManager extends JsonSerializable
      *
      * @param array<non-empty-string,int<0,max>> $streamsPositions
      */
-    public function merge(array $streamsPositions): void;
+    public function sync(array $streamsPositions): void;
 
     /**
      * Binds a stream name to the next available position.

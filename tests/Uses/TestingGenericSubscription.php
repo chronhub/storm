@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Uses;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Subscription\Beacon;
@@ -18,7 +18,7 @@ trait TestingGenericSubscription
 {
     protected Beacon $subscription;
 
-    protected ContextReaderInterface|MockObject $context;
+    protected ContextReader|MockObject $context;
 
     protected StreamManager|MockObject $streamManager;
 
@@ -31,7 +31,7 @@ trait TestingGenericSubscription
     protected function setUpGenericSubscription(): void
     {
         /** @var TestCase $this */
-        $this->context = $this->createMock(ContextReaderInterface::class);
+        $this->context = $this->createMock(ContextReader::class);
         $this->streamManager = $this->createMock(StreamManager::class);
         $this->clock = $this->createMock(SystemClock::class);
         $this->option = $this->createMock(ProjectionOption::class);
@@ -46,7 +46,7 @@ trait TestingGenericSubscription
     protected function setUpAndAndAssertInnerMostChronicler(): void
     {
         /** @var TestCase $this */
-        $this->context = $this->createMock(ContextReaderInterface::class);
+        $this->context = $this->createMock(ContextReader::class);
         $this->streamManager = $this->createMock(StreamManager::class);
         $this->clock = $this->createMock(SystemClock::class);
         $this->option = $this->createMock(ProjectionOption::class);

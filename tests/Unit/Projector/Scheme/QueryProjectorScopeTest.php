@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
-use Chronhub\Storm\Projector\Scheme\QueryAccess;
-use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Scope\QueryAccess;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(QuerySubscriber::class);

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
+use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(ReadModelSubscriber::class);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Scheme\ConsumeWithSleepToken;
+use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 
 use function microtime;
 use function usleep;

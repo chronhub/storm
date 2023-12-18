@@ -57,7 +57,7 @@ class MergeStreamIteratorFactory
         return [5, 1, 4, 3, 8, 7, 2, 9, 6];
     }
 
-    public static function getIterator(SystemClock|MockObject $clock = null): MergeStreamIterator
+    public static function getIterator(SystemClock|MockObject|null $clock = null): MergeStreamIterator
     {
         $streams = self::getStreams();
 

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Datasets;
 
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionCreated;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionDeleted;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionDeletedWithEvents;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionReset;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionRestarted;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionStarted;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionStopped;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionCreated;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionDeleted;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionDeletedWithEvents;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionReset;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionRestarted;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionStarted;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionStopped;
 
 dataset('projection status', [
     'idle' => ProjectionStatus::IDLE,

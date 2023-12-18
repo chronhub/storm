@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Projector\Scheme\Sprint;
-use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Workflow\Sprint;
+use Chronhub\Storm\Projector\Workflow\Workflow;
 use Closure;
 
 beforeEach(function (): void {

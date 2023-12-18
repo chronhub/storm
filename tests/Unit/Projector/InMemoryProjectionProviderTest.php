@@ -10,9 +10,9 @@ use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Projector\Exceptions\InMemoryProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\InMemoryProjection;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Provider\InMemoryProjection;
+use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
 
 beforeEach(function (): void {
     $this->clock = $this->createMock(SystemClock::class);

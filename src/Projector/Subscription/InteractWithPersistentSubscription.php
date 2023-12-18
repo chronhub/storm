@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Workflow\RunProjection;
+use Chronhub\Storm\Projector\Workflow\Workflow;
 
 trait InteractWithPersistentSubscription
 {
-    public function start(ContextReaderInterface $context, bool $keepRunning): void
+    public function start(ContextReader $context, bool $keepRunning): void
     {
         $this->initializeContext($context, $keepRunning);
 
@@ -42,7 +42,7 @@ trait InteractWithPersistentSubscription
      */
     abstract public function getScope(): ProjectorScope;
 
-    private function initializeContext(ContextReaderInterface $context, bool $keepRunning): void
+    private function initializeContext(ContextReader $context, bool $keepRunning): void
     {
         $this->validateContext($context);
 
@@ -59,7 +59,7 @@ trait InteractWithPersistentSubscription
         $project->beginCycle();
     }
 
-    private function validateContext(ContextReaderInterface $context): void
+    private function validateContext(ContextReader $context): void
     {
         if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
             throw new RuntimeException('Persistent subscription requires a projection query filter.');

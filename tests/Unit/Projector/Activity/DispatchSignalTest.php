@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Activity;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Projector\Activity\DispatchSignal;
+use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 
 use function pcntl_signal;
 use function posix_getpid;

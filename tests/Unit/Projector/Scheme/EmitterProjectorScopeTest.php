@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
-use Chronhub\Storm\Projector\Scheme\EmitterAccess;
+use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 
 beforeEach(function () {

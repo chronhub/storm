@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Scheme\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use JsonSerializable;
 
 interface ProjectionOption extends JsonSerializable

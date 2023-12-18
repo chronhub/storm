@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\QueryAccess;
+use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;

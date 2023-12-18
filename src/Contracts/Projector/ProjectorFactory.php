@@ -20,28 +20,28 @@ interface ProjectorFactory extends Projector
      *
      * @param Closure():TInit $userState
      *
-     * @see ContextReaderInterface::initialize()
+     * @see ContextReader::initialize()
      */
     public function initialize(Closure $userState): static;
 
     /**
      * Proxy method to set the streams.
      *
-     * @see ContextReaderInterface::fromStreams()
+     * @see ContextReader::fromStreams()
      */
     public function fromStreams(string ...$streams): static;
 
     /**
      * Proxy method to set the categories.
      *
-     * @see ContextReaderInterface::fromCategories()
+     * @see ContextReader::fromCategories()
      */
     public function fromCategories(string ...$categories): static;
 
     /**
      * Proxy method to set all streams.
      *
-     * @see ContextInterface::fromAll()
+     * @see Context::fromAll()
      */
     public function fromAll(): static;
 
@@ -50,14 +50,14 @@ interface ProjectorFactory extends Projector
      *
      * @param Closure(TWhen): ?TInit $reactors
      *
-     * @see ContextInterface::when()
+     * @see Context::when()
      */
     public function when(Closure $reactors): static;
 
     /**
      * Proxy method to set the query filter.
      *
-     * @see ContextInterface::withQueryFilter()
+     * @see Context::withQueryFilter()
      */
     public function withQueryFilter(QueryFilter $queryFilter): static;
 
@@ -66,21 +66,21 @@ interface ProjectorFactory extends Projector
      *
      * @param DateInterval|string|int<0,max> $interval
      *
-     * @see ContextInterface::until()
+     * @see Context::until()
      */
     public function until(DateInterval|string|int $interval): static;
 
     /**
      * Proxy method to set the projector scope.
      *
-     * @see ContextInterface::withScope()
+     * @see Context::withScope()
      */
     public function withScope(Closure $scope): static;
 
     /**
      * Proxy method to keep the state in memory.
      *
-     * @see ContextInterface::withKeepState()
+     * @see Context::withKeepState()
      */
     public function withKeepState(): static;
 }

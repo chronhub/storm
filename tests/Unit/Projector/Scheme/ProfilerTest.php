@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Projector\StateManagement;
+use Chronhub\Storm\Projector\Projection\Profiler;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Scheme\Profiler;
 use RuntimeException;
 
 beforeEach(function () {

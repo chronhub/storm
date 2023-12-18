@@ -10,12 +10,12 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryChronicler;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
-use Chronhub\Storm\Projector\InMemoryProjectionProvider;
-use Chronhub\Storm\Projector\InMemoryQueryScope;
+use Chronhub\Storm\Projector\Factory\InMemorySubscriptionFactory;
+use Chronhub\Storm\Projector\Filter\InMemoryQueryScope;
 use Chronhub\Storm\Projector\Options\InMemoryOption;
 use Chronhub\Storm\Projector\ProjectorManager;
-use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
-use Chronhub\Storm\Projector\Subscription\InMemorySubscriptionFactory;
+use Chronhub\Storm\Projector\Provider\InMemoryProjectionProvider;
+use Chronhub\Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Chronhub\Storm\Serializer\ProjectorJsonSerializer;
 use Chronhub\Storm\Stream\DetermineStreamCategory;
 use Chronhub\Storm\Stream\Stream;
@@ -80,8 +80,8 @@ class InMemoryFactory
     public function getStream(
         string $streamName,
         int $numberOfEvents,
-        string $eventTimeModifier = null,
-        Uuid|string $eventId = null,
+        ?string $eventTimeModifier = null,
+        Uuid|string|null $eventId = null,
         string $eventType = SomeEvent::class,
         int $positionStartAt = 1
     ): Stream {

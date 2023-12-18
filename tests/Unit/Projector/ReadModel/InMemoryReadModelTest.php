@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\ReadModel;
 
-use Chronhub\Storm\Projector\ReadModel\InMemoryReadModel;
+use Chronhub\Storm\Projector\Support\ReadModel\InMemoryReadModel;
 
 beforeEach(function (): void {
     $this->readModel = new InMemoryReadModel();

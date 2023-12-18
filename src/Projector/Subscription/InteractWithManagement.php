@@ -55,7 +55,7 @@ trait InteractWithManagement
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->subscription->streamManager->merge($projectionDetail->streamPositions);
+        $this->subscription->streamManager->sync($projectionDetail->streamPositions);
 
         $state = $projectionDetail->state;
 

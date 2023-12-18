@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
-use Chronhub\Storm\Projector\Scheme\EmitterAccess;
+use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Closure;
 
 final readonly class EmitterSubscription implements EmitterSubscriber

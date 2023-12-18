@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Scheme\EmittedStreamCache;
+use Chronhub\Storm\Projector\Stream\InMemoryStreams;
 
 test('stream cache instance', function (): void {
-    $cache = new EmittedStreamCache(3);
+    $cache = new InMemoryStreams(3);
 
     expect($cache->jsonSerialize())->toBe([0 => null, 1 => null, 2 => null]);
 });
 
 test('can push stream name', function (): void {
-    $cache = new EmittedStreamCache(3);
+    $cache = new InMemoryStreams(3);
 
     expect($cache->has('customer-123'))->toBeFalse();
 
@@ -25,7 +25,7 @@ test('can push stream name', function (): void {
 });
 
 test('can push stream name and replace oldest stream name according to cache size and position', function (): void {
-    $cache = new EmittedStreamCache(2);
+    $cache = new InMemoryStreams(2);
 
     $cache->push('customer-123');
     $cache->push('customer-456');
@@ -42,7 +42,7 @@ test('can push stream name and replace oldest stream name according to cache siz
 });
 
 test('can push stream with cache size of one', function (): void {
-    $cache = new EmittedStreamCache(1);
+    $cache = new InMemoryStreams(1);
 
     $cache->push('customer-123');
 
@@ -57,7 +57,7 @@ test('can push stream with cache size of one', function (): void {
 });
 
 test('check if stream name is in cache', function (): void {
-    $cache = new EmittedStreamCache(2);
+    $cache = new InMemoryStreams(2);
 
     $cache->push('customer-123');
     $cache->push('customer-456');
@@ -68,13 +68,13 @@ test('check if stream name is in cache', function (): void {
 });
 
 test('raise exception when cache size is less than 1', function (int $cacheSize): void {
-    new EmittedStreamCache($cacheSize);
+    new InMemoryStreams($cacheSize);
 })
     ->with(['zero' => [0], 'negative' => [-1, -5]])
     ->throws(InvalidArgumentException::class, 'Stream cache size must be greater than 0');
 
 test('raise exception when push stream name already exists', function (array $streamNames): void {
-    $cache = new EmittedStreamCache(3);
+    $cache = new InMemoryStreams(3);
 
     foreach ($streamNames as $streamName) {
         $cache->push($streamName);

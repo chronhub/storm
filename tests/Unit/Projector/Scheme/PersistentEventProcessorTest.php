@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Scheme\EventProcessor;
+use Chronhub\Storm\Projector\Workflow\EventProcessor;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Uses\TestingSubscriptionFactory;

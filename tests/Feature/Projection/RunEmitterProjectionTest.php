@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\EmitterAccess;
+use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;

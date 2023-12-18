@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Projector\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Workflow\Activity\MonitorRemoteStatus;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 
 beforeEach(function (): void {
     $this->subscription = $this->createMock(PersistentSubscriber::class);

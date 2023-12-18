@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Projector\Scheme\ProjectionState;
+use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
 
 beforeEach(function () {
-    $this->state = new ProjectionState();
+    $this->state = new InMemoryUserState();
 });
 
 it('can be instantiated', function () {

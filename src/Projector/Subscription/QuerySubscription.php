@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\ContextReaderInterface;
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\QueryAccess;
-use Chronhub\Storm\Projector\Scheme\RunProjection;
-use Chronhub\Storm\Projector\Scheme\Workflow;
+use Chronhub\Storm\Projector\Scope\QueryAccess;
+use Chronhub\Storm\Projector\Workflow\RunProjection;
+use Chronhub\Storm\Projector\Workflow\Workflow;
 use Closure;
 
 final readonly class QuerySubscription implements QuerySubscriber
@@ -22,7 +22,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     ) {
     }
 
-    public function start(ContextReaderInterface $context, bool $keepRunning): void
+    public function start(ContextReader $context, bool $keepRunning): void
     {
         $this->initializeContext($context, $keepRunning);
 
@@ -58,7 +58,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         return new Workflow($this->subscription, $activities, null);
     }
 
-    private function initializeContext(ContextReaderInterface $context, bool $keepRunning): void
+    private function initializeContext(ContextReader $context, bool $keepRunning): void
     {
         if (! $this->subscription->isContextInitialized()) {
             $this->subscription->setContext($context, true);

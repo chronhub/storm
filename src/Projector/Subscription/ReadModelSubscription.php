@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
+use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Closure;
 
 final readonly class ReadModelSubscription implements ReadModelSubscriber

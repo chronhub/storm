@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scheme\ReadModelAccess;
+use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;

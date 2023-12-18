@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Projector\Scheme\ConsumeToken;
+use Chronhub\Storm\Projector\Support\Token\ConsumeToken;
 use InvalidArgumentException;
 
 use function microtime;

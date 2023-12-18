@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
-use Chronhub\Storm\Projector\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Scheme\EventCounter;
+use Chronhub\Storm\Projector\Support\EventCounter;
+use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Closure;
 
 beforeEach(function () {

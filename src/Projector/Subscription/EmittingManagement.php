@@ -8,7 +8,7 @@ use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
-use Chronhub\Storm\Projector\Scheme\EmittedStream;
+use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;

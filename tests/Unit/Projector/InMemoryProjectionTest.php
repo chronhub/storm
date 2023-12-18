@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
-use Chronhub\Storm\Projector\InMemoryProjection;
+use Chronhub\Storm\Projector\Provider\InMemoryProjection;
 
 it('create projection', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');

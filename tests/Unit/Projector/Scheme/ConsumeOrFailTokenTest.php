@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Projector\Exceptions\NoMoreTockenBucketAvailable;
-use Chronhub\Storm\Projector\Scheme\ConsumeOrFailToken;
+use Chronhub\Storm\Projector\Support\Token\ConsumeOrFailToken;
 
 use function sleep;
 

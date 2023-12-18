@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
-use Chronhub\Storm\Projector\Scheme\Sprint;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 
 beforeEach(function (): void {
     $this->sprint = new Sprint();

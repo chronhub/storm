@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Uses;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Projector\Repository\Event\ProjectionError;
 use Chronhub\Storm\Projector\Repository\EventMap;
+use Chronhub\Storm\Projector\Repository\Events\ProjectionError;
 use Illuminate\Contracts\Events\Dispatcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use Throwable;
