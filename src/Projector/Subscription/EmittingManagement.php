@@ -68,9 +68,7 @@ final readonly class EmittingManagement implements EmitterManagement
     public function revise(): void
     {
         $this->subscription->streamManager->resets();
-
         $this->subscription->initializeAgain();
-
         $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
 
         $this->deleteStream();
@@ -85,9 +83,7 @@ final readonly class EmittingManagement implements EmitterManagement
         }
 
         $this->subscription->sprint->stop();
-
         $this->subscription->streamManager->resets();
-
         $this->subscription->initializeAgain();
     }
 

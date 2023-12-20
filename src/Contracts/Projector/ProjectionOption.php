@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use JsonSerializable;
 
@@ -92,10 +92,10 @@ interface ProjectionOption extends JsonSerializable
     /**
      * Get sleep
      *
-     * @see ConsumeWithSleepToken
-     * @see NoStreamLoadedCounter
-     *
      * @return int|array{int|float, int|float}
+     * @see NoEventStreamCounter
+     *
+     * @see ConsumeWithSleepToken
      */
     public function getSleep(): int|array;
 

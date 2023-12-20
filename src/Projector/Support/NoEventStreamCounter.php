@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function usleep;
 
-final class NoStreamLoadedCounter
+final class NoEventStreamCounter
 {
     private int $counter;
 

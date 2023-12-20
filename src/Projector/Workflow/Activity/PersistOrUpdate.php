@@ -6,13 +6,13 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 
 final readonly class PersistOrUpdate
 {
     public function __construct(
         private PersistentManagement $management,
-        private NoStreamLoadedCounter $noEventCounter,
+        private NoEventStreamCounter $noEventCounter,
     ) {
     }
 

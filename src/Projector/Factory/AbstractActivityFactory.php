@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 use Chronhub\Storm\Projector\Support\Timer;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\EventProcessor;
@@ -32,17 +32,17 @@ abstract class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscription->context()->queryFilter());
     }
 
-    protected function getNoStreamLoadedCounter(Subscription $subscription): NoStreamLoadedCounter
+    protected function getNoStreamLoadedCounter(Subscription $subscription): NoEventStreamCounter
     {
         $sleep = $subscription->option->getSleep();
 
         if (is_array($sleep)) {
             $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
 
-            return new NoStreamLoadedCounter($bucket);
+            return new NoEventStreamCounter($bucket);
         }
 
-        return new NoStreamLoadedCounter(null, $sleep);
+        return new NoEventStreamCounter(null, $sleep);
     }
 
     protected function getEventProcessor(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): EventProcessor

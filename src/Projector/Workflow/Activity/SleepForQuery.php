@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 
 final readonly class SleepForQuery
 {
-    public function __construct(private NoStreamLoadedCounter $eventCounter)
+    public function __construct(private NoEventStreamCounter $eventCounter)
     {
     }
 

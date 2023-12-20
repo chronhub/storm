@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Subscription\Subscription;
-use Chronhub\Storm\Projector\Support\NoStreamLoadedCounter;
+use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
@@ -24,8 +24,8 @@ final class LoadStreams
     private $queryFilterResolver;
 
     public function __construct(
-        private readonly NoStreamLoadedCounter $noEventCounter,
-        callable $queryFilterResolver
+        private readonly NoEventStreamCounter $noEventCounter,
+        callable                              $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
     }
