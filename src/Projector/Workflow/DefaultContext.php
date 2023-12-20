@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Provider\EventStream\DiscoverAllStream;
+use Chronhub\Storm\Projector\Provider\EventStream\DiscoverCategories;
+use Chronhub\Storm\Projector\Provider\EventStream\DiscoverStreams;
 use Closure;
 use DateInterval;
 
@@ -17,7 +21,10 @@ use function sprintf;
 
 final class DefaultContext implements ContextReader
 {
-    private array $queries = [];
+    /**
+     * @var ?callable(EventStreamProvider): array<string|empty>
+     */
+    private $query;
 
     private ?Closure $userState = null;
 
@@ -90,7 +97,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertQueriesNotSet();
 
-        $this->queries['names'] = $streamNames;
+        $this->query = new DiscoverStreams($streamNames);
 
         return $this;
     }
@@ -99,7 +106,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertQueriesNotSet();
 
-        $this->queries['categories'] = $categories;
+        $this->query = new DiscoverCategories($categories);
 
         return $this;
     }
@@ -108,7 +115,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertQueriesNotSet();
 
-        $this->queries['all'] = true;
+        $this->query = new DiscoverAllStream();
 
         return $this;
     }
@@ -143,13 +150,13 @@ final class DefaultContext implements ContextReader
         return $this->reactors;
     }
 
-    public function queries(): array
+    public function queries(): callable
     {
-        if ($this->queries === []) {
+        if ($this->query === null) {
             throw new InvalidArgumentException('Projection streams all|names|categories not set');
         }
 
-        return $this->queries;
+        return $this->query;
     }
 
     public function queryFilter(): QueryFilter
@@ -186,7 +193,7 @@ final class DefaultContext implements ContextReader
 
     private function assertQueriesNotSet(): void
     {
-        if ($this->queries !== []) {
+        if ($this->query !== null) {
             throw new InvalidArgumentException('Projection streams all|names|categories already set');
         }
     }

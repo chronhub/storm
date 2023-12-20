@@ -49,7 +49,7 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
     {
         $projection = $this->tryRetrieveProjectionByName($projectionName);
 
-        return $this->jsonSerializer->decode($projection->position());
+        return $this->jsonSerializer->decode($projection->checkpoint());
     }
 
     public function stateOf(string $projectionName): array

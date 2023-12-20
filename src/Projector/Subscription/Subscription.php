@@ -9,13 +9,14 @@ use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\GapDetection;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\StreamGapManager;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\UserState;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
 use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
@@ -45,7 +46,8 @@ final class Subscription
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public function __construct(
-        public readonly StreamManager|StreamGapManager $streamManager,
+        private readonly EventStreamDiscovery $streamDiscovery,
+        public readonly StreamManager|GapDetection $streamManager,
         public readonly SystemClock $clock,
         public readonly ProjectionOption $option,
         public readonly ?ActivityFactory $activityFactory,
@@ -143,11 +145,15 @@ final class Subscription
     }
 
     /**
-     * Shortcut to discover streams from queries.
+     * Discover streams from queries.
      */
     public function discoverStreams(): void
     {
-        $this->streamManager->discover($this->context->queries());
+        $queries = $this->context->queries();
+
+        $eventStreams = $this->streamDiscovery->query($queries);
+
+        $this->streamManager->refreshStreams($eventStreams);
     }
 
     /**
@@ -155,6 +161,6 @@ final class Subscription
      */
     public function hasGapDetection(): bool
     {
-        return $this->streamManager instanceof StreamGapManager;
+        return $this->streamManager instanceof GapDetection;
     }
 }

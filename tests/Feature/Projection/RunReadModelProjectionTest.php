@@ -399,7 +399,7 @@ test('can no stream event loaded', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->fromStreams('debit')
-        ->until(20)
+        ->until(1)
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['count']++;

@@ -38,7 +38,7 @@ final readonly class EventProcessor
     {
         $this->dispatchSignalIfRequested($subscription);
 
-        if (! $subscription->streamManager->bind($subscription->currentStreamName(), $expectedPosition, $event)) {
+        if (! $subscription->streamManager->insert($subscription->currentStreamName(), $expectedPosition)) {
             return false;
         }
 
@@ -60,6 +60,7 @@ final readonly class EventProcessor
 
     private function incrementEventCounter(Subscription $subscription): void
     {
+        // checkMe: use if, till event counter is a setter in subscription
         if ($this->management) {
             $subscription->eventCounter->increment();
         }

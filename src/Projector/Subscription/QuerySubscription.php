@@ -37,6 +37,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     public function resets(): void
     {
         $this->subscription->streamManager->resets();
+
         $this->subscription->initializeAgain();
     }
 

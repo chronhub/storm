@@ -14,7 +14,7 @@ interface ProjectionModel
     /**
      * Get the projection position as json representation.
      */
-    public function position(): string;
+    public function checkpoint(): string;
 
     /**
      * Get the projection state as json representation.

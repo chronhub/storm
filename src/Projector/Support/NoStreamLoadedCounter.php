@@ -24,7 +24,7 @@ final class NoStreamLoadedCounter
         $this->reset();
 
         // Overflow the bucket to sleep for every increment
-        // issue: on the very first increment which does not sleep at all
+        // issue: on the first increment which does not sleep at all
         // because of the exact zero token
         $this->bucket?->consume($this->bucket->getCapacity());
     }

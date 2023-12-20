@@ -22,7 +22,7 @@ use function in_array;
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
     /**
-     * @var Collection<non-empty-string,InMemoryProjection>
+     * @var Collection<string,InMemoryProjection>
      */
     private Collection $projections;
 

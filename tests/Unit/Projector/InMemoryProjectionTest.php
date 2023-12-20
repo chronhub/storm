@@ -13,7 +13,7 @@ it('create projection', function (): void {
     expect($projection)->toBeInstanceOf(ProjectionModel::class)
         ->and($projection->name())->toBe('projection')
         ->and($projection->status())->toBe('running')
-        ->and($projection->position())->toBe('{}')
+        ->and($projection->checkpoint())->toBe('{}')
         ->and($projection->state())->toBe('{}')
         ->and($projection->lockedUntil())->toBeNull();
 });
@@ -31,11 +31,11 @@ it('update state', function (): void {
 it('update position', function (): void {
     $projection = InMemoryProjection::create('projection', 'running');
 
-    expect($projection->position())->toBe('{}');
+    expect($projection->checkpoint())->toBe('{}');
 
-    $projection->setPosition('{foo:1}');
+    $projection->setCheckpoint('{foo:1}');
 
-    expect($projection->position())->toBe('{foo:1}');
+    expect($projection->checkpoint())->toBe('{foo:1}');
 });
 
 it('update status', function (): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -35,9 +36,11 @@ interface ContextReader extends Context
     /**
      * Get stream names handled by the projection.
      *
+     * @return callable(EventStreamProvider): array<string|empty>
+     *
      * @throws InvalidArgumentException When queries are not set
      */
-    public function queries(): array;
+    public function queries(): callable;
 
     /**
      * Get the query filter to filter events.

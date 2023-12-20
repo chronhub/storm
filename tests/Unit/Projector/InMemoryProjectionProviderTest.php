@@ -34,7 +34,7 @@ it('create projection with status', function (ProjectionStatus $status): void {
         ->and($projection)->toBeInstanceOf(InMemoryProjection::class)
         ->and($projection->name())->toBe('customer')
         ->and($projection->state())->toEqual('{}')
-        ->and($projection->position())->toEqual('{}')
+        ->and($projection->checkpoint())->toEqual('{}')
         ->and($projection->status())->toEqual($status->value)
         ->and($projection->lockedUntil())->toBeNull();
 })->with('projection status');
@@ -110,7 +110,7 @@ it('update projection', function (): void {
 
     expect($projection->status())->toBe('running')
         ->and($projection->state())->toBe('{"foo":"bar"}')
-        ->and($projection->position())->toBe('{"foo":"bar"}')
+        ->and($projection->checkpoint())->toBe('{"foo":"bar"}')
         ->and($projection->lockedUntil())->toBe($newLockedUntil);
 });
 

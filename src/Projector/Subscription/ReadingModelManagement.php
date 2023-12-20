@@ -42,11 +42,8 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     public function revise(): void
     {
         $this->subscription->streamManager->resets();
-
         $this->subscription->initializeAgain();
-
         $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
-
         $this->readModel->reset();
     }
 
@@ -59,9 +56,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         }
 
         $this->subscription->sprint->stop();
-
         $this->subscription->streamManager->resets();
-
         $this->subscription->initializeAgain();
     }
 

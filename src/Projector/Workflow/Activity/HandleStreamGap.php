@@ -18,10 +18,8 @@ final readonly class HandleStreamGap
         // When a gap is detected and still retry left,
         // we sleep and store the projection if some event(s) has been loaded and incremented
 
-        // @phpstan-ignore-next-line
         if ($subscription->hasGapDetection() && $subscription->streamManager->hasGap()) {
-            // @phpstan-ignore-next-line
-            $subscription->streamManager->sleep();
+            $subscription->streamManager->sleepWhenGap();
 
             if (! $subscription->eventCounter->isReset()) {
                 $this->management->store();

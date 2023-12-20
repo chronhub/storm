@@ -4,52 +4,36 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 use JsonSerializable;
 
 interface StreamManager extends JsonSerializable
 {
     /**
-     * Watches event streams based on given queries.
+     * Refresh event streams.
      *
-     * @param array{'all'?:bool, 'categories'?:array<non-empty-string>, 'names'?:array<non-empty-string>} $queries
+     * Happens once when projector is started and at the end of each loop.
+     * todo: could avoid refreshing event streams at the end of each loop,
+     *  but it should be explicitly called by dev in factory to set only once discover
      */
-    public function discover(array $queries): void;
+    public function refreshStreams(array $eventStreams): void;
 
     /**
-     * Merges local with remote stream positions.
-     *
-     * @param array<non-empty-string,int<0,max>> $streamsPositions
+     * @param positive-int $position
      */
-    public function sync(array $streamsPositions): void;
+    public function insert(string $streamName, int $position): bool;
 
     /**
-     * Binds a stream name to the next available position.
-     *
-     * @param int<1,max> $expectedPosition The incremented position of the current event.
-     *
-     * @throw RuntimeException When stream name is not watched
-     * @throw RuntimeException When event time is null for gap detection
+     * @param array<array{stream_name: string, position: positive-int, created_at: string, gaps: array<positive-int>}> $checkpoints
      */
-    public function bind(string $streamName, int $expectedPosition, DomainEvent $event): bool;
+    public function update(array $checkpoints): void;
 
     /**
-     * Check if the next position is available.
+     * Returns the current stream checkpoints.
      *
-     * @throw RuntimeException When stream name is not watched
+     * @return array<string,Checkpoint>
      */
-    public function hasNextPosition(string $streamName, int $expectedPosition): bool;
-
-    /**
-     * Check if stream name is watched.
-     */
-    public function hasStream(string $streamName): bool;
-
-    /**
-     * Returns the current stream positions.
-     */
-    public function all(): array;
+    public function checkpoints(): array;
 
     /**
      * Resets stream positions.

@@ -21,12 +21,13 @@ use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
-use Chronhub\Storm\Projector\Provider\EventStreamLoader;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
+use Chronhub\Storm\Projector\Stream\CheckpointCollection;
+use Chronhub\Storm\Projector\Stream\CheckpointManager;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
-use Chronhub\Storm\Projector\Stream\GapDetection;
+use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
+use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
@@ -53,11 +54,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     ) {
     }
 
-    // todo provide persistent subscription withNoGapDetection
-    //  or does a flag in the option is enough ?
-    //  by now, we use a method in subscription to check if gap detection is enabled
-    //  fine till we persists gaps also in the stream
-
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
         $subscription = $this->createSubscription($option, false);
@@ -67,7 +63,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscription = $this->createSubscriptionWithGapDetection($option);
+        $subscription = $this->createSubscription($option, true);
         $subscription->setEventCounter($this->createEventCounter($option));
 
         $management = new EmittingManagement(
@@ -82,7 +78,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscription = $this->createSubscriptionWithGapDetection($option);
+        $subscription = $this->createSubscription($option, true);
         $subscription->setEventCounter($this->createEventCounter($option));
 
         $management = new ReadingModelManagement(
@@ -126,21 +122,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createSubscription(ProjectionOption $option, bool $persistent): Subscription
     {
         return new Subscription(
-            $this->createStreamManager(),
+            new EventStreamDiscovery($this->eventStreamProvider),
+            $this->createStreamManager($option),
             $this->clock,
             $option,
             $persistent ? new PersistentActivityFactory() : new QueryActivityFactory(),
-            $this->chronicler,
-        );
-    }
-
-    protected function createSubscriptionWithGapDetection(ProjectionOption $option): Subscription
-    {
-        return new Subscription(
-            $this->createStreamGapManager($option),
-            $this->clock,
-            $option,
-            new PersistentActivityFactory(),
             $this->chronicler,
         );
     }
@@ -152,18 +138,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createStreamManager(): StreamManager
+    protected function createStreamManager(ProjectionOption $option): StreamManager
     {
-        return new Checkpoint(new EventStreamLoader($this->eventStreamProvider));
-    }
-
-    protected function createStreamGapManager(ProjectionOption $options): StreamManager
-    {
-        return new GapDetection(
-            $this->createStreamManager(),
-            $this->clock,
-            $options->getRetries(),
-            $options->getDetectionWindows()
+        return new CheckpointManager(
+            new CheckpointCollection($this->clock),
+            new GapDetector($option->getRetries(), $option->getDetectionWindows())
         );
     }
 

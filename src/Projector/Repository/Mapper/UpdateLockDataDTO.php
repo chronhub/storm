@@ -15,8 +15,6 @@ final readonly class UpdateLockDataDTO extends ProjectionDataDTO
      */
     public function toArray(): array
     {
-        return [
-            'locked_until' => $this->lockedUntil,
-        ];
+        return ['locked_until' => $this->lockedUntil];
     }
 }

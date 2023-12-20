@@ -49,7 +49,6 @@ final readonly class PersistOrUpdate
 
     private function hasGap(Subscription $subscription): bool
     {
-        // @phpstan-ignore-next-line
         return $subscription->hasGapDetection() && $subscription->streamManager->hasGap();
     }
 }

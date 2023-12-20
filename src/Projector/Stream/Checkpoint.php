@@ -4,78 +4,28 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Stream;
 
-use Chronhub\Storm\Contracts\Projector\StreamManager;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Provider\EventStreamLoader;
-use Chronhub\Storm\Reporter\DomainEvent;
-use Illuminate\Support\Collection;
+use JsonSerializable;
 
-final class Checkpoint implements StreamManager
+final readonly class Checkpoint implements JsonSerializable
 {
+    public function __construct(
+        public string $streamName,
+        public int $position,
+        public string $createdAt,
+        public array $gaps
+    ) {
+    }
+
     /**
-     * @var Collection<string,int>
+     * @return array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>}
      */
-    private Collection $streamPosition;
-
-    public function __construct(private readonly EventStreamLoader $eventStreamLoader)
-    {
-        $this->streamPosition = new Collection();
-    }
-
-    public function discover(array $queries): void
-    {
-        $container = $this->eventStreamLoader
-            ->loadFrom($queries)
-            ->mapWithKeys(fn (string $streamName): array => [$streamName => 0]); // todo test category and all can be empty
-
-        $this->streamPosition = $container->merge($this->streamPosition);
-    }
-
-    public function sync(array $streamsPositions): void
-    {
-        $this->streamPosition = $this->streamPosition->merge($streamsPositions);
-    }
-
-    public function bind(string $streamName, int $expectedPosition, DomainEvent $event): bool
-    {
-        $this->assertStreamExists($streamName);
-
-        $this->streamPosition[$streamName] = $expectedPosition;
-
-        return true;
-    }
-
-    public function hasNextPosition(string $streamName, int $expectedPosition): bool
-    {
-        $this->assertStreamExists($streamName);
-
-        return $expectedPosition === $this->streamPosition[$streamName] + 1;
-    }
-
-    public function resets(): void
-    {
-        $this->streamPosition = new Collection();
-    }
-
-    public function hasStream(string $streamName): bool
-    {
-        return $this->streamPosition->has($streamName);
-    }
-
-    public function all(): array
-    {
-        return $this->streamPosition->toArray();
-    }
-
     public function jsonSerialize(): array
     {
-        return $this->all();
-    }
-
-    private function assertStreamExists(string $streamName): void
-    {
-        if (! $this->hasStream($streamName)) {
-            throw new RuntimeException("Stream $streamName is not watched");
-        }
+        return [
+            'stream_name' => $this->streamName,
+            'position' => $this->position,
+            'created_at' => $this->createdAt,
+            'gaps' => $this->gaps,
+        ];
     }
 }

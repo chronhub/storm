@@ -55,8 +55,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     {
         $data = new StopDataDTO(
             $projectionStatus->value,
-            $this->serializer->encode($projectionDetail->state),
-            $this->serializer->encode($projectionDetail->streamPositions),
+            $this->serializer->encode($projectionDetail->userState),
+            $this->serializer->encode($projectionDetail->checkpoints),
             $this->lockManager->refresh()
         );
 
@@ -80,8 +80,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     public function persist(ProjectionDetail $projectionDetail): void
     {
         $data = new PersistDataDTO(
-            $this->serializer->encode($projectionDetail->state),
-            $this->serializer->encode($projectionDetail->streamPositions),
+            $this->serializer->encode($projectionDetail->userState),
+            $this->serializer->encode($projectionDetail->checkpoints),
             $this->lockManager->refresh()
         );
 
@@ -92,8 +92,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     {
         $data = new ResetDataDTO(
             $currentStatus->value,
-            $this->serializer->encode($projectionDetail->state),
-            $this->serializer->encode($projectionDetail->streamPositions),
+            $this->serializer->encode($projectionDetail->userState),
+            $this->serializer->encode($projectionDetail->checkpoints),
         );
 
         $this->updateProjection($data);
@@ -113,7 +113,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
         }
 
         return new ProjectionDetail(
-            $this->serializer->decode($projection->position()),
+            $this->serializer->decode($projection->checkpoint()),
             $this->serializer->decode($projection->state()),
         );
     }

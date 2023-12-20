@@ -20,7 +20,6 @@ trait InteractWithManagement
     public function freed(): void
     {
         $this->repository->release();
-
         $this->subscription->setStatus(ProjectionStatus::IDLE);
     }
 
@@ -29,9 +28,7 @@ trait InteractWithManagement
         $idleStatus = ProjectionStatus::IDLE;
 
         $this->repository->stop($this->getProjectionDetail(), $idleStatus);
-
         $this->subscription->setStatus($idleStatus);
-
         $this->subscription->sprint->stop();
     }
 
@@ -40,9 +37,7 @@ trait InteractWithManagement
         $this->subscription->sprint->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
-
         $this->repository->startAgain($runningStatus);
-
         $this->subscription->setStatus($runningStatus);
     }
 
@@ -55,9 +50,9 @@ trait InteractWithManagement
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->subscription->streamManager->sync($projectionDetail->streamPositions);
+        $this->subscription->streamManager->update($projectionDetail->checkpoints);
 
-        $state = $projectionDetail->state;
+        $state = $projectionDetail->userState;
 
         if ($state !== []) {
             $this->subscription->state->put($state);
@@ -70,9 +65,7 @@ trait InteractWithManagement
             $this->store();
 
             $this->subscription->eventCounter->reset();
-
             $this->subscription->setStatus($this->disclose());
-
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
             if (! in_array($this->subscription->currentStatus(), $keepProjectionRunning, true)) {
@@ -107,9 +100,7 @@ trait InteractWithManagement
         }
 
         $status = ProjectionStatus::RUNNING;
-
         $this->repository->start($status);
-
         $this->subscription->setStatus($status);
     }
 

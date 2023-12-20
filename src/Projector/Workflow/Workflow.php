@@ -59,8 +59,6 @@ final readonly class Workflow
 
     private function conditionallyReleaseLock(?Throwable $exception): void
     {
-        // raising projection already running exception, prevent from releasing lock
-        // and put the projection in an idle status.
         if ($exception instanceof ProjectionAlreadyRunning) {
             throw $exception;
         }

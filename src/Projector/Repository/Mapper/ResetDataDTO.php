@@ -9,19 +9,19 @@ final readonly class ResetDataDTO extends ProjectionDataDTO
     public function __construct(
         public string $status,
         public string $state,
-        public string $position
+        public string $checkpoint
     ) {
     }
 
     /**
-     * @return array{'status': string, 'state': string, 'position': string}
+     * @return array{'status': string, 'state': string, 'checkpoint': string}
      */
     public function toArray(): array
     {
         return [
             'status' => $this->status,
             'state' => $this->state,
-            'position' => $this->position,
+            'checkpoint' => $this->checkpoint,
         ];
     }
 }
