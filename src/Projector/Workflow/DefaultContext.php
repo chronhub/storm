@@ -32,9 +32,9 @@ final class DefaultContext implements ContextReader
 
     private ?QueryFilter $queryFilter = null;
 
-    private DateInterval|string|int|null $timer = null;
-
     private ?Closure $userScope = null;
+
+    private DateInterval|string|int|null $timer = null;
 
     private bool $keepState = false;
 

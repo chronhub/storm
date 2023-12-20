@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function array_map;
+use function array_merge;
 use function in_array;
 
 final class CheckpointManager implements GapDetection, StreamManager
@@ -23,7 +24,7 @@ final class CheckpointManager implements GapDetection, StreamManager
 
     public function refreshStreams(array $eventStreams): void
     {
-        $this->eventStreams = $eventStreams;
+        $this->eventStreams = array_merge($this->eventStreams, $eventStreams);
 
         $this->checkpoints->onDiscover(...$eventStreams);
     }
