@@ -25,7 +25,7 @@ final class LoadStreams
 
     public function __construct(
         private readonly NoEventStreamCounter $noEventCounter,
-        callable                              $queryFilterResolver
+        callable $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
     }

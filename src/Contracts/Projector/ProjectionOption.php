@@ -93,8 +93,8 @@ interface ProjectionOption extends JsonSerializable
      * Get sleep
      *
      * @return int|array{int|float, int|float}
-     * @see NoEventStreamCounter
      *
+     * @see NoEventStreamCounter
      * @see ConsumeWithSleepToken
      */
     public function getSleep(): int|array;
