@@ -58,24 +58,24 @@ final class LoadStreams
     }
 
     /**
-     * @param  array<string,Checkpoint>     $checkpoints
+     * @param  array<string,Checkpoint>     $streams
      * @return array<string,StreamIterator>
      */
-    private function batchStreams(Chronicler $chronicler, array $checkpoints, int $loadLimiter): array
+    private function batchStreams(Chronicler $chronicler, array $streams, int $loadLimiter): array
     {
-        $streams = [];
+        $loadedStreams = [];
 
-        foreach ($checkpoints as $streamName => $checkpoint) {
-            $queryFilter = ($this->queryFilterResolver)($streamName, $checkpoint->position + 1, $loadLimiter);
+        foreach ($streams as $streamName => $stream) {
+            $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $loadLimiter);
 
             try {
                 $events = $chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
-                $streams[$streamName] = new StreamIterator($events);
+                $loadedStreams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;
             }
         }
 
-        return $streams;
+        return $loadedStreams;
     }
 }

@@ -31,7 +31,7 @@ final class MonitorRemoteStatus
     private function onStopping(PersistentManagement $management): bool
     {
         if ($this->isFirstLoop) {
-            // checkMe why sync on stop,
+            // todo why sync on stop,
             $management->synchronise();
         }
 
