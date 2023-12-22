@@ -16,12 +16,12 @@ final class GenericEvent extends DecoratedEvent
         return new self($event);
     }
 
-    public function id(): string|Uuid
+    public function eventId(): string|Uuid
     {
         return $this->event->header(Header::EVENT_ID);
     }
 
-    public function time(): string|DateTimeImmutable
+    public function eventTime(): string|DateTimeImmutable
     {
         return $this->event->header(Header::EVENT_TIME);
     }

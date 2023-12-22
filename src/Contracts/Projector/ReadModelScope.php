@@ -16,5 +16,5 @@ interface ReadModelScope extends ProjectorScope
     /**
      * Shortcut to read model stack.
      */
-    public function stack(string $operation, mixed ...$arguments): void;
+    public function stack(string $operation, mixed ...$arguments): self;
 }

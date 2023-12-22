@@ -7,8 +7,6 @@ namespace Chronhub\Storm\Projector\Support\Event;
 use Chronhub\Storm\Reporter\DomainEvent;
 use DateTimeImmutable;
 
-use function get_class;
-
 abstract class DecoratedEvent
 {
     protected function __construct(public readonly DomainEvent $event)
@@ -17,17 +15,12 @@ abstract class DecoratedEvent
 
     abstract public static function fromEvent(DomainEvent $event): self;
 
-    abstract public function id(): mixed;
+    abstract public function eventId(): mixed;
 
-    abstract public function time(): string|DateTimeImmutable;
+    abstract public function eventTime(): string|DateTimeImmutable;
 
-    public function content(): array
+    public function eventContent(): array
     {
         return $this->event->toContent();
-    }
-
-    public function class(): string
-    {
-        return get_class($this->event);
     }
 }

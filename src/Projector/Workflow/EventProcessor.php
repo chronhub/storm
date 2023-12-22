@@ -70,11 +70,17 @@ final readonly class EventProcessor
     {
         $initializedState = $this->getUserState($subscription);
 
-        $currentState = is_array($initializedState)
-            ? ($this->reactors)($event, $initializedState, $this->scope)
-            : ($this->reactors)($event, $this->scope);
+        $this->scope->setEvent($event);
+        if (is_array($initializedState)) {
+            $this->scope->setState($initializedState);
+        }
 
-        $this->updateUserState($subscription, $initializedState, $currentState);
+        ($this->reactors)($this->scope);
+        /*$currentState = is_array($initializedState)
+            ? ($this->reactors)($event, $initializedState, $this->scope)
+            : ($this->reactors)($event, $this->scope);*/
+
+        $this->updateUserState($subscription, $initializedState, $this->scope->getState());
     }
 
     private function getUserState(Subscription $subscription): ?array

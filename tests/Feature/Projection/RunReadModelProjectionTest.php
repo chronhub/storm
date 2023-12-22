@@ -6,9 +6,6 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Message\Header;
-use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -24,11 +21,7 @@ beforeEach(function () {
     $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
-/**
- * checkMe: do not use the same prefix for test/it
- * to expect only one test to run when it's above all other tests
- */
-test('can run read model projection from one stream', function () {
+test('can run read model projection with scope', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -43,32 +36,20 @@ test('can run read model projection from one stream', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope) use ($readModel): array {
-            if ($state['count'] === 1) {
-                expect($scope)
-                    ->toBeInstanceOf(ReadModelAccess::class)
-                    ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
-                    ->and($scope->readModel())->toBe($readModel)
-                    ->and($event)->toBeInstanceOf(SomeEvent::class);
+        ->when(function (ReadModelAccess $scope) use ($readModel): void {
+            $scope->increment();
 
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            $state['count']++;
-
-            expect($scope->streamName())->toBe('user');
-
-            return $state;
+            expect($scope)
+                ->toBeInstanceOf(ReadModelAccess::class)
+                ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
+                ->and($scope->readModel())->toBe($readModel)
+                ->and($scope->event())->toBeInstanceOf(SomeEvent::class);
         })->run(false);
 
-    expect($projector->getState())
-        ->toBe(['count' => 10])
-        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+    expect($projector->getState())->toBe(['count' => 10]);
 });
 
-test('can run read model with shortcut stack from scope', function () {
+test('can run read model projection with new scope', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
@@ -83,14 +64,15 @@ test('can run read model with shortcut stack from scope', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            $state['count']++;
-
-            $state['count'] === 1
-                ? $scope->stack('insert', $event->header(Header::EVENT_ID), $event->toContent())
-                : $scope->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ?->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(false);
 
     expect($projector->getState())
@@ -113,20 +95,15 @@ test('can stop read model projection', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            if ($state['count'] === 1) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            $state['count']++;
-
-            if ($state['count'] === 7) {
-                $scope->stop();
-            }
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                )->stopWhen($scope['count'] === 7);
         })->run(false);
 
     expect($projector->getState())
@@ -149,16 +126,15 @@ test('can reset read model projection', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            if ($state['count'] === 1) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            $state['count']++;
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(false);
 
     expect($projector->getState())
@@ -193,16 +169,15 @@ test('can delete read model projection with read model', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            $state['count']++;
-
-            if ($state['count'] === 1) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(false);
 
     expect($projector->getState())
@@ -238,16 +213,15 @@ test('can delete read model projection without read model', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            if ($state['count'] === 1) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            $state['count']++;
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(false);
 
     expect($projector->getState())
@@ -283,16 +257,15 @@ test('can rerun read model projection by catchup', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            if ($state['count'] === 1) {
-                $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), ['count' => $event->header(EventHeader::INTERNAL_POSITION)]);
-            } else {
-                $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->header(EventHeader::INTERNAL_POSITION));
-            }
-
-            $state['count']++;
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(false);
 
     expect($projector->getState())
@@ -309,7 +282,7 @@ test('can rerun read model projection by catchup', function () {
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
 
-test('can run read model projection from many streams', function () {
+test('11can run read model projection from many streams', function () {
     // fake data where debit event time is all less than credit event time
     $eventId = Uuid::v4()->toRfc4122();
     $stream1 = $this->testFactory->getStream('debit', 10, '-10 second', $eventId);
@@ -324,29 +297,26 @@ test('can run read model projection from many streams', function () {
 
     // run projection
     $projector
-        ->initialize(fn () => ['count_some_event' => 0, 'count_another_event' => 0])
+        ->initialize(fn () => ['some_event' => 0, 'another_event' => 0])
         ->subscribeToStreams('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            if ($scope->streamName() === 'debit') {
-                $state['count_some_event']++;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment('some_event')
+                ->when(
+                    $scope['some_event'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), ['count' => 1]),
+                    fn () => $scope->stack('increment', $scope->eventId(), 'count', 1),
+                );
 
-                if ($state['count_some_event'] === 1) {
-                    $scope->readModel()->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-                } else {
-                    $scope->readModel()->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-                }
-            } else {
-                $state['count_another_event']++;
-
-                $scope->readModel()->stack('increment', $event->header(Header::EVENT_ID), 'count', 1);
-            }
-
-            return $state;
+            $scope
+                ->ack(AnotherEvent::class)
+                ?->increment('another_event')
+                ->stack('increment', $scope->eventId(), 'count', 1);
         })->run(false);
 
-    expect($projector->getState())
-        ->toBe(['count_some_event' => 10, 'count_another_event' => 10])
+    expect($projector->getState())->toBe(['some_event' => 10, 'another_event' => 10])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 20]]);
 });
 
@@ -372,12 +342,17 @@ test('can run read model projection from many streams and sort events by ascendi
         ->initialize(fn () => ['order' => [], 'index' => 0])
         ->subscribeToStreams('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            $state['order'][$scope->streamName()][$state['index'] + 1] = $event::class;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment('index')
+                ?->update('order.'.$scope->streamName().'.'.$scope->getState()['index'], $scope->event()::class);
 
-            $state['index']++;
+            $scope
+                ->ack(AnotherEvent::class)
+                ?->increment('index')
+                ?->update('order.'.$scope->streamName().'.'.$scope->getState()['index'], $scope->event()::class);
 
-            return $state;
         })->run(false);
 
     expect($projector->getState()['order'])->toBe([
@@ -401,16 +376,15 @@ test('can no stream event loaded', function () {
         ->subscribeToStreams('debit')
         ->until(1)
         ->withQueryFilter($this->fromIncludedPosition)
-        ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
-            $state['count']++;
-
-            if ($state['count'] === 1) {
-                $scope->stack('insert', $event->header(Header::EVENT_ID), $event->toContent());
-            } else {
-                $scope->stack('update', $event->header(Header::EVENT_ID), 'count', $event->toContent()['count']);
-            }
-
-            return $state;
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->increment()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                );
         })->run(true);
 
     expect($projector->getState())->toBe(['count' => 50]);
