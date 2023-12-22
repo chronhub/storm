@@ -44,7 +44,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
+    public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void
     {
         $this->when(
             fn () => $this->repository->stop($projectionDetail, $projectionStatus),
@@ -62,7 +62,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void
     {
         $this->when(
             fn () => $this->repository->reset($projectionDetail, $currentStatus),
@@ -91,7 +91,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function persist(ProjectionDetail $projectionDetail): void
+    public function persist(ProjectionResult $projectionDetail): void
     {
         $this->repository->persist($projectionDetail);
     }
@@ -106,7 +106,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         return $this->repository->loadStatus();
     }
 
-    public function loadDetail(): ProjectionDetail
+    public function loadDetail(): ProjectionResult
     {
         return $this->repository->loadDetail();
     }

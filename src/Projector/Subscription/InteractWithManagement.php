@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\ProjectionDetail;
+use Chronhub\Storm\Projector\Repository\ProjectionResult;
 
 use function in_array;
 
@@ -27,7 +27,7 @@ trait InteractWithManagement
     {
         $idleStatus = ProjectionStatus::IDLE;
 
-        $this->repository->stop($this->getProjectionDetail(), $idleStatus);
+        $this->repository->stop($this->getProjectionResult(), $idleStatus);
         $this->subscription->setStatus($idleStatus);
         $this->subscription->sprint->stop();
     }
@@ -104,10 +104,10 @@ trait InteractWithManagement
         $this->subscription->setStatus($status);
     }
 
-    protected function getProjectionDetail(): ProjectionDetail
+    protected function getProjectionResult(): ProjectionResult
     {
         $streamPositions = $this->subscription->streamManager->jsonSerialize();
 
-        return new ProjectionDetail($streamPositions, $this->subscription->state->get());
+        return new ProjectionResult($streamPositions, $this->subscription->state->get());
     }
 }

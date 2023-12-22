@@ -34,7 +34,7 @@ interface Context
      * @throws InvalidArgumentException When streams are already set
      * @throws InvalidArgumentException When streams are empty
      */
-    public function fromStreams(string ...$streamNames): self;
+    public function subscribeToStreams(string ...$streamNames): self;
 
     /**
      * Sets the categories to fetch events from.
@@ -42,7 +42,7 @@ interface Context
      * @throws InvalidArgumentException When streams are already set
      * @throws InvalidArgumentException When streams are empty
      */
-    public function fromCategories(string ...$categories): self;
+    public function subscribeToCategories(string ...$categories): self;
 
     /**
      * Sets to fetch events from all streams
@@ -50,7 +50,7 @@ interface Context
      * @throws InvalidArgumentException When streams are already set
      * @throws InvalidArgumentException When streams are empty
      */
-    public function fromAll(): self;
+    public function subscribeToAll(): self;
 
     /**
      * Sets the event handlers to be called when an event is received.

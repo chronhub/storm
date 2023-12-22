@@ -31,7 +31,7 @@ it('can run emitter projection 111', function (): void {
     // run projection
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
-        ->fromStreams('user', 'foo')
+        ->subscribeToStreams('user', 'foo')
         //->until(10)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {

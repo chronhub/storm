@@ -35,7 +35,7 @@ it('can run emitter projection 111', function (): void {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
             if ($state['count'] === 1) {
@@ -70,7 +70,7 @@ it('can emit event to a new stream named from projection', function (): void {
     // run projection
     $emitter
         ->initialize(fn () => ['events' => []])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterAccess $scope): array {
             $scope->emit($event);
@@ -88,7 +88,7 @@ it('can emit event to a new stream named from projection', function (): void {
 
     $query
         ->initialize(fn () => ['events' => []])
-        ->fromStreams('customer')
+        ->subscribeToStreams('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['events'][] = $event;
@@ -115,7 +115,7 @@ it('can link event to a new stream', function (): void {
     // run projection
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
             $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
@@ -136,7 +136,7 @@ it('can link event to a new stream', function (): void {
 
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->fromStreams('user_odd', 'user_even')
+        ->subscribeToStreams('user_odd', 'user_even')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, QueryProjectorScope $projector): array {
             $projector->streamName() === 'user_odd'
@@ -163,7 +163,7 @@ it('can link event to new categories', function (): void {
     // run projection
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, EmitterScope $projector): array {
             $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
@@ -185,7 +185,7 @@ it('can link event to new categories', function (): void {
 
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->fromCategories('customer')
+        ->subscribeToCategories('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
             $scope->streamName() === 'customer-odd'
@@ -202,7 +202,7 @@ it('raise exception when query filter is not a projection query filter', functio
     $projector = $this->projectorManager->newEmitterProjector('customer');
 
     $projector
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);

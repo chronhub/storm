@@ -15,14 +15,14 @@ final readonly class EmitterAccess implements EmitterScope
     {
     }
 
-    public function linkTo(string $streamName, DomainEvent $event): void
-    {
-        $this->emitter->linkTo($streamName, $event);
-    }
-
     public function emit(DomainEvent $event): void
     {
         $this->emitter->emit($event);
+    }
+
+    public function linkTo(string $streamName, DomainEvent $event): void
+    {
+        $this->emitter->linkTo($streamName, $event);
     }
 
     public function stop(): void

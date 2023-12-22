@@ -62,14 +62,14 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionDetail());
+        $this->repository->persist($this->getProjectionResult());
     }
 
     public function revise(): void
     {
         $this->subscription->streamManager->resets();
         $this->subscription->initializeAgain();
-        $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
+        $this->repository->reset($this->getProjectionResult(), $this->subscription->currentStatus());
 
         $this->deleteStream();
     }

@@ -17,7 +17,6 @@ final readonly class HandleStreamGap
     {
         // When a gap is detected and still retry left,
         // we sleep and store the projection if some event(s) has been loaded and incremented
-
         if ($subscription->hasGapDetection() && $subscription->streamManager->hasGap()) {
             $subscription->streamManager->sleepWhenGap();
 

@@ -51,7 +51,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
         $this->provider->acquireLock($this->projectionName(), $data);
     }
 
-    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void
+    public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void
     {
         $data = new StopDataDTO(
             $projectionStatus->value,
@@ -77,7 +77,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
         $this->updateProjection($data);
     }
 
-    public function persist(ProjectionDetail $projectionDetail): void
+    public function persist(ProjectionResult $projectionDetail): void
     {
         $data = new PersistDataDTO(
             $this->serializer->encode($projectionDetail->userState),
@@ -88,7 +88,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
         $this->updateProjection($data);
     }
 
-    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void
     {
         $data = new ResetDataDTO(
             $currentStatus->value,
@@ -104,7 +104,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
         $this->provider->deleteProjection($this->streamName);
     }
 
-    public function loadDetail(): ProjectionDetail
+    public function loadDetail(): ProjectionResult
     {
         $projection = $this->provider->retrieve($this->streamName);
 
@@ -112,7 +112,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
             throw ProjectionNotFound::withName($this->streamName);
         }
 
-        return new ProjectionDetail(
+        return new ProjectionResult(
             $this->serializer->decode($projection->checkpoint()),
             $this->serializer->decode($projection->state()),
         );

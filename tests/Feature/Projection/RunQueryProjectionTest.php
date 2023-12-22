@@ -35,7 +35,7 @@ it('can run query projection 1', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
             $state['count']++;
@@ -85,7 +85,7 @@ it('can run query projection until and increment loop', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($queryFilter)
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -110,7 +110,7 @@ it('can stop query projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
             $state['count']++;
@@ -137,7 +137,7 @@ it('can run query projection in background with timer 1000', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->until(0)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
@@ -161,7 +161,7 @@ it('rerun a completed query projection will return the original initialized stat
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -188,7 +188,7 @@ it('can rerun query projection from incomplete run and override state', function
     // first run
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -227,7 +227,7 @@ it('assert query projection does not handle gap', function () {
     // run once
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -252,7 +252,7 @@ it('can rerun query projection while keeping state in memory', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->withKeepState()
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -282,7 +282,7 @@ it('raise exception when keeping state in memory but user state has not been ini
     // run projection
     $projector
         ->withKeepState()
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (): void {
             throw new RuntimeException('Should not be called');
@@ -305,7 +305,7 @@ it('can reset query projection and re run from scratch', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -338,7 +338,7 @@ it('can run query projection from category', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromCategories('balance')
+        ->subscribeToCategories('balance')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -369,7 +369,7 @@ it('can run query projection from all streams', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromAll()
+        ->subscribeToAll()
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state): array {
             $state['count']++;
@@ -412,7 +412,7 @@ it('can run query projection from current stream position', function () {
     // run projection
     $projector
         ->initialize(fn () => ['position' => []])
-        ->fromAll()
+        ->subscribeToAll()
         ->withQueryFilter($queryFilter)
         ->when(function (DomainEvent $event, array $state): array {
             $state['position'][] = $event->header(EventHeader::INTERNAL_POSITION);
@@ -456,7 +456,7 @@ it('can run query projection with a dedicated query filter', function () {
     // run projection
     $projector
         ->initialize(fn () => ['positions' => []])
-        ->fromAll()
+        ->subscribeToAll()
         ->withQueryFilter($queryFilter)
         ->when(function (DomainEvent $event, array $state): array {
             $state['positions'][] = $event->header(EventHeader::INTERNAL_POSITION);
@@ -479,7 +479,7 @@ it('can run query projection with user state 123', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, $state): array {
             expect($state)->toBeArray()->and($state['count'])->toBe(0);
@@ -504,7 +504,7 @@ it('can run query projection with empty user state', function () {
     // run projection
     $projector
         ->initialize(fn () => [])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, $state): array {
             expect($state)->toBeArray()->toBeEmpty();
@@ -527,7 +527,7 @@ it('can run query projection with user state and return', function (array $retur
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, $state) use ($returnState): array {
             expect($state)->toBeArray()->and($state['count'])->toBe(0);
@@ -556,7 +556,7 @@ it('can run query projection without user state and return will be ignored', fun
 
     // run projection
     $projector
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, ProjectorScope $scope, ?array $state = null): array {
             expect($state)->toBeNull();
@@ -576,7 +576,7 @@ it('test state is not altered with no event to handle', function () {
     // run projection
     $projector
         ->initialize(fn () => [])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (DomainEvent $event, array $state) use ($outState): array {
             return $outState;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository;
 
-final readonly class ProjectionDetail
+final readonly class ProjectionResult
 {
     public function __construct(
         public array $checkpoints,

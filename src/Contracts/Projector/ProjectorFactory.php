@@ -27,23 +27,23 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the streams.
      *
-     * @see ContextReader::fromStreams()
+     * @see ContextReader::subscribeToStreams()
      */
-    public function fromStreams(string ...$streams): static;
+    public function subscribeToStreams(string ...$streams): static;
 
     /**
      * Proxy method to set the categories.
      *
-     * @see ContextReader::fromCategories()
+     * @see ContextReader::subscribeToCategories()
      */
-    public function fromCategories(string ...$categories): static;
+    public function subscribeToCategories(string ...$categories): static;
 
     /**
      * Proxy method to set all streams.
      *
-     * @see Context::fromAll()
+     * @see Context::subscribeToAll()
      */
-    public function fromAll(): static;
+    public function subscribeToAll(): static;
 
     /**
      * Proxy method to set the reactos.

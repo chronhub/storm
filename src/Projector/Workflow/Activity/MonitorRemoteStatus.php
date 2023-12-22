@@ -10,41 +10,41 @@ use Chronhub\Storm\Projector\Workflow\Sprint;
 
 final class MonitorRemoteStatus
 {
-    private bool $isFirstLoop = true;
+    private bool $onRise = true;
 
     public function shouldStop(PersistentManagement $management, Sprint $sprint): bool
     {
         $shouldStop = $this->discovering($management, $sprint);
 
-        $this->isFirstLoop = false;
+        $this->onRise = false;
 
         return $shouldStop;
     }
 
     public function refreshStatus(PersistentManagement $management, Sprint $sprint): void
     {
-        $this->isFirstLoop = false;
+        $this->onRise = false;
 
         $this->discovering($management, $sprint);
     }
 
     private function onStopping(PersistentManagement $management): bool
     {
-        if ($this->isFirstLoop) {
+        if ($this->onRise) {
             // todo why sync on stop,
             $management->synchronise();
         }
 
         $management->close();
 
-        return $this->isFirstLoop;
+        return $this->onRise;
     }
 
     private function onResetting(PersistentManagement $management, Sprint $sprint): bool
     {
         $management->revise();
 
-        if (! $this->isFirstLoop && $sprint->inBackground()) {
+        if (! $this->onRise && $sprint->inBackground()) {
             $management->restart();
         }
 
@@ -55,7 +55,7 @@ final class MonitorRemoteStatus
     {
         $management->discard($shouldDiscardEvents);
 
-        return $this->isFirstLoop;
+        return $this->onRise;
     }
 
     private function discovering(PersistentManagement $management, Sprint $sprint): bool

@@ -34,7 +34,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionDetail());
+        $this->repository->persist($this->getProjectionResult());
 
         $this->readModel->persist();
     }
@@ -43,7 +43,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     {
         $this->subscription->streamManager->resets();
         $this->subscription->initializeAgain();
-        $this->repository->reset($this->getProjectionDetail(), $this->subscription->currentStatus());
+        $this->repository->reset($this->getProjectionResult(), $this->subscription->currentStatus());
         $this->readModel->reset();
     }
 

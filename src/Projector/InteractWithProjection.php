@@ -17,23 +17,23 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function fromStreams(string ...$streams): static
+    public function subscribeToStreams(string ...$streams): static
     {
-        $this->context->fromStreams(...$streams);
+        $this->context->subscribeToStreams(...$streams);
 
         return $this;
     }
 
-    public function fromCategories(string ...$categories): static
+    public function subscribeToCategories(string ...$categories): static
     {
-        $this->context->fromCategories(...$categories);
+        $this->context->subscribeToCategories(...$categories);
 
         return $this;
     }
 
-    public function fromAll(): static
+    public function subscribeToAll(): static
     {
-        $this->context->fromAll();
+        $this->context->subscribeToAll();
 
         return $this;
     }

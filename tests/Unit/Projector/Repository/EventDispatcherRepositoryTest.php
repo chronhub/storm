@@ -14,7 +14,7 @@ use Chronhub\Storm\Projector\Repository\Events\ProjectionReset;
 use Chronhub\Storm\Projector\Repository\Events\ProjectionRestarted;
 use Chronhub\Storm\Projector\Repository\Events\ProjectionStarted;
 use Chronhub\Storm\Projector\Repository\Events\ProjectionStopped;
-use Chronhub\Storm\Projector\Repository\ProjectionDetail;
+use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Tests\Uses\TestingEventDispatcherRepository;
 use Illuminate\Events\Dispatcher;
 use RuntimeException;
@@ -45,7 +45,7 @@ test('dispatch event when', function (string $event) {
 
                 break;
             case ProjectionStopped::class:
-                $data = new ProjectionDetail([], []);
+                $data = new ProjectionResult([], []);
                 $this->repository->expects($this->once())->method('stop')->with($data, $status);
                 $this->eventRepository->stop($data, $status);
 
@@ -56,7 +56,7 @@ test('dispatch event when', function (string $event) {
 
                 break;
             case ProjectionReset::class:
-                $data = new ProjectionDetail([], []);
+                $data = new ProjectionResult([], []);
                 $this->repository->expects($this->once())->method('reset')->with($data, $status);
                 $this->eventRepository->reset($data, $status);
 
@@ -97,7 +97,7 @@ test('dispatch error event on exception and raise it when', function (string $ev
 
                 break;
             case ProjectionStopped::class:
-                $data = new ProjectionDetail([], []);
+                $data = new ProjectionResult([], []);
                 $this->repository->expects($this->once())->method('stop')->with($data, $status)->willThrowException($exception);
                 $this->eventRepository->stop($data, $status);
 
@@ -109,7 +109,7 @@ test('dispatch error event on exception and raise it when', function (string $ev
 
                 break;
             case ProjectionReset::class:
-                $data = new ProjectionDetail([], []);
+                $data = new ProjectionResult([], []);
                 $this->repository->expects($this->once())->method('reset')->with($data, $status)->willThrowException($exception);
                 $this->eventRepository->reset($data, $status);
 
@@ -133,7 +133,7 @@ test('dispatch error event on exception and raise it when', function (string $ev
 })->with('projection dispatcher events');
 
 it('persist', function (ProjectionStatus $status) {
-    $data = new ProjectionDetail([], []);
+    $data = new ProjectionResult([], []);
 
     $this->repository->expects($this->once())->method('persist')->with($data, $status);
 
@@ -153,7 +153,7 @@ it('load status', function (ProjectionStatus $status) {
 })->with('projection status');
 
 it('load detail', function () {
-    $data = new ProjectionDetail([], []);
+    $data = new ProjectionResult([], []);
 
     $this->repository->expects($this->once())->method('loadDetail')->willReturn($data);
 

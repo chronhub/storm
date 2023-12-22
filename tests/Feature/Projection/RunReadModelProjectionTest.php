@@ -41,7 +41,7 @@ test('can run read model projection from one stream', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope) use ($readModel): array {
             if ($state['count'] === 1) {
@@ -81,7 +81,7 @@ test('can run read model with shortcut stack from scope', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['count']++;
@@ -111,7 +111,7 @@ test('can stop read model projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
@@ -147,7 +147,7 @@ test('can reset read model projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
@@ -191,7 +191,7 @@ test('can delete read model projection with read model', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['count']++;
@@ -236,7 +236,7 @@ test('can delete read model projection without read model', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
@@ -281,7 +281,7 @@ test('can rerun read model projection by catchup', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($state['count'] === 1) {
@@ -325,7 +325,7 @@ test('can run read model projection from many streams', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count_some_event' => 0, 'count_another_event' => 0])
-        ->fromStreams('debit', 'credit')
+        ->subscribeToStreams('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             if ($scope->streamName() === 'debit') {
@@ -370,7 +370,7 @@ test('can run read model projection from many streams and sort events by ascendi
     // run projection
     $projector
         ->initialize(fn () => ['order' => [], 'index' => 0])
-        ->fromStreams('debit', 'credit')
+        ->subscribeToStreams('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
             $state['order'][$scope->streamName()][$state['index'] + 1] = $event::class;
@@ -398,7 +398,7 @@ test('can no stream event loaded', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->fromStreams('debit')
+        ->subscribeToStreams('debit')
         ->until(1)
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (DomainEvent $event, array $state, ReadModelScope $scope): array {
@@ -421,7 +421,7 @@ test('raise exception when query filter is not a projection query filter', funct
     $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     $projector
-        ->fromStreams('user')
+        ->subscribeToStreams('user')
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);

@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\ProjectionDetail;
+use Chronhub\Storm\Projector\Repository\ProjectionResult;
 
 interface ProjectionRepository
 {
@@ -33,7 +33,7 @@ interface ProjectionRepository
      *
      * @throws ProjectionFailed When projection data cannot be stored.
      */
-    public function persist(ProjectionDetail $projectionDetail): void;
+    public function persist(ProjectionResult $projectionDetail): void;
 
     /**
      * Stops the projection and store data.
@@ -41,7 +41,7 @@ interface ProjectionRepository
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection data cannot be stored.
      */
-    public function stop(ProjectionDetail $projectionDetail, ProjectionStatus $projectionStatus): void;
+    public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void;
 
     /**
      * Starts the projection again.
@@ -54,7 +54,7 @@ interface ProjectionRepository
     /**
      * Resets projection data.
      */
-    public function reset(ProjectionDetail $projectionDetail, ProjectionStatus $currentStatus): void;
+    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void;
 
     /**
      * Deletes the projection.
@@ -86,7 +86,7 @@ interface ProjectionRepository
      *
      * @throws ProjectionNotFound When the projection doesn't exist.
      */
-    public function loadDetail(): ProjectionDetail;
+    public function loadDetail(): ProjectionResult;
 
     /**
      * Checks if the projection exists.
