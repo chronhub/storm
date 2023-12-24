@@ -41,15 +41,9 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->subscription->initializeAgain();
     }
 
-    public function getScope(): QueryProjectorScope
+    protected function getScope(): QueryProjectorScope
     {
-        $userScope = $this->subscription->context()->userScope();
-
-        if ($userScope instanceof Closure) {
-            return $userScope($this->subscription);
-        }
-
-        return new QueryAccess();
+        return new QueryAccess($this->management);
     }
 
     protected function newWorkflow(): Workflow

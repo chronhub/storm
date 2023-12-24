@@ -71,13 +71,6 @@ interface ProjectorFactory extends Projector
     public function until(DateInterval|string|int $interval): static;
 
     /**
-     * Proxy method to set the projector scope.
-     *
-     * @see Context::withScope()
-     */
-    public function withScope(Closure $scope): static;
-
-    /**
      * Proxy method to keep the state in memory.
      *
      * @see Context::withKeepState()

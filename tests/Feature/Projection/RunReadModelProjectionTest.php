@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
@@ -87,7 +88,7 @@ test('raise exception when event was not acked when calling stack event', functi
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->incrementState()
-                ->stack('insert', $scope->id(), $scope->getState());
+                ->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState());
         })->run(false);
 })->throws(RuntimeException::class, 'Event must be acked before returning it');
 
@@ -112,8 +113,8 @@ test('can run read model projection with new scope', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -147,8 +148,8 @@ test('can run read model projection and count events', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), ['count' => $scope['count']]),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), ['count' => $scope['count']]),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
 
             ! $scope->isAcked() and $scope->incrementState('other');
@@ -180,8 +181,8 @@ test('can stop read model projection', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 )->stopWhen($scope['count'] === 7);
         })->run(false);
 
@@ -211,8 +212,8 @@ test('can reset read model projection', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -254,8 +255,8 @@ test('can delete read model projection with read model', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -298,8 +299,8 @@ test('can delete read model projection without read model', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -342,8 +343,8 @@ test('can rerun read model projection by catchup', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -385,14 +386,14 @@ test('11can run read model projection from many streams', function () {
                 ?->incrementState('some_event')
                 ->when(
                     $scope['some_event'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), ['count' => 1]),
-                    fn () => $scope->stack('increment', $scope->id(), 'count', 1),
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), ['count' => 1]),
+                    fn () => $scope->stack('increment', $scope->event()->header(Header::EVENT_ID), 'count', 1),
                 );
 
             $scope
                 ->ack(AnotherEvent::class)
                 ?->incrementState('another_event')
-                ->stack('increment', $scope->id(), 'count', 1);
+                ->stack('increment', $scope->event()->header(Header::EVENT_ID), 'count', 1);
         })->run(false);
 
     expect($projector->getState())->toBe(['some_event' => 10, 'another_event' => 10])
@@ -461,8 +462,8 @@ test('can no stream event loaded', function () {
                 ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                    fn () => $scope->stack('insert', $scope->event()->header(Header::EVENT_ID), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->event()->header(Header::EVENT_ID), 'count', $scope['count'])
                 );
         })->run(true);
 

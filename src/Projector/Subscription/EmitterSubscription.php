@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
-use Closure;
 
 final readonly class EmitterSubscription implements EmitterSubscriber
 {
@@ -32,12 +31,6 @@ final readonly class EmitterSubscription implements EmitterSubscriber
 
     public function getScope(): EmitterScope
     {
-        $userScope = $this->subscription->context()->userScope();
-
-        if ($userScope instanceof Closure) {
-            return $userScope($this);
-        }
-
-        return new EmitterAccess();
+        return new EmitterAccess($this->management);
     }
 }

@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
-use Closure;
 
 final readonly class ReadModelSubscription implements ReadModelSubscriber
 {
@@ -32,12 +31,6 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
 
     public function getScope(): ReadModelScope
     {
-        $userScope = $this->subscription->context()->userScope();
-
-        if ($userScope instanceof Closure) {
-            return $userScope($this);
-        }
-
-        return new ReadModelAccess();
+        return new ReadModelAccess($this->management);
     }
 }

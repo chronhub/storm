@@ -32,8 +32,6 @@ final class DefaultContext implements ContextReader
 
     private ?QueryFilter $queryFilter = null;
 
-    private ?Closure $userScope = null;
-
     private DateInterval|string|int|null $timer = null;
 
     private bool $keepState = false;
@@ -56,17 +54,6 @@ final class DefaultContext implements ContextReader
         }
 
         $this->queryFilter = $queryFilter;
-
-        return $this;
-    }
-
-    public function withScope(Closure $scope): self
-    {
-        if ($this->userScope instanceof Closure) {
-            throw new InvalidArgumentException('Projection scope already set');
-        }
-
-        $this->userScope = $scope;
 
         return $this;
     }
@@ -134,11 +121,6 @@ final class DefaultContext implements ContextReader
     public function userState(): ?Closure
     {
         return $this->userState;
-    }
-
-    public function userScope(): ?Closure
-    {
-        return $this->userScope;
     }
 
     public function reactors(): Closure

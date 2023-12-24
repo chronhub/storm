@@ -59,13 +59,6 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function withScope(Closure $scope): static
-    {
-        $this->context->withScope($scope);
-
-        return $this;
-    }
-
     public function withKeepState(): static
     {
         $this->context->withKeepState();

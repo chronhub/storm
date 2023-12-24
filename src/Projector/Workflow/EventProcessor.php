@@ -68,9 +68,8 @@ final readonly class EventProcessor
         $initializedState = $this->getUserState($subscription);
 
         // todo reset management in constructor scope
-        // todo pass one event , the decorator or the event,
-        //  as second arg of reactors could be used for string decorator class
-        $resetScope = ($this->scope)($this->management, $event, $initializedState);
+
+        $resetScope = ($this->scope)($event, $initializedState);
 
         ($this->reactors)($this->scope);
 

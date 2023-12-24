@@ -70,11 +70,6 @@ interface Context
     public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
-     * Sets an optional projector scope
-     */
-    public function withScope(Closure $scope): self;
-
-    /**
      * Keep the state in memory for the next run.
      *
      * Only available for query projection.

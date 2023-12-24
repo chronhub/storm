@@ -163,7 +163,7 @@ it('can rerun query projection from incomplete run and override state', function
             $scope
                 ->ack(SomeEvent::class)
                 ->incrementState()
-                ->mergeState('ids', [$scope->internalPosition()]);
+                ->mergeState('ids', $scope->event()->header(EventHeader::INTERNAL_POSITION));
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 5, 'ids' => [1, 2, 3, 4, 5]]);
@@ -202,7 +202,7 @@ it('assert query projection does not handle gap', function () {
             $scope
                 ->ack(SomeEvent::class)
                 ->incrementState()
-                ->mergeState('ids', [$scope->internalPosition()]);
+                ->mergeState('ids', $scope->event()->header(EventHeader::INTERNAL_POSITION));
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 2, 'ids' => [1, 5]]);
@@ -407,7 +407,7 @@ it('can run query projection with a dedicated query filter', function () {
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ->mergeState('positions', [$scope->internalPosition()]);
+                ->mergeState('positions', $scope->event()->header(EventHeader::INTERNAL_POSITION));
         })->run(false);
 
     expect($projector->getState())->toBe(['positions' => [8, 9, 10]]);

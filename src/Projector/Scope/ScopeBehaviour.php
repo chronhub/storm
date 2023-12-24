@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scope;
 
-use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Support\Event\DecoratedEvent;
-use Chronhub\Storm\Projector\Support\Event\GenericEvent;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 use Illuminate\Support\Arr;
@@ -21,8 +18,6 @@ use function str_contains;
 trait ScopeBehaviour
 {
     protected ?DomainEvent $event = null;
-
-    protected ?DecoratedEvent $decoratedEvent = null;
 
     protected ?array $state = null;
 
@@ -107,7 +102,9 @@ trait ScopeBehaviour
 
     public function event(): DomainEvent
     {
-        $this->assertEventIsAcked();
+        if (! $this->isAcked) {
+            throw new RuntimeException('Event must be acked before returning it');
+        }
 
         return $this->event;
     }
@@ -142,33 +139,17 @@ trait ScopeBehaviour
         unset($this->state[$offset]);
     }
 
-    public function __call(string $method, array $arguments): mixed
+    public function __invoke(DomainEvent $event, ?array $state): Closure
     {
-        // todo handle better exception
-        $this->assertEventIsAcked();
-
-        if ($this->decoratedEvent === null) {
-            $this->decoratedEvent = GenericEvent::fromEvent($this->event);
-        }
-
-        return $this->decoratedEvent->$method(...$arguments);
-    }
-
-    public function __invoke(Management $management, DomainEvent $event, ?array $state): Closure
-    {
-        $this->setManagement($management);
         $this->event = $event;
         $this->state = $state;
 
         return fn () => $this->reset();
     }
 
-    abstract protected function setManagement(Management $management): void;
-
     private function reset(): void
     {
         $this->event = null;
-        $this->decoratedEvent = null;
         $this->state = null;
         $this->isAcked = false;
     }
@@ -189,12 +170,5 @@ trait ScopeBehaviour
         return str_contains($field, '.') !== false
             ? Arr::get($this->state, $field)
             : $this->state[$field];
-    }
-
-    private function assertEventIsAcked(): void
-    {
-        if (! $this->isAcked) {
-            throw new RuntimeException('Event must be acked before returning it');
-        }
     }
 }

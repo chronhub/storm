@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
@@ -116,14 +117,14 @@ it('can link event to a new stream', function (): void {
             $scope
                 ->ack(SomeEvent::class)
                 ->when(
-                    $scope->internalPosition() % 2 === 0,
+                    $scope->event()->header(EventHeader::INTERNAL_POSITION) % 2 === 0,
                     function (EmitterAccess $scope): void {
                         $scope
                             ->mergeState('even', $scope->event())
                             ->linkTo('user_even', $scope->event());
                     }, function (EmitterAccess $scope): void {
                         $scope
-                            ->mergeState('odd', [$scope->event()])
+                            ->mergeState('odd', $scope->event())
                             ->linkTo('user_odd', $scope->event());
                     }
                 );
@@ -178,7 +179,7 @@ it('can link event to new categories', function (): void {
             $scope
                 ->ack(SomeEvent::class)
                 ->when(
-                    $scope->internalPosition() % 2 === 0,
+                    $scope->event()->header(EventHeader::INTERNAL_POSITION) % 2 === 0,
                     function (EmitterAccess $scope): void {
                         $scope
                             ->mergeState('even', $scope->event())

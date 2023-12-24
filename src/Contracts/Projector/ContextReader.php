@@ -55,13 +55,6 @@ interface ContextReader extends Context
     public function timer(): ?DateInterval;
 
     /**
-     * Get the projection scope.
-     *
-     * When not set, a default scope will be used.
-     */
-    public function userScope(): ?Closure;
-
-    /**
      * Check if projection should keep state in memory.
      *
      * Default is false
