@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -24,7 +23,7 @@ beforeEach(function () {
 it('can run emitter projection 111', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $stream = $this->testFactory->getStream('user', 2, null, $eventId);
     $this->eventStore->firstCommit($stream);
 
     // create a projection
@@ -50,7 +49,7 @@ it('can run emitter projection 111', function (): void {
             expect($scope->streamName())->not()->toBeNull();
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->getState())->toBe(['count' => 2]);
 });
 
 it('can emit event to a new stream named from projection', function (): void {
@@ -226,6 +225,6 @@ it('raise exception when query filter is not a projection query filter', functio
     $projector
         ->subscribeToStream('user')
         ->withQueryFilter($this->createMock(QueryFilter::class))
-        ->when(function (DomainEvent $event): void {
-        })->run(false);
+        ->when(fn () => null)
+        ->run(false);
 })->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');

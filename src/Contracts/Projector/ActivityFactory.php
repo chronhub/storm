@@ -11,6 +11,6 @@ interface ActivityFactory
     public function __invoke(
         Subscription $subscription,
         ProjectorScope $scope,
-        ?PersistentManagement $management
+        Management $management
     ): array;
 }

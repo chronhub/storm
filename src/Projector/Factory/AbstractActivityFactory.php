@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Factory;
 
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
@@ -19,7 +19,7 @@ use function is_array;
 
 abstract class AbstractActivityFactory implements ActivityFactory
 {
-    public function __invoke(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
+    public function __invoke(Subscription $subscription, ProjectorScope $scope, Management $management): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
@@ -45,7 +45,7 @@ abstract class AbstractActivityFactory implements ActivityFactory
         return new NoEventStreamCounter(null, $sleep);
     }
 
-    protected function getEventProcessor(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): EventProcessor
+    protected function getEventProcessor(Subscription $subscription, ProjectorScope $scope, Management $management): EventProcessor
     {
         return new EventProcessor($subscription->context()->reactors(), $scope, $management);
     }
@@ -58,5 +58,5 @@ abstract class AbstractActivityFactory implements ActivityFactory
     /**
      * @return array<callable>
      */
-    abstract protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array;
+    abstract protected function activities(Subscription $subscription, ProjectorScope $scope, Management $management): array;
 }

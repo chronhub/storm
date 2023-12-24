@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Factory;
 
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -20,8 +22,12 @@ use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 
 final class PersistentActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
+    protected function activities(Subscription $subscription, ProjectorScope $scope, Management $management): array
     {
+        if (! $management instanceof PersistentManagement) {
+            throw new RuntimeException('Management must be instance of PersistentManagement');
+        }
+
         $timer = $this->getTimer($subscription);
         $noEventCounter = $this->getNoStreamLoadedCounter($subscription);
         $eventProcessor = $this->getEventProcessor($subscription, $scope, $management);

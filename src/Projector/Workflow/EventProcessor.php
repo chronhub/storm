@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Subscription;
@@ -11,7 +12,6 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
 use function is_array;
-use function method_exists;
 use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
@@ -20,12 +20,12 @@ final readonly class EventProcessor
 
     private ProjectorScope $scope;
 
-    private ?PersistentManagement $management;
+    private Management $management;
 
     public function __construct(
         Closure $reactors,
         ProjectorScope $scope,
-        ?PersistentManagement $management
+        Management $management
     ) {
         $this->reactors = $reactors;
         $this->scope = $scope;
@@ -43,11 +43,15 @@ final readonly class EventProcessor
             return false;
         }
 
-        $this->incrementEventCounter($subscription);
+        if ($this->management instanceof PersistentManagement) {
+            $subscription->eventCounter->increment();
+        }
 
         $this->reactOn($event, $subscription);
 
-        $this->management?->persistWhenCounterIsReached();
+        if ($this->management instanceof PersistentManagement) {
+            $this->management->persistWhenCounterIsReached();
+        }
 
         return $subscription->sprint->inProgress();
     }
@@ -59,36 +63,22 @@ final readonly class EventProcessor
         }
     }
 
-    private function incrementEventCounter(Subscription $subscription): void
-    {
-        // checkMe: use if, till event counter is a setter in subscription
-        if ($this->management) {
-            $subscription->eventCounter->increment();
-        }
-    }
-
     private function reactOn(DomainEvent $event, Subscription $subscription): void
     {
         $initializedState = $this->getUserState($subscription);
 
-        if (method_exists($this->scope, 'setState')) {
-            $this->scope->setState($initializedState);
-        }
-
-        if (method_exists($this->scope, 'setEvent')) {
-            $this->scope->setEvent($event);
-        }
+        // todo reset management in constructor scope
+        // todo pass one event , the decorator or the event,
+        //  as second arg of reactors could be used for string decorator class
+        $resetScope = ($this->scope)($this->management, $event, $initializedState);
 
         ($this->reactors)($this->scope);
 
-        if (method_exists($this->scope, 'getState')) {
-            $this->updateUserState($subscription, $initializedState, $this->scope->getState());
-        }
+        $this->updateUserState($subscription, $initializedState, $this->scope->getState());
 
-        if (method_exists($this->scope, 'finish')) {
-            // if isAcked
-            $this->scope->finish();
-        }
+        // todo handle isAcked
+
+        $resetScope();
     }
 
     private function getUserState(Subscription $subscription): ?array

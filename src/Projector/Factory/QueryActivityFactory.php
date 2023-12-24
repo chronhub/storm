@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Factory;
 
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
@@ -16,7 +16,7 @@ use Chronhub\Storm\Projector\Workflow\Activity\SleepForQuery;
 
 final class QueryActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(Subscription $subscription, ProjectorScope $scope, ?PersistentManagement $management): array
+    protected function activities(Subscription $subscription, ProjectorScope $scope, Management $management): array
     {
         $timer = $this->getTimer($subscription);
         $eventProcessor = $this->getEventProcessor($subscription, $scope, $management);

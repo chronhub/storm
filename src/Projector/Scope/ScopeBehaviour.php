@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scope;
 
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Support\Event\DecoratedEvent;
 use Chronhub\Storm\Projector\Support\Event\GenericEvent;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Closure;
 use Illuminate\Support\Arr;
 
 use function array_merge;
@@ -16,29 +18,35 @@ use function in_array;
 use function is_array;
 use function str_contains;
 
-trait AccessBehaviour
+trait ScopeBehaviour
 {
-    private ?DomainEvent $event = null;
+    protected ?DomainEvent $event = null;
 
-    private ?DecoratedEvent $decoratedEvent = null;
+    protected ?DecoratedEvent $decoratedEvent = null;
 
-    private ?array $state = null;
+    protected ?array $state = null;
 
-    private bool $isAcked = false;
+    protected bool $isAcked = false;
 
-    public function ack(string $event): ?self
+    public function ack(string $event): ?static
     {
-        $this->isAcked = true;
+        if ($this->isAcked) {
+            return null;
+        }
 
-        return $event === $this->event::class ? $this : null;
-    }
-
-    public function ackOneOf(string ...$events): ?self
-    {
-        if (in_array($this->event::class, $events, true)) {
+        if ($event === $this->event::class) {
             $this->isAcked = true;
 
             return $this;
+        }
+
+        return null;
+    }
+
+    public function ackOneOf(string ...$events): ?static
+    {
+        if (in_array($this->event::class, $events, true)) {
+            return $this->ack($this->event::class);
         }
 
         return null;
@@ -109,28 +117,9 @@ trait AccessBehaviour
         return $this->state;
     }
 
-    /**
-     * @internal
-     */
     public function isAcked(): bool
     {
         return $this->isAcked;
-    }
-
-    /**
-     * @internal
-     */
-    public function setEvent(DomainEvent $event): void
-    {
-        $this->event = $event;
-    }
-
-    /**
-     * @internal
-     */
-    public function setState(?array $state): void
-    {
-        $this->state = $state;
     }
 
     public function offsetExists(mixed $offset): bool
@@ -153,19 +142,9 @@ trait AccessBehaviour
         unset($this->state[$offset]);
     }
 
-    /**
-     * @internal
-     */
-    public function finish(): void
-    {
-        $this->event = null;
-        $this->decoratedEvent = null;
-        $this->isAcked = false;
-        $this->state = null;
-    }
-
     public function __call(string $method, array $arguments): mixed
     {
+        // todo handle better exception
         $this->assertEventIsAcked();
 
         if ($this->decoratedEvent === null) {
@@ -173,6 +152,25 @@ trait AccessBehaviour
         }
 
         return $this->decoratedEvent->$method(...$arguments);
+    }
+
+    public function __invoke(Management $management, DomainEvent $event, ?array $state): Closure
+    {
+        $this->setManagement($management);
+        $this->event = $event;
+        $this->state = $state;
+
+        return fn () => $this->reset();
+    }
+
+    abstract protected function setManagement(Management $management): void;
+
+    private function reset(): void
+    {
+        $this->event = null;
+        $this->decoratedEvent = null;
+        $this->state = null;
+        $this->isAcked = false;
     }
 
     private function updateUserState(string $field, $value, bool $increment): void

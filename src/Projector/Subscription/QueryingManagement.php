@@ -13,7 +13,7 @@ final readonly class QueryingManagement implements QueryManagement
     {
     }
 
-    public function stop(): void
+    public function close(): void
     {
         $this->subscription->sprint->stop();
     }

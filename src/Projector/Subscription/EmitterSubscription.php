@@ -38,6 +38,6 @@ final readonly class EmitterSubscription implements EmitterSubscriber
             return $userScope($this);
         }
 
-        return new EmitterAccess($this->management);
+        return new EmitterAccess();
     }
 }

@@ -16,11 +16,6 @@ interface PersistentManagement extends Management
     public function rise(): void;
 
     /**
-     * Stop the projection.
-     */
-    public function close(): void;
-
-    /**
      * Restart the projection.
      */
     public function restart(): void;

@@ -49,12 +49,12 @@ final readonly class QuerySubscription implements QuerySubscriber
             return $userScope($this->subscription);
         }
 
-        return new QueryAccess($this->management);
+        return new QueryAccess();
     }
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->subscription->activityFactory)($this->subscription, $this->getScope(), null);
+        $activities = ($this->subscription->activityFactory)($this->subscription, $this->getScope(), $this->management);
 
         return new Workflow($this->subscription, $activities, null);
     }

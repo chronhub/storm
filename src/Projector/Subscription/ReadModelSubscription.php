@@ -38,6 +38,6 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
             return $userScope($this);
         }
 
-        return new ReadModelAccess($this->management);
+        return new ReadModelAccess();
     }
 }

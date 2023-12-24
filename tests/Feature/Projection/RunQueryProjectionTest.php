@@ -474,8 +474,6 @@ it('can run query projection without user state', function () {
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (QueryAccess $scope): void {
             expect($scope->getState())->toBeNull();
-
-            $scope->setState(['count' => 1]);
         })->run(false);
 
     expect($projector->getState())->toBe([]);

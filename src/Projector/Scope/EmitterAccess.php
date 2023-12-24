@@ -8,6 +8,8 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
+use Chronhub\Storm\Contracts\Projector\Management;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use DateTimeImmutable;
 
@@ -19,11 +21,9 @@ use DateTimeImmutable;
  */
 final class EmitterAccess implements ArrayAccess, EmitterScope
 {
-    use AccessBehaviour;
+    use ScopeBehaviour;
 
-    public function __construct(private readonly EmitterManagement $management)
-    {
-    }
+    protected ?EmitterManagement $management = null;
 
     public function emit(DomainEvent $event): void
     {
@@ -48,5 +48,14 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
     public function clock(): SystemClock
     {
         return $this->management->getClock();
+    }
+
+    protected function setManagement(Management $management): void
+    {
+        if (! $management instanceof EmitterManagement) {
+            throw new RuntimeException('Management must be an instance of '.EmitterManagement::class);
+        }
+
+        $this->management = $management;
     }
 }

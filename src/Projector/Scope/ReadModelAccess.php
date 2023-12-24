@@ -6,9 +6,11 @@ namespace Chronhub\Storm\Projector\Scope;
 
 use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Contracts\Projector\StackedReadModel;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 
 /**
@@ -19,11 +21,9 @@ use DateTimeImmutable;
  */
 final class ReadModelAccess implements ArrayAccess, ReadModelScope
 {
-    use AccessBehaviour;
+    use ScopeBehaviour;
 
-    public function __construct(private readonly ReadModelManagement $management)
-    {
-    }
+    protected ?ReadModelManagement $management = null;
 
     public function stop(): void
     {
@@ -50,5 +50,14 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
     public function clock(): SystemClock
     {
         return $this->management->getClock();
+    }
+
+    protected function setManagement(Management $management): void
+    {
+        if (! $management instanceof ReadModelManagement) {
+            throw new RuntimeException('Management must be an instance of '.ReadModelManagement::class);
+        }
+
+        $this->management = $management;
     }
 }

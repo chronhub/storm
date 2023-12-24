@@ -6,8 +6,10 @@ namespace Chronhub\Storm\Projector\Scope;
 
 use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
+use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use DateTimeImmutable;
 
 /**
@@ -18,15 +20,13 @@ use DateTimeImmutable;
  */
 final class QueryAccess implements ArrayAccess, QueryProjectorScope
 {
-    use AccessBehaviour;
+    use ScopeBehaviour;
 
-    public function __construct(private readonly QueryManagement $management)
-    {
-    }
+    protected ?QueryManagement $management = null;
 
     public function stop(): void
     {
-        $this->management->stop();
+        $this->management->close();
     }
 
     public function streamName(): string
@@ -37,5 +37,14 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
     public function clock(): SystemClock
     {
         return $this->management->getClock();
+    }
+
+    protected function setManagement(Management $management): void
+    {
+        if (! $management instanceof QueryManagement) {
+            throw new RuntimeException('Management must be an instance of '.QueryManagement::class);
+        }
+
+        $this->management = $management;
     }
 }
