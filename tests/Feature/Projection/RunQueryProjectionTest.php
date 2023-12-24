@@ -7,10 +7,8 @@ namespace Chronhub\Storm\Tests\Feature;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Filter\InMemoryLimitByOneQuery;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -35,18 +33,17 @@ it('can run query projection 1', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
-            $state['count']++;
-
-            if ($state['count'] === 1) {
-                expect($scope)->toBeInstanceOf(QueryAccess::class)
-                    ->and($scope->streamName())->toBe('user')
-                    ->and($scope->clock())->toBeInstanceOf(PointInTime::class);
-            }
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->when($scope['count'] === 1, function ($scope) {
+                    expect($scope)->toBeInstanceOf(QueryAccess::class)
+                        ->and($scope->streamName())->toBe('user')
+                        ->and($scope->clock())->toBeInstanceOf(PointInTime::class);
+                });
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 10]);
@@ -62,35 +59,15 @@ it('can run query projection until and increment loop', function () {
     $projector = $this->projectorManager->newQueryProjector();
 
     // force to only handle one event
-    $queryFilter = new class() implements InMemoryQueryFilter, ProjectionQueryFilter
-    {
-        private int $currentPosition = 0;
-
-        public function apply(): callable
-        {
-            return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::INTERNAL_POSITION) === $this->currentPosition;
-        }
-
-        public function orderBy(): string
-        {
-            return 'asc';
-        }
-
-        public function setStreamPosition(int $streamPosition): void
-        {
-            $this->currentPosition = $streamPosition;
-        }
-    };
+    $queryFilter = new InMemoryLimitByOneQuery();
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($queryFilter)
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })
         ->until(1)
         ->run(true);
@@ -110,18 +87,14 @@ it('can stop query projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
-            $state['count']++;
-
-            if ($state['count'] === 5) {
-                $scope->stop();
-            }
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->stopWhen($scope['count'] === 5);
         })->run(false);
-
     expect($projector->getState())->toBe(['count' => 5]);
 });
 
@@ -137,13 +110,11 @@ it('can run query projection in background with timer 1000', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->until(0)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(true);
 
     expect($projector->getState())->toBe(['count' => 10]);
@@ -152,7 +123,7 @@ it('can run query projection in background with timer 1000', function () {
 it('rerun a completed query projection will return the original initialized state', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 5, '+1 seconds', $eventId);
+    $stream = $this->testFactory->getStream('user', 10, '+1 seconds', $eventId);
     $this->eventStore->firstCommit($stream);
 
     // create a projection
@@ -161,15 +132,13 @@ it('rerun a completed query projection will return the original initialized stat
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 5]);
+    expect($projector->getState())->toBe(['count' => 10]);
 
     $projector->run(false);
 
@@ -188,13 +157,13 @@ it('can rerun query projection from incomplete run and override state', function
     // first run
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-            $state['ids'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->mergeState('ids', [$scope->internalPosition()]);
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 5, 'ids' => [1, 2, 3, 4, 5]]);
@@ -207,7 +176,7 @@ it('can rerun query projection from incomplete run and override state', function
     $projector->run(false);
     expect($projector->getState())->toBe(['count' => 3, 'ids' => [6, 7, 8]]);
 
-    // third run from a "completed" state
+    // third run for a "completed" state
     $projector->run(false);
     expect($projector->getState())->toBe(['count' => 0, 'ids' => []]);
 });
@@ -227,13 +196,13 @@ it('assert query projection does not handle gap', function () {
     // run once
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-            $state['ids'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->mergeState('ids', [$scope->internalPosition()]);
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 2, 'ids' => [1, 5]]);
@@ -252,12 +221,10 @@ it('can rerun query projection while keeping state in memory', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->withKeepState()
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 10]);
@@ -282,7 +249,7 @@ it('raise exception when keeping state in memory but user state has not been ini
     // run projection
     $projector
         ->withKeepState()
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (): void {
             throw new RuntimeException('Should not be called');
@@ -305,12 +272,10 @@ it('can reset query projection and re run from scratch', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 10]);
@@ -338,12 +303,10 @@ it('can run query projection from category', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToCategories('balance')
+        ->subscribeToCategory('balance')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 4]);
@@ -371,10 +334,8 @@ it('can run query projection from all streams', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToAll()
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 14]);
@@ -386,25 +347,7 @@ it('can run query projection from current stream position', function () {
     $stream = $this->testFactory->getStream('user', 5, null, $eventId);
     $this->eventStore->firstCommit($stream);
 
-    $queryFilter = new class() implements InMemoryQueryFilter, ProjectionQueryFilter
-    {
-        private int $currentPosition = 0;
-
-        public function apply(): callable
-        {
-            return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::INTERNAL_POSITION) === $this->currentPosition;
-        }
-
-        public function orderBy(): string
-        {
-            return 'asc';
-        }
-
-        public function setStreamPosition(int $streamPosition): void
-        {
-            $this->currentPosition = $streamPosition;
-        }
-    };
+    $queryFilter = new InMemoryLimitByOneQuery();
 
     // create a projection
     $projector = $this->projectorManager->newQueryProjector();
@@ -414,18 +357,21 @@ it('can run query projection from current stream position', function () {
         ->initialize(fn () => ['position' => []])
         ->subscribeToAll()
         ->withQueryFilter($queryFilter)
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['position'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->mergeState('position', [$scope->event()->header(EventHeader::INTERNAL_POSITION)]);
         })->run(false);
 
     expect($projector->getState())->toBe(['position' => [1]]);
 
+    $current = 1;
     $next = 4;
     while ($next > 0) {
         $projector->run(false);
+        expect($projector->getState())->toBe(['position' => [$current + 1]]);
         $next--;
+        $current++;
     }
 
     expect($projector->getState())->toBe(['position' => [5]]);
@@ -458,10 +404,10 @@ it('can run query projection with a dedicated query filter', function () {
         ->initialize(fn () => ['positions' => []])
         ->subscribeToAll()
         ->withQueryFilter($queryFilter)
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['positions'][] = $event->header(EventHeader::INTERNAL_POSITION);
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->mergeState('positions', [$scope->internalPosition()]);
         })->run(false);
 
     expect($projector->getState())->toBe(['positions' => [8, 9, 10]]);
@@ -479,17 +425,13 @@ it('can run query projection with user state 123', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, $state): array {
-            expect($state)->toBeArray()->and($state['count'])->toBe(0);
-
-            $state['count']++;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            expect($scope->getState())->toBeArray()->and($scope['count'])->toBe(0);
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 1]);
+    expect($projector->getState())->toBe(['count' => 0]);
 });
 
 it('can run query projection with empty user state', function () {
@@ -504,46 +446,18 @@ it('can run query projection with empty user state', function () {
     // run projection
     $projector
         ->initialize(fn () => [])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, $state): array {
-            expect($state)->toBeArray()->toBeEmpty();
+        ->when(function (QueryAccess $scope): void {
+            expect($scope->getState())->toBeArray()->toBeEmpty();
 
-            return ['count' => 1];
+            $scope['count'] = 1;
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 1]);
 });
 
-it('can run query projection with user state and return', function (array $returnState) {
-    // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
-    $this->eventStore->firstCommit($stream);
-
-    // create a projection
-    $projector = $this->projectorManager->newQueryProjector();
-
-    // run projection
-    $projector
-        ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, $state) use ($returnState): array {
-            expect($state)->toBeArray()->and($state['count'])->toBe(0);
-
-            $state['count']++;
-
-            return $returnState;
-        })->run(false);
-
-    expect($projector->getState())->toBe($returnState);
-})->with([
-    'whatever data' => [['return whatever data']],
-    'empty array' => [[]],
-]);
-
-it('can run query projection without user state and return will be ignored', function () {
+it('can run query projection without user state', function () {
     // unless, dev uses his own state, a query projection is useless without an initial state
 
     // feed our event store
@@ -556,30 +470,12 @@ it('can run query projection without user state and return will be ignored', fun
 
     // run projection
     $projector
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, ProjectorScope $scope, ?array $state = null): array {
-            expect($state)->toBeNull();
+        ->when(function (QueryAccess $scope): void {
+            expect($scope->getState())->toBeNull();
 
-            return ['foo' => 'bar'];
-        })->run(false);
-
-    expect($projector->getState())->toBe([]);
-});
-
-it('test state is not altered with no event to handle', function () {
-    // create a projection
-    $projector = $this->projectorManager->newQueryProjector();
-
-    $outState = ['foo' => 'bar'];
-
-    // run projection
-    $projector
-        ->initialize(fn () => [])
-        ->subscribeToStreams('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state) use ($outState): array {
-            return $outState;
+            $scope->setState(['count' => 1]);
         })->run(false);
 
     expect($projector->getState())->toBe([]);

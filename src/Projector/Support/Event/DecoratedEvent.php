@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Support\Event;
 
+use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 use DateTimeImmutable;
 
@@ -15,12 +16,17 @@ abstract class DecoratedEvent
 
     abstract public static function fromEvent(DomainEvent $event): self;
 
-    abstract public function eventId(): mixed;
+    abstract public function id(): mixed;
 
-    abstract public function eventTime(): string|DateTimeImmutable;
+    abstract public function time(): string|DateTimeImmutable;
 
-    public function eventContent(): array
+    public function content(): array
     {
         return $this->event->toContent();
+    }
+
+    public function internalPosition(): int
+    {
+        return $this->event->header(EventHeader::INTERNAL_POSITION);
     }
 }

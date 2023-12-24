@@ -93,7 +93,7 @@ final class DefaultContext implements ContextReader
         return $this;
     }
 
-    public function subscribeToStreams(string ...$streamNames): self
+    public function subscribeToStream(string ...$streamNames): self
     {
         $this->assertQueriesNotSet();
 
@@ -102,7 +102,7 @@ final class DefaultContext implements ContextReader
         return $this;
     }
 
-    public function subscribeToCategories(string ...$categories): self
+    public function subscribeToCategory(string ...$categories): self
     {
         $this->assertQueriesNotSet();
 

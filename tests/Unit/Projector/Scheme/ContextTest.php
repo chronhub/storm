@@ -55,13 +55,13 @@ test('can set reactors once', function () {
 })->throws(InvalidArgumentException::class, 'Projection reactors already set');
 
 test('from streams', function () {
-    $this->context->subscribeToStreams('foo', 'bar');
+    $this->context->subscribeToStream('foo', 'bar');
 
     expect($this->context->queries())->toBe(['names' => ['foo', 'bar']]);
 });
 
 test('from categories', function () {
-    $this->context->subscribeToCategories('foo', 'bar');
+    $this->context->subscribeToCategory('foo', 'bar');
 
     expect($this->context->queries())->toBe(['categories' => ['foo', 'bar']]);
 });
@@ -73,16 +73,16 @@ test('from all', function () {
 });
 
 test('can not set queries twice from streams', function () {
-    $this->context->subscribeToStreams('foo');
-    $this->context->subscribeToStreams('bar');
+    $this->context->subscribeToStream('foo');
+    $this->context->subscribeToStream('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
 
 test('can not set queries twice from categories', function () {
-    $this->context->subscribeToCategories('foo');
-    $this->context->subscribeToStreams('bar');
+    $this->context->subscribeToCategory('foo');
+    $this->context->subscribeToStream('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');
 
 test('can not set queries twice from all', function () {
     $this->context->subscribeToAll();
-    $this->context->subscribeToStreams('bar');
+    $this->context->subscribeToStream('bar');
 })->throws(InvalidArgumentException::class, 'Projection streams all|names|categories already set');

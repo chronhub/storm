@@ -4,39 +4,49 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Scope;
 
+use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Reporter\DomainEvent;
+use DateTimeImmutable;
 
-final readonly class EmitterAccess implements EmitterScope
+/**
+ * @method mixed                    id()
+ * @method string|DateTimeImmutable time()
+ * @method array                    content()
+ * @method int                      internalPosition()
+ */
+final class EmitterAccess implements ArrayAccess, EmitterScope
 {
-    public function __construct(private EmitterManagement $emitter)
+    use AccessBehaviour;
+
+    public function __construct(private readonly EmitterManagement $management)
     {
     }
 
     public function emit(DomainEvent $event): void
     {
-        $this->emitter->emit($event);
+        $this->management->emit($event);
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
     {
-        $this->emitter->linkTo($streamName, $event);
+        $this->management->linkTo($streamName, $event);
     }
 
     public function stop(): void
     {
-        $this->emitter->close();
+        $this->management->close();
     }
 
     public function streamName(): string
     {
-        return $this->emitter->getCurrentStreamName();
+        return $this->management->getCurrentStreamName();
     }
 
     public function clock(): SystemClock
     {
-        return $this->emitter->getClock();
+        return $this->management->getClock();
     }
 }

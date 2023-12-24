@@ -34,10 +34,10 @@ test('can run read model projection with scope', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope) use ($readModel): void {
-            $scope->increment();
+            $scope->ack(SomeEvent::class)?->incrementState();
 
             expect($scope)
                 ->toBeInstanceOf(ReadModelAccess::class)
@@ -48,6 +48,48 @@ test('can run read model projection with scope', function () {
 
     expect($projector->getState())->toBe(['count' => 10]);
 });
+
+test('raise exception when event was not acked when calling event', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->subscribeToStream('user')
+        ->withQueryFilter($this->fromIncludedPosition)
+        ->when(function (ReadModelAccess $scope): void {
+            $scope->event();
+        })->run(false);
+})->throws(RuntimeException::class, 'Event must be acked before returning it');
+
+test('raise exception when event was not acked when calling stack event', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0])
+        ->subscribeToStream('user')
+        ->withQueryFilter($this->fromIncludedPosition)
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->incrementState()
+                ->stack('insert', $scope->id(), $scope->getState());
+        })->run(false);
+})->throws(RuntimeException::class, 'Event must be acked before returning it');
 
 test('can run read model projection with new scope', function () {
     // feed our event store
@@ -62,21 +104,58 @@ test('can run read model projection with new scope', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
-                ?->when(
+                ?->incrementState()
+                ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(false);
 
     expect($projector->getState())
         ->toBe(['count' => 10])
+        ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
+});
+
+test('can run read model projection and count events', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    $eventId1 = Uuid::v4()->toRfc4122();
+    $stream1 = $this->testFactory->getStream('foo', 5, null, $eventId1, AnotherEvent::class);
+    $this->eventStore->firstCommit($stream1);
+
+    // create a projection
+    $readModel = $this->testFactory->readModel;
+    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['count' => 0, 'other' => 0])
+        ->subscribeToStream('user', 'foo')
+        ->withQueryFilter($this->fromIncludedPosition)
+        ->when(function (ReadModelAccess $scope): void {
+            $scope
+                ->ackOneOf(SomeEvent::class)
+                ?->incrementState()
+                ->when(
+                    $scope['count'] === 1,
+                    fn () => $scope->stack('insert', $scope->id(), ['count' => $scope['count']]),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
+                );
+
+            ! $scope->isAcked() and $scope->incrementState('other');
+        })->run(false);
+
+    expect($projector->getState())
+        ->toBe(['count' => 10, 'other' => 5])
         ->and($readModel->getContainer())->toBe([$eventId => ['count' => 10]]);
 });
 
@@ -93,16 +172,16 @@ test('can stop read model projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 )->stopWhen($scope['count'] === 7);
         })->run(false);
 
@@ -124,16 +203,16 @@ test('can reset read model projection', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -167,16 +246,16 @@ test('can delete read model projection with read model', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -211,16 +290,16 @@ test('can delete read model projection without read model', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -255,16 +334,16 @@ test('can rerun read model projection by catchup', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(false);
 
@@ -298,22 +377,22 @@ test('11can run read model projection from many streams', function () {
     // run projection
     $projector
         ->initialize(fn () => ['some_event' => 0, 'another_event' => 0])
-        ->subscribeToStreams('debit', 'credit')
+        ->subscribeToStream('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment('some_event')
+                ?->incrementState('some_event')
                 ->when(
                     $scope['some_event'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), ['count' => 1]),
-                    fn () => $scope->stack('increment', $scope->eventId(), 'count', 1),
+                    fn () => $scope->stack('insert', $scope->id(), ['count' => 1]),
+                    fn () => $scope->stack('increment', $scope->id(), 'count', 1),
                 );
 
             $scope
                 ->ack(AnotherEvent::class)
-                ?->increment('another_event')
-                ->stack('increment', $scope->eventId(), 'count', 1);
+                ?->incrementState('another_event')
+                ->stack('increment', $scope->id(), 'count', 1);
         })->run(false);
 
     expect($projector->getState())->toBe(['some_event' => 10, 'another_event' => 10])
@@ -340,18 +419,18 @@ test('can run read model projection from many streams and sort events by ascendi
     // run projection
     $projector
         ->initialize(fn () => ['order' => [], 'index' => 0])
-        ->subscribeToStreams('debit', 'credit')
+        ->subscribeToStream('debit', 'credit')
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment('index')
-                ?->update('order.'.$scope->streamName().'.'.$scope->getState()['index'], $scope->event()::class);
+                ?->incrementState('index')
+                ->updateState('order.'.$scope->streamName().'.'.$scope['index'], $scope->event()::class);
 
             $scope
                 ->ack(AnotherEvent::class)
-                ?->increment('index')
-                ?->update('order.'.$scope->streamName().'.'.$scope->getState()['index'], $scope->event()::class);
+                ?->incrementState('index')
+                ->updateState('order.'.$scope->streamName().'.'.$scope['index'], $scope->event()::class);
 
         })->run(false);
 
@@ -373,17 +452,17 @@ test('can no stream event loaded', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('debit')
+        ->subscribeToStream('debit')
         ->until(1)
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
-                ?->increment()
+                ?->incrementState()
                 ->when(
                     $scope['count'] === 1,
-                    fn () => $scope->stack('insert', $scope->eventId(), $scope->getState()),
-                    fn () => $scope->stack('update', $scope->eventId(), 'count', $scope->getState()['count'])
+                    fn () => $scope->stack('insert', $scope->id(), $scope->getState()),
+                    fn () => $scope->stack('update', $scope->id(), 'count', $scope['count'])
                 );
         })->run(true);
 
@@ -395,7 +474,7 @@ test('raise exception when query filter is not a projection query filter', funct
     $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
 
     $projector
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);

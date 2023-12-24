@@ -6,11 +6,9 @@ namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Contracts\Projector\EmitterScope;
-use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
+use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -35,22 +33,21 @@ it('can run emitter projection 111', function (): void {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
-            if ($state['count'] === 1) {
-                expect($scope)
-                    ->toBeInstanceOf(EmitterAccess::class)
-                    ->and($scope->streamName())->toBe('user')
-                    ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
-                    ->and($event)->toBeInstanceOf(SomeEvent::class);
-            }
+        ->when(function (EmitterAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->when($scope['count'] === 1, function (EmitterAccess $scope): void {
+                    expect($scope)
+                        ->toBeInstanceOf(EmitterAccess::class)
+                        ->and($scope->streamName())->toBe('user')
+                        ->and($scope->clock())->toBeInstanceOf(PointInTime::class)
+                        ->and($scope->event())->toBeInstanceOf(SomeEvent::class);
+                });
 
             expect($scope->streamName())->not()->toBeNull();
-
-            $state['count']++;
-
-            return $state;
         })->run(false);
 
     expect($projector->getState())->toBe(['count' => 10]);
@@ -70,14 +67,13 @@ it('can emit event to a new stream named from projection', function (): void {
     // run projection
     $emitter
         ->initialize(fn () => ['events' => []])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, EmitterAccess $scope): array {
-            $scope->emit($event);
-
-            $state['events'][] = $event;
-
-            return $state;
+        ->when(function (EmitterAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->mergeState('events', [$scope->event()])
+                ->emit($scope->event());
         })->run(false);
 
     expect($emitter->getState()['events'])->toHaveCount(10)
@@ -88,12 +84,12 @@ it('can emit event to a new stream named from projection', function (): void {
 
     $query
         ->initialize(fn () => ['events' => []])
-        ->subscribeToStreams('customer')
+        ->subscribeToStream('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state): array {
-            $state['events'][] = $event;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->mergeState('events', $scope->event());
         })->run(false);
 
     expect($query->getState()['events'])->toHaveCount(10)
@@ -115,15 +111,23 @@ it('can link event to a new stream', function (): void {
     // run projection
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
-            $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
-
-            $scope->linkTo('user_'.$eventType, $event);
-            $state[$eventType][] = $event;
-
-            return $state;
+        ->when(function (EmitterAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->when(
+                    $scope->internalPosition() % 2 === 0,
+                    function (EmitterAccess $scope): void {
+                        $scope
+                            ->mergeState('even', $scope->event())
+                            ->linkTo('user_even', $scope->event());
+                    }, function (EmitterAccess $scope): void {
+                        $scope
+                            ->mergeState('odd', [$scope->event()])
+                            ->linkTo('user_odd', $scope->event());
+                    }
+                );
         })->run(false);
 
     expect($emitter->getState()['odd'])->toHaveCount(5)
@@ -136,14 +140,19 @@ it('can link event to a new stream', function (): void {
 
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->subscribeToStreams('user_odd', 'user_even')
+        ->subscribeToStream('user_odd', 'user_even')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $projector): array {
-            $projector->streamName() === 'user_odd'
-                ? $state['odd'][] = $event
-                : $state['even'][] = $event;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->when(
+                    $scope->streamName() === 'user_odd',
+                    function (QueryAccess $scope): void {
+                        $scope->mergeState('odd', $scope->event());
+                    }, function (QueryAccess $scope): void {
+                        $scope->mergeState('even', $scope->event());
+                    }
+                );
         })->run(false);
 
     expect($query->getState())->toBe($emitter->getState());
@@ -160,19 +169,27 @@ it('can link event to new categories', function (): void {
 
     // create a projection
     $emitter = $this->projectorManager->newEmitterProjector('customer');
+
     // run projection
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, EmitterScope $projector): array {
-            $eventType = ($event->header(EventHeader::INTERNAL_POSITION) % 2 === 0) ? 'even' : 'odd';
-
-            $projector->linkTo('customer-'.$eventType, $event);
-
-            $state[$eventType][] = $event;
-
-            return $state;
+        ->when(function (EmitterAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->when(
+                    $scope->internalPosition() % 2 === 0,
+                    function (EmitterAccess $scope): void {
+                        $scope
+                            ->mergeState('even', $scope->event())
+                            ->linkTo('customer-even', $scope->event());
+                    }, function (EmitterAccess $scope): void {
+                        $scope
+                            ->mergeState('odd', $scope->event())
+                            ->linkTo('customer-odd', $scope->event());
+                    }
+                );
         })->run(false);
 
     expect($emitter->getState()['odd'])->toHaveCount(5)
@@ -185,14 +202,19 @@ it('can link event to new categories', function (): void {
 
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
-        ->subscribeToCategories('customer')
+        ->subscribeToCategory('customer')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, QueryProjectorScope $scope): array {
-            $scope->streamName() === 'customer-odd'
-                ? $state['odd'][] = $event
-                : $state['even'][] = $event;
-
-            return $state;
+        ->when(function (QueryAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ?->when(
+                    $scope->streamName() === 'customer-odd',
+                    function (QueryAccess $scope): void {
+                        $scope->mergeState('odd', $scope->event());
+                    }, function (QueryAccess $scope): void {
+                        $scope->mergeState('even', $scope->event());
+                    }
+                );
         })->run(false);
 
     expect($query->getState())->toBe($emitter->getState());
@@ -202,7 +224,7 @@ it('raise exception when query filter is not a projection query filter', functio
     $projector = $this->projectorManager->newEmitterProjector('customer');
 
     $projector
-        ->subscribeToStreams('user')
+        ->subscribeToStream('user')
         ->withQueryFilter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);

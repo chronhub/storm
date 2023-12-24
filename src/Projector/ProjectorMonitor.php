@@ -45,7 +45,7 @@ final readonly class ProjectorMonitor implements ProjectorMonitorInterface
         return $this->tryRetrieveProjectionByName($projectionName)->status();
     }
 
-    public function streamPositionsOf(string $projectionName): array
+    public function checkpointOf(string $projectionName): array
     {
         $projection = $this->tryRetrieveProjectionByName($projectionName);
 

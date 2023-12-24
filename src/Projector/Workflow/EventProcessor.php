@@ -11,6 +11,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
 use function is_array;
+use function method_exists;
 use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
@@ -70,17 +71,24 @@ final readonly class EventProcessor
     {
         $initializedState = $this->getUserState($subscription);
 
-        $this->scope->setEvent($event);
-        if (is_array($initializedState)) {
+        if (method_exists($this->scope, 'setState')) {
             $this->scope->setState($initializedState);
         }
 
-        ($this->reactors)($this->scope);
-        /*$currentState = is_array($initializedState)
-            ? ($this->reactors)($event, $initializedState, $this->scope)
-            : ($this->reactors)($event, $this->scope);*/
+        if (method_exists($this->scope, 'setEvent')) {
+            $this->scope->setEvent($event);
+        }
 
-        $this->updateUserState($subscription, $initializedState, $this->scope->getState());
+        ($this->reactors)($this->scope);
+
+        if (method_exists($this->scope, 'getState')) {
+            $this->updateUserState($subscription, $initializedState, $this->scope->getState());
+        }
+
+        if (method_exists($this->scope, 'finish')) {
+            // if isAcked
+            $this->scope->finish();
+        }
     }
 
     private function getUserState(Subscription $subscription): ?array

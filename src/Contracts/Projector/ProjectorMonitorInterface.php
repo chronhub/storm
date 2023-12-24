@@ -47,7 +47,7 @@ interface ProjectorMonitorInterface
      *
      * @throws ProjectionNotFound
      */
-    public function streamPositionsOf(string $projectionName): array;
+    public function checkpointOf(string $projectionName): array;
 
     /**
      * Get the projection state.
