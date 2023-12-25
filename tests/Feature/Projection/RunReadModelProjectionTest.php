@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Reporter\DomainEvent;
+use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -22,11 +23,19 @@ beforeEach(function () {
     $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
-test('can run read model projection with scope', function () {
-    // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+$eventStore = function (string $name, int $num, ?string $eventId = null): Stream {
+    $eventId = $eventId ?? Uuid::v4()->toRfc4122();
+
+    $stream = $this->testFactory->getStream($name, $num, null, $eventId);
+
     $this->eventStore->firstCommit($stream);
+
+    return $stream;
+};
+
+test('can run read model projection with scope', function () use ($eventStore) {
+    // feed our event store
+    $eventStore->call($this, 'user', 10);
 
     // create a projection
     $readModel = $this->testFactory->readModel;
@@ -50,11 +59,9 @@ test('can run read model projection with scope', function () {
     expect($projector->getState())->toBe(['count' => 10]);
 });
 
-test('raise exception when event was not acked when calling event', function () {
+test('raise exception when event was not acked when calling event', function () use ($eventStore) {
     // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 1, null, $eventId);
-    $this->eventStore->firstCommit($stream);
+    $eventStore->call($this, 'user', 1);
 
     // create a projection
     $readModel = $this->testFactory->readModel;
@@ -70,11 +77,9 @@ test('raise exception when event was not acked when calling event', function () 
         })->run(false);
 })->throws(RuntimeException::class, 'Event must be acked before returning it');
 
-test('raise exception when event was not acked when calling stack event', function () {
+test('raise exception when event was not acked when calling stack event', function () use ($eventStore) {
     // feed our event store
-    $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 1, null, $eventId);
-    $this->eventStore->firstCommit($stream);
+    $eventStore->call($this, 'user', 10);
 
     // create a projection
     $readModel = $this->testFactory->readModel;
@@ -92,11 +97,10 @@ test('raise exception when event was not acked when calling stack event', functi
         })->run(false);
 })->throws(RuntimeException::class, 'Event must be acked before returning it');
 
-test('can run read model projection with new scope', function () {
+test('can run read model projection with new scope', function () use ($eventStore) {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
-    $this->eventStore->firstCommit($stream);
+    $eventStore->call($this, 'user', 10, $eventId);
 
     // create a projection
     $readModel = $this->testFactory->readModel;
