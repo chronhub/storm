@@ -35,8 +35,9 @@ use Chronhub\Storm\Projector\Subscription\QueryingManagement;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
 use Chronhub\Storm\Projector\Support\EventCounter;
+use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
 use Illuminate\Contracts\Events\Dispatcher;
 
@@ -56,38 +57,37 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscription = $this->createSubscription($option, false);
+        $subscriptor = $this->createSusbcriptor($option, false);
 
-        return new QuerySubscription($subscription, new QueryingManagement($subscription));
+        return new QuerySubscription($subscriptor, new QueryingManagement($subscriptor));
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscription = $this->createSubscription($option, true);
-        $subscription->setEventCounter($this->createEventCounter($option));
+        $subscriptor = $this->createSusbcriptor($option, true);
 
         $management = new EmittingManagement(
-            $subscription,
+            $subscriptor,
+            $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
             new EmittedStream()
         );
 
-        return new EmitterSubscription($subscription, $management);
+        return new EmitterSubscription($subscriptor, $management);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscription = $this->createSubscription($option, true);
-        $subscription->setEventCounter($this->createEventCounter($option));
+        $subscriptor = $this->createSusbcriptor($option, true);
 
         $management = new ReadingModelManagement(
-            $subscription,
+            $subscriptor,
             $this->createProjectionRepository($streamName, $option),
             $readModel
         );
 
-        return new ReadModelSubscription($subscription, $management);
+        return new ReadModelSubscription($subscriptor, $management);
     }
 
     public function createOption(array $options = []): ProjectionOption
@@ -119,19 +119,27 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function useEvents(bool $useEvents): void;
 
-    protected function createSubscription(ProjectionOption $option, bool $persistent): Subscription
+    abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
+
+    protected function createSusbcriptor(ProjectionOption $option, bool $isPersistent): SubscriptionManager
     {
-        return new Subscription(
-            new EventStreamDiscovery($this->eventStreamProvider),
-            $this->createStreamManager($option),
+        $activities = $isPersistent ? new PersistentActivityFactory() : new QueryActivityFactory();
+
+        return new SubscriptionManager(
+            $this->createEventStreamDiscovery(),
+            $this->createStreamManager($option), // todo query does not handle gap
             $this->clock,
             $option,
-            $persistent ? new PersistentActivityFactory() : new QueryActivityFactory(),
+            new Loop(),
+            $activities,
             $this->chronicler,
         );
     }
 
-    abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
+    protected function createEventStreamDiscovery(): EventStreamDiscovery
+    {
+        return new EventStreamDiscovery($this->eventStreamProvider);
+    }
 
     protected function createLockManager(ProjectionOption $option): LockManager
     {

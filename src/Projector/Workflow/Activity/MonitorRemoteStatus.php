@@ -6,26 +6,25 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Workflow\Sprint;
 
 final class MonitorRemoteStatus
 {
     private bool $onRise = true;
 
-    public function shouldStop(PersistentManagement $management, Sprint $sprint): bool
+    public function shouldStop(PersistentManagement $management, bool $keepRunning): bool
     {
-        $shouldStop = $this->discovering($management, $sprint);
+        $shouldStop = $this->discovering($management, $keepRunning);
 
         $this->onRise = false;
 
         return $shouldStop;
     }
 
-    public function refreshStatus(PersistentManagement $management, Sprint $sprint): void
+    public function refreshStatus(PersistentManagement $management, bool $keepRunning): void
     {
         $this->onRise = false;
 
-        $this->discovering($management, $sprint);
+        $this->discovering($management, $keepRunning);
     }
 
     private function onStopping(PersistentManagement $management): bool
@@ -40,11 +39,11 @@ final class MonitorRemoteStatus
         return $this->onRise;
     }
 
-    private function onResetting(PersistentManagement $management, Sprint $sprint): bool
+    private function onResetting(PersistentManagement $management, bool $keepRunning): bool
     {
         $management->revise();
 
-        if (! $this->onRise && $sprint->inBackground()) {
+        if (! $this->onRise && $keepRunning) {
             $management->restart();
         }
 
@@ -58,11 +57,11 @@ final class MonitorRemoteStatus
         return $this->onRise;
     }
 
-    private function discovering(PersistentManagement $management, Sprint $sprint): bool
+    private function discovering(PersistentManagement $management, bool $keepRunning): bool
     {
         return match ($management->disclose()->value) {
             ProjectionStatus::STOPPING->value => $this->onStopping($management),
-            ProjectionStatus::RESETTING->value => $this->onResetting($management, $sprint),
+            ProjectionStatus::RESETTING->value => $this->onResetting($management, $keepRunning),
             ProjectionStatus::DELETING->value => $this->onDeleting($management, false),
             ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($management, true),
             default => false,

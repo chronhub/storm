@@ -7,13 +7,14 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
     use InteractWithManagement;
 
     public function __construct(
-        protected Subscription $subscription,
+        protected Subscriptor $subscriptor,
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
@@ -27,7 +28,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->subscription->discoverStreams();
+        $this->subscriptor->discoverStreams();
 
         $this->synchronise();
     }
@@ -41,9 +42,9 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function revise(): void
     {
-        $this->subscription->streamManager->resets();
-        $this->subscription->initializeAgain();
-        $this->repository->reset($this->getProjectionResult(), $this->subscription->currentStatus());
+        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->initializeAgain();
+        $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
         $this->readModel->reset();
     }
 
@@ -55,9 +56,9 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->down();
         }
 
-        $this->subscription->sprint->stop();
-        $this->subscription->streamManager->resets();
-        $this->subscription->initializeAgain();
+        $this->subscriptor->stop();
+        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->initializeAgain();
     }
 
     public function getReadModel(): ReadModel

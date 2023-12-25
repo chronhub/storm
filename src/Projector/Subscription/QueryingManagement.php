@@ -6,25 +6,26 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class QueryingManagement implements QueryManagement
 {
-    public function __construct(private Subscription $subscription)
+    public function __construct(private Subscriptor $subscriptor)
     {
     }
 
     public function close(): void
     {
-        $this->subscription->sprint->stop();
+        $this->subscriptor->stop();
     }
 
     public function getCurrentStreamName(): string
     {
-        return $this->subscription->currentStreamName();
+        return $this->subscriptor->getStreamName();
     }
 
     public function getClock(): SystemClock
     {
-        return $this->subscription->clock;
+        return $this->subscriptor->clock();
     }
 }

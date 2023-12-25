@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -16,80 +16,58 @@ use function pcntl_signal_dispatch;
 
 final readonly class EventProcessor
 {
-    private Closure $reactors;
-
-    private ProjectorScope $scope;
-
-    private Management $management;
-
     public function __construct(
-        Closure $reactors,
-        ProjectorScope $scope,
-        Management $management
+        private Closure $reactors,
+        private ProjectorScope $scope,
+        private Management $management
     ) {
-        $this->reactors = $reactors;
-        $this->scope = $scope;
-        $this->management = $management;
     }
 
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(Subscription $subscription, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(Subscriptor $subscriptor, DomainEvent $event, int $expectedPosition): bool
     {
-        $this->dispatchSignalIfRequested($subscription);
+        $this->dispatchSignalIfRequested($subscriptor);
 
-        if (! $subscription->streamManager->insert($subscription->currentStreamName(), $expectedPosition)) {
+        if (! $subscriptor->addCheckpoint($subscriptor->getStreamName(), $expectedPosition)) {
             return false;
         }
 
-        if ($this->management instanceof PersistentManagement) {
-            $subscription->eventCounter->increment();
-        }
+        $subscriptor->incrementEvent();
 
-        $this->reactOn($event, $subscription);
+        $this->reactOn($event, $subscriptor);
 
         if ($this->management instanceof PersistentManagement) {
             $this->management->persistWhenCounterIsReached();
         }
 
-        return $subscription->sprint->inProgress();
+        return $subscriptor->isRunning();
     }
 
-    private function dispatchSignalIfRequested(Subscription $subscription): void
+    private function reactOn(DomainEvent $event, Subscriptor $subscriptor): void
     {
-        if ($subscription->option->getSignal()) {
-            pcntl_signal_dispatch();
-        }
-    }
-
-    private function reactOn(DomainEvent $event, Subscription $subscription): void
-    {
-        $initializedState = $this->getUserState($subscription);
-
-        // todo reset management in constructor scope
+        $initializedState = $subscriptor->isUserStateInitialized() ? $subscriptor->getUserState() : null;
 
         $resetScope = ($this->scope)($event, $initializedState);
 
         ($this->reactors)($this->scope);
 
-        $this->updateUserState($subscription, $initializedState, $this->scope->getState());
+        $currentState = $this->scope->getState();
+
+        if (is_array($initializedState) && is_array($currentState)) {
+            $subscriptor->setUserState($currentState);
+        }
 
         // todo handle isAcked
 
         $resetScope();
     }
 
-    private function getUserState(Subscription $subscription): ?array
+    private function dispatchSignalIfRequested(Subscriptor $subscriptor): void
     {
-        return $subscription->context()->userState() instanceof Closure
-            ? $subscription->state->get() : null;
-    }
-
-    private function updateUserState(Subscription $subscription, ?array $initializedState, ?array $currentState): void
-    {
-        if (is_array($initializedState) && is_array($currentState)) {
-            $subscription->state->put($currentState);
+        if ($subscriptor->option()->getSignal()) {
+            pcntl_signal_dispatch();
         }
     }
 }

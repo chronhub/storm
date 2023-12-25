@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class RisePersistentProjection
 {
@@ -15,18 +15,18 @@ final readonly class RisePersistentProjection
     ) {
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        if ($subscription->looper->isFirstLoop()) {
+        if ($subscriptor->isFirstLoop()) {
             // depending on the discovered status, the projection can be stopped early,
             // on stopping and on deleting.
-            if ($this->monitor->shouldStop($this->management, $subscription->sprint)) {
+            if ($this->monitor->shouldStop($this->management, $subscriptor->inBackground())) {
                 return false;
             }
 
             $this->management->rise();
         }
 
-        return $next($subscription);
+        return $next($subscriptor);
     }
 }

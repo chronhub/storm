@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 
 final readonly class PersistOrUpdate
@@ -16,39 +16,23 @@ final readonly class PersistOrUpdate
     ) {
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        if ($this->hasGap($subscription)) {
-            return $next($subscription);
+        if (! $subscriptor->hasGap()) {
+            $this->isEventReset($subscriptor)
+                ? $this->management->update() : $this->management->store();
         }
 
-        if (! $this->handleResetEventCounter($subscription)) {
-            $this->noEventCounter->reset();
-            $this->management->store();
-        }
-
-        return $next($subscription);
+        return $next($subscriptor);
     }
 
-    /**
-     * The event counter is reset when no event has been loaded,
-     * and, when persistWhenThresholdReached was successfully called and no more event "handled",
-     * so, we sleep and try updating the lock.
-     */
-    private function handleResetEventCounter(Subscription $subscription): bool
+    private function isEventReset(Subscriptor $subscriptor): bool
     {
-        if ($subscription->eventCounter->isReset()) {
-            $this->noEventCounter->sleep();
-            $this->management->update();
+        match ($subscriptor->isEventReset()) {
+            true => $this->noEventCounter->sleep(),
+            default => $this->noEventCounter->reset(),
+        };
 
-            return true;
-        }
-
-        return false;
-    }
-
-    private function hasGap(Subscription $subscription): bool
-    {
-        return $subscription->hasGapDetection() && $subscription->streamManager->hasGap();
+        return $subscriptor->isEventReset();
     }
 }

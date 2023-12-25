@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Projector\Subscription\Subscription;
 use Closure;
 use Throwable;
 
@@ -19,7 +19,7 @@ final readonly class Workflow
      * @param array<callable> $activities
      */
     public function __construct(
-        private Subscription $subscription,
+        private Subscriptor $subscriptor,
         private array $activities,
         private ?PersistentManagement $management,
     ) {
@@ -30,7 +30,7 @@ final readonly class Workflow
         $process = $this->prepareProcess($destination);
 
         try {
-            return $process($this->subscription);
+            return $process($this->subscriptor);
         } catch (Throwable $exception) {
             return false;
         } finally {
@@ -49,12 +49,12 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (Subscription $subscription) => $destination($subscription);
+        return fn (Subscriptor $subscriptor) => $destination($subscriptor);
     }
 
     private function carry(): Closure
     {
-        return fn (callable $stack, callable $activity) => fn (Subscription $subscription) => $activity($subscription, $stack);
+        return fn (callable $stack, callable $activity) => fn (Subscriptor $subscriptor) => $activity($subscriptor, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void

@@ -27,14 +27,15 @@ trait InteractWithPersistentSubscription
 
     public function getState(): array
     {
-        return $this->subscription->state->get();
+        return $this->subscriptor->getUserState();
     }
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->subscription->activityFactory)($this->subscription, $this->getScope(), $this->management);
+        $factory = $this->subscriptor->getActivityFactory();
+        $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
 
-        return new Workflow($this->subscription, $activities, $this->management);
+        return new Workflow($this->subscriptor, $activities, $this->management);
     }
 
     /**
@@ -46,15 +47,15 @@ trait InteractWithPersistentSubscription
     {
         $this->validateContext($context);
 
-        $this->subscription->setContext($context, true);
-        $this->subscription->setOriginalUserState();
-        $this->subscription->sprint->runInBackground($keepRunning);
-        $this->subscription->sprint->continue();
+        $this->subscriptor->setContext($context, true);
+        $this->subscriptor->setOriginalUserState();
+        $this->subscriptor->runInBackground($keepRunning);
+        $this->subscriptor->continue();
     }
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection($this->newWorkflow(), $this->subscription->looper, $keepRunning);
+        $project = new RunProjection($this->newWorkflow(), $this->subscriptor->loop(), $keepRunning);
 
         $project->beginCycle();
     }

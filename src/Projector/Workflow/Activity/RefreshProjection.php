@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Subscription;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class RefreshProjection
 {
@@ -15,15 +15,15 @@ final readonly class RefreshProjection
     ) {
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
         // depending on the discovered status, the projection
         // can be stopped, restarted if in the background or just keep going.
-        $this->monitor->refreshStatus($this->management, $subscription->sprint);
+        $this->monitor->refreshStatus($this->management, $subscriptor->inBackground());
 
         // watch again for event streams which may have changed after the first watch.
-        $subscription->discoverStreams();
+        $subscriptor->discoverStreams();
 
-        return $next($subscription);
+        return $next($subscriptor);
     }
 }

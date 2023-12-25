@@ -20,7 +20,7 @@ trait InteractWithManagement
     public function freed(): void
     {
         $this->repository->release();
-        $this->subscription->setStatus(ProjectionStatus::IDLE);
+        $this->subscriptor->setStatus(ProjectionStatus::IDLE);
     }
 
     public function close(): void
@@ -28,17 +28,17 @@ trait InteractWithManagement
         $idleStatus = ProjectionStatus::IDLE;
 
         $this->repository->stop($this->getProjectionResult(), $idleStatus);
-        $this->subscription->setStatus($idleStatus);
-        $this->subscription->sprint->stop();
+        $this->subscriptor->setStatus($idleStatus);
+        $this->subscriptor->stop();
     }
 
     public function restart(): void
     {
-        $this->subscription->sprint->continue();
+        $this->subscriptor->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
         $this->repository->startAgain($runningStatus);
-        $this->subscription->setStatus($runningStatus);
+        $this->subscriptor->setStatus($runningStatus);
     }
 
     public function disclose(): ProjectionStatus
@@ -50,26 +50,26 @@ trait InteractWithManagement
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->subscription->streamManager->update($projectionDetail->checkpoints);
+        $this->subscriptor->updateCheckpoints($projectionDetail->checkpoints);
 
         $state = $projectionDetail->userState;
 
         if ($state !== []) {
-            $this->subscription->state->put($state);
+            $this->subscriptor->setUserState($state);
         }
     }
 
     public function persistWhenCounterIsReached(): void
     {
-        if ($this->subscription->eventCounter->isReached()) {
+        if ($this->subscriptor->isEventReached()) {
             $this->store();
 
-            $this->subscription->eventCounter->reset();
-            $this->subscription->setStatus($this->disclose());
+            $this->subscriptor->resetEvent();
+            $this->subscriptor->setStatus($this->disclose());
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->subscription->currentStatus(), $keepProjectionRunning, true)) {
-                $this->subscription->sprint->stop();
+            if (! in_array($this->subscriptor->currentStatus(), $keepProjectionRunning, true)) {
+                $this->subscriptor->stop();
             }
         }
     }
@@ -81,33 +81,32 @@ trait InteractWithManagement
 
     public function getClock(): SystemClock
     {
-        return $this->subscription->clock;
+        return $this->subscriptor->clock();
     }
 
     public function getCurrentStreamName(): string
     {
-        return $this->subscription->currentStreamName();
+        return $this->subscriptor->getStreamName();
     }
 
     protected function mountProjection(): void
     {
-        $this->subscription->sprint->continue();
+        $this->subscriptor->continue();
 
         if (! $this->repository->exists()) {
-            $this->repository->create(
-                $this->subscription->currentStatus()
-            );
+            $this->repository->create($this->subscriptor->currentStatus());
         }
 
         $status = ProjectionStatus::RUNNING;
+
         $this->repository->start($status);
-        $this->subscription->setStatus($status);
+        $this->subscriptor->setStatus($status);
     }
 
     protected function getProjectionResult(): ProjectionResult
     {
-        $streamPositions = $this->subscription->streamManager->jsonSerialize();
+        $streamPositions = $this->subscriptor->checkPoints();
 
-        return new ProjectionResult($streamPositions, $this->subscription->state->get());
+        return new ProjectionResult($streamPositions, $this->subscriptor->getUserState());
     }
 }

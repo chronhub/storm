@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
@@ -17,7 +18,7 @@ use Closure;
 final readonly class QuerySubscription implements QuerySubscriber
 {
     public function __construct(
-        private Subscription $subscription,
+        private Subscriptor $subscriptor,
         private QueryManagement $management,
     ) {
     }
@@ -31,14 +32,14 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function getState(): array
     {
-        return $this->subscription->state->get();
+        return $this->subscriptor->getUserState();
     }
 
     public function resets(): void
     {
-        $this->subscription->streamManager->resets();
+        $this->subscriptor->resetCheckpoint();
 
-        $this->subscription->initializeAgain();
+        $this->subscriptor->initializeAgain();
     }
 
     protected function getScope(): QueryProjectorScope
@@ -48,33 +49,35 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->subscription->activityFactory)($this->subscription, $this->getScope(), $this->management);
+        $factory = $this->subscriptor->getActivityFactory();
 
-        return new Workflow($this->subscription, $activities, null);
+        $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
+
+        return new Workflow($this->subscriptor, $activities, null);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
     {
-        if (! $this->subscription->isContextInitialized()) {
-            $this->subscription->setContext($context, true);
+        if (! $this->subscriptor->isContextInitialized()) {
+            $this->subscriptor->setContext($context, true);
 
-            $this->subscription->setOriginalUserState();
+            $this->subscriptor->setOriginalUserState();
         }
 
         $this->initializeContextAgain();
 
-        $this->subscription->sprint->runInBackground($keepRunning);
-        $this->subscription->sprint->continue();
+        $this->subscriptor->runInBackground($keepRunning);
+        $this->subscriptor->continue();
     }
 
     private function initializeContextAgain(): void
     {
-        if ($this->subscription->context()->keepState() === true) {
-            if (! $this->subscription->context()->userState() instanceof Closure) {
+        if ($this->subscriptor->getContext()->keepState() === true) {
+            if (! $this->subscriptor->getContext()->userState() instanceof Closure) {
                 throw new RuntimeException('Projection context is not initialized. Provide a closure to initialize user state');
             }
         } else {
-            $this->subscription->setOriginalUserState();
+            $this->subscriptor->setOriginalUserState();
         }
     }
 
@@ -82,7 +85,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         $project = new RunProjection(
             $this->newWorkflow(),
-            $this->subscription->looper,
+            $this->subscriptor->loop(),
             $keepRunning
         );
 

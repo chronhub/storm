@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Subscription;
 use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
 use Chronhub\Storm\Stream\StreamName;
 
@@ -30,29 +30,29 @@ final class LoadStreams
         $this->queryFilterResolver = $queryFilterResolver;
     }
 
-    public function __invoke(Subscription $subscription, callable $next): callable|bool
+    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        $hasLoadedStreams = $this->handleStreams($subscription);
+        $hasLoadedStreams = $this->handleStreams($subscriptor);
 
         $this->noEventCounter->hasLoadedStreams($hasLoadedStreams);
 
-        return $next($subscription);
+        return $next($subscriptor);
     }
 
-    private function handleStreams(Subscription $subscription): bool
+    private function handleStreams(Subscriptor $subscriptor): bool
     {
         $streams = $this->batchStreams(
-            $subscription->chronicler,
-            $subscription->streamManager->checkpoints(),
-            $subscription->option->getLoads()
+            $subscriptor->chronicler(),
+            $subscriptor->checkpoints(),
+            $subscriptor->option()->getLoads()
         );
 
         if ($streams === []) {
             return false;
         }
 
-        $iterator = new MergeStreamIterator($subscription->clock, array_keys($streams), ...array_values($streams));
-        $subscription->setStreamIterator($iterator);
+        $iterator = new MergeStreamIterator($subscriptor->clock(), array_keys($streams), ...array_values($streams));
+        $subscriptor->setStreamIterator($iterator);
 
         return true;
     }

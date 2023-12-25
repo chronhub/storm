@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
@@ -18,7 +20,8 @@ final readonly class EmittingManagement implements EmitterManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected Subscription $subscription,
+        protected Subscriptor $subscriptor,
+        protected Chronicler $chronicler,
         protected ProjectionRepository $repository,
         private StreamCache $streamCache,
         private EmittedStream $emittedStream
@@ -31,7 +34,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
         // First commit the stream name without the event
         if ($this->streamNotEmittedAndNotExists($streamName)) {
-            $this->subscription->chronicler->firstCommit(new Stream($streamName));
+            $this->chronicler->firstCommit(new Stream($streamName));
 
             $this->emittedStream->emitted();
         }
@@ -47,15 +50,15 @@ final readonly class EmittingManagement implements EmitterManagement
         $stream = new Stream($newStreamName, [$event]);
 
         $this->streamIsCachedOrExists($newStreamName)
-            ? $this->subscription->chronicler->amend($stream)
-            : $this->subscription->chronicler->firstCommit($stream);
+            ? $this->chronicler->amend($stream)
+            : $this->chronicler->firstCommit($stream);
     }
 
     public function rise(): void
     {
         $this->mountProjection();
 
-        $this->subscription->discoverStreams();
+        $this->subscriptor->discoverStreams();
 
         $this->synchronise();
     }
@@ -67,9 +70,9 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function revise(): void
     {
-        $this->subscription->streamManager->resets();
-        $this->subscription->initializeAgain();
-        $this->repository->reset($this->getProjectionResult(), $this->subscription->currentStatus());
+        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->initializeAgain();
+        $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
 
         $this->deleteStream();
     }
@@ -82,15 +85,15 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->deleteStream();
         }
 
-        $this->subscription->sprint->stop();
-        $this->subscription->streamManager->resets();
-        $this->subscription->initializeAgain();
+        $this->subscriptor->stop();
+        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->initializeAgain();
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool
     {
         return ! $this->emittedStream->wasEmitted()
-            && ! $this->subscription->chronicler->hasStream($streamName);
+            && ! $this->chronicler->hasStream($streamName);
     }
 
     private function streamIsCachedOrExists(StreamName $streamName): bool
@@ -101,7 +104,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
         $this->streamCache->push($streamName->name);
 
-        return $this->subscription->chronicler->hasStream($streamName);
+        return $this->chronicler->hasStream($streamName);
     }
 
     private function deleteStream(): void
@@ -109,7 +112,7 @@ final readonly class EmittingManagement implements EmitterManagement
         try {
             $streamName = new StreamName($this->repository->projectionName());
 
-            $this->subscription->chronicler->delete($streamName);
+            $this->chronicler->delete($streamName);
         } catch (StreamNotFound) {
             // ignore
         }

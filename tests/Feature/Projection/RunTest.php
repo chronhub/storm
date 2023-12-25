@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature\Projection;
 
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
+use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
+use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Symfony\Component\Uid\Uuid;
 
 beforeEach(function () {
@@ -34,16 +35,12 @@ it('can run emitter projection 111', function (): void {
         ->subscribeToStream('user', 'foo')
         //->until(10)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->when(function (DomainEvent $event, array $state, EmitterScope $scope): array {
-
-            $state['count'][$scope->streamName()]++;
-            $state['count']['total']++;
-
-            if ($state['count']['total'] === 15000) {
-                $scope->stop();
-            }
-
-            return $state;
+        ->when(function (EmitterScope $scope): void {
+            $scope
+                ->ackOneOf(SomeEvent::class, AnotherEvent::class)
+                ->incrementState('count.'.$scope->streamName())
+                ->incrementState('count.total')
+                ->stopWhen($scope['count']['total'] === 15000);
         })->run(true);
 
     expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);
