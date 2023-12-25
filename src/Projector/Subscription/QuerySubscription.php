@@ -13,7 +13,6 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
 use Chronhub\Storm\Projector\Workflow\Workflow;
-use Closure;
 
 final readonly class QuerySubscription implements QuerySubscriber
 {
@@ -73,7 +72,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     private function initializeContextAgain(): void
     {
         if ($this->subscriptor->getContext()->keepState() === true) {
-            if (! $this->subscriptor->getContext()->userState() instanceof Closure) {
+            if (! $this->subscriptor->isUserStateInitialized()) {
                 throw new RuntimeException('Projection context is not initialized. Provide a closure to initialize user state');
             }
         } else {
