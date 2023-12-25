@@ -39,10 +39,14 @@ use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
+use Chronhub\Storm\Projector\Support\BatchStreamsAware;
 use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Support\Loop;
+use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
 use Illuminate\Contracts\Events\Dispatcher;
+
+use function is_array;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -140,6 +144,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $option,
             new Loop(),
             $this->getActivities($isPersistent),
+            $this->batchStreamsAware($option),
         );
     }
 
@@ -181,5 +186,18 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $isPersistent
             ? new PersistentActivityFactory($this->chronicler)
             : new QueryActivityFactory($this->chronicler);
+    }
+
+    protected function BatchStreamsAware(ProjectionOption $option): BatchStreamsAware
+    {
+        $sleep = $option->getSleep();
+
+        if (is_array($sleep)) {
+            $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
+
+            return new BatchStreamsAware($bucket);
+        }
+
+        return new BatchStreamsAware(null, $sleep);
     }
 }

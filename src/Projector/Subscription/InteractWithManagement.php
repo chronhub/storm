@@ -7,12 +7,13 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
+use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 
 use function in_array;
 
 trait InteractWithManagement
 {
-    public function update(): void
+    public function tryUpdateLock(): void
     {
         $this->repository->updateLock();
     }
@@ -37,6 +38,7 @@ trait InteractWithManagement
         $this->subscriptor->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
+
         $this->repository->startAgain($runningStatus);
         $this->subscriptor->setStatus($runningStatus);
     }
@@ -64,8 +66,9 @@ trait InteractWithManagement
         if ($this->subscriptor->isEventReached()) {
             $this->store();
 
-            $this->subscriptor->resetEvent();
+            $this->subscriptor->notify(new EventReset());
             $this->subscriptor->setStatus($this->disclose());
+
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
             if (! in_array($this->subscriptor->currentStatus(), $keepProjectionRunning, true)) {

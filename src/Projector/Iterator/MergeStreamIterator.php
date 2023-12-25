@@ -30,17 +30,10 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public readonly int $numberOfEvents;
 
-    public function __construct(
-        private readonly SystemClock $clock,
-        array $streamNames,
-        StreamIterator ...$iterators
-    ) {
-        $this->iterators = collect($iterators)->map(
-            fn (StreamIterator $iterator, int $key): array => [$iterator, $streamNames[$key]]
-        );
-
+    public function __construct(private readonly SystemClock $clock, Collection $iterators)
+    {
+        $this->iterators = $iterators;
         $this->originalIteratorOrder = $this->iterators;
-
         $this->numberOfIterators = $this->iterators->count();
         $this->numberOfEvents = $this->iterators->sum(fn (array $stream) => $stream[0]->count());
 

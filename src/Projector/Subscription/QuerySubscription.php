@@ -58,7 +58,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
     {
-        if (! $this->subscriptor->isContextInitialized()) {
+        if ($this->subscriptor->getContext() === null) {
             $this->subscriptor->setContext($context, true);
 
             $this->subscriptor->setOriginalUserState();

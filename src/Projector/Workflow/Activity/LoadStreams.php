@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
+use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
@@ -25,7 +25,6 @@ final class LoadStreams
 
     public function __construct(
         private readonly Chronicler $chronicler,
-        private readonly NoEventStreamCounter $noEventCounter,
         callable $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
@@ -33,9 +32,9 @@ final class LoadStreams
 
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        $hasLoadedStreams = $this->handleStreams($subscriptor);
+        $hasStreams = $this->handleStreams($subscriptor);
 
-        $this->noEventCounter->hasLoadedStreams($hasLoadedStreams);
+        $subscriptor->notify(new HasBatchStreams($hasStreams));
 
         return $next($subscriptor);
     }
@@ -44,14 +43,19 @@ final class LoadStreams
     {
         $streams = $this->batchStreams($subscriptor->checkpoints(), $subscriptor->option()->getLoads());
 
-        if ($streams === []) {
-            return false;
+        if ($streams !== []) {
+            $iterators = collect(array_values($streams))->map(
+                fn (StreamIterator $iterator, int $key): array => [$iterator, array_keys($streams)[$key]]
+            );
+
+            $iterator = new MergeStreamIterator($subscriptor->clock(), $iterators);
+
+            $subscriptor->setStreamIterator($iterator);
+
+            return true;
         }
 
-        $iterator = new MergeStreamIterator($subscriptor->clock(), array_keys($streams), ...array_values($streams));
-        $subscriptor->setStreamIterator($iterator);
-
-        return true;
+        return false;
     }
 
     /**
@@ -60,19 +64,19 @@ final class LoadStreams
      */
     private function batchStreams(array $streams, int $loadLimiter): array
     {
-        $loadedStreams = [];
+        $streamEvents = [];
 
         foreach ($streams as $streamName => $stream) {
             $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $loadLimiter);
 
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
-                $loadedStreams[$streamName] = new StreamIterator($events);
+                $streamEvents[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;
             }
         }
 
-        return $loadedStreams;
+        return $streamEvents;
     }
 }

@@ -8,6 +8,8 @@ use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -34,7 +36,7 @@ final readonly class EventProcessor
             return false;
         }
 
-        $subscriptor->incrementEvent();
+        $subscriptor->notify(new EventIncremented());
 
         $this->reactOn($event, $subscriptor);
 
@@ -59,7 +61,10 @@ final readonly class EventProcessor
             $subscriptor->setUserState($currentState);
         }
 
-        // todo handle isAcked
+        if ($this->scope->isAcked()) {
+            // todo reset acked event after each cycle
+            $subscriptor->notify(new StreamEventAcked($event::class));
+        }
 
         $resetScope();
     }

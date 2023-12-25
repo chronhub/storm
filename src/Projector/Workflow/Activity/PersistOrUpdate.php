@@ -6,21 +6,20 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Support\NoEventStreamCounter;
+use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
 
 final readonly class PersistOrUpdate
 {
-    public function __construct(
-        private PersistentManagement $management,
-        private NoEventStreamCounter $noEventCounter,
-    ) {
+    public function __construct(private PersistentManagement $management)
+    {
     }
 
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
         if (! $subscriptor->hasGap()) {
             $this->isEventReset($subscriptor)
-                ? $this->management->update() : $this->management->store();
+                ? $this->management->tryUpdateLock() : $this->management->store();
         }
 
         return $next($subscriptor);
@@ -29,8 +28,8 @@ final readonly class PersistOrUpdate
     private function isEventReset(Subscriptor $subscriptor): bool
     {
         match ($subscriptor->isEventReset()) {
-            true => $this->noEventCounter->sleep(),
-            default => $this->noEventCounter->reset(),
+            true => $subscriptor->notify(new SleepWhenEmptyBatchStreams()), //fixMe: acked event and batch event
+            default => $subscriptor->notify(new ResetBatchStreams()),
         };
 
         return $subscriptor->isEventReset();

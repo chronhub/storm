@@ -11,9 +11,7 @@ use Chronhub\Storm\Projector\Support\Loop;
 
 interface Subscriptor
 {
-    public function incrementEvent(): void;
-
-    public function resetEvent(): void;
+    public function notify(object $event): void;
 
     public function isEventReset(): bool;
 
@@ -25,13 +23,11 @@ interface Subscriptor
 
     public function setContext(ContextReader $context, bool $allowRerun): void;
 
-    public function getContext(): ContextReader;
+    public function getContext(): ?ContextReader;
 
     public function initializeAgain(): void;
 
     public function setOriginalUserState(): void;
-
-    public function isContextInitialized(): bool;
 
     public function setUserState(array $userState): void;
 
@@ -64,13 +60,8 @@ interface Subscriptor
     public function clock(): SystemClock;
 
     // todo profiler for events / observer and notification
-    public function ackEvent(string $eventType): void;
-
-    public function resetAckedEvents(): void;
 
     public function ackedEvents(): array;
-
-    public function hasEventAcked(): bool;
 
     public function addCheckpoint(string $streamName, int $position): bool;
 
@@ -84,7 +75,7 @@ interface Subscriptor
 
     public function stop(): void;
 
-    public function runInBackground(bool $inBackground): void;
+    public function runInBackground(bool $keepRunning): void;
 
     public function inBackground(): bool;
 

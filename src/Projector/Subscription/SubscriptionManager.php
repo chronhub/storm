@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\GapDetection;
-use Chronhub\Storm\Contracts\Projector\Observer;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
@@ -16,6 +15,14 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
+use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
+use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
+use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
+use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
+use Chronhub\Storm\Projector\Support\BatchStreamsAware;
 use Chronhub\Storm\Projector\Support\Loop;
 use Closure;
 
@@ -39,8 +46,6 @@ final class SubscriptionManager implements Subscriptor
         'loaded' => false, // if event streams loaded
     ];
 
-    private array $observers = [];
-
     private ?MergeStreamIterator $streamIterator = null;
 
     private ?ContextReader $context = null;
@@ -54,19 +59,22 @@ final class SubscriptionManager implements Subscriptor
         private readonly ProjectionOption $option,
         public readonly Loop $loop,
         private readonly ActivityFactory $activityFactory,
+        private readonly BatchStreamsAware $batchStreamsAware
     ) {
     }
 
-    public function attach(Observer $observer): void
+    public function notify(object $event): void
     {
-        $this->observers[] = $observer;
-    }
-
-    public function notify(): void
-    {
-        foreach ($this->observers as $observer) {
-            $observer->update($this);
-        }
+        match ($event::class) {
+            HasBatchStreams::class => $this->batchStreamsAware->hasLoadedStreams($event->hasBatchStreams),
+            ResetBatchStreams::class => $this->batchStreamsAware->reset(),
+            SleepWhenEmptyBatchStreams::class => $this->batchStreamsAware->sleep(),
+            StreamEventAcked::class => $this->eventsAcked[] = $event->eventClass,
+            ResetAckedEvent::class => $this->eventsAcked = [],
+            EventIncremented::class => $this->events['total']++,
+            EventReset::class => $this->events['total'] = 0,
+            default => throw new RuntimeException('Unknown notification: '.$event::class),
+        };
     }
 
     public function setContext(ContextReader $context, bool $allowRerun): void
@@ -78,7 +86,7 @@ final class SubscriptionManager implements Subscriptor
         $this->context = $context;
     }
 
-    public function getContext(): ContextReader
+    public function getContext(): ?ContextReader
     {
         return $this->context;
     }
@@ -105,11 +113,6 @@ final class SubscriptionManager implements Subscriptor
         }
     }
 
-    public function isContextInitialized(): bool
-    {
-        return $this->context !== null;
-    }
-
     public function setUserState(array $userState): void
     {
         $this->userState = $userState;
@@ -123,6 +126,11 @@ final class SubscriptionManager implements Subscriptor
     public function resetUserState(): void
     {
         $this->userState = [];
+    }
+
+    public function isUserStateInitialized(): bool
+    {
+        return $this->context->userState() instanceof Closure;
     }
 
     public function setStreamName(string $streamName): void
@@ -143,16 +151,6 @@ final class SubscriptionManager implements Subscriptor
     public function setStatus(ProjectionStatus $status): void
     {
         $this->status = $status;
-    }
-
-    public function incrementEvent(): void
-    {
-        $this->events['total']++;
-    }
-
-    public function resetEvent(): void
-    {
-        $this->events['total'] = 0;
     }
 
     public function isEventReset(): bool
@@ -218,11 +216,6 @@ final class SubscriptionManager implements Subscriptor
         $this->streamManager->refreshStreams($eventStreams);
     }
 
-    public function isUserStateInitialized(): bool
-    {
-        return $this->context->userState() instanceof Closure;
-    }
-
     public function addCheckpoint(string $streamName, int $position): bool
     {
         return $this->streamManager->insert($streamName, $position);
@@ -249,24 +242,10 @@ final class SubscriptionManager implements Subscriptor
     }
 
     // todo profiler for events / observer and notification
-    public function ackEvent(string $eventType): void
-    {
-        $this->eventsAcked[] = $eventType;
-    }
-
-    public function resetAckedEvents(): void
-    {
-        $this->eventsAcked = [];
-    }
 
     public function ackedEvents(): array
     {
         return $this->eventsAcked;
-    }
-
-    public function hasEventAcked(): bool
-    {
-        return $this->eventsAcked !== [];
     }
 
     public function continue(): void
@@ -274,14 +253,14 @@ final class SubscriptionManager implements Subscriptor
         $this->sprint = true;
     }
 
-    public function runInBackground(bool $inBackground): void
+    public function runInBackground(bool $keepRunning): void
     {
-        $this->keepRunning = $inBackground;
+        $this->keepRunning = $keepRunning;
     }
 
     public function isRunning(): bool
     {
-        return $this->sprint === true;
+        return $this->sprint;
     }
 
     public function isStopped(): bool
