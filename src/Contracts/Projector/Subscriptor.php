@@ -55,11 +55,9 @@ interface Subscriptor
 
     public function checkPoints(): array;
 
-    public function resetCheckpoint();
+    public function resetCheckpoints();
 
     public function clock(): SystemClock;
-
-    // todo profiler for events / observer and notification
 
     public function ackedEvents(): array;
 

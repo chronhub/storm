@@ -42,7 +42,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function revise(): void
     {
-        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->resetCheckpoints();
         $this->subscriptor->initializeAgain();
         $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
         $this->readModel->reset();
@@ -57,7 +57,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         }
 
         $this->subscriptor->stop();
-        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->resetCheckpoints();
         $this->subscriptor->initializeAgain();
     }
 

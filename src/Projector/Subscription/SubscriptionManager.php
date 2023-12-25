@@ -231,7 +231,7 @@ final class SubscriptionManager implements Subscriptor
         return $this->streamManager->checkpoints();
     }
 
-    public function resetCheckpoint(): void
+    public function resetCheckpoints(): void
     {
         $this->streamManager->resets();
     }

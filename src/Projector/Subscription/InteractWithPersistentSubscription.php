@@ -57,7 +57,7 @@ trait InteractWithPersistentSubscription
     {
         $project = new RunProjection($this->newWorkflow(), $this->subscriptor->loop(), $keepRunning);
 
-        $project->beginCycle();
+        $project->loop();
     }
 
     private function validateContext(ContextReader $context): void

@@ -37,7 +37,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function resets(): void
     {
-        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->resetCheckpoints();
 
         $this->subscriptor->initializeAgain();
     }
@@ -83,12 +83,8 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection(
-            $this->newWorkflow(),
-            $this->subscriptor->loop(),
-            $keepRunning
-        );
+        $project = new RunProjection($this->newWorkflow(), $this->subscriptor->loop(), $keepRunning);
 
-        $project->beginCycle();
+        $project->loop();
     }
 }

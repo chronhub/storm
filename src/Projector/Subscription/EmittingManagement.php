@@ -72,7 +72,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
 
-        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->resetCheckpoints();
         $this->subscriptor->initializeAgain();
 
         $this->deleteStream();
@@ -88,7 +88,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
         $this->subscriptor->stop();
 
-        $this->subscriptor->resetCheckpoint();
+        $this->subscriptor->resetCheckpoints();
         $this->subscriptor->initializeAgain();
     }
 

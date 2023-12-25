@@ -16,7 +16,7 @@ final readonly class RunProjection
     ) {
     }
 
-    public function beginCycle(): void
+    public function loop(): void
     {
         do {
             $this->startLooperIfNeeded();
