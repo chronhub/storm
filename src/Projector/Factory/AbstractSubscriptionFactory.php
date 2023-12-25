@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Factory;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
@@ -43,8 +44,10 @@ use Illuminate\Contracts\Events\Dispatcher;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
+    protected Chronicler $chronicler;
+
     public function __construct(
-        protected readonly Chronicler $chronicler,
+        Chronicler $chronicler,
         protected readonly ProjectionProvider $projectionProvider,
         protected readonly EventStreamProvider $eventStreamProvider,
         protected readonly SystemClock $clock,
@@ -53,6 +56,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         protected readonly ?ProjectionQueryScope $queryScope = null,
         protected readonly ProjectionOption|array $options = [],
     ) {
+        while ($chronicler instanceof ChroniclerDecorator) {
+            $chronicler = $chronicler->innerChronicler();
+        }
+
+        $this->chronicler = $chronicler;
     }
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
