@@ -41,7 +41,7 @@ trait InteractWithPersistentSubscription
     /**
      * @internal
      */
-    abstract public function getScope(): ProjectorScope;
+    abstract protected function getScope(): ProjectorScope;
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
     {

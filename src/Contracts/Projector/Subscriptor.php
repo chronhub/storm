@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
@@ -63,8 +62,6 @@ interface Subscriptor
     public function resetCheckpoint();
 
     public function clock(): SystemClock;
-
-    public function chronicler(): Chronicler;
 
     // todo profiler for events / observer and notification
     public function ackEvent(string $eventType): void;

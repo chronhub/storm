@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
@@ -47,8 +45,6 @@ final class SubscriptionManager implements Subscriptor
 
     private ?ContextReader $context = null;
 
-    private Chronicler $chronicler; // set on activity
-
     private array $eventsAcked = [];
 
     public function __construct(
@@ -58,13 +54,7 @@ final class SubscriptionManager implements Subscriptor
         private readonly ProjectionOption $option,
         public readonly Loop $loop,
         private readonly ActivityFactory $activityFactory,
-        Chronicler $chronicler,
     ) {
-        while ($chronicler instanceof ChroniclerDecorator) {
-            $chronicler = $chronicler->innerChronicler();
-        }
-
-        $this->chronicler = $chronicler;
     }
 
     public function attach(Observer $observer): void
@@ -231,12 +221,6 @@ final class SubscriptionManager implements Subscriptor
     public function isUserStateInitialized(): bool
     {
         return $this->context->userState() instanceof Closure;
-    }
-
-    // todo remove and set chronicler on load streams activity
-    public function chronicler(): Chronicler
-    {
-        return $this->chronicler;
     }
 
     public function addCheckpoint(string $streamName, int $position): bool

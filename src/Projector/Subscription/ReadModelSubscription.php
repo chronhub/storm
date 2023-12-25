@@ -30,7 +30,7 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
         $this->management->discard($withReadModel);
     }
 
-    public function getScope(): ReadModelScope
+    protected function getScope(): ReadModelScope
     {
         return new ReadModelAccess($this->management);
     }

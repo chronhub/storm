@@ -14,7 +14,7 @@ use Chronhub\Storm\Projector\Workflow\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 use Chronhub\Storm\Projector\Workflow\Activity\SleepForQuery;
 
-final class QueryActivityFactory extends AbstractActivityFactory
+final readonly class QueryActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
     {
@@ -26,7 +26,7 @@ final class QueryActivityFactory extends AbstractActivityFactory
         return [
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RiseQueryProjection(),
-            fn (): callable => new LoadStreams($noEventCounter, $queryFilterResolver),
+            fn (): callable => new LoadStreams($this->chronicler, $noEventCounter, $queryFilterResolver),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new SleepForQuery($noEventCounter),
             fn (): callable => new DispatchSignal(),

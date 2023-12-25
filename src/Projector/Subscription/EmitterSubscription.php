@@ -30,7 +30,7 @@ final readonly class EmitterSubscription implements EmitterSubscriber
         $this->management->discard($withEmittedEvents);
     }
 
-    public function getScope(): EmitterScope
+    protected function getScope(): EmitterScope
     {
         return new EmitterAccess($this->management);
     }

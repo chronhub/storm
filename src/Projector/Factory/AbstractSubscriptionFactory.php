@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -20,6 +21,7 @@ use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
@@ -65,14 +67,14 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscriptor = $this->createSusbcriptor($option, false);
+        $subscriptor = $this->createSubscriptor($option, false);
 
         return new QuerySubscription($subscriptor, new QueryingManagement($subscriptor));
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscriptor = $this->createSusbcriptor($option, true);
+        $subscriptor = $this->createSubscriptor($option, true);
 
         $management = new EmittingManagement(
             $subscriptor,
@@ -87,7 +89,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscriptor = $this->createSusbcriptor($option, true);
+        $subscriptor = $this->createSubscriptor($option, true);
 
         $management = new ReadingModelManagement(
             $subscriptor,
@@ -129,18 +131,15 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createSusbcriptor(ProjectionOption $option, bool $isPersistent): SubscriptionManager
+    protected function createSubscriptor(ProjectionOption $option, bool $isPersistent): Subscriptor
     {
-        $activities = $isPersistent ? new PersistentActivityFactory() : new QueryActivityFactory();
-
         return new SubscriptionManager(
             $this->createEventStreamDiscovery(),
-            $this->createStreamManager($option), // todo query does not handle gap
+            $this->createStreamManager($option), // todo query does not handle gaps
             $this->clock,
             $option,
             new Loop(),
-            $activities,
-            $this->chronicler,
+            $this->getActivities($isPersistent),
         );
     }
 
@@ -175,5 +174,12 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository
     {
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
+    }
+
+    protected function getActivities(bool $isPersistent): ActivityFactory
+    {
+        return $isPersistent
+            ? new PersistentActivityFactory($this->chronicler)
+            : new QueryActivityFactory($this->chronicler);
     }
 }

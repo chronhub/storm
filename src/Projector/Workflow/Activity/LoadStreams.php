@@ -24,6 +24,7 @@ final class LoadStreams
     private $queryFilterResolver;
 
     public function __construct(
+        private readonly Chronicler $chronicler,
         private readonly NoEventStreamCounter $noEventCounter,
         callable $queryFilterResolver
     ) {
@@ -41,11 +42,7 @@ final class LoadStreams
 
     private function handleStreams(Subscriptor $subscriptor): bool
     {
-        $streams = $this->batchStreams(
-            $subscriptor->chronicler(),
-            $subscriptor->checkpoints(),
-            $subscriptor->option()->getLoads()
-        );
+        $streams = $this->batchStreams($subscriptor->checkpoints(), $subscriptor->option()->getLoads());
 
         if ($streams === []) {
             return false;
@@ -61,7 +58,7 @@ final class LoadStreams
      * @param  array<string,Checkpoint>     $streams
      * @return array<string,StreamIterator>
      */
-    private function batchStreams(Chronicler $chronicler, array $streams, int $loadLimiter): array
+    private function batchStreams(array $streams, int $loadLimiter): array
     {
         $loadedStreams = [];
 
@@ -69,7 +66,7 @@ final class LoadStreams
             $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $loadLimiter);
 
             try {
-                $events = $chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
+                $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
                 $loadedStreams[$streamName] = new StreamIterator($events);
             } catch (StreamNotFound) {
                 continue;

@@ -20,7 +20,7 @@ use Chronhub\Storm\Projector\Workflow\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 
-final class PersistentActivityFactory extends AbstractActivityFactory
+final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
     {
@@ -37,7 +37,7 @@ final class PersistentActivityFactory extends AbstractActivityFactory
         return [
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RisePersistentProjection($monitor, $management),
-            fn (): callable => new LoadStreams($noEventCounter, $queryFilterResolver),
+            fn (): callable => new LoadStreams($this->chronicler, $noEventCounter, $queryFilterResolver),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap($management),
             fn (): callable => new PersistOrUpdate($management, $noEventCounter),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Factory;
 
+use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
@@ -17,8 +18,12 @@ use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
 use function array_map;
 use function is_array;
 
-abstract class AbstractActivityFactory implements ActivityFactory
+abstract readonly class AbstractActivityFactory implements ActivityFactory
 {
+    public function __construct(protected Chronicler $chronicler)
+    {
+    }
+
     public function __invoke(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
     {
         return array_map(
