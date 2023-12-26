@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
 use Chronhub\Storm\Projector\Workflow\Workflow;
@@ -27,15 +26,10 @@ trait InteractWithPersistentSubscription
 
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
+        $activities = ($this->activities)($this->subscriptor, $this->scope, $this->management);
 
         return new Workflow($this->notify(), $activities);
     }
-
-    /**
-     * @internal
-     */
-    abstract protected function getScope(): ProjectorScope;
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
     {

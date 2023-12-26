@@ -25,6 +25,9 @@ use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
+use Chronhub\Storm\Projector\Scope\EmitterAccess;
+use Chronhub\Storm\Projector\Scope\QueryAccess;
+use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Projector\Stream\CheckpointCollection;
 use Chronhub\Storm\Projector\Stream\CheckpointManager;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
@@ -73,8 +76,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $subscriptor = $this->createSubscriptor($option);
         $notification = new Notification($subscriptor);
         $activities = new QueryActivityFactory($this->chronicler);
+        $scope = new QueryAccess($notification, $this->clock);
 
-        return new QuerySubscription($subscriptor, new QueryingManagement($notification), $activities);
+        return new QuerySubscription($subscriptor, new QueryingManagement($notification), $activities, $scope);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
@@ -91,8 +95,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         );
 
         $activities = new PersistentActivityFactory($this->chronicler);
+        $scope = new EmitterAccess($notification, $this->clock);
 
-        return new EmitterSubscription($subscriptor, $management, $activities);
+        return new EmitterSubscription($subscriptor, $management, $activities, $scope);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
@@ -107,8 +112,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         );
 
         $activities = new PersistentActivityFactory($this->chronicler);
+        $scope = new ReadModelAccess($notification, $readModel, $this->clock);
 
-        return new ReadModelSubscription($subscriptor, $management, $activities);
+        return new ReadModelSubscription($subscriptor, $management, $activities, $scope);
     }
 
     public function createOption(array $options = []): ProjectionOption

@@ -11,7 +11,6 @@ use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 
@@ -20,7 +19,8 @@ final readonly class QuerySubscription implements QuerySubscriber
     public function __construct(
         private Subscriptor $subscriptor,
         private QueryManagement $management,
-        private ActivityFactory $activities
+        private ActivityFactory $activities,
+        private QueryProjectorScope $scope
     ) {
     }
 
@@ -43,14 +43,9 @@ final readonly class QuerySubscription implements QuerySubscriber
         return $this->management->notify();
     }
 
-    protected function getScope(): QueryProjectorScope
-    {
-        return new QueryAccess($this->notify(), $this->subscriptor->clock());
-    }
-
     protected function newWorkflow(): Workflow
     {
-        $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
+        $activities = ($this->activities)($this->subscriptor, $this->scope, $this->management);
 
         return new Workflow($this->notify(), $activities);
     }
