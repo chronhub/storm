@@ -33,9 +33,10 @@ trait InteractWithPersistentSubscription
     protected function newWorkflow(): Workflow
     {
         $factory = $this->subscriptor->getActivityFactory();
+
         $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
 
-        return new Workflow($this->subscriptor, $activities, $this->management);
+        return new Workflow($this->notification, $activities, $this->management);
     }
 
     /**

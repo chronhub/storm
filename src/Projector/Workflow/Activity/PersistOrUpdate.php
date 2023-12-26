@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
 
 final readonly class PersistOrUpdate
 {
@@ -13,14 +13,12 @@ final readonly class PersistOrUpdate
     {
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        if (! $subscriptor->hasGap()) {
-            $subscriptor->isEventReset()
-                ? $this->management->tryUpdateLock()
-                : $this->management->store();
+        if (! $notification->hasGap()) {
+            $notification->isEventReset() ? $this->management->tryUpdateLock() : $this->management->store();
         }
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

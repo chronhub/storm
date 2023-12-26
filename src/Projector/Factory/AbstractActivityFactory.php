@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Support\Timer;
+use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Workflow\EventProcessor;
 use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
 
@@ -36,12 +37,27 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
 
     protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): EventProcessor
     {
-        return new EventProcessor($subscriptor->getContext()->reactors(), $scope, $management);
+        return new EventProcessor(
+            $subscriptor->getContext()->reactors(),
+            $scope,
+            $management,
+            $subscriptor->option()->getSignal()
+        );
     }
 
     protected function getTimer(Subscriptor $subscriptor): Timer
     {
         return new Timer($subscriptor->clock(), $subscriptor->getContext()->timer());
+    }
+
+    protected function getStreamLoader(Subscriptor $subscriptor): LoadStreams
+    {
+        return new LoadStreams(
+            $this->chronicler,
+            $subscriptor->option()->getLoads(),
+            $subscriptor->clock(),
+            $this->getQueryFilterResolver($subscriptor)
+        );
     }
 
     /**

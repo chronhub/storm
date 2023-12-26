@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
 
 final readonly class HandleStreamGap
 {
@@ -13,12 +13,12 @@ final readonly class HandleStreamGap
     {
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        if ($subscriptor->sleepWhenGap() && ! $subscriptor->isEventReset()) {
-            $this->management->store();
+        if ($notification->observeShouldSleepWhenGap() && ! $notification->IsEventReset()) {
+            $this->management->store(); // todo dispatch event
         }
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Projector\Support\Loop;
 
 final readonly class RunProjection
@@ -22,7 +22,7 @@ final readonly class RunProjection
             $this->startLooperIfNeeded();
 
             $inProgress = $this->workflow->process(
-                fn (Subscriptor $subscriptor): bool => $subscriptor->isRunning()
+                fn (Notification $notification): bool => $notification->isRunning()
             );
 
             $this->handleCycleEnd($inProgress);

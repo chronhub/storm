@@ -6,11 +6,11 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
@@ -25,32 +25,34 @@ final class LoadStreams
 
     public function __construct(
         private readonly Chronicler $chronicler,
+        private readonly int $loadLimiter,
+        private readonly SystemClock $clock,
         callable $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        $hasStreams = $this->handleStreams($subscriptor);
+        $hasStreams = $this->handleStreams($notification);
 
-        $subscriptor->receive(new HasBatchStreams($hasStreams));
+        $notification->onHasBatchStreams($hasStreams);
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 
-    private function handleStreams(Subscriptor $subscriptor): bool
+    private function handleStreams(Notification $notification): bool
     {
-        $streams = $this->batchStreams($subscriptor->checkpoints(), $subscriptor->option()->getLoads());
+        $streams = $this->batchStreams($notification->observeCheckpoints());
 
         if ($streams !== []) {
             $iterators = collect(array_values($streams))->map(
                 fn (StreamIterator $iterator, int $key): array => [$iterator, array_keys($streams)[$key]]
             );
 
-            $iterator = new MergeStreamIterator($subscriptor->clock(), $iterators);
+            $iterator = new MergeStreamIterator($this->clock, $iterators);
 
-            $subscriptor->setStreamIterator($iterator);
+            $notification->onStreamMerged($iterator);
 
             return true;
         }
@@ -62,12 +64,12 @@ final class LoadStreams
      * @param  array<string,Checkpoint>     $streams
      * @return array<string,StreamIterator>
      */
-    private function batchStreams(array $streams, int $loadLimiter): array
+    private function batchStreams(array $streams): array
     {
         $streamEvents = [];
 
         foreach ($streams as $streamName => $stream) {
-            $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $loadLimiter);
+            $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $this->loadLimiter);
 
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);

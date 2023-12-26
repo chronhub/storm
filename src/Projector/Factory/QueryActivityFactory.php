@@ -10,7 +10,6 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\FinalizeProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
-use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Workflow\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 use Chronhub\Storm\Projector\Workflow\Activity\SleepForQuery;
@@ -21,15 +20,15 @@ final readonly class QueryActivityFactory extends AbstractActivityFactory
     {
         $timer = $this->getTimer($subscriptor);
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope, $management);
-        $queryFilterResolver = $this->getQueryFilterResolver($subscriptor);
+        $streamLoader = $this->getStreamLoader($subscriptor);
 
         return [
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RiseQueryProjection(),
-            fn (): callable => new LoadStreams($this->chronicler, $queryFilterResolver),
+            fn (): callable => $streamLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new SleepForQuery(),
-            fn (): callable => new DispatchSignal(),
+            fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
             fn (): callable => new FinalizeProjection(),
         ];
     }

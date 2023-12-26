@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
 
 use function pcntl_signal_dispatch;
 
-final class DispatchSignal
+final readonly class DispatchSignal
 {
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __construct(private bool $dispatchSignal)
     {
-        if ($subscriptor->option()->getSignal()) {
+    }
+
+    public function __invoke(Notification $notification, callable $next): callable|bool
+    {
+        if ($this->dispatchSignal) {
             pcntl_signal_dispatch();
         }
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

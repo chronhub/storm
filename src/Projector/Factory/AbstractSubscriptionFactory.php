@@ -41,7 +41,6 @@ use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
 use Chronhub\Storm\Projector\Support\BatchStreamsAware;
-use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
@@ -74,35 +73,39 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscriptor = $this->createSubscriptor($option, false);
 
-        return new QuerySubscription($subscriptor, new QueryingManagement($subscriptor));
+        $notification = new Notification($subscriptor);
+
+        return new QuerySubscription($subscriptor, new QueryingManagement($subscriptor), $notification);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         $subscriptor = $this->createSubscriptor($option, true);
+        $notification = new Notification($subscriptor);
 
         $management = new EmittingManagement(
-            new Notification($subscriptor),
+            $notification,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
             new EmittedStream()
         );
 
-        return new EmitterSubscription($subscriptor, $management);
+        return new EmitterSubscription($subscriptor, $management, $notification);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
         $subscriptor = $this->createSubscriptor($option, true);
+        $notification = new Notification($subscriptor);
 
         $management = new ReadingModelManagement(
-            new Notification($subscriptor),
+            $notification,
             $this->createProjectionRepository($streamName, $option),
             $readModel,
         );
 
-        return new ReadModelSubscription($subscriptor, $management);
+        return new ReadModelSubscription($subscriptor, $management, $notification);
     }
 
     public function createOption(array $options = []): ProjectionOption
@@ -165,11 +168,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             new CheckpointCollection($this->clock),
             new GapDetector($option->getRetries(), $option->getDetectionWindows())
         );
-    }
-
-    protected function createEventCounter(ProjectionOption $options): EventCounter
-    {
-        return new EventCounter($options->getBlockSize());
     }
 
     protected function createStreamCache(ProjectionOption $option): StreamCache

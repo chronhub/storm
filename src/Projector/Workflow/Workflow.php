@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Closure;
 use Throwable;
 
@@ -19,7 +19,7 @@ final readonly class Workflow
      * @param array<callable> $activities
      */
     public function __construct(
-        private Subscriptor $subscriptor,
+        private Notification $notification,
         private array $activities,
         private ?PersistentManagement $management,
     ) {
@@ -30,7 +30,7 @@ final readonly class Workflow
         $process = $this->prepareProcess($destination);
 
         try {
-            return $process($this->subscriptor);
+            return $process($this->notification);
         } catch (Throwable $exception) {
             return false;
         } finally {
@@ -49,12 +49,12 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (Subscriptor $subscriptor) => $destination($subscriptor);
+        return fn (Notification $notification) => $destination($notification);
     }
 
     private function carry(): Closure
     {
-        return fn (callable $stack, callable $activity) => fn (Subscriptor $subscriptor) => $activity($subscriptor, $stack);
+        return fn (callable $stack, callable $activity) => fn (Notification $notification) => $activity($notification, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void
@@ -64,7 +64,7 @@ final readonly class Workflow
         }
 
         try {
-            $this->management?->freed();
+            $this->management?->freed(); // todo use event but how to know is persistent
         } catch (Throwable) {
             // ignore
         }

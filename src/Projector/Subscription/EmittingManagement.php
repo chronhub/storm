@@ -10,6 +10,10 @@ use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
+use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRised;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
@@ -25,6 +29,21 @@ final readonly class EmittingManagement implements EmitterManagement
         private StreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
+        $this->notification->listen(ProjectionRised::class, function (): void {
+            $this->rise();
+        });
+
+        $this->notification->listen(ProjectionLockUpdated::class, function (): void {
+            $this->tryUpdateLock();
+        });
+
+        $this->notification->listen(ProjectionStored::class, function (): void {
+            $this->store();
+        });
+
+        $this->notification->listen(PersistWhenThresholdIsReached::class, function (): void {
+            $this->persistWhenCounterIsReached();
+        });
     }
 
     public function emit(DomainEvent $event): void

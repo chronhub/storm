@@ -4,27 +4,25 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRised;
 
 final readonly class RisePersistentProjection
 {
-    public function __construct(
-        private MonitorRemoteStatus $monitor,
-        private PersistentManagement $management
-    ) {
+    public function __construct(private MonitorRemoteStatus $monitor)
+    {
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        if ($subscriptor->isRising()) {
-            if ($this->monitor->shouldStop($this->management, $subscriptor->inBackground())) {
+        if ($notification->isRising()) {
+            if ($this->monitor->shouldStop($notification->isInBackground())) {
                 return false;
             }
 
-            $this->management->rise();
+            $notification->dispatch(new ProjectionRised());
         }
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

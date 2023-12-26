@@ -15,22 +15,25 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Stream\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
+use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\OriginalUserStateReset;
 use Chronhub\Storm\Projector\Subscription\Notification\ProjectionRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\ProjectionStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\ShouldSleepOnGap;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Projector\Support\BatchStreamsAware;
@@ -78,6 +81,18 @@ final class SubscriptionManager implements Subscriptor
     {
         if ($event instanceof CheckpointAdded) {
             return $this->addCheckpoint($event->streamName, $event->streamPosition);
+        }
+
+        if ($event instanceof HasGap) {
+            return $this->hasGap();
+        }
+
+        if ($event instanceof ShouldSleepOnGap) {
+            return $this->sleepWhenGap();
+        }
+
+        if ($event instanceof IsEventReset) {
+            return $this->isEventReset();
         }
 
         match ($event::class) {
@@ -225,7 +240,7 @@ final class SubscriptionManager implements Subscriptor
         $this->streamManager->update($checkpoints);
     }
 
-    public function checkPoints(): array
+    public function checkpoints(): array
     {
         return $this->streamManager->checkpoints();
     }

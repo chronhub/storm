@@ -11,59 +11,63 @@ final class MonitorRemoteStatus
 {
     private bool $onRise = true;
 
-    public function shouldStop(PersistentManagement $management, bool $keepRunning): bool
+    public function __construct(private readonly PersistentManagement $management)
     {
-        $shouldStop = $this->discovering($management, $keepRunning);
+    }
+
+    public function shouldStop(bool $keepRunning): bool
+    {
+        $shouldStop = $this->discovering($keepRunning);
 
         $this->onRise = false;
 
         return $shouldStop;
     }
 
-    public function refreshStatus(PersistentManagement $management, bool $keepRunning): void
+    public function refreshStatus(bool $keepRunning): void
     {
         $this->onRise = false;
 
-        $this->discovering($management, $keepRunning);
+        $this->discovering($keepRunning);
     }
 
-    private function onStopping(PersistentManagement $management): bool
+    private function onStopping(): bool
     {
         if ($this->onRise) {
             // todo why sync on stop,
-            $management->synchronise();
+            $this->management->synchronise();
         }
 
-        $management->close();
+        $this->management->close();
 
         return $this->onRise;
     }
 
-    private function onResetting(PersistentManagement $management, bool $keepRunning): bool
+    private function onResetting(bool $keepRunning): bool
     {
-        $management->revise();
+        $this->management->revise();
 
         if (! $this->onRise && $keepRunning) {
-            $management->restart();
+            $this->management->restart();
         }
 
         return false;
     }
 
-    private function onDeleting(PersistentManagement $management, bool $shouldDiscardEvents): bool
+    private function onDeleting(bool $shouldDiscardEvents): bool
     {
-        $management->discard($shouldDiscardEvents);
+        $this->management->discard($shouldDiscardEvents);
 
         return $this->onRise;
     }
 
-    private function discovering(PersistentManagement $management, bool $keepRunning): bool
+    private function discovering(bool $keepRunning): bool
     {
-        return match ($management->disclose()->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping($management),
-            ProjectionStatus::RESETTING->value => $this->onResetting($management, $keepRunning),
-            ProjectionStatus::DELETING->value => $this->onDeleting($management, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($management, true),
+        return match ($this->management->disclose()->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping(),
+            ProjectionStatus::RESETTING->value => $this->onResetting($keepRunning),
+            ProjectionStatus::DELETING->value => $this->onDeleting(false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting(true),
             default => false,
         };
     }

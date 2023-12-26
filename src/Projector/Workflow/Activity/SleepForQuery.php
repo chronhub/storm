@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification;
 
 final readonly class SleepForQuery
 {
@@ -13,11 +12,11 @@ final readonly class SleepForQuery
     {
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
         // checkMe
-        $subscriptor->receive(new SleepWhenEmptyBatchStreams());
+        $notification->onSleepWhenEmptyBatchStreams();
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

@@ -7,11 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
-use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
-use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -23,37 +19,41 @@ final readonly class EventProcessor
     public function __construct(
         private Closure $reactors,
         private ProjectorScope $scope,
-        private Management $management
+        private Management $management,
+        private bool $dispatchSignal
     ) {
     }
 
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(Subscriptor $subscriptor, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(Notification $notification, DomainEvent $event, int $expectedPosition): bool
     {
-        $this->dispatchSignalIfRequested($subscriptor);
+        $this->dispatchSignalIfRequested();
 
-        $isCheckpointValid = $subscriptor->receive(new CheckpointAdded($subscriptor->getStreamName(), $expectedPosition));
+        $isCheckpointValid = $notification->onCheckpointAdded(
+            $notification->observeStreamName(),
+            $expectedPosition
+        );
 
         if (! $isCheckpointValid) {
             return false;
         }
 
-        $subscriptor->receive(new EventIncremented());
+        $notification->onEventIncremented();
 
-        $this->reactOn($event, $subscriptor);
+        $this->reactOn($event, $notification);
 
         if ($this->management instanceof PersistentManagement) {
-            $this->management->persistWhenCounterIsReached();
+            $notification->dispatch(new \Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached());
         }
 
-        return $subscriptor->isRunning();
+        return $notification->isRunning();
     }
 
-    private function reactOn(DomainEvent $event, Subscriptor $subscriptor): void
+    private function reactOn(DomainEvent $event, Notification $notification): void
     {
-        $initializedState = $subscriptor->isUserStateInitialized() ? $subscriptor->getUserState() : null;
+        $initializedState = $notification->observeUserState();
 
         $resetScope = ($this->scope)($event, $initializedState);
 
@@ -62,19 +62,19 @@ final readonly class EventProcessor
         $currentState = $this->scope->getState();
 
         if (is_array($initializedState) && is_array($currentState)) {
-            $subscriptor->receive(new UserStateChanged($currentState));
+            $notification->onUserStateChanged($currentState);
         }
 
         if ($this->scope->isAcked()) {
-            $subscriptor->receive(new StreamEventAcked($event::class));
+            $notification->onStreamEventAcked($event::class);
         }
 
         $resetScope();
     }
 
-    private function dispatchSignalIfRequested(Subscriptor $subscriptor): void
+    private function dispatchSignalIfRequested(): void
     {
-        if ($subscriptor->option()->getSignal()) {
+        if ($this->dispatchSignal) {
             pcntl_signal_dispatch();
         }
     }

@@ -19,6 +19,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     public function __construct(
         private Subscriptor $subscriptor,
         private QueryManagement $management,
+        private Notification $notification
     ) {
     }
 
@@ -52,7 +53,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
 
-        return new Workflow($this->subscriptor, $activities, null);
+        return new Workflow($this->notification, $activities, null);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void

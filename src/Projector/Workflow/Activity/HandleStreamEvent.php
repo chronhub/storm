@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\Subscriber;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
-use Chronhub\Storm\Projector\Stream\StreamProcessed;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;
@@ -24,28 +23,28 @@ final class HandleStreamEvent
         $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        $streams = $subscriptor->pullStreamIterator();
+        $streams = $notification->pullStreams();
 
         if (! $streams instanceof MergeStreamIterator) {
-            return $next($subscriptor);
+            return $next($notification);
         }
 
         foreach ($streams as $position => $event) {
             $streamName = $streams->streamName();
 
-            $subscriptor->receive(new StreamProcessed($streamName));
+            $notification->onStreamProcess($streamName);
 
-            $continue = ($this->eventProcessor)($subscriptor, $event, $position);
+            $continue = ($this->eventProcessor)($notification, $event, $position);
 
-            if (! $continue || ! $subscriptor->isRunning()) {
+            if (! $continue || ! $notification->isRunning()) {
                 break;
             }
         }
 
         gc_collect_cycles();
 
-        return $next($subscriptor);
+        return $next($notification);
     }
 }

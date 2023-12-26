@@ -17,6 +17,7 @@ final readonly class EmitterSubscription implements EmitterSubscriber
     public function __construct(
         protected Subscriptor $subscriptor,
         protected EmitterManagement $management,
+        protected Notification $notification
     ) {
     }
 

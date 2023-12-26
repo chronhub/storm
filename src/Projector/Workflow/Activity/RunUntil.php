@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Projector\Support\Timer;
 
 final readonly class RunUntil
@@ -13,16 +13,16 @@ final readonly class RunUntil
     {
     }
 
-    public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
+    public function __invoke(Notification $notification, callable $next): callable|bool
     {
         if (! $this->timer->isStarted()) {
             $this->timer->start();
         }
 
-        $response = $next($subscriptor);
+        $response = $next($notification);
 
         if ($this->timer->isExpired()) {
-            $subscriptor->stop();
+            $notification->onProjectionStopped();
 
             return false;
         }

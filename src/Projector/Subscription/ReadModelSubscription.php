@@ -17,6 +17,7 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
     public function __construct(
         protected Subscriptor $subscriptor,
         protected ReadModelManagement $management,
+        protected Notification $notification
     ) {
     }
 

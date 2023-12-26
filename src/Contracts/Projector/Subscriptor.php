@@ -43,7 +43,7 @@ interface Subscriptor
 
     public function isUserStateInitialized(): bool;
 
-    public function checkPoints(): array;
+    public function checkpoints(): array;
 
     public function resetCheckpoints();
 
