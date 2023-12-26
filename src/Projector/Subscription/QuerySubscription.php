@@ -43,7 +43,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         return $this->management->notify();
     }
 
-    protected function newWorkflow(): Workflow
+    private function newWorkflow(): Workflow
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope, $this->management);
 

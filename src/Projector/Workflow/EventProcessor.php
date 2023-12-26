@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Notification;
-use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -29,9 +29,7 @@ final readonly class EventProcessor
     {
         $this->dispatchSignalIfRequested();
 
-        $noGap = $notification->onCheckpointAdded($notification->observeStreamName(), $expectedPosition);
-
-        if (! $noGap) {
+        if (! $this->hasNoGap($notification, $expectedPosition)) {
             return false;
         }
 
@@ -39,7 +37,7 @@ final readonly class EventProcessor
 
         $this->reactOn($event, $notification);
 
-        $notification->dispatch(new PersistWhenThresholdIsReached());
+        $this->dispatchWhenThresholdIsReached($notification);
 
         return $notification->isRunning();
     }
@@ -63,6 +61,16 @@ final readonly class EventProcessor
         }
 
         $resetScope();
+    }
+
+    private function hasNoGap(Notification $notification, int $expectedPosition): bool
+    {
+        return $notification->onCheckpointAdded($notification->observeStreamName(), $expectedPosition);
+    }
+
+    private function dispatchWhenThresholdIsReached(Notification $notification): void
+    {
+        $notification->dispatch(new ProjectionPersistedWhenThresholdIsReached());
     }
 
     private function dispatchSignalIfRequested(): void

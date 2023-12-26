@@ -30,13 +30,12 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
 
         $timer = $this->getTimer($subscriptor);
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
-        $streamLoader = $this->getStreamLoader($subscriptor);
-        $monitor = $this->getMonitor($management);
+        $monitor = new MonitorRemoteStatus();
 
         return [
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RisePersistentProjection($monitor),
-            fn (): callable => $streamLoader,
+            fn (): callable => $this->getStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
@@ -45,10 +44,5 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
             fn (): callable => new RefreshProjection($monitor),
             fn (): callable => new FinalizeProjection(),
         ];
-    }
-
-    protected function getMonitor(PersistentManagement $management): MonitorRemoteStatus
-    {
-        return new MonitorRemoteStatus($management);
     }
 }

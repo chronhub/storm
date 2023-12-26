@@ -8,10 +8,6 @@ use Chronhub\Storm\Projector\Subscription\Notification;
 
 final readonly class SleepForQuery
 {
-    public function __construct()
-    {
-    }
-
     public function __invoke(Notification $notification, callable $next): callable|bool
     {
         // checkMe

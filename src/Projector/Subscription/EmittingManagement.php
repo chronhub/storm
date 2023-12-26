@@ -75,7 +75,7 @@ final readonly class EmittingManagement implements EmitterManagement
         $this->repository->reset($this->getProjectionResult(), $this->notification->observeStatus());
 
         $this->notification->onCheckpointReset();
-        $this->notification->onOriginalUserStateReset();
+        $this->notification->onUserStateReset();
 
         $this->deleteStream();
     }
@@ -90,7 +90,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
         $this->notification->onProjectionStopped();
         $this->notification->onCheckpointReset();
-        $this->notification->onOriginalUserStateReset();
+        $this->notification->onUserStateReset();
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool

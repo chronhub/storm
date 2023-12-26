@@ -45,7 +45,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     public function revise(): void
     {
         $this->notification->onCheckpointReset();
-        $this->notification->onOriginalUserStateReset();
+        $this->notification->onUserStateReset();
 
         $this->repository->reset($this->getProjectionResult(), $this->notification->observeStatus());
         $this->readModel->reset();
@@ -61,7 +61,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
         $this->notification->onProjectionStopped();
         $this->notification->onCheckpointReset();
-        $this->notification->onOriginalUserStateReset();
+        $this->notification->onUserStateReset();
     }
 
     public function getReadModel(): ReadModel

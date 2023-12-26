@@ -39,8 +39,6 @@ use Chronhub\Storm\Projector\Support\BatchStreamsAware;
 use Chronhub\Storm\Projector\Support\Loop;
 use Closure;
 
-use function is_array;
-
 final class SubscriptionManager implements Subscriptor
 {
     private bool $keepRunning = false;
@@ -70,7 +68,7 @@ final class SubscriptionManager implements Subscriptor
         private readonly StreamManager $streamManager,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
-        public readonly Loop $loop,
+        private readonly Loop $loop,
         private readonly BatchStreamsAware $batchStreamsAware
     ) {
     }
@@ -132,17 +130,7 @@ final class SubscriptionManager implements Subscriptor
 
     public function setOriginalUserState(): void
     {
-        tap($this->context->userState(), function (?Closure $callback): void {
-            if ($callback instanceof Closure) {
-                $userState = $callback();
-
-                if (is_array($userState)) {
-                    $this->userState = $userState;
-                }
-            } else {
-                $this->userState = [];
-            }
-        });
+        $this->userState = value($this->context->userState()) ?? [];
     }
 
     public function getUserState(): array

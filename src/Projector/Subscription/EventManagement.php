@@ -7,11 +7,11 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
@@ -29,7 +29,7 @@ final class EventManagement
 
         $notification->listen(ProjectionStored::class, fn () => $management->store());
 
-        $notification->listen(PersistWhenThresholdIsReached::class, fn () => $management->persistWhenCounterIsReached());
+        $notification->listen(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenCounterIsReached());
 
         $notification->listen(ProjectionClosed::class, fn () => $management->close());
 

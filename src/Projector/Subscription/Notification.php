@@ -28,11 +28,11 @@ use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
@@ -58,13 +58,42 @@ final class Notification
         ProjectionLockUpdated::class => [],
         ProjectionSynchronized::class => [],
         ProjectionStatusDisclosed::class => [],
-        PersistWhenThresholdIsReached::class => [],
+        ProjectionPersistedWhenThresholdIsReached::class => [],
         EventEmitted::class => [],
         EventLinkedTo::class => [],
     ];
 
     public function __construct(private readonly Subscriptor $subscriptor)
     {
+    }
+
+    public function listen(string $event, callable $listener): void
+    {
+        if (! array_key_exists($event, $this->listeners)) {
+            throw new RuntimeException("Event $event is not supported");
+        }
+
+        $this->listeners[$event][] = $listener;
+    }
+
+    public function dispatch(object $event): void
+    {
+        $eventClass = $event::class;
+
+        if (! array_key_exists($eventClass, $this->listeners)) {
+            throw new RuntimeException("Event $eventClass is not supported");
+        }
+
+        foreach ($this->listeners[$eventClass] as $handler) {
+            $handler($event);
+        }
+    }
+
+    public function notify(string $notification, mixed ...$arguments): void
+    {
+        $notifier = new $notification(...$arguments);
+
+        $this->send($notifier);
     }
 
     public function isRunning(): bool
@@ -102,35 +131,6 @@ final class Notification
         return $this->subscriptor->isEventReset();
     }
 
-    public function listen(string $event, callable $listener): void
-    {
-        if (! array_key_exists($event, $this->listeners)) {
-            throw new RuntimeException("Event $event is not supported");
-        }
-
-        $this->listeners[$event][] = $listener;
-    }
-
-    public function dispatch(object $event): void
-    {
-        $eventClass = $event::class;
-
-        if (! array_key_exists($eventClass, $this->listeners)) {
-            throw new RuntimeException("Event $eventClass is not supported");
-        }
-
-        foreach ($this->listeners[$eventClass] as $handler) {
-            $handler($event);
-        }
-    }
-
-    public function notify(string $notification, mixed ...$arguments): void
-    {
-        $notifier = new $notification(...$arguments);
-
-        $this->send($notifier);
-    }
-
     public function observeStreamName(): string
     {
         return $this->subscriptor->getStreamName();
@@ -165,6 +165,11 @@ final class Notification
         return $this->subscriptor->sleepWhenGap();
     }
 
+    public function onCheckpointAdded(string $streamName, int $position): bool
+    {
+        return $this->subscriptor->receive(new CheckpointAdded($streamName, $position));
+    }
+
     public function onStatusChanged(ProjectionStatus $oldStatus, ProjectionStatus $newStatus): void
     {
         $this->send(new StatusChanged($oldStatus, $newStatus));
@@ -180,7 +185,7 @@ final class Notification
         $this->send(new UserStateChanged($userState));
     }
 
-    public function onOriginalUserStateReset(): void
+    public function onUserStateReset(): void
     {
         $this->send(new UserStateReset());
     }
@@ -223,11 +228,6 @@ final class Notification
     public function onStreamsDiscovered(): void
     {
         $this->send(new StreamsDiscovered());
-    }
-
-    public function onCheckpointAdded(string $streamName, int $position): bool
-    {
-        return $this->subscriptor->receive(new CheckpointAdded($streamName, $position));
     }
 
     public function onCheckpointUpdated(array $checkpoints): void
