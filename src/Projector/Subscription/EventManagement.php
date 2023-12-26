@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionSynchronized;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
@@ -18,6 +17,7 @@ use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionSynchronized;
 
 final class EventManagement
 {

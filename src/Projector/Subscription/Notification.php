@@ -14,7 +14,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionSynchronized;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
@@ -39,6 +38,7 @@ use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionSynchronized;
 
 use function array_key_exists;
 

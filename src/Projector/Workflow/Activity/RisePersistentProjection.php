@@ -16,7 +16,7 @@ final readonly class RisePersistentProjection
     public function __invoke(Notification $notification, callable $next): callable|bool
     {
         if ($notification->isRising()) {
-            if ($this->monitor->shouldStop($notification->isInBackground())) {
+            if ($this->monitor->shouldStop($notification)) {
                 return false;
             }
 

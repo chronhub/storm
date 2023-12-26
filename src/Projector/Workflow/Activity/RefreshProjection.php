@@ -14,7 +14,7 @@ final readonly class RefreshProjection
 
     public function __invoke(Notification $notification, callable $next): callable|bool
     {
-        $this->monitor->refreshStatus($notification->isInBackground());
+        $this->monitor->refreshStatus($notification);
 
         // watch again for event streams which may have changed after the first watch.
         $notification->onStreamsDiscovered();
