@@ -14,26 +14,30 @@ use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
-use Chronhub\Storm\Projector\Subscription\Notification\OriginalUserStateReset;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionRunning;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\ProjectionSynchronized;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 use function array_key_exists;
@@ -49,7 +53,11 @@ final class Notification
         ProjectionClosed::class => [],
         ProjectionRevised::class => [],
         ProjectionDiscarded::class => [],
+        ProjectionFreed::class => [],
+        ProjectionRestarted::class => [],
         ProjectionLockUpdated::class => [],
+        ProjectionSynchronized::class => [],
+        ProjectionStatusDisclosed::class => [],
         PersistWhenThresholdIsReached::class => [],
         EventEmitted::class => [],
         EventLinkedTo::class => [],
@@ -111,8 +119,8 @@ final class Notification
             throw new RuntimeException("Event $eventClass is not supported");
         }
 
-        foreach ($this->listeners[$eventClass] as $listener) {
-            $listener($event);
+        foreach ($this->listeners[$eventClass] as $handler) {
+            $handler($event);
         }
     }
 
@@ -174,7 +182,7 @@ final class Notification
 
     public function onOriginalUserStateReset(): void
     {
-        $this->send(new OriginalUserStateReset());
+        $this->send(new UserStateReset());
     }
 
     public function onEventIncremented(): void
@@ -234,12 +242,12 @@ final class Notification
 
     public function onProjectionRunning(): void
     {
-        $this->send(new ProjectionRunning());
+        $this->send(new SprintRunning());
     }
 
     public function onProjectionStopped(): void
     {
-        $this->send(new ProjectionStopped());
+        $this->send(new SprintStopped());
     }
 
     public function onStreamProcess(string $streamName): void

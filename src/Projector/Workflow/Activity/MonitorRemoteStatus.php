@@ -4,71 +4,73 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
+use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStatusDisclosed;
 
-// todo use notification
 final class MonitorRemoteStatus
 {
     private bool $onRise = true;
 
-    public function __construct(private readonly PersistentManagement $management)
+    public function shouldStop(Notification $notification, bool $keepRunning): bool
     {
-    }
-
-    public function shouldStop(bool $keepRunning): bool
-    {
-        $shouldStop = $this->discovering($keepRunning);
+        $shouldStop = $this->discovering($notification, $keepRunning);
 
         $this->onRise = false;
 
         return $shouldStop;
     }
 
-    public function refreshStatus(bool $keepRunning): void
+    public function refreshStatus(Notification $notification, bool $keepRunning): void
     {
         $this->onRise = false;
 
-        $this->discovering($keepRunning);
+        $this->discovering($notification, $keepRunning);
     }
 
-    private function onStopping(): bool
+    private function onStopping(Notification $notification): bool
     {
         if ($this->onRise) {
             // todo why sync on stop,
-            $this->management->synchronise();
+            $notification->dispatch(new Notification\ProjectionSynchronized());
         }
 
-        $this->management->close();
+        $notification->dispatch(new ProjectionClosed());
 
         return $this->onRise;
     }
 
-    private function onResetting(bool $keepRunning): bool
+    private function onResetting(Notification $notification, bool $keepRunning): bool
     {
-        $this->management->revise();
+        $notification->dispatch(new ProjectionRevised());
 
         if (! $this->onRise && $keepRunning) {
-            $this->management->restart();
+            $notification->dispatch(new ProjectionRestarted());
         }
 
         return false;
     }
 
-    private function onDeleting(bool $shouldDiscardEvents): bool
+    private function onDeleting(Notification $notification, bool $shouldDiscardEvents): bool
     {
-        $this->management->discard($shouldDiscardEvents);
+        $notification->dispatch(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }
 
-    private function discovering(bool $keepRunning): bool
+    private function discovering(Notification $notification, bool $keepRunning): bool
     {
-        return match ($this->management->disclose()->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping(),
-            ProjectionStatus::RESETTING->value => $this->onResetting($keepRunning),
-            ProjectionStatus::DELETING->value => $this->onDeleting(false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting(true),
+        $notification->dispatch(new ProjectionStatusDisclosed());
+
+        return match ($notification->observeStatus()->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping($notification),
+            ProjectionStatus::RESETTING->value => $this->onResetting($notification, $keepRunning),
+            ProjectionStatus::DELETING->value => $this->onDeleting($notification, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($notification, true),
             default => false,
         };
     }

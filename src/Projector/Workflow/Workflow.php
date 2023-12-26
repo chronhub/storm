@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Closure;
 use Throwable;
 
@@ -18,11 +18,8 @@ final readonly class Workflow
     /**
      * @param array<callable> $activities
      */
-    public function __construct(
-        private Notification $notification,
-        private array $activities,
-        private ?PersistentManagement $management,
-    ) {
+    public function __construct(private Notification $notification, private array $activities)
+    {
     }
 
     public function process(Closure $destination): bool
@@ -64,7 +61,7 @@ final readonly class Workflow
         }
 
         try {
-            $this->management?->freed(); // todo use event but how to know is persistent
+            $this->notification->dispatch(new ProjectionFreed());
         } catch (Throwable) {
             // ignore
         }

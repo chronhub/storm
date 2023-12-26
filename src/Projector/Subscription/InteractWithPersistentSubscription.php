@@ -29,7 +29,7 @@ trait InteractWithPersistentSubscription
     {
         $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
 
-        return new Workflow($this->notify(), $activities, $this->management);
+        return new Workflow($this->notify(), $activities);
     }
 
     /**

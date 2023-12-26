@@ -52,7 +52,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
 
-        return new Workflow($this->notify(), $activities, null);
+        return new Workflow($this->notify(), $activities);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void

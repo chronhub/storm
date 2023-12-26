@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
+use Chronhub\Storm\Projector\Subscription\Notification\ProjectionSynchronized;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 final class EventManagement
@@ -32,6 +36,14 @@ final class EventManagement
         $notification->listen(ProjectionRevised::class, fn () => $management->revise());
 
         $notification->listen(ProjectionDiscarded::class, fn ($listener) => $management->discard($listener->withEmittedEvents));
+
+        $notification->listen(ProjectionFreed::class, fn () => $management->freed());
+
+        $notification->listen(ProjectionRestarted::class, fn () => $management->restart());
+
+        $notification->listen(ProjectionStatusDisclosed::class, fn () => $management->disclose());
+
+        $notification->listen(ProjectionSynchronized::class, fn () => $management->synchronise());
 
         if ($management instanceof EmittingManagement) {
             $notification->listen(EventEmitted::class, fn ($listener) => $management->emit($listener->event));

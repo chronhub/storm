@@ -22,19 +22,19 @@ use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
-use Chronhub\Storm\Projector\Subscription\Notification\OriginalUserStateReset;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionRunning;
-use Chronhub\Storm\Projector\Subscription\Notification\ProjectionStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
 use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\ShouldSleepOnGap;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Projector\Support\BatchStreamsAware;
 use Chronhub\Storm\Projector\Support\Loop;
 use Closure;
@@ -96,7 +96,7 @@ final class SubscriptionManager implements Subscriptor
         match ($event::class) {
             StatusDisclosed::class, StatusChanged::class => $this->status = $event->newStatus,
             UserStateChanged::class => $this->userState = $event->userState,
-            OriginalUserStateReset::class => $this->setOriginalUserState(),
+            UserStateReset::class => $this->setOriginalUserState(),
             StreamsDiscovered::class => $this->discoverStreams(),
             HasBatchStreams::class => $this->batchStreamsAware->hasLoadedStreams($event->hasBatchStreams),
             ResetBatchStreams::class => $this->batchStreamsAware->reset(),
@@ -105,8 +105,8 @@ final class SubscriptionManager implements Subscriptor
             ResetAckedEvent::class => $this->eventsAcked = [],
             EventIncremented::class => $this->events['total']++,
             EventReset::class => $this->events['total'] = 0,
-            ProjectionStopped::class => $this->stop(),
-            ProjectionRunning::class => $this->continue(),
+            SprintStopped::class => $this->stop(),
+            SprintRunning::class => $this->continue(),
             CheckpointReset::class => $this->resetCheckpoints(),
             CheckpointUpdated::class => $this->updateCheckpoints($event->checkpoints),
             StreamProcessed::class => $this->streamName = $event->streamName,

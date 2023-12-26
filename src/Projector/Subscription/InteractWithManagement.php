@@ -46,13 +46,11 @@ trait InteractWithManagement
         $this->notification->onStatusChanged($this->notification->observeStatus(), $runningStatus);
     }
 
-    public function disclose(): ProjectionStatus
+    public function disclose(): void
     {
         $disclosedStatus = $this->repository->loadStatus();
 
         $this->notification->onStatusDisclosed($this->notification->observeStatus(), $disclosedStatus);
-
-        return $disclosedStatus;
     }
 
     public function synchronise(): void

@@ -13,9 +13,10 @@ final readonly class PersistOrUpdate
     public function __invoke(Notification $notification, callable $next): callable|bool
     {
         if (! $notification->hasGap()) {
-            $notification->isEventReset()
-                ? $notification->dispatch(new ProjectionLockUpdated())
-                : $notification->dispatch(new ProjectionStored());
+            $dispatchEvent = $notification->isEventReset()
+                ? new ProjectionLockUpdated() : new ProjectionStored();
+
+            $notification->dispatch($dispatchEvent);
         }
 
         return $next($notification);
