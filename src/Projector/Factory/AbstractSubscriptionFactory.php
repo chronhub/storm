@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -71,16 +70,16 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, false);
-
+        $subscriptor = $this->createSubscriptor($option);
         $notification = new Notification($subscriptor);
+        $activities = new QueryActivityFactory($this->chronicler);
 
-        return new QuerySubscription($subscriptor, new QueryingManagement($subscriptor), $notification);
+        return new QuerySubscription($subscriptor, new QueryingManagement($notification), $activities);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, true);
+        $subscriptor = $this->createSubscriptor($option);
         $notification = new Notification($subscriptor);
 
         $management = new EmittingManagement(
@@ -88,15 +87,17 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
-            new EmittedStream()
+            new EmittedStream(),
         );
 
-        return new EmitterSubscription($subscriptor, $management, $notification);
+        $activities = new PersistentActivityFactory($this->chronicler);
+
+        return new EmitterSubscription($subscriptor, $management, $activities);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, true);
+        $subscriptor = $this->createSubscriptor($option);
         $notification = new Notification($subscriptor);
 
         $management = new ReadingModelManagement(
@@ -105,7 +106,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $readModel,
         );
 
-        return new ReadModelSubscription($subscriptor, $management, $notification);
+        $activities = new PersistentActivityFactory($this->chronicler);
+
+        return new ReadModelSubscription($subscriptor, $management, $activities);
     }
 
     public function createOption(array $options = []): ProjectionOption
@@ -139,7 +142,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createSubscriptor(ProjectionOption $option, bool $isPersistent): Subscriptor
+    protected function createSubscriptor(ProjectionOption $option): Subscriptor
     {
         return new SubscriptionManager(
             $this->createEventStreamDiscovery(),
@@ -147,7 +150,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->clock,
             $option,
             new Loop(),
-            $this->getActivities($isPersistent),
             $this->batchStreamsAware($option),
         );
     }
@@ -178,13 +180,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository
     {
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
-    }
-
-    protected function getActivities(bool $isPersistent): ActivityFactory
-    {
-        return $isPersistent
-            ? new PersistentActivityFactory($this->chronicler)
-            : new QueryActivityFactory($this->chronicler);
     }
 
     protected function BatchStreamsAware(ProjectionOption $option): BatchStreamsAware

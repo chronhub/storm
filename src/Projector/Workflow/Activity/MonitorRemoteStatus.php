@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\ProjectionStatus;
 
+// todo use notification
 final class MonitorRemoteStatus
 {
     private bool $onRise = true;

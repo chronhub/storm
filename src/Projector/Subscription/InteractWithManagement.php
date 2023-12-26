@@ -50,9 +50,6 @@ trait InteractWithManagement
     {
         $disclosedStatus = $this->repository->loadStatus();
 
-        // checkMe: called from monitor remote status and persist the threshold.
-        // till we use it actually to set the status,
-        // but we cannot use it to query remote status.
         $this->notification->onStatusDisclosed($this->notification->observeStatus(), $disclosedStatus);
 
         return $disclosedStatus;
@@ -96,6 +93,11 @@ trait InteractWithManagement
     public function getCurrentStreamName(): string
     {
         return $this->notification->observeStreamName();
+    }
+
+    public function notify(): Notification
+    {
+        return $this->notification;
     }
 
     protected function mountProjection(): void

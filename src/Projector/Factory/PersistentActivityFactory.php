@@ -29,7 +29,7 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
         }
 
         $timer = $this->getTimer($subscriptor);
-        $eventProcessor = $this->getEventProcessor($subscriptor, $scope, $management);
+        $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
         $streamLoader = $this->getStreamLoader($subscriptor);
         $monitor = $this->getMonitor($management);
 
@@ -38,8 +38,8 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
             fn (): callable => new RisePersistentProjection($monitor),
             fn (): callable => $streamLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
-            fn (): callable => new HandleStreamGap($management),
-            fn (): callable => new PersistOrUpdate($management),
+            fn (): callable => new HandleStreamGap(),
+            fn (): callable => new PersistOrUpdate(),
             fn (): callable => new ResetEventCounter(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
             fn (): callable => new RefreshProjection($monitor),

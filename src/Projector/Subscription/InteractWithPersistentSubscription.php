@@ -20,23 +20,16 @@ trait InteractWithPersistentSubscription
         $this->startProjection($keepRunning);
     }
 
-    public function getName(): string
+    public function notify(): Notification
     {
-        return $this->management->getName();
-    }
-
-    public function getState(): array
-    {
-        return $this->subscriptor->getUserState();
+        return $this->management->notify();
     }
 
     protected function newWorkflow(): Workflow
     {
-        $factory = $this->subscriptor->getActivityFactory();
+        $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
 
-        $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
-
-        return new Workflow($this->notification, $activities, $this->management);
+        return new Workflow($this->notify(), $activities, $this->management);
     }
 
     /**

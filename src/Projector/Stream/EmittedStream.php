@@ -18,7 +18,7 @@ final class EmittedStream
         $this->wasEmitted = true;
     }
 
-    public function reset(): void
+    public function unlink(): void
     {
         $this->wasEmitted = false;
     }

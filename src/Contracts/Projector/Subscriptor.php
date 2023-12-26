@@ -59,8 +59,6 @@ interface Subscriptor
 
     public function continue(): void;
 
-    public function isStopped(): bool;
-
     public function stop(): void;
 
     public function runInBackground(bool $keepRunning): void;
@@ -68,8 +66,6 @@ interface Subscriptor
     public function inBackground(): bool;
 
     public function isRising(): bool;
-
-    public function getActivityFactory(): ActivityFactory;
 
     public function loop(): Loop;
 }

@@ -14,7 +14,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function __construct(
         protected QuerySubscriber $subscriber,
-        protected ContextReader $context
+        protected ContextReader $context,
     ) {
     }
 

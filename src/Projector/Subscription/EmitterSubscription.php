@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
@@ -17,22 +18,12 @@ final readonly class EmitterSubscription implements EmitterSubscriber
     public function __construct(
         protected Subscriptor $subscriptor,
         protected EmitterManagement $management,
-        protected Notification $notification
+        protected ActivityFactory $activities
     ) {
-    }
-
-    public function reset(): void
-    {
-        $this->management->revise();
-    }
-
-    public function delete(bool $withEmittedEvents): void
-    {
-        $this->management->discard($withEmittedEvents);
     }
 
     protected function getScope(): EmitterScope
     {
-        return new EmitterAccess($this->management, $this->subscriptor->clock());
+        return new EmitterAccess($this->management->notify(), $this->subscriptor->clock());
     }
 }

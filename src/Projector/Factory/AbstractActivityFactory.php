@@ -35,12 +35,11 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscriptor->getContext()->queryFilter());
     }
 
-    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): EventProcessor
+    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope): EventProcessor
     {
         return new EventProcessor(
             $subscriptor->getContext()->reactors(),
             $scope,
-            $management,
             $subscriptor->option()->getSignal()
         );
     }

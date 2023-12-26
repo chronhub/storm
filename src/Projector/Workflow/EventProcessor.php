@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Contracts\Projector\Management;
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -19,7 +18,6 @@ final readonly class EventProcessor
     public function __construct(
         private Closure $reactors,
         private ProjectorScope $scope,
-        private Management $management,
         private bool $dispatchSignal
     ) {
     }
@@ -31,12 +29,9 @@ final readonly class EventProcessor
     {
         $this->dispatchSignalIfRequested();
 
-        $isCheckpointValid = $notification->onCheckpointAdded(
-            $notification->observeStreamName(),
-            $expectedPosition
-        );
+        $noGap = $notification->onCheckpointAdded($notification->observeStreamName(), $expectedPosition);
 
-        if (! $isCheckpointValid) {
+        if (! $noGap) {
             return false;
         }
 
@@ -44,9 +39,7 @@ final readonly class EventProcessor
 
         $this->reactOn($event, $notification);
 
-        if ($this->management instanceof PersistentManagement) {
-            $notification->dispatch(new \Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached());
-        }
+        $notification->dispatch(new PersistWhenThresholdIsReached());
 
         return $notification->isRunning();
     }

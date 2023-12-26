@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
@@ -19,7 +20,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     public function __construct(
         private Subscriptor $subscriptor,
         private QueryManagement $management,
-        private Notification $notification
+        private ActivityFactory $activities
     ) {
     }
 
@@ -30,11 +31,6 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->startProjection($keepRunning);
     }
 
-    public function getState(): array
-    {
-        return $this->subscriptor->getUserState();
-    }
-
     public function resets(): void
     {
         $this->subscriptor->resetCheckpoints();
@@ -42,18 +38,21 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->subscriptor->setOriginalUserState();
     }
 
+    public function notify(): Notification
+    {
+        return $this->management->notify();
+    }
+
     protected function getScope(): QueryProjectorScope
     {
-        return new QueryAccess($this->management, $this->subscriptor->clock());
+        return new QueryAccess($this->notify(), $this->subscriptor->clock());
     }
 
     protected function newWorkflow(): Workflow
     {
-        $factory = $this->subscriptor->getActivityFactory();
+        $activities = ($this->activities)($this->subscriptor, $this->getScope(), $this->management);
 
-        $activities = $factory($this->subscriptor, $this->getScope(), $this->management);
-
-        return new Workflow($this->notification, $activities, null);
+        return new Workflow($this->notify(), $activities, null);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void

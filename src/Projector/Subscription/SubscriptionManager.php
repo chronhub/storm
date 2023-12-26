@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\GapDetection;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -72,7 +71,6 @@ final class SubscriptionManager implements Subscriptor
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         public readonly Loop $loop,
-        private readonly ActivityFactory $activityFactory,
         private readonly BatchStreamsAware $batchStreamsAware
     ) {
     }
@@ -275,11 +273,6 @@ final class SubscriptionManager implements Subscriptor
         return $this->sprint;
     }
 
-    public function isStopped(): bool
-    {
-        return ! $this->isRunning();
-    }
-
     public function stop(): void
     {
         $this->sprint = false;
@@ -293,11 +286,6 @@ final class SubscriptionManager implements Subscriptor
     public function isRising(): bool
     {
         return $this->loop->isFirstLoop();
-    }
-
-    public function getActivityFactory(): ActivityFactory
-    {
-        return $this->activityFactory;
     }
 
     public function loop(): Loop

@@ -26,9 +26,14 @@ use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
+use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\PersistWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRised;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 use function array_key_exists;
@@ -39,10 +44,15 @@ final class Notification
      * @var array<string, array<callable>>
      */
     private array $listeners = [
-        ProjectionRised::class => [],
+        ProjectionRise::class => [],
         ProjectionStored::class => [],
+        ProjectionClosed::class => [],
+        ProjectionRevised::class => [],
+        ProjectionDiscarded::class => [],
         ProjectionLockUpdated::class => [],
         PersistWhenThresholdIsReached::class => [],
+        EventEmitted::class => [],
+        EventLinkedTo::class => [],
     ];
 
     public function __construct(private readonly Subscriptor $subscriptor)
@@ -102,7 +112,7 @@ final class Notification
         }
 
         foreach ($this->listeners[$eventClass] as $listener) {
-            $listener();
+            $listener($event);
         }
     }
 
@@ -182,7 +192,7 @@ final class Notification
         $this->send(new HasBatchStreams($hasBatchStreams));
     }
 
-    public function onResetBatchStreams(): void
+    public function onBatchStreamsReset(): void
     {
         $this->send(new ResetBatchStreams());
     }

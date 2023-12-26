@@ -7,6 +7,9 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
+use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRevised;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
@@ -14,7 +17,9 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function __construct(
         protected ReadModelSubscriber $subscriber,
-        protected ContextReader $context
+        protected ContextReader $context,
+        private Notification $notification,
+        private string $streamName
     ) {
     }
 
@@ -25,16 +30,16 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function reset(): void
     {
-        $this->subscriber->reset();
+        $this->subscriber->notify()->dispatch(new ProjectionRevised());
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-        $this->subscriber->delete($deleteEmittedEvents);
+        $this->subscriber->notify()->dispatch(new ProjectionDiscarded($deleteEmittedEvents));
     }
 
     public function getName(): string
     {
-        return $this->subscriber->getName();
+        return $this->streamName;
     }
 }

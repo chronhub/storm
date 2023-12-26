@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Projector\Subscription\Notification;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRised;
+use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 
 final readonly class RisePersistentProjection
 {
@@ -20,7 +20,7 @@ final readonly class RisePersistentProjection
                 return false;
             }
 
-            $notification->dispatch(new ProjectionRised());
+            $notification->dispatch(new ProjectionRise());
         }
 
         return $next($notification);

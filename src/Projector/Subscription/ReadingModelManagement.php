@@ -7,9 +7,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRised;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
@@ -20,17 +17,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
-        $this->notification->listen(ProjectionRised::class, function (): void {
-            $this->rise();
-        });
-
-        $this->notification->listen(ProjectionLockUpdated::class, function (): void {
-            $this->tryUpdateLock();
-        });
-
-        $this->notification->listen(ProjectionStored::class, function (): void {
-            $this->store();
-        });
+        EventManagement::subscribe($notification, $this);
     }
 
     public function rise(): void
@@ -52,7 +39,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
         $this->readModel->persist();
 
-        $this->notification->onResetBatchStreams();
+        $this->notification->onBatchStreamsReset();
     }
 
     public function revise(): void

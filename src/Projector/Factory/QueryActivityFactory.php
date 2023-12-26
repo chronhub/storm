@@ -19,7 +19,7 @@ final readonly class QueryActivityFactory extends AbstractActivityFactory
     protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
     {
         $timer = $this->getTimer($subscriptor);
-        $eventProcessor = $this->getEventProcessor($subscriptor, $scope, $management);
+        $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
         $streamLoader = $this->getStreamLoader($subscriptor);
 
         return [
