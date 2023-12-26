@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 
 final readonly class RefreshProjection
 {
@@ -22,7 +23,7 @@ final readonly class RefreshProjection
         $this->monitor->refreshStatus($this->management, $subscriptor->inBackground());
 
         // watch again for event streams which may have changed after the first watch.
-        $subscriptor->discoverStreams();
+        $subscriptor->receive(new StreamsDiscovered());
 
         return $next($subscriptor);
     }

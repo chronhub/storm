@@ -32,6 +32,6 @@ final readonly class EmitterSubscription implements EmitterSubscriber
 
     protected function getScope(): EmitterScope
     {
-        return new EmitterAccess($this->management);
+        return new EmitterAccess($this->management, $this->subscriptor->clock());
     }
 }

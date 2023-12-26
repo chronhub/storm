@@ -11,7 +11,7 @@ final readonly class ResetEventCounter
 {
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        $subscriptor->notify(new EventReset());
+        $subscriptor->receive(new EventReset());
 
         return $next($subscriptor);
     }

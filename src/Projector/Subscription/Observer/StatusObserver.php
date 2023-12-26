@@ -16,6 +16,6 @@ final readonly class StatusObserver implements Observer
 
     public function update(Subscriptor $subscriptor): void
     {
-        $subscriptor->setStatus($this->status);
+
     }
 }

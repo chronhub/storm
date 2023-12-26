@@ -38,12 +38,12 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         $this->subscriptor->resetCheckpoints();
 
-        $this->subscriptor->initializeAgain();
+        $this->subscriptor->setOriginalUserState();
     }
 
     protected function getScope(): QueryProjectorScope
     {
-        return new QueryAccess($this->management);
+        return new QueryAccess($this->management, $this->subscriptor->clock());
     }
 
     protected function newWorkflow(): Workflow

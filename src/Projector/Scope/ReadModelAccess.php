@@ -14,8 +14,10 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 {
     use ScopeBehaviour;
 
-    public function __construct(private readonly ReadModelManagement $management)
-    {
+    public function __construct(
+        private readonly ReadModelManagement $management,
+        private readonly SystemClock $clock
+    ) {
     }
 
     public function stop(): void
@@ -42,6 +44,6 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function clock(): SystemClock
     {
-        return $this->management->getClock();
+        return $this->clock;
     }
 }

@@ -11,7 +11,7 @@ final class FinalizeProjection
 {
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        $subscriptor->notify(new ResetAckedEvent());
+        $subscriptor->receive(new ResetAckedEvent());
 
         return $next($subscriptor);
     }

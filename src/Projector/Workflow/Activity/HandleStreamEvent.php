@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
+use Chronhub\Storm\Projector\Stream\StreamProcessed;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;
@@ -34,7 +35,7 @@ final class HandleStreamEvent
         foreach ($streams as $position => $event) {
             $streamName = $streams->streamName();
 
-            $subscriptor->setStreamName($streamName);
+            $subscriptor->receive(new StreamProcessed($streamName));
 
             $continue = ($this->eventProcessor)($subscriptor, $event, $position);
 

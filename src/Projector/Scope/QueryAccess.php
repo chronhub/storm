@@ -13,8 +13,10 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
 {
     use ScopeBehaviour;
 
-    public function __construct(private readonly QueryManagement $management)
-    {
+    public function __construct(
+        private readonly QueryManagement $management,
+        private readonly SystemClock $clock
+    ) {
     }
 
     public function stop(): void
@@ -29,6 +31,6 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
 
     public function clock(): SystemClock
     {
-        return $this->management->getClock();
+        return $this->clock;
     }
 }

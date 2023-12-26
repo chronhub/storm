@@ -34,7 +34,7 @@ final class LoadStreams
     {
         $hasStreams = $this->handleStreams($subscriptor);
 
-        $subscriptor->notify(new HasBatchStreams($hasStreams));
+        $subscriptor->receive(new HasBatchStreams($hasStreams));
 
         return $next($subscriptor);
     }

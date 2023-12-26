@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
@@ -20,11 +19,11 @@ final readonly class EmittingManagement implements EmitterManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected Subscriptor $subscriptor,
+        protected Notification $notification,
         protected Chronicler $chronicler,
         protected ProjectionRepository $repository,
         private StreamCache $streamCache,
-        private EmittedStream $emittedStream
+        private EmittedStream $emittedStream,
     ) {
     }
 
@@ -58,7 +57,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->mountProjection();
 
-        $this->subscriptor->discoverStreams();
+        $this->notification->onStreamsDiscovered();
 
         $this->synchronise();
     }
@@ -66,14 +65,16 @@ final readonly class EmittingManagement implements EmitterManagement
     public function store(): void
     {
         $this->repository->persist($this->getProjectionResult());
+
+        $this->notification->onResetBatchStreams();
     }
 
     public function revise(): void
     {
-        $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
+        $this->repository->reset($this->getProjectionResult(), $this->notification->observeStatus());
 
-        $this->subscriptor->resetCheckpoints();
-        $this->subscriptor->initializeAgain();
+        $this->notification->onCheckpointReset();
+        $this->notification->onOriginalUserStateReset();
 
         $this->deleteStream();
     }
@@ -86,10 +87,9 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->deleteStream();
         }
 
-        $this->subscriptor->stop();
-
-        $this->subscriptor->resetCheckpoints();
-        $this->subscriptor->initializeAgain();
+        $this->notification->onProjectionStopped();
+        $this->notification->onCheckpointReset();
+        $this->notification->onOriginalUserStateReset();
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool

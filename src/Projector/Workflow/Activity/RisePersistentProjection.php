@@ -17,9 +17,7 @@ final readonly class RisePersistentProjection
 
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
-        if ($subscriptor->isFirstLoop()) {
-            // depending on the discovered status, the projection can be stopped early,
-            // on stopping and on deleting.
+        if ($subscriptor->isRising()) {
             if ($this->monitor->shouldStop($this->management, $subscriptor->inBackground())) {
                 return false;
             }

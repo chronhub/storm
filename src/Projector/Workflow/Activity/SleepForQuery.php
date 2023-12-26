@@ -16,7 +16,7 @@ final readonly class SleepForQuery
     public function __invoke(Subscriptor $subscriptor, callable $next): callable|bool
     {
         // checkMe
-        $subscriptor->notify(new SleepWhenEmptyBatchStreams());
+        $subscriptor->receive(new SleepWhenEmptyBatchStreams());
 
         return $next($subscriptor);
     }

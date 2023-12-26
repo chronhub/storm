@@ -34,6 +34,7 @@ use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
+use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Projector\Subscription\QueryingManagement;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
@@ -81,7 +82,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $subscriptor = $this->createSubscriptor($option, true);
 
         $management = new EmittingManagement(
-            $subscriptor,
+            new Notification($subscriptor),
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
@@ -96,9 +97,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $subscriptor = $this->createSubscriptor($option, true);
 
         $management = new ReadingModelManagement(
-            $subscriptor,
+            new Notification($subscriptor),
             $this->createProjectionRepository($streamName, $option),
-            $readModel
+            $readModel,
         );
 
         return new ReadModelSubscription($subscriptor, $management);

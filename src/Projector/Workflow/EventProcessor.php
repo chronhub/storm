@@ -8,8 +8,10 @@ use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
@@ -32,11 +34,13 @@ final readonly class EventProcessor
     {
         $this->dispatchSignalIfRequested($subscriptor);
 
-        if (! $subscriptor->addCheckpoint($subscriptor->getStreamName(), $expectedPosition)) {
+        $isCheckpointValid = $subscriptor->receive(new CheckpointAdded($subscriptor->getStreamName(), $expectedPosition));
+
+        if (! $isCheckpointValid) {
             return false;
         }
 
-        $subscriptor->notify(new EventIncremented());
+        $subscriptor->receive(new EventIncremented());
 
         $this->reactOn($event, $subscriptor);
 
@@ -58,12 +62,11 @@ final readonly class EventProcessor
         $currentState = $this->scope->getState();
 
         if (is_array($initializedState) && is_array($currentState)) {
-            $subscriptor->setUserState($currentState);
+            $subscriptor->receive(new UserStateChanged($currentState));
         }
 
         if ($this->scope->isAcked()) {
-            // todo reset acked event after each cycle
-            $subscriptor->notify(new StreamEventAcked($event::class));
+            $subscriptor->receive(new StreamEventAcked($event::class));
         }
 
         $resetScope();

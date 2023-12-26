@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\Support\Loop;
 
 interface Subscriptor
 {
-    public function notify(object $event): void;
+    public function receive(object $event): mixed;
 
     public function isEventReset(): bool;
 
@@ -25,23 +25,13 @@ interface Subscriptor
 
     public function getContext(): ?ContextReader;
 
-    public function initializeAgain(): void;
-
     public function setOriginalUserState(): void;
 
-    public function setUserState(array $userState): void;
-
     public function getUserState(): array;
-
-    public function resetUserState(): void;
-
-    public function setStreamName(string $streamName): void;
 
     public function &getStreamName(): string;
 
     public function currentStatus(): ProjectionStatus;
-
-    public function setStatus(ProjectionStatus $status): void;
 
     public function option(): ProjectionOption;
 
@@ -77,7 +67,7 @@ interface Subscriptor
 
     public function inBackground(): bool;
 
-    public function isFirstLoop(): bool;
+    public function isRising(): bool;
 
     public function getActivityFactory(): ActivityFactory;
 

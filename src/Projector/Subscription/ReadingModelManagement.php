@@ -7,14 +7,13 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
     use InteractWithManagement;
 
     public function __construct(
-        protected Subscriptor $subscriptor,
+        protected Notification $notification,
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
@@ -28,7 +27,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->subscriptor->discoverStreams();
+        $this->notification->onStreamsDiscovered();
 
         $this->synchronise();
     }
@@ -38,13 +37,16 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         $this->repository->persist($this->getProjectionResult());
 
         $this->readModel->persist();
+
+        $this->notification->onResetBatchStreams();
     }
 
     public function revise(): void
     {
-        $this->subscriptor->resetCheckpoints();
-        $this->subscriptor->initializeAgain();
-        $this->repository->reset($this->getProjectionResult(), $this->subscriptor->currentStatus());
+        $this->notification->onCheckpointReset();
+        $this->notification->onOriginalUserStateReset();
+
+        $this->repository->reset($this->getProjectionResult(), $this->notification->observeStatus());
         $this->readModel->reset();
     }
 
@@ -56,9 +58,9 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->down();
         }
 
-        $this->subscriptor->stop();
-        $this->subscriptor->resetCheckpoints();
-        $this->subscriptor->initializeAgain();
+        $this->notification->onProjectionStopped();
+        $this->notification->onCheckpointReset();
+        $this->notification->onOriginalUserStateReset();
     }
 
     public function getReadModel(): ReadModel

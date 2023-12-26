@@ -14,8 +14,10 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
 {
     use ScopeBehaviour;
 
-    public function __construct(private readonly EmitterManagement $management)
-    {
+    public function __construct(
+        private readonly EmitterManagement $management,
+        private readonly SystemClock $clock
+    ) {
     }
 
     public function emit(DomainEvent $event): void
@@ -40,6 +42,6 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
 
     public function clock(): SystemClock
     {
-        return $this->management->getClock();
+        return $this->clock;
     }
 }

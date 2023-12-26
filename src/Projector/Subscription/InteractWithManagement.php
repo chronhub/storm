@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
-use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 
 use function in_array;
 
@@ -16,12 +14,15 @@ trait InteractWithManagement
     public function tryUpdateLock(): void
     {
         $this->repository->updateLock();
+
+        $this->notification->onSleepWhenEmptyBatchStreams();
     }
 
     public function freed(): void
     {
         $this->repository->release();
-        $this->subscriptor->setStatus(ProjectionStatus::IDLE);
+
+        $this->notification->onStatusChanged($this->notification->observeStatus(), ProjectionStatus::IDLE);
     }
 
     public function close(): void
@@ -29,50 +30,60 @@ trait InteractWithManagement
         $idleStatus = ProjectionStatus::IDLE;
 
         $this->repository->stop($this->getProjectionResult(), $idleStatus);
-        $this->subscriptor->setStatus($idleStatus);
-        $this->subscriptor->stop();
+
+        $this->notification->onStatusChanged($this->notification->observeStatus(), $idleStatus);
+        $this->notification->onProjectionStopped();
     }
 
     public function restart(): void
     {
-        $this->subscriptor->continue();
+        $this->notification->onProjectionRunning();
 
         $runningStatus = ProjectionStatus::RUNNING;
 
         $this->repository->startAgain($runningStatus);
-        $this->subscriptor->setStatus($runningStatus);
+
+        $this->notification->onStatusChanged($this->notification->observeStatus(), $runningStatus);
     }
 
     public function disclose(): ProjectionStatus
     {
-        return $this->repository->loadStatus();
+        $disclosedStatus = $this->repository->loadStatus();
+
+        // checkMe: called from monitor remote status and persist the threshold.
+        // till we use it actually to set the status,
+        // but we cannot use it to query remote status.
+        $this->notification->onStatusDisclosed($this->notification->observeStatus(), $disclosedStatus);
+
+        return $disclosedStatus;
     }
 
     public function synchronise(): void
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->subscriptor->updateCheckpoints($projectionDetail->checkpoints);
+        $this->notification->onCheckpointUpdated($projectionDetail->checkpoints);
 
         $state = $projectionDetail->userState;
 
         if ($state !== []) {
-            $this->subscriptor->setUserState($state);
+            $this->notification->onUserStateChanged($state);
         }
     }
 
     public function persistWhenCounterIsReached(): void
     {
-        if ($this->subscriptor->isEventReached()) {
+        if ($this->notification->observeThresholdIsReached()) {
             $this->store();
 
-            $this->subscriptor->notify(new EventReset());
-            $this->subscriptor->setStatus($this->disclose());
+            $this->notification->onEventReset();
+
+            $this->disclose();
 
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->subscriptor->currentStatus(), $keepProjectionRunning, true)) {
-                $this->subscriptor->stop();
+            if (! in_array($this->notification->observeStatus(), $keepProjectionRunning, true)) {
+                $this->notification->onProjectionStopped();
             }
         }
     }
@@ -82,34 +93,31 @@ trait InteractWithManagement
         return $this->repository->projectionName();
     }
 
-    public function getClock(): SystemClock
-    {
-        return $this->subscriptor->clock();
-    }
-
     public function getCurrentStreamName(): string
     {
-        return $this->subscriptor->getStreamName();
+        return $this->notification->observeStreamName();
     }
 
     protected function mountProjection(): void
     {
-        $this->subscriptor->continue();
+        $this->notification->onProjectionRunning();
 
         if (! $this->repository->exists()) {
-            $this->repository->create($this->subscriptor->currentStatus());
+            $this->repository->create($this->notification->observeStatus());
         }
 
-        $status = ProjectionStatus::RUNNING;
+        $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->repository->start($status);
-        $this->subscriptor->setStatus($status);
+        $this->repository->start($runningStatus);
+
+        $this->notification->onStatusChanged($this->notification->observeStatus(), $runningStatus);
     }
 
     protected function getProjectionResult(): ProjectionResult
     {
-        $streamPositions = $this->subscriptor->checkPoints();
-
-        return new ProjectionResult($streamPositions, $this->subscriptor->getUserState());
+        return new ProjectionResult(
+            $this->notification->observeCheckpoints(),
+            $this->notification->observeUserState()
+        );
     }
 }

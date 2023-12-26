@@ -32,6 +32,6 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
 
     protected function getScope(): ReadModelScope
     {
-        return new ReadModelAccess($this->management);
+        return new ReadModelAccess($this->management, $this->subscriptor->clock());
     }
 }
