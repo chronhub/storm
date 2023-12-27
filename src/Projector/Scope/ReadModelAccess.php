@@ -8,7 +8,6 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
-use Chronhub\Storm\Contracts\Projector\StackedReadModel;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
 use Chronhub\Storm\Projector\Subscription\NotificationManager;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
@@ -29,8 +28,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
         $this->notification->trigger(new ProjectionClosed());
     }
 
-    // todo remove
-    public function readModel(): StackedReadModel
+    public function readModel(): ReadModel
     {
         return $this->readModel;
     }
