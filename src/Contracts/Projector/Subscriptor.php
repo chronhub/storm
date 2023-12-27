@@ -7,9 +7,10 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Support\BatchObserver;
-use Chronhub\Storm\Projector\Support\Loop;
+use Chronhub\Storm\Projector\Support\AckedStreamObserver;
+use Chronhub\Storm\Projector\Support\BatchStreamObserver;
 use Chronhub\Storm\Projector\Workflow\EventCounter;
+use Chronhub\Storm\Projector\Workflow\Loop;
 use Chronhub\Storm\Projector\Workflow\Sprint;
 
 interface Subscriptor
@@ -24,7 +25,9 @@ interface Subscriptor
 
     public function streamManager(): StreamManager;
 
-    public function batch(): BatchObserver;
+    public function batch(): BatchStreamObserver;
+
+    public function acked(): AckedStreamObserver;
 
     public function setContext(ContextReader $context, bool $allowRerun): void;
 
@@ -32,11 +35,9 @@ interface Subscriptor
 
     public function setOriginalUserState(): void;
 
-    public function getUserState(): array;
+    public function getProcessedStream(): string;
 
-    public function getStreamName(): string;
-
-    public function setStreamName(string $streamName): void;
+    public function setProcessedStream(string $streamName): void;
 
     public function setStatus(ProjectionStatus $status): void;
 
@@ -51,14 +52,6 @@ interface Subscriptor
     public function discoverStreams(): void;
 
     public function isUserStateInitialized(): bool;
-
-    public function ackedEvents(): array;
-
-    public function ackEvent(string $event): void;
-
-    public function resetAckedEvents(): void;
-
-    public function isRising(): bool;
 
     public function loop(): Loop;
 

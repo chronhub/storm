@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Support;
+namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use DateInterval;
 use DateTimeImmutable;
 
-final class Timer
+class Timer
 {
     private ?DateTimeImmutable $startTime = null;
 
@@ -49,8 +49,6 @@ final class Timer
             return null;
         }
 
-        $now = $this->clock->now();
-
-        return $now->getTimestamp() - $this->startTime->getTimestamp();
+        return $this->clock->now()->getTimestamp() - $this->startTime->getTimestamp();
     }
 }

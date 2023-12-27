@@ -14,6 +14,6 @@ final readonly class StreamEventAcked
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->ackEvent($this->event);
+        $subscriptor->acked()->ack($this->event);
     }
 }

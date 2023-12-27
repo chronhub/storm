@@ -78,7 +78,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     private function startProjection(bool $keepRunning): void
     {
-        $project = new RunProjection($this->newWorkflow(), $this->subscriptor->loop(), $keepRunning);
+        $project = new RunProjection($this->newWorkflow(), $keepRunning);
 
         $project->loop();
     }

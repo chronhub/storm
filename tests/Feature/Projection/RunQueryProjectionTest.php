@@ -24,7 +24,7 @@ beforeEach(function () {
 it('can run query projection 1', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10, '+1 seconds', $eventId);
+    $stream = $this->testFactory->getStream('user', 100, '+1 seconds', $eventId);
     $this->eventStore->firstCommit($stream);
 
     // create a projection
@@ -46,7 +46,7 @@ it('can run query projection 1', function () {
                 });
         })->run(false);
 
-    expect($projector->getState())->toBe(['count' => 10]);
+    expect($projector->getState())->toBe(['count' => 100]);
 });
 
 it('can run query projection until and increment loop', function () {

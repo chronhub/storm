@@ -109,7 +109,7 @@ trait InteractWithManagement
         return $this->repository->projectionName();
     }
 
-    public function getCurrentStreamName(): string
+    public function getProcessedStream(): string
     {
         return $this->hub->interact(GetStreamName::class);
     }

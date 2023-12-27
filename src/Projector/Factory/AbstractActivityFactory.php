@@ -9,10 +9,10 @@ use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Support\Timer;
 use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Workflow\EventReactor;
 use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
+use Chronhub\Storm\Projector\Workflow\Timer;
 
 use function array_map;
 

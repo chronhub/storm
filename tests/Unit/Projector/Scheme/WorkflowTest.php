@@ -56,7 +56,7 @@ it('process workflow', function (): void {
 });
 
 it('process workflow can be stopped', function (): void {
-    $this->sprint->stop();
+    $this->sprint->halt();
 
     $called = 0;
 

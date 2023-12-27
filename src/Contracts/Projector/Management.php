@@ -12,9 +12,9 @@ interface Management
     public function close(): void;
 
     /**
-     * Get the current stream name.
+     * Get the current stream name processed.
      */
-    public function getCurrentStreamName(): string;
+    public function getProcessedStream(): string;
 
     public function hub(): HookHub;
 }

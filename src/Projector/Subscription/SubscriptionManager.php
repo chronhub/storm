@@ -14,10 +14,11 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Support\BatchObserver;
-use Chronhub\Storm\Projector\Support\Loop;
+use Chronhub\Storm\Projector\Support\AckedStreamObserver;
+use Chronhub\Storm\Projector\Support\BatchStreamObserver;
 use Chronhub\Storm\Projector\Workflow\EventCounter;
 use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
+use Chronhub\Storm\Projector\Workflow\Loop;
 use Chronhub\Storm\Projector\Workflow\Sprint;
 use Closure;
 
@@ -26,8 +27,6 @@ final class SubscriptionManager implements Subscriptor
     private ?string $streamName = null;
 
     private ?ContextReader $context = null;
-
-    private array $eventsAcked = [];
 
     private ?MergeStreamIterator $streamIterator = null;
 
@@ -39,17 +38,20 @@ final class SubscriptionManager implements Subscriptor
 
     private Sprint $sprint;
 
+    private AckedStreamObserver $acked;
+
     public function __construct(
         private readonly EventStreamDiscovery $streamDiscovery,
         private readonly StreamManager $streamManager,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         private readonly Loop $loop,
-        private readonly BatchObserver $batchStreamsAware
+        private readonly BatchStreamObserver $batchStreamsAware
     ) {
         $this->eventCounter = new EventCounter($option->getBlockSize());
         $this->userState = new InMemoryUserState();
         $this->sprint = new Sprint();
+        $this->acked = new AckedStreamObserver();
     }
 
     public function receive(callable $event): mixed
@@ -86,9 +88,14 @@ final class SubscriptionManager implements Subscriptor
         return $this->streamManager;
     }
 
-    public function batch(): BatchObserver
+    public function batch(): BatchStreamObserver
     {
         return $this->batchStreamsAware;
+    }
+
+    public function acked(): AckedStreamObserver
+    {
+        return $this->acked;
     }
 
     public function currentStatus(): ProjectionStatus
@@ -113,22 +120,17 @@ final class SubscriptionManager implements Subscriptor
         $this->userState->put($originalUserState);
     }
 
-    public function getUserState(): array
-    {
-        return $this->userState->get();
-    }
-
     public function isUserStateInitialized(): bool
     {
         return $this->context->userState() instanceof Closure;
     }
 
-    public function setStreamName(string $streamName): void
+    public function setProcessedStream(string $streamName): void
     {
         $this->streamName = $streamName;
     }
 
-    public function getStreamName(): string
+    public function getProcessedStream(): string
     {
         return $this->streamName;
     }
@@ -154,26 +156,6 @@ final class SubscriptionManager implements Subscriptor
 
             $this->streamManager->refreshStreams($eventStreams);
         });
-    }
-
-    public function ackedEvents(): array
-    {
-        return $this->eventsAcked;
-    }
-
-    public function ackEvent(string $event): void
-    {
-        $this->eventsAcked[] = $event;
-    }
-
-    public function resetAckedEvents(): void
-    {
-        $this->eventsAcked = [];
-    }
-
-    public function isRising(): bool
-    {
-        return $this->loop->isFirstLoop();
     }
 
     public function loop(): Loop

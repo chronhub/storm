@@ -38,7 +38,7 @@ test('stop sprint', function (): void {
 
     expect($this->sprint->inProgress())->toBeTrue();
 
-    $this->sprint->stop();
+    $this->sprint->halt();
 
     expect($this->sprint->inProgress())->toBeFalse();
 });

@@ -20,7 +20,7 @@ final readonly class QueryingManagement implements QueryManagement
         $this->hub->interact(SprintStopped::class);
     }
 
-    public function getCurrentStreamName(): string
+    public function getProcessedStream(): string
     {
         return $this->hub->interact(GetStreamName::class);
     }

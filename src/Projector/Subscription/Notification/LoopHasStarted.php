@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class IsRising
+final class LoopHasStarted
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->isRising();
+        return $subscriptor->loop()->hasStarted();
     }
 }

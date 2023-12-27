@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final readonly class SprintStopped
+final class IsUserStateInitialized
 {
-    public function __invoke(Subscriptor $subscriptor): void
+    public function __invoke(Subscriptor $subscriptor): bool
     {
-        $subscriptor->sprint()->halt();
+        return $subscriptor->isUserStateInitialized();
     }
 }

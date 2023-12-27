@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Support\BatchObserver;
+use Chronhub\Storm\Projector\Support\BatchStreamObserver;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use JsonSerializable;
 
@@ -94,7 +94,7 @@ interface ProjectionOption extends JsonSerializable
      *
      * @return int|array{int|float, int|float}
      *
-     * @see BatchObserver
+     * @see BatchStreamObserver
      * @see ConsumeWithSleepToken
      */
     public function getSleep(): int|array;

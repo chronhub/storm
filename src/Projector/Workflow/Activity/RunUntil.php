@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
-use Chronhub\Storm\Projector\Support\Timer;
+use Chronhub\Storm\Projector\Workflow\Timer;
 
 final readonly class RunUntil
 {

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
+// todo
 final readonly class UserStateReset
 {
     public function __invoke(Subscriptor $subscriptor): void

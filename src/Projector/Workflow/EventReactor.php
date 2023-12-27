@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
-use Chronhub\Storm\Projector\Subscription\Notification\IsStateInitialized;
+use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionPersistedWhenThresholdIsReached;
@@ -52,7 +52,7 @@ final readonly class EventReactor
 
     private function reactOn(DomainEvent $event, HookHub $task): void
     {
-        $initializedState = $task->interact(IsStateInitialized::class)
+        $initializedState = $task->interact(IsUserStateInitialized::class)
             ? $task->interact(GetUserState::class) : null;
 
         $resetScope = ($this->scope)($event, $initializedState);

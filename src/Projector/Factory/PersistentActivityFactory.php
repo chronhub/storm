@@ -19,6 +19,7 @@ use Chronhub\Storm\Projector\Workflow\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
+use Chronhub\Storm\Projector\Workflow\Activity\StartLoop;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
@@ -33,6 +34,7 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
         $monitor = new MonitorRemoteStatus();
 
         return [
+            fn (): callable => new StartLoop(),
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RisePersistentProjection($monitor),
             fn (): callable => $this->getStreamLoader($subscriptor),

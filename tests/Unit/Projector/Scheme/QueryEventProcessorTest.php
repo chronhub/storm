@@ -47,7 +47,7 @@ $assertEventProcessed = function (bool $inProgress) {
 test('always process event and return sprint in progress', function (bool $inProgress) use ($assertEventProcessed): void {
     $this->option->expects($this->once())->method('getSignal')->willReturn($inProgress);
 
-    $inProgress ? $this->sprint->continue() : $this->sprint->stop();
+    $inProgress ? $this->sprint->continue() : $this->sprint->halt();
 
     $assertEventProcessed->call($this, $inProgress);
 })->with(['in progress' => [true], 'stopped' => [false]]);

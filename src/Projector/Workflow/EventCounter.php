@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
-final class EventCounter
+class EventCounter
 {
     /**
      * @var int<0,max>

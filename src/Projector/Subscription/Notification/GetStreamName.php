@@ -10,6 +10,6 @@ class GetStreamName
 {
     public function __invoke(Subscriptor $subscriptor): string
     {
-        return $subscriptor->getStreamName();
+        return $subscriptor->getProcessedStream();
     }
 }

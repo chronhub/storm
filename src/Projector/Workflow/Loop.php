@@ -2,39 +2,39 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Support;
+namespace Chronhub\Storm\Projector\Workflow;
 
-final class Loop
+class Loop
 {
-    private int $loop = 0;
+    private int $cycle = 0;
 
     public function start(): void
     {
-        $this->loop = 1;
+        $this->cycle = 1;
     }
 
     public function next(): void
     {
-        $this->loop++;
+        $this->cycle++;
     }
 
     public function reset(): void
     {
-        $this->loop = 0;
+        $this->cycle = 0;
     }
 
-    public function loop(): int
+    public function cycle(): int
     {
-        return $this->loop;
+        return $this->cycle;
     }
 
     public function isFirstLoop(): bool
     {
-        return $this->loop === 1;
+        return $this->cycle === 1;
     }
 
     public function hasStarted(): bool
     {
-        return $this->loop > 0;
+        return $this->cycle > 0;
     }
 }

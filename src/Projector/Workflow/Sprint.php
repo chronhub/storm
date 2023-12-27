@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 class Sprint
 {
-    protected bool $runInBackground = false;
+    protected bool $inBackground = false;
 
     protected bool $inProgress = false;
 
@@ -15,7 +15,7 @@ class Sprint
         $this->inProgress = true;
     }
 
-    public function stop(): void
+    public function halt(): void
     {
         $this->inProgress = false;
     }
@@ -27,11 +27,11 @@ class Sprint
 
     public function runInBackground(bool $runInBackground): void
     {
-        $this->runInBackground = $runInBackground;
+        $this->inBackground = $runInBackground;
     }
 
     public function inBackground(): bool
     {
-        return $this->runInBackground;
+        return $this->inBackground;
     }
 }

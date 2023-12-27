@@ -14,6 +14,6 @@ final readonly class StreamProcessed
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->setStreamName($this->streamName);
+        $subscriptor->setProcessedStream($this->streamName);
     }
 }

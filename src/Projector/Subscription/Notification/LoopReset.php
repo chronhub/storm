@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final readonly class SprintStopped
+final class LoopReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->sprint()->halt();
+        $subscriptor->loop()->reset();
     }
 }
