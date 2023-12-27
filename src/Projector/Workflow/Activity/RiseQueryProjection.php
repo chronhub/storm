@@ -10,12 +10,12 @@ use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 
 final readonly class RiseQueryProjection
 {
-    public function __invoke(HookHub $task, callable $next): callable|bool
+    public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($task->interact(IsRising::class)) {
-            $task->interact(StreamsDiscovered::class);
+        if ($hub->interact(IsRising::class)) {
+            $hub->interact(StreamsDiscovered::class);
         }
 
-        return $next($task);
+        return $next($hub);
     }
 }

@@ -9,10 +9,10 @@ use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 
 final readonly class ResetEventCounter
 {
-    public function __invoke(HookHub $task, callable $next): callable|bool
+    public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $task->interact(EventReset::class);
+        $hub->interact(EventReset::class);
 
-        return $next($task);
+        return $next($hub);
     }
 }

@@ -28,8 +28,8 @@ final class LoadStreams
 
     public function __construct(
         private readonly Chronicler $chronicler,
-        private readonly int $loadLimiter,
         private readonly SystemClock $clock,
+        private readonly int $loadLimiter,
         callable $queryFilterResolver
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
