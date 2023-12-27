@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchObserverSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
@@ -14,7 +15,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReached;
-use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
@@ -29,16 +29,16 @@ trait InteractWithManagement
     {
         $this->repository->updateLock();
 
-        $this->task->listen(SleepWhenEmptyBatchStreams::class);
+        $this->hub->interact(BatchObserverSleep::class);
     }
 
     public function freed(): void
     {
         $this->repository->release();
 
-        $this->task->listen(
+        $this->hub->interact(
             StatusChanged::class,
-            $this->task->listen(GetStatus::class), ProjectionStatus::IDLE
+            $this->hub->interact(GetStatus::class), ProjectionStatus::IDLE
         );
     }
 
@@ -48,25 +48,25 @@ trait InteractWithManagement
 
         $this->repository->stop($this->getProjectionResult(), $idleStatus);
 
-        $this->task->listen(
+        $this->hub->interact(
             StatusChanged::class,
-            $this->task->listen(GetStatus::class), $idleStatus
+            $this->hub->interact(GetStatus::class), $idleStatus
         );
 
-        $this->task->listen(SprintStopped::class);
+        $this->hub->interact(SprintStopped::class);
     }
 
     public function restart(): void
     {
-        $this->task->listen(SprintRunning::class);
+        $this->hub->interact(SprintRunning::class);
 
         $runningStatus = ProjectionStatus::RUNNING;
 
         $this->repository->startAgain($runningStatus);
 
-        $this->task->listen(
+        $this->hub->interact(
             StatusChanged::class,
-            $this->task->listen(GetStatus::class), $runningStatus
+            $this->hub->interact(GetStatus::class), $runningStatus
         );
     }
 
@@ -74,9 +74,9 @@ trait InteractWithManagement
     {
         $disclosedStatus = $this->repository->loadStatus();
 
-        $this->task->listen(
+        $this->hub->interact(
             StatusDisclosed::class,
-            $this->task->listen(GetStatus::class), $disclosedStatus
+            $this->hub->interact(GetStatus::class), $disclosedStatus
         );
     }
 
@@ -84,28 +84,28 @@ trait InteractWithManagement
     {
         $projectionDetail = $this->repository->loadDetail();
 
-        $this->task->listen(CheckpointUpdated::class, $projectionDetail->checkpoints);
+        $this->hub->interact(CheckpointUpdated::class, $projectionDetail->checkpoints);
 
         $state = $projectionDetail->userState;
 
         if ($state !== []) {
-            $this->task->listen(UserStateChanged::class, $state);
+            $this->hub->interact(UserStateChanged::class, $state);
         }
     }
 
     public function persistWhenCounterIsReached(): void
     {
-        if ($this->task->listen(IsEventReached::class)) {
+        if ($this->hub->interact(IsEventReached::class)) {
             $this->store();
 
-            $this->task->listen(EventReset::class);
+            $this->hub->interact(EventReset::class);
 
             $this->disclose();
 
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->task->listen(GetStatus::class), $keepProjectionRunning, true)) {
-                $this->task->listen(SprintStopped::class);
+            if (! in_array($this->hub->interact(GetStatus::class), $keepProjectionRunning, true)) {
+                $this->hub->interact(SprintStopped::class);
             }
         }
     }
@@ -117,37 +117,37 @@ trait InteractWithManagement
 
     public function getCurrentStreamName(): string
     {
-        return $this->task->listen(GetStreamName::class);
+        return $this->hub->interact(GetStreamName::class);
     }
 
     public function hub(): HookHub
     {
-        return $this->task;
+        return $this->hub;
     }
 
     protected function mountProjection(): void
     {
-        $this->task->listen(SprintRunning::class);
+        $this->hub->interact(SprintRunning::class);
 
         if (! $this->repository->exists()) {
-            $this->repository->create($this->task->listen(GetStatus::class));
+            $this->repository->create($this->hub->interact(GetStatus::class));
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
 
         $this->repository->start($runningStatus);
 
-        $this->task->listen(
+        $this->hub->interact(
             StatusChanged::class,
-            $this->task->listen(GetStatus::class), $runningStatus
+            $this->hub->interact(GetStatus::class), $runningStatus
         );
     }
 
     protected function getProjectionResult(): ProjectionResult
     {
         return new ProjectionResult(
-            $this->task->listen(GetCheckpoints::class),
-            $this->task->listen(GetUserState::class)
+            $this->hub->interact(GetCheckpoints::class),
+            $this->hub->interact(GetUserState::class)
         );
     }
 }

@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class IsInBackground
+final class StreamEventAckedReset
 {
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): void
     {
-        return $subscriptor->sprint()->inBackground();
+        $subscriptor->resetAckedEvents();
     }
 }

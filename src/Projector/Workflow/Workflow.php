@@ -18,7 +18,7 @@ final readonly class Workflow
     /**
      * @param array<callable> $activities
      */
-    public function __construct(private HookHub $task, private array $activities)
+    public function __construct(private HookHub $hub, private array $activities)
     {
     }
 
@@ -27,7 +27,7 @@ final readonly class Workflow
         $process = $this->prepareProcess($destination);
 
         try {
-            return $process($this->task);
+            return $process($this->hub);
         } catch (Throwable $exception) {
             return false;
         } finally {
@@ -46,12 +46,12 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (HookHub $task) => $destination($task);
+        return fn (HookHub $hub) => $destination($hub);
     }
 
     private function carry(): Closure
     {
-        return fn (callable $stack, callable $activity) => fn (HookHub $task) => $activity($task, $stack);
+        return fn (callable $stack, callable $activity) => fn (HookHub $hub) => $activity($hub, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void
@@ -61,7 +61,7 @@ final readonly class Workflow
         }
 
         try {
-            $this->task->trigger(new ProjectionFreed());
+            $this->hub->trigger(new ProjectionFreed());
         } catch (Throwable) {
             // ignore
         }

@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Support\BatchStreamsAware;
+use Chronhub\Storm\Projector\Support\BatchObserver;
 use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Workflow\EventCounter;
 use Chronhub\Storm\Projector\Workflow\Sprint;
@@ -24,7 +24,7 @@ interface Subscriptor
 
     public function streamManager(): StreamManager;
 
-    public function batchStreamsAware(): BatchStreamsAware;
+    public function batch(): BatchObserver;
 
     public function setContext(ContextReader $context, bool $allowRerun): void;
 
@@ -55,6 +55,8 @@ interface Subscriptor
     public function ackedEvents(): array;
 
     public function ackEvent(string $event): void;
+
+    public function resetAckedEvents(): void;
 
     public function isRising(): bool;
 

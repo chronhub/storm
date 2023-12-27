@@ -15,18 +15,14 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Subscription\Notification\AckedEventReset;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchStreamsReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
-use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\ShouldSleepOnGap;
-use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
@@ -36,7 +32,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\StreamProcessed;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
-use Chronhub\Storm\Projector\Support\BatchStreamsAware;
+use Chronhub\Storm\Projector\Support\BatchObserver;
 use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Workflow\EventCounter;
 use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
@@ -67,7 +63,7 @@ final class SubscriptionManager implements Subscriptor
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         private readonly Loop $loop,
-        private readonly BatchStreamsAware $batchStreamsAware
+        private readonly BatchObserver $batchStreamsAware
     ) {
         $this->eventCounter = new EventCounter($option->getBlockSize());
         $this->userState = new InMemoryUserState();
@@ -113,7 +109,7 @@ final class SubscriptionManager implements Subscriptor
         return $this->streamManager;
     }
 
-    public function batchStreamsAware(): BatchStreamsAware
+    public function batch(): BatchObserver
     {
         return $this->batchStreamsAware;
     }
@@ -186,6 +182,11 @@ final class SubscriptionManager implements Subscriptor
     public function ackEvent(string $event): void
     {
         $this->eventsAcked[] = $event;
+    }
+
+    public function resetAckedEvents(): void
+    {
+        $this->eventsAcked = [];
     }
 
     public function isRising(): bool

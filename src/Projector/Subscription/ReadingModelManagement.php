@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchStreamsReset;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
@@ -20,11 +20,11 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected HookHub $task,
+        protected HookHub $hub,
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
-        EventManagement::subscribe($task, $this);
+        EventManagement::subscribe($hub, $this);
     }
 
     public function rise(): void
@@ -35,7 +35,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->task->listen(StreamsDiscovered::class);
+        $this->hub->interact(StreamsDiscovered::class);
 
         $this->synchronise();
     }
@@ -46,15 +46,15 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
         $this->readModel->persist();
 
-        $this->task->listen(BatchStreamsReset::class);
+        $this->hub->interact(BatchReset::class);
     }
 
     public function revise(): void
     {
-        $this->task->listen(CheckpointReset::class);
-        $this->task->listen(UserStateResetAgain::class);
+        $this->hub->interact(CheckpointReset::class);
+        $this->hub->interact(UserStateResetAgain::class);
 
-        $this->repository->reset($this->getProjectionResult(), $this->task->listen(GetStatus::class));
+        $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
 
         $this->readModel->reset();
     }
@@ -67,9 +67,9 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->down();
         }
 
-        $this->task->listen(SprintStopped::class);
-        $this->task->listen(CheckpointReset::class);
-        $this->task->listen(UserStateResetAgain::class);
+        $this->hub->interact(SprintStopped::class);
+        $this->hub->interact(CheckpointReset::class);
+        $this->hub->interact(UserStateResetAgain::class);
     }
 
     public function getReadModel(): ReadModel

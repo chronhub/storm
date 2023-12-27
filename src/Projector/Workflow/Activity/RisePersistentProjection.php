@@ -16,7 +16,7 @@ final readonly class RisePersistentProjection
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($hub->listen(IsRising::class)) {
+        if ($hub->interact(IsRising::class)) {
             if ($this->monitor->shouldStop($hub)) {
                 return false;
             }

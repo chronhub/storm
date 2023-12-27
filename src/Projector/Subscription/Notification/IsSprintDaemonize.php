@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class AckedEventReset
+final class IsSprintDaemonize
 {
-    public function __invoke(Subscriptor $subscriptor): array
+    public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->ackedEvents();
+        return $subscriptor->sprint()->inBackground();
     }
 }

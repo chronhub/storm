@@ -23,7 +23,7 @@ final readonly class RunProjection
             $this->startLooperIfNeeded();
 
             $inProgress = $this->workflow->process(
-                fn (HookHub $hub): bool => $hub->listen(IsSprintRunning::class)
+                fn (HookHub $hub): bool => $hub->interact(IsSprintRunning::class)
             );
 
             $this->handleCycleEnd($inProgress);

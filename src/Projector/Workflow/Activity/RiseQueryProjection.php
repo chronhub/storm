@@ -12,8 +12,8 @@ final readonly class RiseQueryProjection
 {
     public function __invoke(HookHub $task, callable $next): callable|bool
     {
-        if ($task->listen(IsRising::class)) {
-            $task->listen(StreamsDiscovered::class);
+        if ($task->interact(IsRising::class)) {
+            $task->interact(StreamsDiscovered::class);
         }
 
         return $next($task);

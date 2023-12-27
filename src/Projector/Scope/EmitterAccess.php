@@ -41,7 +41,7 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
 
     public function streamName(): string
     {
-        return $this->hub->listen(GetStreamName::class);
+        return $this->hub->interact(GetStreamName::class);
     }
 
     public function clock(): SystemClock

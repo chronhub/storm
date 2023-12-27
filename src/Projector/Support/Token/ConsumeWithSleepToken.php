@@ -30,12 +30,11 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
         return true;
     }
 
+    /**
+     * Calculate the time required to accumulate the required number of tokens.
+     */
     private function getRemainingTimeUntilNextToken(float $tokens = 1): float
     {
-        // Ensure tokens are up to-date
-        $this->refillTokens();
-
-        // Calculate the time required to accumulate the required number of tokens
         return max(0, ($tokens - $this->tokens) / $this->rate);
     }
 }

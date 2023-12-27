@@ -11,7 +11,7 @@ final readonly class ResetEventCounter
 {
     public function __invoke(HookHub $task, callable $next): callable|bool
     {
-        $task->listen(EventReset::class);
+        $task->interact(EventReset::class);
 
         return $next($task);
     }

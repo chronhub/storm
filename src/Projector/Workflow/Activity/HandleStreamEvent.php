@@ -28,7 +28,7 @@ final class HandleStreamEvent
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $streams = $hub->listen(PullStreamIterator::class);
+        $streams = $hub->interact(PullStreamIterator::class);
 
         if (! $streams instanceof MergeStreamIterator) {
             return $next($hub);
@@ -37,11 +37,11 @@ final class HandleStreamEvent
         foreach ($streams as $position => $event) {
             $streamName = $streams->streamName();
 
-            $hub->listen(StreamProcessed::class, $streamName);
+            $hub->interact(StreamProcessed::class, $streamName);
 
             $continue = ($this->eventProcessor)($hub, $event, $position);
 
-            if (! $continue || ! $hub->listen(IsSprintRunning::class)) {
+            if (! $continue || ! $hub->interact(IsSprintRunning::class)) {
                 break;
             }
         }

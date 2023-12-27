@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Closure;
 use DateInterval;
 
@@ -68,6 +69,6 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->hub()->getUserState();
+        return $this->subscriber->hub()->interact(GetUserState::class);
     }
 }

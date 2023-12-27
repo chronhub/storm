@@ -15,7 +15,7 @@ final class ShouldSleepOnGap
             return false;
         }
 
-        $subscriptor->batchStreamsAware()->sleep();
+        $subscriptor->batch()->sleep();
 
         return true;
     }

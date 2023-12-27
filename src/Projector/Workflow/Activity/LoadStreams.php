@@ -12,7 +12,7 @@ use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
-use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\HasBatch;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
 
@@ -39,14 +39,14 @@ final class LoadStreams
     {
         $hasStreams = $this->handleStreams($hub);
 
-        $hub->listen(HasBatchStreams::class, $hasStreams);
+        $hub->interact(HasBatch::class, $hasStreams);
 
         return $next($hub);
     }
 
     private function handleStreams(HookHub $hub): bool
     {
-        $streams = $this->batchStreams($hub->listen(GetCheckpoints::class));
+        $streams = $this->batchStreams($hub->interact(GetCheckpoints::class));
 
         if ($streams !== []) {
             $iterators = collect(array_values($streams))->map(
@@ -55,7 +55,7 @@ final class LoadStreams
 
             $iterator = new MergeStreamIterator($this->clock, $iterators);
 
-            $hub->listen(StreamIteratorSet::class, $iterator);
+            $hub->interact(StreamIteratorSet::class, $iterator);
 
             return true;
         }

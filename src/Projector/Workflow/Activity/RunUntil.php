@@ -23,7 +23,7 @@ final readonly class RunUntil
         $response = $next($hub);
 
         if ($this->timer->isExpired()) {
-            $hub->listen(SprintStopped::class);
+            $hub->interact(SprintStopped::class);
 
             return false;
         }

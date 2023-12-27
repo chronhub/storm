@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
-use Chronhub\Storm\Projector\Subscription\Notification\IsInBackground;
+use Chronhub\Storm\Projector\Subscription\Notification\IsSprintDaemonize;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRestarted;
@@ -38,7 +38,6 @@ final class MonitorRemoteStatus
     private function onStopping(HookHub $hub): bool
     {
         if ($this->onRise) {
-            // todo why sync on stop,
             $hub->trigger(new ProjectionSynchronized());
         }
 
@@ -51,7 +50,7 @@ final class MonitorRemoteStatus
     {
         $hub->trigger(new ProjectionRevised());
 
-        if (! $this->onRise && $hub->listen(IsInBackground::class)) {
+        if (! $this->onRise && $hub->interact(IsSprintDaemonize::class)) {
             $hub->trigger(new ProjectionRestarted());
         }
 
@@ -69,7 +68,7 @@ final class MonitorRemoteStatus
     {
         $hub->trigger(new ProjectionStatusDisclosed());
 
-        return match ($hub->listen(GetStatus::class)->value) {
+        return match ($hub->interact(GetStatus::class)->value) {
             ProjectionStatus::STOPPING->value => $this->onStopping($hub),
             ProjectionStatus::RESETTING->value => $this->onResetting($hub),
             ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),

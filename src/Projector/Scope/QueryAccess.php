@@ -23,12 +23,12 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
 
     public function stop(): void
     {
-        $this->task->listen(SprintStopped::class);
+        $this->task->interact(SprintStopped::class);
     }
 
     public function streamName(): string
     {
-        return $this->task->listen(GetStreamName::class);
+        return $this->task->interact(GetStreamName::class);
     }
 
     public function clock(): SystemClock

@@ -16,5 +16,5 @@ interface HookHub
     /**
      * @param class-string|object $notification
      */
-    public function listen(string|object $notification, mixed ...$arguments): mixed;
+    public function interact(string|object $notification, mixed ...$arguments): mixed;
 }

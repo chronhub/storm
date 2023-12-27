@@ -24,7 +24,7 @@ use Chronhub\Storm\Projector\Subscription\Observer\ProjectionSynchronized;
 use function array_key_exists;
 use function is_string;
 
-final class Notification implements HookHub
+final class NotificationManager implements HookHub
 {
     /**
      * @var array<string, array<callable>>
@@ -67,7 +67,7 @@ final class Notification implements HookHub
         }
     }
 
-    public function listen(string|object $notification, mixed ...$arguments): mixed
+    public function interact(string|object $notification, mixed ...$arguments): mixed
     {
         $event = is_string($notification) ? new $notification(...$arguments) : $notification;
 

@@ -36,13 +36,13 @@ use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\NotificationManager;
 use Chronhub\Storm\Projector\Subscription\QueryingManagement;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
-use Chronhub\Storm\Projector\Support\BatchStreamsAware;
+use Chronhub\Storm\Projector\Support\BatchObserver;
 use Chronhub\Storm\Projector\Support\Loop;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
@@ -74,7 +74,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
         $subscriptor = $this->createSubscriptor($option);
-        $notification = new Notification($subscriptor);
+        $notification = new NotificationManager($subscriptor);
         $activities = new QueryActivityFactory($this->chronicler);
         $scope = new QueryAccess($notification, $this->clock);
 
@@ -84,7 +84,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         $subscriptor = $this->createSubscriptor($option);
-        $notification = new Notification($subscriptor);
+        $notification = new NotificationManager($subscriptor);
 
         $management = new EmittingManagement(
             $notification,
@@ -103,7 +103,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
         $subscriptor = $this->createSubscriptor($option);
-        $notification = new Notification($subscriptor);
+        $notification = new NotificationManager($subscriptor);
         $repository = $this->createProjectionRepository($streamName, $option);
 
         $management = new ReadingModelManagement($notification, $repository, $readModel);
@@ -185,16 +185,16 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function BatchStreamsAware(ProjectionOption $option): BatchStreamsAware
+    protected function BatchStreamsAware(ProjectionOption $option): BatchObserver
     {
         $sleep = $option->getSleep();
 
         if (is_array($sleep)) {
             $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
 
-            return new BatchStreamsAware($bucket);
+            return new BatchObserver($bucket);
         }
 
-        return new BatchStreamsAware(null, $sleep);
+        return new BatchObserver(null, $sleep);
     }
 }

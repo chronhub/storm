@@ -41,19 +41,19 @@ final readonly class EventReactor
             return false;
         }
 
-        $task->listen(EventIncremented::class);
+        $task->interact(EventIncremented::class);
 
         $this->reactOn($event, $task);
 
         $this->dispatchWhenThresholdIsReached($task);
 
-        return $task->listen(IsSprintRunning::class);
+        return $task->interact(IsSprintRunning::class);
     }
 
     private function reactOn(DomainEvent $event, HookHub $task): void
     {
-        $initializedState = $task->listen(IsStateInitialized::class)
-            ? $task->listen(GetUserState::class) : null;
+        $initializedState = $task->interact(IsStateInitialized::class)
+            ? $task->interact(GetUserState::class) : null;
 
         $resetScope = ($this->scope)($event, $initializedState);
 
@@ -62,11 +62,11 @@ final readonly class EventReactor
         $currentState = $this->scope->getState();
 
         if (is_array($initializedState) && is_array($currentState)) {
-            $task->listen(UserStateChanged::class, $currentState);
+            $task->interact(UserStateChanged::class, $currentState);
         }
 
         if ($this->scope->isAcked()) {
-            $task->listen(StreamEventAcked::class, $event::class);
+            $task->interact(StreamEventAcked::class, $event::class);
         }
 
         $resetScope();
@@ -74,7 +74,7 @@ final readonly class EventReactor
 
     private function hasNoGap(HookHub $task, int $expectedPosition): bool
     {
-        return $task->listen(new CheckpointAdded($task->listen(GetStreamName::class), $expectedPosition));
+        return $task->interact(new CheckpointAdded($task->interact(GetStreamName::class), $expectedPosition));
     }
 
     private function dispatchWhenThresholdIsReached(HookHub $task): void

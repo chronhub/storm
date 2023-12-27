@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function usleep;
 
-final class BatchStreamsAware
+final class BatchObserver
 {
     private int $counter;
 

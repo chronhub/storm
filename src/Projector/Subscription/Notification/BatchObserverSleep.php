@@ -6,10 +6,16 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class SleepWhenEmptyBatchStreams
+use function count;
+
+final class BatchObserverSleep
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->batchStreamsAware()->sleep();
+        if (count($subscriptor->ackedEvents()) > 0) {
+            return;
+        }
+
+        $subscriptor->batch()->sleep();
     }
 }

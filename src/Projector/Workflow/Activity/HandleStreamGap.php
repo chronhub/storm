@@ -13,7 +13,7 @@ final class HandleStreamGap
 {
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($hub->listen(ShouldSleepOnGap::class) && ! $hub->listen(IsEventReset::class)) {
+        if ($hub->interact(ShouldSleepOnGap::class) && ! $hub->interact(IsEventReset::class)) {
             $hub->trigger(new ProjectionStored());
         }
 
