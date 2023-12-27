@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\Workflow\Activity\MonitorRemoteStatus;
 
 interface PersistentManagement extends Management
 {
@@ -21,11 +20,8 @@ interface PersistentManagement extends Management
 
     /**
      * Synchronize the current state and positions of the projection,
-     * on rising or stopping projection (discover status) during the first run.
      *
      * @throws ProjectionNotFound
-     *
-     * @see MonitorRemoteStatus
      */
     public function synchronise(): void;
 

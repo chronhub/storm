@@ -17,7 +17,7 @@ final class InMemoryOption implements ProjectionOption
         protected readonly int|array $sleep = [5, 2.5], // [5, 2.5] 5 queries every 2 seconds
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
-        protected readonly int $loads = 100,
+        protected readonly int $loadLimiter = 100,
         array|string $retries = [],
         protected readonly ?string $detectionWindows = null,
     ) {

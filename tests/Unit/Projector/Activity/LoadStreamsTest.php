@@ -87,7 +87,7 @@ it('set merge stream iterator', function () {
         StreamEventsFactory::withEvent(SomeEvent::class)->withHeaders(PointInTimeFactory::now(), 12),
     ]);
 
-    $this->option->expects($this->never())->method('getLoads');
+    $this->option->expects($this->never())->method('getLoadLimiter');
     $this->context->expects($this->once())->method('queryFilter')->willReturn($queryFilter);
     $this->subscription->expects($this->once())->method('context')->willReturn($this->context);
     $this->streamManager->expects($this->once())->method('jsonSerialize')->willReturn(['customer-123' => 1]);
@@ -108,7 +108,7 @@ it('set current stream name on query filter', function () {
 
     $streamEvents = getStreamEvents();
 
-    $this->option->expects($this->never())->method('getLoads');
+    $this->option->expects($this->never())->method('getLoadLimiter');
     $this->context->expects($this->once())->method('queryFilter')->willReturn($queryFilter);
     $this->subscription->expects($this->once())->method('context')->willReturn($this->context);
     $this->streamManager->expects($this->once())->method('jsonSerialize')->willReturn(['customer-123' => 1]);
@@ -129,7 +129,7 @@ it('set limit on query filter', function (?int $limit) {
 
     $this->chronicler->expects($this->once())->method('retrieveFiltered')->willReturn($streamEvents);
 
-    $this->option->expects($this->once())->method('getLoads')->willReturn($limit);
+    $this->option->expects($this->once())->method('getLoadLimiter')->willReturn($limit);
     $this->context->expects($this->once())->method('queryFilter')->willReturn($queryFilter);
     $this->subscription->expects($this->once())->method('option')->willReturn($this->option);
     $this->subscription->expects($this->once())->method('context')->willReturn($this->context);
@@ -153,7 +153,7 @@ it('keep iterate when stream iterator raise stream not found exception', functio
     $streamEvents = StreamEventsFactory::fromEmptyAndRaiseStreamNotFoundException('customer-123');
     $streamEvents2 = getStreamEvents();
 
-    $this->option->expects($this->never())->method('getLoads');
+    $this->option->expects($this->never())->method('getLoadLimiter');
     $this->context->expects($this->once())->method('queryFilter')->willReturn($queryFilter);
     $this->subscription->expects($this->once())->method('context')->willReturn($this->context);
     $this->streamManager->expects($this->once())->method('jsonSerialize')->willReturn(['customer-123' => 1, 'customer-456' => 20]);

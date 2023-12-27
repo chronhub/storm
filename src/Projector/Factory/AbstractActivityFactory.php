@@ -54,7 +54,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         return new LoadStreams(
             $this->chronicler,
             $subscriptor->clock(),
-            $subscriptor->option()->getLoads(),
+            $subscriptor->option()->getLoadLimiter(),
             $this->getQueryFilterResolver($subscriptor)
         );
     }

@@ -53,7 +53,7 @@ interface ProjectionOption extends JsonSerializable
     /**
      * @var string
      */
-    public const LOADS = 'loadsLimiter';
+    public const LOAD_LIMITER = 'loadLimiter';
 
     /**
      * Dispatch async signal
@@ -122,5 +122,5 @@ interface ProjectionOption extends JsonSerializable
      *
      * @see LoadLimiterProjectionQueryFilter
      */
-    public function getLoads(): int;
+    public function getLoadLimiter(): int;
 }

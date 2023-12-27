@@ -45,7 +45,7 @@ trait ProvideOption
     /**
      * @var int<0,max>
      */
-    protected readonly int $loads;
+    protected readonly int $loadLimiter;
 
     protected readonly ?string $detectionWindows;
 
@@ -84,9 +84,9 @@ trait ProvideOption
         return $this->retries;
     }
 
-    public function getLoads(): int
+    public function getLoadLimiter(): int
     {
-        return $this->loads;
+        return $this->loadLimiter;
     }
 
     public function getDetectionWindows(): ?string
@@ -105,7 +105,7 @@ trait ProvideOption
             self::LOCKOUT => $this->getLockout(),
             self::RETRIES => $this->getRetries(),
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),
-            self::LOADS => $this->getLoads(),
+            self::LOAD_LIMITER => $this->getLoadLimiter(),
         ];
     }
 
