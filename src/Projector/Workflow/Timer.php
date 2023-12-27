@@ -13,8 +13,8 @@ class Timer
     private ?DateTimeImmutable $startTime = null;
 
     public function __construct(
-        private readonly SystemClock $clock,
-        private readonly ?DateInterval $interval
+        protected readonly SystemClock $clock,
+        protected readonly ?DateInterval $interval
     ) {
     }
 

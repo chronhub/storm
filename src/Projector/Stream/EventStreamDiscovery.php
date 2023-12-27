@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 
-class EventStreamDiscovery
+readonly class EventStreamDiscovery
 {
-    public function __construct(protected readonly EventStreamProvider $eventStreamProvider)
+    public function __construct(protected EventStreamProvider $eventStreamProvider)
     {
     }
 

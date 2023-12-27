@@ -36,7 +36,7 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
 
     public function stop(): void
     {
-        $this->hub->trigger((new ProjectionClosed()));
+        $this->hub->trigger(new ProjectionClosed());
     }
 
     public function streamName(): string

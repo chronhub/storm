@@ -11,7 +11,7 @@ class EventCounter
     /**
      * @var int<0,max>
      */
-    private int $counter = 0;
+    protected int $counter = 0;
 
     /**
      * @param positive-int $limit

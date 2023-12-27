@@ -33,53 +33,63 @@ final readonly class EventReactor
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(HookHub $task, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(HookHub $hub, DomainEvent $event, int $expectedPosition): bool
     {
         $this->dispatchSignalIfRequested();
 
-        if (! $this->hasNoGap($task, $expectedPosition)) {
+        if (! $this->hasNoGap($hub, $expectedPosition)) {
             return false;
         }
 
-        $task->interact(EventIncremented::class);
+        $hub->interact(EventIncremented::class);
 
-        $this->reactOn($event, $task);
+        $this->reactOn($hub, $event);
 
-        $this->dispatchWhenThresholdIsReached($task);
+        $this->dispatchWhenThresholdIsReached($hub);
 
-        return $task->interact(IsSprintRunning::class);
+        return $hub->interact(IsSprintRunning::class);
     }
 
-    private function reactOn(DomainEvent $event, HookHub $task): void
+    private function reactOn(HookHub $hub, DomainEvent $event): void
     {
-        $initializedState = $task->interact(IsUserStateInitialized::class)
-            ? $task->interact(GetUserState::class) : null;
+        $initializedState = $this->getUserState($hub);
 
         $resetScope = ($this->scope)($event, $initializedState);
 
         ($this->reactors)($this->scope);
 
-        $currentState = $this->scope->getState();
-
-        if (is_array($initializedState) && is_array($currentState)) {
-            $task->interact(UserStateChanged::class, $currentState);
-        }
+        $this->updateUserState($hub, $initializedState, $this->scope->getState());
 
         if ($this->scope->isAcked()) {
-            $task->interact(StreamEventAcked::class, $event::class);
+            $hub->interact(StreamEventAcked::class, $event::class);
         }
 
         $resetScope();
     }
 
-    private function hasNoGap(HookHub $task, int $expectedPosition): bool
+    private function hasNoGap(HookHub $hub, int $expectedPosition): bool
     {
-        return $task->interact(new CheckpointAdded($task->interact(GetStreamName::class), $expectedPosition));
+        return $hub->interact(
+            new CheckpointAdded($hub->interact(GetStreamName::class), $expectedPosition)
+        );
     }
 
-    private function dispatchWhenThresholdIsReached(HookHub $task): void
+    private function dispatchWhenThresholdIsReached(HookHub $hub): void
     {
-        $task->trigger(new ProjectionPersistedWhenThresholdIsReached());
+        $hub->trigger(new ProjectionPersistedWhenThresholdIsReached());
+    }
+
+    private function getUserState(HookHub $hub): ?array
+    {
+        return $hub->interact(IsUserStateInitialized::class)
+            ? $hub->interact(GetUserState::class) : null;
+    }
+
+    private function updateUserState(HookHub $hub, ?array $initializedState, ?array $userState): void
+    {
+        if (is_array($initializedState) && is_array($userState)) {
+            $hub->interact(UserStateChanged::class, $userState);
+        }
     }
 
     private function dispatchSignalIfRequested(): void

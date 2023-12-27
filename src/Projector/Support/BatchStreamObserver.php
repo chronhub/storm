@@ -14,8 +14,8 @@ class BatchStreamObserver
     private int $counter;
 
     public function __construct(
-        private readonly ?TokenBucket $bucket,
-        private readonly ?int $fixedSleepTime = null,
+        protected readonly ?TokenBucket $bucket,
+        protected readonly ?int $fixedSleepTime = null,
     ) {
         if ($this->bucket === null && $fixedSleepTime === null) {
             throw new InvalidArgumentException('Token bucket or fixed sleep time must be provided');

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 class Loop
 {
-    private int $cycle = 0;
+    protected int $cycle = 0;
 
     public function start(): void
     {
