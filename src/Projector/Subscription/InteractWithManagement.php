@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchObserverSleep;
+use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
@@ -20,6 +21,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateResetAgain;
 
 use function in_array;
 
@@ -141,6 +143,12 @@ trait InteractWithManagement
             StatusChanged::class,
             $this->hub->interact(GetStatus::class), $runningStatus
         );
+    }
+
+    protected function resetState(): void
+    {
+        $this->hub->interact(CheckpointReset::class);
+        $this->hub->interact(UserStateResetAgain::class);
     }
 
     protected function getProjectionResult(): ProjectionResult

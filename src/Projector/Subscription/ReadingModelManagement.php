@@ -9,11 +9,9 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
-use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\UserStateResetAgain;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
@@ -51,8 +49,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function revise(): void
     {
-        $this->hub->interact(CheckpointReset::class);
-        $this->hub->interact(UserStateResetAgain::class);
+        $this->resetState();
 
         $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
 
@@ -68,8 +65,8 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         }
 
         $this->hub->interact(SprintStopped::class);
-        $this->hub->interact(CheckpointReset::class);
-        $this->hub->interact(UserStateResetAgain::class);
+
+        $this->resetState();
     }
 
     public function getReadModel(): ReadModel

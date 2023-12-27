@@ -12,11 +12,9 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
-use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
@@ -81,8 +79,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
 
-        $this->hub->interact(CheckpointReset::class);
-        $this->hub->interact(UserStateReset::class);
+        $this->resetState();
 
         $this->deleteStream();
     }
@@ -96,8 +93,8 @@ final readonly class EmittingManagement implements EmitterManagement
         }
 
         $this->hub->interact(SprintStopped::class);
-        $this->hub->interact(CheckpointReset::class);
-        $this->hub->interact(UserStateReset::class);
+
+        $this->resetState();
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool
