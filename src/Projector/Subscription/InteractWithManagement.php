@@ -38,10 +38,7 @@ trait InteractWithManagement
     {
         $this->repository->release();
 
-        $this->hub->interact(
-            StatusChanged::class,
-            $this->hub->interact(GetStatus::class), ProjectionStatus::IDLE
-        );
+        $this->onStatusChanged(ProjectionStatus::IDLE);
     }
 
     public function close(): void
@@ -50,10 +47,7 @@ trait InteractWithManagement
 
         $this->repository->stop($this->getProjectionResult(), $idleStatus);
 
-        $this->hub->interact(
-            StatusChanged::class,
-            $this->hub->interact(GetStatus::class), $idleStatus
-        );
+        $this->onStatusChanged($idleStatus);
 
         $this->hub->interact(SprintStopped::class);
     }
@@ -66,10 +60,7 @@ trait InteractWithManagement
 
         $this->repository->startAgain($runningStatus);
 
-        $this->hub->interact(
-            StatusChanged::class,
-            $this->hub->interact(GetStatus::class), $runningStatus
-        );
+        $this->onStatusChanged($runningStatus);
     }
 
     public function disclose(): void
@@ -139,16 +130,21 @@ trait InteractWithManagement
 
         $this->repository->start($runningStatus);
 
-        $this->hub->interact(
-            StatusChanged::class,
-            $this->hub->interact(GetStatus::class), $runningStatus
-        );
+        $this->onStatusChanged($runningStatus);
     }
 
     protected function resetState(): void
     {
         $this->hub->interact(CheckpointReset::class);
         $this->hub->interact(UserStateResetAgain::class);
+    }
+
+    protected function onStatusChanged(ProjectionStatus $status): void
+    {
+        $this->hub->interact(
+            StatusChanged::class,
+            $this->hub->interact(GetStatus::class), $status
+        );
     }
 
     protected function getProjectionResult(): ProjectionResult

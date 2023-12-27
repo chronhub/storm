@@ -34,7 +34,7 @@ interface Subscriptor
 
     public function getUserState(): array;
 
-    public function &getStreamName(): string;
+    public function getStreamName(): string;
 
     public function setStreamName(string $streamName): void;
 

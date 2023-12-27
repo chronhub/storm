@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
@@ -82,7 +82,7 @@ final class NotificationManager implements HookHub
     private function assertHookIsSupported(string $hook): void
     {
         if (! array_key_exists($hook, $this->hooks)) {
-            throw new RuntimeException("Hook $hook is not supported");
+            throw new InvalidArgumentException("Hook $hook is not supported");
         }
     }
 }
