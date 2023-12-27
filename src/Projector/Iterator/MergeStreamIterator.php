@@ -12,13 +12,8 @@ use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Iterator;
 
-use function log;
-use function max;
-
 final class MergeStreamIterator implements Countable, Iterator
 {
-    private const CHUNK_SIZE = 32;
-
     /**
      * @var Collection<array{StreamIterator,string}>
      */
@@ -88,36 +83,14 @@ final class MergeStreamIterator implements Countable, Iterator
     private function prioritizeIterators(): void
     {
         if ($this->numberOfIterators > 1) {
-            $iterators = $this->originalIteratorOrder
+            $this->iterators = $this->originalIteratorOrder
                 ->filter(fn (array $stream): bool => $stream[0]->valid())
                 ->sortBy(fn (array $stream): DateTimeImmutable => $this->toDatetime($stream[0]->current()));
-
-            $chunkSize = $this->calculateDynamicChunkSize($iterators);
-
-            //fixMe: chunk and flatten, what is the purpose ?
-            $this->iterators = $iterators->chunk($chunkSize)->flatten(1);
         }
     }
 
     private function toDatetime(DomainEvent $event): DateTimeImmutable
     {
         return $this->clock->toPointInTime($event->header(Header::EVENT_TIME));
-    }
-
-    /**
-     * Determine a chunk size based on the total number of events.
-     * Produce chunk size of 32, 64, 128, 256, 512 ...
-     */
-    private function calculateDynamicChunkSize(Collection $iterators): int
-    {
-        $totalEvents = $iterators->sum(fn (array $stream): int => $stream[0]->count());
-
-        $chunkSize = max(self::CHUNK_SIZE, (int) log($totalEvents, 2));
-
-        while ($totalEvents > $chunkSize * 4) {
-            $chunkSize *= 2;
-        }
-
-        return $chunkSize;
     }
 }
