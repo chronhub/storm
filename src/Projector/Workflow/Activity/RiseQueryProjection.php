@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Notification\IsRising;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 
 final readonly class RiseQueryProjection
 {
-    public function __invoke(Notification $notification, callable $next): callable|bool
+    public function __invoke(HookHub $task, callable $next): callable|bool
     {
-        if ($notification->isRising()) {
-            $notification->onStreamsDiscovered();
+        if ($task->listen(IsRising::class)) {
+            $task->listen(StreamsDiscovered::class);
         }
 
-        return $next($notification);
+        return $next($task);
     }
 }

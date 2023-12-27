@@ -28,12 +28,12 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function reset(): void
     {
-        $this->subscriber->notify()->dispatch(new ProjectionRevised());
+        $this->subscriber->hub()->trigger(new ProjectionRevised());
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-        $this->subscriber->notify()->dispatch(new ProjectionDiscarded($deleteEmittedEvents));
+        $this->subscriber->hub()->trigger(new ProjectionDiscarded($deleteEmittedEvents));
     }
 
     public function getName(): string

@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription\Notification;
 
-final class StreamEventAcked
+use Chronhub\Storm\Contracts\Projector\Subscriptor;
+
+final readonly class StreamEventAcked
 {
-    public function __construct(public readonly string $eventClass)
+    public function __construct(public string $event)
     {
+    }
+
+    public function __invoke(Subscriptor $subscriptor): void
+    {
+        $subscriptor->ackEvent($this->event);
     }
 }

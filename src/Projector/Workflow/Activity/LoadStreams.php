@@ -7,10 +7,13 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
 
 use function array_keys;
@@ -32,18 +35,18 @@ final class LoadStreams
         $this->queryFilterResolver = $queryFilterResolver;
     }
 
-    public function __invoke(Notification $notification, callable $next): callable|bool
+    public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $hasStreams = $this->handleStreams($notification);
+        $hasStreams = $this->handleStreams($hub);
 
-        $notification->onHasBatchStreams($hasStreams);
+        $hub->listen(HasBatchStreams::class, $hasStreams);
 
-        return $next($notification);
+        return $next($hub);
     }
 
-    private function handleStreams(Notification $notification): bool
+    private function handleStreams(HookHub $hub): bool
     {
-        $streams = $this->batchStreams($notification->observeCheckpoints());
+        $streams = $this->batchStreams($hub->listen(GetCheckpoints::class));
 
         if ($streams !== []) {
             $iterators = collect(array_values($streams))->map(
@@ -52,7 +55,7 @@ final class LoadStreams
 
             $iterator = new MergeStreamIterator($this->clock, $iterators);
 
-            $notification->onStreamMerged($iterator);
+            $hub->listen(StreamIteratorSet::class, $iterator);
 
             return true;
         }

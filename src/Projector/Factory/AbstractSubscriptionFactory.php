@@ -104,12 +104,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscriptor = $this->createSubscriptor($option);
         $notification = new Notification($subscriptor);
+        $repository = $this->createProjectionRepository($streamName, $option);
 
-        $management = new ReadingModelManagement(
-            $notification,
-            $this->createProjectionRepository($streamName, $option),
-            $readModel,
-        );
+        $management = new ReadingModelManagement($notification, $repository, $readModel);
 
         $activities = new PersistentActivityFactory($this->chronicler);
         $scope = new ReadModelAccess($notification, $readModel, $this->clock);

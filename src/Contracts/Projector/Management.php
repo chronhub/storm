@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Subscription\Notification;
-
 interface Management
 {
     /**
@@ -18,5 +16,5 @@ interface Management
      */
     public function getCurrentStreamName(): string;
 
-    public function notify(): Notification;
+    public function hub(): HookHub;
 }

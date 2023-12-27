@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
@@ -21,34 +22,34 @@ use Chronhub\Storm\Projector\Subscription\Observer\ProjectionSynchronized;
 
 final class EventManagement
 {
-    public static function subscribe(Notification $notification, PersistentManagement $management): void
+    public static function subscribe(HookHub $task, PersistentManagement $management): void
     {
-        $notification->listen(ProjectionRise::class, fn () => $management->rise());
+        $task->addHook(ProjectionRise::class, fn () => $management->rise());
 
-        $notification->listen(ProjectionLockUpdated::class, fn () => $management->tryUpdateLock());
+        $task->addHook(ProjectionLockUpdated::class, fn () => $management->tryUpdateLock());
 
-        $notification->listen(ProjectionStored::class, fn () => $management->store());
+        $task->addHook(ProjectionStored::class, fn () => $management->store());
 
-        $notification->listen(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenCounterIsReached());
+        $task->addHook(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenCounterIsReached());
 
-        $notification->listen(ProjectionClosed::class, fn () => $management->close());
+        $task->addHook(ProjectionClosed::class, fn () => $management->close());
 
-        $notification->listen(ProjectionRevised::class, fn () => $management->revise());
+        $task->addHook(ProjectionRevised::class, fn () => $management->revise());
 
-        $notification->listen(ProjectionDiscarded::class, fn ($listener) => $management->discard($listener->withEmittedEvents));
+        $task->addHook(ProjectionDiscarded::class, fn ($listener) => $management->discard($listener->withEmittedEvents));
 
-        $notification->listen(ProjectionFreed::class, fn () => $management->freed());
+        $task->addHook(ProjectionFreed::class, fn () => $management->freed());
 
-        $notification->listen(ProjectionRestarted::class, fn () => $management->restart());
+        $task->addHook(ProjectionRestarted::class, fn () => $management->restart());
 
-        $notification->listen(ProjectionStatusDisclosed::class, fn () => $management->disclose());
+        $task->addHook(ProjectionStatusDisclosed::class, fn () => $management->disclose());
 
-        $notification->listen(ProjectionSynchronized::class, fn () => $management->synchronise());
+        $task->addHook(ProjectionSynchronized::class, fn () => $management->synchronise());
 
         if ($management instanceof EmittingManagement) {
-            $notification->listen(EventEmitted::class, fn ($listener) => $management->emit($listener->event));
+            $task->addHook(EventEmitted::class, fn ($listener) => $management->emit($listener->event));
 
-            $notification->listen(EventLinkedTo::class, fn ($listener) => $management->linkTo($listener->streamName, $listener->event));
+            $task->addHook(EventLinkedTo::class, fn ($listener) => $management->linkTo($listener->streamName, $listener->event));
         }
     }
 }

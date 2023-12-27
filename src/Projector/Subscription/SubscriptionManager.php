@@ -6,14 +6,17 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
-use Chronhub\Storm\Contracts\Projector\GapDetection;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Contracts\Projector\UserState;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
+use Chronhub\Storm\Projector\Subscription\Notification\AckedEventReset;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchStreamsReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
@@ -22,8 +25,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\HasBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
-use Chronhub\Storm\Projector\Subscription\Notification\ResetAckedEvent;
-use Chronhub\Storm\Projector\Subscription\Notification\ResetBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\ShouldSleepOnGap;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepWhenEmptyBatchStreams;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
@@ -37,31 +38,28 @@ use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Projector\Support\BatchStreamsAware;
 use Chronhub\Storm\Projector\Support\Loop;
+use Chronhub\Storm\Projector\Workflow\EventCounter;
+use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
+use Chronhub\Storm\Projector\Workflow\Sprint;
 use Closure;
 
 final class SubscriptionManager implements Subscriptor
 {
-    private bool $keepRunning = false;
-
-    private bool $sprint = false;
-
     private ?string $streamName = null;
-
-    private ProjectionStatus $status = ProjectionStatus::IDLE;
-
-    private array $userState = [];
-
-    private array $events = [
-        'total' => 0, // all stream events
-        'acked' => 0, // all stream events acked
-        'loaded' => false, // if event streams loaded
-    ];
-
-    private ?MergeStreamIterator $streamIterator = null;
 
     private ?ContextReader $context = null;
 
     private array $eventsAcked = [];
+
+    private ?MergeStreamIterator $streamIterator = null;
+
+    private ProjectionStatus $status = ProjectionStatus::IDLE;
+
+    private EventCounter $eventCounter;
+
+    private UserState $userState;
+
+    private Sprint $sprint;
 
     public function __construct(
         private readonly EventStreamDiscovery $streamDiscovery,
@@ -71,47 +69,14 @@ final class SubscriptionManager implements Subscriptor
         private readonly Loop $loop,
         private readonly BatchStreamsAware $batchStreamsAware
     ) {
+        $this->eventCounter = new EventCounter($option->getBlockSize());
+        $this->userState = new InMemoryUserState();
+        $this->sprint = new Sprint();
     }
 
-    public function receive(object $event): ?bool
+    public function receive(callable $event): mixed
     {
-        if ($event instanceof CheckpointAdded) {
-            return $this->addCheckpoint($event->streamName, $event->streamPosition);
-        }
-
-        if ($event instanceof HasGap) {
-            return $this->hasGap();
-        }
-
-        if ($event instanceof ShouldSleepOnGap) {
-            return $this->sleepWhenGap();
-        }
-
-        if ($event instanceof IsEventReset) {
-            return $this->isEventReset();
-        }
-
-        match ($event::class) {
-            StatusDisclosed::class, StatusChanged::class => $this->status = $event->newStatus,
-            UserStateChanged::class => $this->userState = $event->userState,
-            UserStateReset::class => $this->setOriginalUserState(),
-            StreamsDiscovered::class => $this->discoverStreams(),
-            HasBatchStreams::class => $this->batchStreamsAware->hasLoadedStreams($event->hasBatchStreams),
-            ResetBatchStreams::class => $this->batchStreamsAware->reset(),
-            SleepWhenEmptyBatchStreams::class => $this->batchStreamsAware->sleep(),
-            StreamEventAcked::class => $this->eventsAcked[] = $event->eventClass,
-            ResetAckedEvent::class => $this->eventsAcked = [],
-            EventIncremented::class => $this->events['total']++,
-            EventReset::class => $this->events['total'] = 0,
-            SprintStopped::class => $this->stop(),
-            SprintRunning::class => $this->continue(),
-            CheckpointReset::class => $this->resetCheckpoints(),
-            CheckpointUpdated::class => $this->updateCheckpoints($event->checkpoints),
-            StreamProcessed::class => $this->streamName = $event->streamName,
-            default => throw new RuntimeException('Unknown notification: '.$event::class),
-        };
-
-        return null;
+        return $event($this);
     }
 
     public function setContext(ContextReader $context, bool $allowRerun): void
@@ -128,24 +93,29 @@ final class SubscriptionManager implements Subscriptor
         return $this->context;
     }
 
-    public function setOriginalUserState(): void
+    public function eventCounter(): EventCounter
     {
-        $this->userState = value($this->context->userState()) ?? [];
+        return $this->eventCounter;
     }
 
-    public function getUserState(): array
+    public function userState(): UserState
     {
         return $this->userState;
     }
 
-    public function isUserStateInitialized(): bool
+    public function sprint(): Sprint
     {
-        return $this->context->userState() instanceof Closure;
+        return $this->sprint;
     }
 
-    public function &getStreamName(): string
+    public function streamManager(): StreamManager
     {
-        return $this->streamName;
+        return $this->streamManager;
+    }
+
+    public function batchStreamsAware(): BatchStreamsAware
+    {
+        return $this->batchStreamsAware;
     }
 
     public function currentStatus(): ProjectionStatus
@@ -153,19 +123,36 @@ final class SubscriptionManager implements Subscriptor
         return $this->status;
     }
 
-    public function isEventReset(): bool
+    public function setStatus(ProjectionStatus $status): void
     {
-        return $this->events['total'] === 0;
+        $this->status = $status;
     }
 
-    public function isEventReached(): bool
+    public function setOriginalUserState(): void
     {
-        return $this->events['total'] === $this->option->getBlockSize();
+        $originalUserState = value($this->context->userState()) ?? [];
+
+        $this->userState->put($originalUserState);
     }
 
-    public function option(): ProjectionOption
+    public function getUserState(): array
     {
-        return $this->option;
+        return $this->userState->get();
+    }
+
+    public function isUserStateInitialized(): bool
+    {
+        return $this->context->userState() instanceof Closure;
+    }
+
+    public function setStreamName(string $streamName): void
+    {
+        $this->streamName = $streamName;
+    }
+
+    public function &getStreamName(): string
+    {
+        return $this->streamName;
     }
 
     public function setStreamIterator(MergeStreamIterator $streamIterator): void
@@ -182,31 +169,6 @@ final class SubscriptionManager implements Subscriptor
         return $streamIterator;
     }
 
-    public function hasGap(): bool
-    {
-        if (! $this->streamManager instanceof GapDetection) {
-            return false;
-        }
-
-        if (! $this->streamManager->hasGap()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function sleepWhenGap(): bool
-    {
-        if (! $this->hasGap()) {
-            return false;
-        }
-
-        /** @phpstan-ignore-next-line */
-        $this->streamManager->sleepWhenGap();
-
-        return true;
-    }
-
     public function discoverStreams(): void
     {
         tap($this->context->queries(), function (callable $query): void {
@@ -216,59 +178,14 @@ final class SubscriptionManager implements Subscriptor
         });
     }
 
-    public function addCheckpoint(string $streamName, int $position): bool
-    {
-        return $this->streamManager->insert($streamName, $position);
-    }
-
-    public function updateCheckpoints(array $checkpoints): void
-    {
-        $this->streamManager->update($checkpoints);
-    }
-
-    public function checkpoints(): array
-    {
-        return $this->streamManager->checkpoints();
-    }
-
-    public function resetCheckpoints(): void
-    {
-        $this->streamManager->resets();
-    }
-
-    public function clock(): SystemClock
-    {
-        return $this->clock;
-    }
-
     public function ackedEvents(): array
     {
         return $this->eventsAcked;
     }
 
-    public function continue(): void
+    public function ackEvent(string $event): void
     {
-        $this->sprint = true;
-    }
-
-    public function runInBackground(bool $keepRunning): void
-    {
-        $this->keepRunning = $keepRunning;
-    }
-
-    public function isRunning(): bool
-    {
-        return $this->sprint;
-    }
-
-    public function stop(): void
-    {
-        $this->sprint = false;
-    }
-
-    public function inBackground(): bool
-    {
-        return $this->keepRunning;
+        $this->eventsAcked[] = $event;
     }
 
     public function isRising(): bool
@@ -280,4 +197,47 @@ final class SubscriptionManager implements Subscriptor
     {
         return $this->loop;
     }
+
+    public function option(): ProjectionOption
+    {
+        return $this->option;
+    }
+
+    public function clock(): SystemClock
+    {
+        return $this->clock;
+    }
+
+    //    /**
+    //     * @param class-string $eventClass
+    //     */
+    //    private function locateEventHandler(string $eventClass): Closure
+    //    {
+    //        $handlers = [
+    //            StatusDisclosed::class => fn ($event) => $this->status = $event->newStatus,
+    //            StatusChanged::class => fn ($event) => $this->status = $event->newStatus,
+    //            UserStateChanged::class => fn ($event) => $this->userState = $event->userState,
+    //            UserStateReset::class => fn ($event) => $this->setOriginalUserState(),
+    //            StreamsDiscovered::class => fn ($event) => $this->discoverStreams(),
+    //            HasBatchStreams::class => fn ($event) => $this->batchStreamsAware->hasLoadedStreams($event->hasBatchStreams),
+    //            BatchStreamsReset::class => fn ($event) => $this->batchStreamsAware->reset(),
+    //            SleepWhenEmptyBatchStreams::class => fn ($event) => $this->batchStreamsAware->sleep(),
+    //            EventIncremented::class => fn ($event) => $this->events['total']++,
+    //            EventReset::class => fn ($event) => $this->events['total'] = 0,
+    //            IsEventReset::class => fn ($event) => $this->isEventReset(),
+    //            SprintStopped::class => fn ($event) => $this->stop(),
+    //            SprintRunning::class => fn ($event) => $this->continue(),
+    //            //fixMe checkpoint added is not event
+    //            CheckpointAdded::class => fn ($event) => $this->addCheckpoint($event->streamName, $event->streamPosition),
+    //            CheckpointReset::class => fn ($event) => $this->resetCheckpoints(),
+    //            CheckpointUpdated::class => fn ($event) => $this->updateCheckpoints($event->checkpoints),
+    //            HasGap::class => fn ($event) => $this->hasGap(),
+    //            ShouldSleepOnGap::class => fn ($event) => $this->sleepWhenGap(),
+    //            StreamEventAcked::class => fn ($event) => $this->eventsAcked[] = $event->eventClass,
+    //            AckedEventReset::class => fn ($event) => $this->eventsAcked = [],
+    //            StreamProcessed::class => fn ($event) => $this->streamName = $event->streamName,
+    //        ];
+    //
+    //        return $handlers[$eventClass] ?? throw new InvalidArgumentException('Unknown notification: '.$eventClass);
+    //    }
 }

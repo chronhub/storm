@@ -45,7 +45,6 @@ final class ProjectorManager implements ProjectorManagerInterface
         return new ProjectReadModel(
             $subscription,
             $this->factory->createContextBuilder(),
-            $subscription->notify(),
             $streamName
         );
     }

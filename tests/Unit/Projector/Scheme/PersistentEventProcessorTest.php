@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Workflow\EventProcessor;
+use Chronhub\Storm\Projector\Workflow\EventReactor;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Uses\TestingSubscriptionFactory;
@@ -30,7 +30,7 @@ $assertEventProcessed = function (bool $inProgress) {
     $this->subscription->expects($this->once())->method('persistWhenCounterIsReached');
     $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, 'some_event_time')->willReturn(true);
 
-    $eventProcessor = new EventProcessor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
+    $eventProcessor = new EventReactor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
         expect($event)
             ->toBe($this->event)
             ->and($state)->toBe($this->state->get())
@@ -78,7 +78,7 @@ test('does not process event when gap has been detected and always return false'
     $this->subscription->expects($this->never())->method('state');
     $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, 'some_event_time')->willReturn(false);
 
-    $eventProcessor = new EventProcessor(function (): void {
+    $eventProcessor = new EventReactor(function (): void {
         throw new LogicException('test: should not be called');
     }, $this->projectorScope);
 
@@ -94,7 +94,7 @@ test('raise error when event time extracted from event header is not string or d
     $this->subscription->expects($this->never())->method('state');
     $this->streamManager->expects($this->never())->method('bind');
 
-    $eventProcessor = new EventProcessor(function (): void {
+    $eventProcessor = new EventReactor(function (): void {
         throw new LogicException('test: should not be called');
     }, $this->projectorScope);
 

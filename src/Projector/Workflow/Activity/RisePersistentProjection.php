@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Notification\IsRising;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 
 final readonly class RisePersistentProjection
@@ -13,16 +14,16 @@ final readonly class RisePersistentProjection
     {
     }
 
-    public function __invoke(Notification $notification, callable $next): callable|bool
+    public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($notification->isRising()) {
-            if ($this->monitor->shouldStop($notification)) {
+        if ($hub->listen(IsRising::class)) {
+            if ($this->monitor->shouldStop($hub)) {
                 return false;
             }
 
-            $notification->dispatch(new ProjectionRise());
+            $hub->trigger(new ProjectionRise());
         }
 
-        return $next($notification);
+        return $next($hub);
     }
 }

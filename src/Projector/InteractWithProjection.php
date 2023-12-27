@@ -68,6 +68,6 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->notify()->observeUserState() ?? [];
+        return $this->subscriber->hub()->getUserState();
     }
 }

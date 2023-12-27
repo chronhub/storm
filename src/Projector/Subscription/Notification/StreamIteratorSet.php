@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 
-final readonly class UserStateChanged
+final readonly class StreamIteratorSet
 {
-    public function __construct(public array $userState)
+    public function __construct(private MergeStreamIterator $iterator)
     {
     }
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->userState()->put($this->userState);
+        $subscriptor->setStreamIterator($this->iterator);
     }
 }

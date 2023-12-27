@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Projector\Subscription\Notification;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
 use Closure;
 use Throwable;
@@ -18,7 +18,7 @@ final readonly class Workflow
     /**
      * @param array<callable> $activities
      */
-    public function __construct(private Notification $notification, private array $activities)
+    public function __construct(private HookHub $task, private array $activities)
     {
     }
 
@@ -27,7 +27,7 @@ final readonly class Workflow
         $process = $this->prepareProcess($destination);
 
         try {
-            return $process($this->notification);
+            return $process($this->task);
         } catch (Throwable $exception) {
             return false;
         } finally {
@@ -46,12 +46,12 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (Notification $notification) => $destination($notification);
+        return fn (HookHub $task) => $destination($task);
     }
 
     private function carry(): Closure
     {
-        return fn (callable $stack, callable $activity) => fn (Notification $notification) => $activity($notification, $stack);
+        return fn (callable $stack, callable $activity) => fn (HookHub $task) => $activity($task, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void
@@ -61,7 +61,7 @@ final readonly class Workflow
         }
 
         try {
-            $this->notification->dispatch(new ProjectionFreed());
+            $this->task->trigger(new ProjectionFreed());
         } catch (Throwable) {
             // ignore
         }

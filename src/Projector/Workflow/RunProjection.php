@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Support\Loop;
 
 final readonly class RunProjection
@@ -22,7 +23,7 @@ final readonly class RunProjection
             $this->startLooperIfNeeded();
 
             $inProgress = $this->workflow->process(
-                fn (Notification $notification): bool => $notification->isRunning()
+                fn (HookHub $hub): bool => $hub->listen(IsSprintRunning::class)
             );
 
             $this->handleCycleEnd($inProgress);

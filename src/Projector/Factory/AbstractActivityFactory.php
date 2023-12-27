@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Support\Timer;
 use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Workflow\EventProcessor;
+use Chronhub\Storm\Projector\Workflow\EventReactor;
 use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
 
 use function array_map;
@@ -35,9 +35,9 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscriptor->getContext()->queryFilter());
     }
 
-    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope): EventProcessor
+    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope): EventReactor
     {
-        return new EventProcessor(
+        return new EventReactor(
             $subscriptor->getContext()->reactors(),
             $scope,
             $subscriptor->option()->getSignal()

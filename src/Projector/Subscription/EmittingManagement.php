@@ -7,9 +7,15 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchStreamsReset;
+use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateReset;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Stream\StreamName;
@@ -19,13 +25,13 @@ final readonly class EmittingManagement implements EmitterManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected Notification $notification,
+        protected HookHub $task,
         protected Chronicler $chronicler,
         protected ProjectionRepository $repository,
         private StreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
-        EventManagement::subscribe($notification, $this);
+        EventManagement::subscribe($task, $this);
     }
 
     public function emit(DomainEvent $event): void
@@ -58,7 +64,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->mountProjection();
 
-        $this->notification->onStreamsDiscovered();
+        $this->task->listen(StreamsDiscovered::class);
 
         $this->synchronise();
     }
@@ -67,15 +73,15 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->repository->persist($this->getProjectionResult());
 
-        $this->notification->onBatchStreamsReset();
+        $this->task->listen(BatchStreamsReset::class);
     }
 
     public function revise(): void
     {
-        $this->repository->reset($this->getProjectionResult(), $this->notification->observeStatus());
+        $this->repository->reset($this->getProjectionResult(), $this->task->currentStatus());
 
-        $this->notification->onCheckpointReset();
-        $this->notification->onUserStateReset();
+        $this->task->listen(CheckpointReset::class);
+        $this->task->listen(UserStateReset::class);
 
         $this->deleteStream();
     }
@@ -88,9 +94,9 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->deleteStream();
         }
 
-        $this->notification->onProjectionStopped();
-        $this->notification->onCheckpointReset();
-        $this->notification->onUserStateReset();
+        $this->task->listen(SprintStopped::class);
+        $this->task->listen(CheckpointReset::class);
+        $this->task->listen(UserStateReset::class);
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool

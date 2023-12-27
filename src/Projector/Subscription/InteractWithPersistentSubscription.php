@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
@@ -19,16 +20,16 @@ trait InteractWithPersistentSubscription
         $this->startProjection($keepRunning);
     }
 
-    public function notify(): Notification
+    public function hub(): HookHub
     {
-        return $this->management->notify();
+        return $this->management->hub();
     }
 
     private function newWorkflow(): Workflow
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope, $this->management);
 
-        return new Workflow($this->notify(), $activities);
+        return new Workflow($this->hub(), $activities);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
@@ -37,8 +38,8 @@ trait InteractWithPersistentSubscription
 
         $this->subscriptor->setContext($context, true);
         $this->subscriptor->setOriginalUserState();
-        $this->subscriptor->runInBackground($keepRunning);
-        $this->subscriptor->continue();
+        $this->subscriptor->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->sprint()->continue();
     }
 
     private function startProjection(bool $keepRunning): void

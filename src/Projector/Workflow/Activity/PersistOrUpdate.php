@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Projector\Subscription\Notification;
+use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
+use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 final readonly class PersistOrUpdate
 {
-    public function __invoke(Notification $notification, callable $next): callable|bool
+    public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if (! $notification->hasGap()) {
-            $dispatchEvent = $notification->isEventReset()
+        if (! $hub->listen(HasGap::class)) {
+            $dispatchEvent = $hub->listen(IsEventReset::class)
                 ? new ProjectionLockUpdated() : new ProjectionStored();
 
-            $notification->dispatch($dispatchEvent);
+            $hub->trigger($dispatchEvent);
         }
 
-        return $next($notification);
+        return $next($hub);
     }
 }

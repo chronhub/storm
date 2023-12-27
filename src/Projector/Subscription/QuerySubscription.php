@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
@@ -33,21 +34,21 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function resets(): void
     {
-        $this->subscriptor->resetCheckpoints();
+        $this->subscriptor->streamManager()->resets();
 
         $this->subscriptor->setOriginalUserState();
     }
 
-    public function notify(): Notification
+    public function hub(): HookHub
     {
-        return $this->management->notify();
+        return $this->management->hub();
     }
 
     private function newWorkflow(): Workflow
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope, $this->management);
 
-        return new Workflow($this->notify(), $activities);
+        return new Workflow($this->hub(), $activities);
     }
 
     private function initializeContext(ContextReader $context, bool $keepRunning): void
@@ -60,8 +61,8 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $this->initializeContextAgain();
 
-        $this->subscriptor->runInBackground($keepRunning);
-        $this->subscriptor->continue();
+        $this->subscriptor->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->sprint()->continue();
     }
 
     private function initializeContextAgain(): void
