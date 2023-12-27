@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final readonly class HasBatch
+final readonly class BatchLoaded
 {
-    public function __construct(public bool $hasBatch)
+    public function __construct(public bool $hasBatchStreams)
     {
     }
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->batch()->hasLoadedStreams($this->hasBatch);
+        $subscriptor->batch()->hasLoadedStreams($this->hasBatchStreams);
     }
 }

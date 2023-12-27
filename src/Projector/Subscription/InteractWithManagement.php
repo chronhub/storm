@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchObserverSleep;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
@@ -31,7 +31,7 @@ trait InteractWithManagement
     {
         $this->repository->updateLock();
 
-        $this->hub->interact(BatchObserverSleep::class);
+        $this->hub->interact(BatchSleep::class);
     }
 
     public function freed(): void
@@ -95,6 +95,7 @@ trait InteractWithManagement
 
             $this->disclose();
 
+            // todo check if Idle still needed
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
             if (! in_array($this->hub->interact(GetStatus::class), $keepProjectionRunning, true)) {

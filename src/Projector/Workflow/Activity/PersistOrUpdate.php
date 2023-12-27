@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchObserverSleep;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReset;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
@@ -27,7 +27,7 @@ final readonly class PersistOrUpdate
     private function getHook(HookHub $hub): object
     {
         if ($hub->interact(IsEventReset::class)) {
-            $hub->interact(BatchObserverSleep::class);
+            $hub->interact(BatchSleep::class);
 
             return new ProjectionLockUpdated();
         }

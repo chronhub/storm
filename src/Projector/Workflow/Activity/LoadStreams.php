@@ -11,10 +11,11 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
-use Chronhub\Storm\Projector\Subscription\Notification\HasBatch;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
+use Illuminate\Support\Arr;
 
 use function array_keys;
 use function array_values;
@@ -39,7 +40,7 @@ final class LoadStreams
     {
         $hasStreams = $this->handleStreams($hub);
 
-        $hub->interact(HasBatch::class, $hasStreams);
+        $hub->interact(BatchLoaded::class, $hasStreams);
 
         return $next($hub);
     }
@@ -58,9 +59,11 @@ final class LoadStreams
             $hub->interact(StreamIteratorSet::class, $iterator);
 
             return true;
+            //return Arr::map($streams, fn (StreamIterator $iterator, string $streamName): array => [$streamName => $iterator->count()]);
         }
 
         return false;
+        //return [];
     }
 
     /**

@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 use function count;
 
-final class BatchObserverSleep
+final class BatchSleep
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
