@@ -17,12 +17,15 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function __construct(
         protected ReadModelSubscriber $subscriber,
         protected ContextReader $context,
-        private string $streamName
+        protected string $streamName
     ) {
     }
 
     public function run(bool $inBackground): void
     {
+
+        $this->setContextIdIfNeeded();
+
         $this->subscriber->start($this->context, $inBackground);
     }
 

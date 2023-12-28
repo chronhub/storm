@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Projector\Context;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Provider\EventStream\DiscoverAllStream;
@@ -36,6 +37,8 @@ final class DefaultContext implements ContextReader
 
     private bool $keepState = false;
 
+    private ?string $id = null;
+
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
@@ -65,6 +68,17 @@ final class DefaultContext implements ContextReader
         }
 
         $this->keepState = true;
+
+        return $this;
+    }
+
+    public function withId(string $id): Context
+    {
+        if ($this->id !== null) {
+            throw new InvalidArgumentException('Projection id already set');
+        }
+
+        $this->id = $id;
 
         return $this;
     }
@@ -153,6 +167,11 @@ final class DefaultContext implements ContextReader
     public function keepState(): bool
     {
         return $this->keepState;
+    }
+
+    public function id(): ?string
+    {
+        return $this->id;
     }
 
     public function timer(): ?DateInterval

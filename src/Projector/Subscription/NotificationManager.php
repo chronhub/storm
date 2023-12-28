@@ -74,11 +74,6 @@ final class NotificationManager implements HookHub
         return $this->subscriptor->receive($event);
     }
 
-    public function __call(string $method, array $arguments): mixed
-    {
-        return $this->subscriptor->{$method}(...$arguments);
-    }
-
     private function assertHookIsSupported(string $hook): void
     {
         if (! array_key_exists($hook, $this->hooks)) {

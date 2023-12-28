@@ -76,4 +76,11 @@ interface ProjectorFactory extends Projector
      * @see Context::withKeepState()
      */
     public function withKeepState(): static;
+
+    /**
+     * Proxy method to set the projector id.
+     *
+     * @see Context::withId()
+     */
+    public function withId(string $id): static;
 }

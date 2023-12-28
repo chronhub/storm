@@ -20,6 +20,8 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function run(bool $inBackground): void
     {
+        $this->setContextIdIfNeeded();
+
         $this->subscriber->start($this->context, $inBackground);
     }
 

@@ -8,6 +8,9 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Closure;
 use DateInterval;
+use Illuminate\Support\Str;
+
+use function property_exists;
 
 trait InteractWithProjection
 {
@@ -67,8 +70,32 @@ trait InteractWithProjection
         return $this;
     }
 
+    public function withId(string $id): static
+    {
+        $this->context->withId($id);
+
+        return $this;
+    }
+
     public function getState(): array
     {
         return $this->subscriber->hub()->interact(GetUserState::class);
+    }
+
+    protected function setContextIdIfNeeded(): void
+    {
+        if ($this->context->id() !== null) {
+            return;
+        }
+
+        $prefix = Str::kebab(class_basename($this));
+
+        if (property_exists($this, 'streamName')) {
+            $prefix .= '.'.$this->streamName;
+        }
+
+        $id = $prefix.'.'.Str::kebab(class_basename($this->context->queries()));
+
+        $this->context->withId($id);
     }
 }

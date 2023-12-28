@@ -60,4 +60,9 @@ interface ContextReader extends Context
      * Default is false
      */
     public function keepState(): bool;
+
+    /**
+     * Get the projection identifier.
+     */
+    public function id(): ?string;
 }

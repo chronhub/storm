@@ -17,12 +17,14 @@ final readonly class ProjectEmitter implements EmitterProjector
     public function __construct(
         protected EmitterSubscriber $subscriber,
         protected ContextReader $context,
-        private string $streamName
+        protected string $streamName
     ) {
     }
 
     public function run(bool $inBackground): void
     {
+        $this->setContextIdIfNeeded();
+
         $this->subscriber->start($this->context, $inBackground);
     }
 

@@ -22,7 +22,6 @@ interface Context
      * @param Closure():TInit $userState
      *
      * @throws InvalidArgumentException When user state is already set
-     * @throws InvalidArgumentException When user state is a static closure
      *
      * @example $context->initialize(fn(): array => ['count' => 0]);
      */
@@ -58,7 +57,6 @@ interface Context
      * @param Closure(TWhen): ?TInit $reactors
      *
      * @throws InvalidArgumentException When reactors are already set
-     * @throws InvalidArgumentException When reactors is a static closure
      */
     public function when(Closure $reactors): self;
 
@@ -90,4 +88,11 @@ interface Context
      * @throws InvalidArgumentException When the timer is already set
      */
     public function until(DateInterval|string|int $interval): self;
+
+    /**
+     * Set a projection id to identify it.
+     *
+     * Note that a default id will be provided but uniqueness is not guaranteed
+     */
+    public function withId(string $id): self;
 }
