@@ -9,8 +9,8 @@ use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 
 final class ReadModelAccess implements ArrayAccess, ReadModelScope
 {

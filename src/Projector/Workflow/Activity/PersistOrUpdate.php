@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
 use Chronhub\Storm\Projector\Subscription\Notification\HasStreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReset;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionStored;
 
 final readonly class PersistOrUpdate
 {

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionFreed;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionFreed;
 use Closure;
 use Throwable;
 

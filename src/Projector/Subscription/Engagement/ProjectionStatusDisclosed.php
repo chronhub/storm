@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Observer;
+namespace Chronhub\Storm\Projector\Subscription\Engagement;
 
 final class ProjectionStatusDisclosed
 {

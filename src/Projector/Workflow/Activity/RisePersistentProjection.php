@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Notification\IsFirstLoop;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionRise;
 
 final readonly class RisePersistentProjection
 {

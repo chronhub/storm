@@ -8,10 +8,10 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Engagement\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Engagement\EventLinkedTo;
+use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
-use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
-use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 final class EmitterAccess implements ArrayAccess, EmitterScope
