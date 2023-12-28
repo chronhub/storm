@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use function array_unique;
 use function count;
 
-final readonly class DiscoverStreams
+final readonly class DiscoverStream
 {
     public function __construct(private array $streams)
     {

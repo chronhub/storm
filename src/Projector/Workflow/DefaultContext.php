@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Provider\EventStream\DiscoverAllStream;
 use Chronhub\Storm\Projector\Provider\EventStream\DiscoverCategories;
-use Chronhub\Storm\Projector\Provider\EventStream\DiscoverStreams;
+use Chronhub\Storm\Projector\Provider\EventStream\DiscoverStream;
 use Closure;
 use DateInterval;
 
@@ -98,7 +98,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertQueriesNotSet();
 
-        $this->query = new DiscoverStreams($streamNames);
+        $this->query = new DiscoverStream($streamNames);
 
         return $this;
     }

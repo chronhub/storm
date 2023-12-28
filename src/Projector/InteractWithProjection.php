@@ -82,7 +82,7 @@ trait InteractWithProjection
         return $this->subscriber->hub()->interact(GetUserState::class);
     }
 
-    protected function setContextIdIfNeeded(): void
+    protected function identifyProjectionIfNeeded(): void
     {
         if ($this->context->id() !== null) {
             return;

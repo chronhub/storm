@@ -40,7 +40,7 @@ class BatchStreamMonitor
         } else {
             //dump('Count : '.$this->counter);
 
-            $this->bucket?->consume($this->counter);
+            $this->bucket->consume($this->counter);
 
             if ($this->counter >= $this->bucket->getCapacity()) {
                 $this->reset();
