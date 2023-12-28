@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Stream;
 
+use Chronhub\Storm\Contracts\Projector\GapRecognition;
+
 use function array_key_exists;
 use function usleep;
 
-class GapDetector
+final class GapDetector implements GapRecognition
 {
     private int $retries = 0;
 

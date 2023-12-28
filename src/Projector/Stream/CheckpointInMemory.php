@@ -5,21 +5,18 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
-use Chronhub\Storm\Contracts\Projector\GapRecognition;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function array_map;
 use function array_merge;
 use function in_array;
 
-final class CheckpointManager implements CheckpointRecognition
+final class CheckpointInMemory implements CheckpointRecognition
 {
     private array $eventStreams = [];
 
-    public function __construct(
-        private readonly CheckpointCollection $checkpoints,
-        private readonly GapRecognition $gapDetector,
-    ) {
+    public function __construct(private readonly CheckpointCollection $checkpoints)
+    {
     }
 
     public function refreshStreams(array $eventStreams): void
@@ -39,40 +36,14 @@ final class CheckpointManager implements CheckpointRecognition
             throw new InvalidArgumentException("Position given for stream $streamName is outdated");
         }
 
-        if ($this->hasNextPosition($checkpoint, $position)) {
-            $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
+        $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
 
-            return true;
-        }
-
-        if (! $this->gapDetector->isRecoverable()) {
-            $this->checkpoints->nextWithGap($checkpoint, $position);
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     public function update(array $checkpoints): void
     {
-        foreach ($checkpoints as $checkpoint) {
-            $streamName = $checkpoint['stream_name'];
-
-            if (in_array($streamName, $this->eventStreams, true)) {
-                $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint));
-            }
-        }
-    }
-
-    public function hasGap(): bool
-    {
-        return $this->gapDetector->hasGap();
-    }
-
-    public function sleepWhenGap(): void
-    {
-        $this->gapDetector->sleep();
+        throw new InvalidArgumentException('Update checkpoint is not supported in memory.');
     }
 
     public function checkpoints(): array
@@ -92,13 +63,15 @@ final class CheckpointManager implements CheckpointRecognition
     public function resets(): void
     {
         $this->checkpoints->flush();
-
-        $this->gapDetector->reset();
     }
 
-    private function hasNextPosition(Checkpoint $checkpoint, int $expectedPosition): bool
+    public function hasGap(): bool
     {
-        return $expectedPosition === $checkpoint->position + 1;
+        return false;
+    }
+
+    public function sleepWhenGap(): void
+    {
     }
 
     private function validate(string $streamName, int $eventPosition): void

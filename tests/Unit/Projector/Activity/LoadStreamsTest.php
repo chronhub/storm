@@ -8,12 +8,12 @@ use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Clock\PointInTimeFactory;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
@@ -23,7 +23,7 @@ use Generator;
 
 beforeEach(function (): void {
     $this->subscription = $this->createMock(StateManagement::class);
-    $this->streamManager = $this->createMock(StreamManager::class);
+    $this->streamManager = $this->createMock(CheckpointRecognition::class);
     $this->context = $this->createMock(ContextReader::class);
     $this->option = $this->createMock(ProjectionOption::class);
     $this->chronicler = $this->createMock(Chronicler::class);

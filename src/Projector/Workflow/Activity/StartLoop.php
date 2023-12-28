@@ -33,11 +33,9 @@ final class StartLoop
 
     private function shouldEndLoop(HookHub $hub, bool $inProgress): void
     {
-        if ($this->shouldStop($hub, $inProgress)) {
-            $hub->interact(LoopReset::class);
-        } else {
-            $hub->interact(LoopIncremented::class);
-        }
+        $eventLoop = $this->shouldStop($hub, $inProgress) ? LoopReset::class : LoopIncremented::class;
+
+        $hub->interact($eventLoop);
     }
 
     private function shouldStop(HookHub $hub, bool $inProgress): bool

@@ -45,7 +45,7 @@ interface PersistentManagement extends Management
      *
      * @see ProjectionOption::BLOCK_SIZE
      */
-    public function persistWhenCounterIsReached(): void;
+    public function persistWhenThresholdIsReached(): void;
 
     /**
      * Reset the projection.

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriptionMangagement;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(PersistentSubscriptionMangagement::class);
-    $this->streamManager = $this->createMock(StreamManager::class);
+    $this->streamManager = $this->createMock(CheckpointRecognition::class);
     $this->option = $this->createMock(ProjectionOption::class);
     $this->eventCounter = new EventCounter(2);
 

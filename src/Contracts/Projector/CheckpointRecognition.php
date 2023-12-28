@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use JsonSerializable;
 
-interface StreamManager extends JsonSerializable
+interface CheckpointRecognition extends JsonSerializable
 {
     /**
      * Refresh event streams.
@@ -39,4 +39,14 @@ interface StreamManager extends JsonSerializable
      * Resets stream positions.
      */
     public function resets(): void;
+
+    /**
+     * Check if a gap is detected.
+     */
+    public function hasGap(): bool;
+
+    /**
+     * Sleep when a gap is detected.
+     */
+    public function sleepWhenGap(): void;
 }

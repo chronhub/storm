@@ -15,7 +15,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\BatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
-use Illuminate\Support\Arr;
 
 use function array_keys;
 use function array_values;
@@ -59,11 +58,9 @@ final class LoadStreams
             $hub->interact(StreamIteratorSet::class, $iterator);
 
             return true;
-            //return Arr::map($streams, fn (StreamIterator $iterator, string $streamName): array => [$streamName => $iterator->count()]);
         }
 
         return false;
-        //return [];
     }
 
     /**

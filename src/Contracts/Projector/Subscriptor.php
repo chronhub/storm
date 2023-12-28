@@ -23,7 +23,7 @@ interface Subscriptor
 
     public function sprint(): Sprint;
 
-    public function streamManager(): StreamManager;
+    public function streamManager(): CheckpointRecognition;
 
     public function batch(): BatchStreamObserver;
 

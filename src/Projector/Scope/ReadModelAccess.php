@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Scope;
 
 use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
-use Chronhub\Storm\Projector\Subscription\NotificationManager;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
 
 final class ReadModelAccess implements ArrayAccess, ReadModelScope
@@ -17,7 +17,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
     use ScopeBehaviour;
 
     public function __construct(
-        private readonly NotificationManager $notification,
+        private readonly HookHub $hook,
         private readonly ReadModel $readModel,
         private readonly SystemClock $clock
     ) {
@@ -25,7 +25,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function stop(): void
     {
-        $this->notification->trigger(new ProjectionClosed());
+        $this->hook->trigger(new ProjectionClosed());
     }
 
     public function readModel(): ReadModel
@@ -42,7 +42,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function streamName(): string
     {
-        return $this->notification->interact(GetStreamName::class);
+        return $this->hook->interact(GetStreamName::class);
     }
 
     public function clock(): SystemClock

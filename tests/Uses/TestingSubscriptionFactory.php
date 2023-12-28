@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Uses;
 
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
 use Chronhub\Storm\Projector\Workflow\Sprint;
@@ -24,7 +24,7 @@ trait TestingSubscriptionFactory
 
     protected ProjectionOption&MockObject $option;
 
-    protected StreamManager&MockObject $streamManager;
+    protected CheckpointRecognition&MockObject $streamManager;
 
     protected ContextReader&MockObject $context;
 
@@ -45,7 +45,7 @@ trait TestingSubscriptionFactory
         $this->projectorScope = $this->createMock($projectorScope);
 
         $this->option = $this->createMock(ProjectionOption::class);
-        $this->streamManager = $this->createMock(StreamManager::class);
+        $this->streamManager = $this->createMock(CheckpointRecognition::class);
         $this->context = $this->createMock(ContextReader::class);
         $this->state = new InMemoryUserState(); // mock
         $this->sprint = new Sprint();

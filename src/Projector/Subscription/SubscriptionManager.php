@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Projector\UserState;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
@@ -42,7 +42,7 @@ final class SubscriptionManager implements Subscriptor
 
     public function __construct(
         private readonly EventStreamDiscovery $streamDiscovery,
-        private readonly StreamManager $streamManager,
+        private readonly CheckpointRecognition $streamManager,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         private readonly Loop $loop,
@@ -83,7 +83,7 @@ final class SubscriptionManager implements Subscriptor
         return $this->sprint;
     }
 
-    public function streamManager(): StreamManager
+    public function streamManager(): CheckpointRecognition
     {
         return $this->streamManager;
     }

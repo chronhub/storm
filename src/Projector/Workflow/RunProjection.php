@@ -9,10 +9,8 @@ use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 
 final readonly class RunProjection
 {
-    public function __construct(
-        private Workflow $workflow,
-        private bool $keepRunning
-    ) {
+    public function __construct(private Workflow $workflow, private bool $keepRunning)
+    {
     }
 
     public function loop(): void

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Unit\Projector\Activity;
 
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\PersistentSubscriber;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Projector\Support\EventCounter;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Closure;
 
 beforeEach(function () {
     $this->subscription = $this->createMock(PersistentSubscriber::class);
-    $this->streamManager = $this->createMock(StreamManager::class);
+    $this->streamManager = $this->createMock(CheckpointRecognition::class);
     $this->eventCounter = new EventCounter(10);
 
     $this->activity = new HandleStreamGap();

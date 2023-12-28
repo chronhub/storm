@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
@@ -30,8 +29,6 @@ trait InteractWithManagement
     public function tryUpdateLock(): void
     {
         $this->repository->updateLock();
-
-        $this->hub->interact(BatchSleep::class);
     }
 
     public function freed(): void
@@ -86,7 +83,7 @@ trait InteractWithManagement
         }
     }
 
-    public function persistWhenCounterIsReached(): void
+    public function persistWhenThresholdIsReached(): void
     {
         if ($this->hub->interact(IsEventReached::class)) {
             $this->store();

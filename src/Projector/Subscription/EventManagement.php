@@ -30,7 +30,7 @@ final class EventManagement
 
         $task->addHook(ProjectionStored::class, fn () => $management->store());
 
-        $task->addHook(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenCounterIsReached());
+        $task->addHook(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenThresholdIsReached());
 
         $task->addHook(ProjectionClosed::class, fn () => $management->close());
 

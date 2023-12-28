@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Stream;
 
-final class EmittedStream
+class EmittedStream
 {
-    private bool $wasEmitted = false;
+    protected bool $wasEmitted = false;
 
     public function wasEmitted(): bool
     {

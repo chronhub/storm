@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Chronicler\ChroniclerDecorator;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
@@ -18,7 +19,6 @@ use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
-use Chronhub\Storm\Contracts\Projector\StreamManager;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
@@ -29,6 +29,7 @@ use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Projector\Stream\CheckpointCollection;
+use Chronhub\Storm\Projector\Stream\CheckpointInMemory;
 use Chronhub\Storm\Projector\Stream\CheckpointManager;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
@@ -73,7 +74,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscriptor = $this->createSubscriptor($option);
+        $subscriptor = $this->createSubscriptor($option, false);
         $notification = new NotificationManager($subscriptor);
         $activities = new QueryActivityFactory($this->chronicler);
         $scope = new QueryAccess($notification, $this->clock);
@@ -83,7 +84,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option);
+        $subscriptor = $this->createSubscriptor($option, true);
         $notification = new NotificationManager($subscriptor);
 
         $management = new EmittingManagement(
@@ -102,7 +103,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option);
+        $subscriptor = $this->createSubscriptor($option, true);
         $notification = new NotificationManager($subscriptor);
         $repository = $this->createProjectionRepository($streamName, $option);
 
@@ -145,15 +146,15 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createSubscriptor(ProjectionOption $option): Subscriptor
+    protected function createSubscriptor(ProjectionOption $option, bool $detectGap): Subscriptor
     {
         return new SubscriptionManager(
             $this->createEventStreamDiscovery(),
-            $this->createStreamManager($option), // todo query does not handle gaps
+            $this->createCheckpointManager($option, $detectGap), // todo query does not handle gaps
             $this->clock,
             $option,
             new Loop(),
-            $this->batchStreamsAware($option),
+            $this->BatchStreamObserver($option),
         );
     }
 
@@ -167,12 +168,18 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createStreamManager(ProjectionOption $option): StreamManager
+    protected function createCheckpointManager(ProjectionOption $option, bool $detectGap): CheckpointRecognition
     {
-        return new CheckpointManager(
-            new CheckpointCollection($this->clock),
-            new GapDetector($option->getRetries(), $option->getDetectionWindows())
-        );
+        $checkpoints = new CheckpointCollection($this->clock);
+
+        if ($detectGap) {
+            return new CheckpointManager(
+                $checkpoints,
+                new GapDetector($option->getRetries(), $option->getDetectionWindows())
+            );
+        }
+
+        return new CheckpointInMemory($checkpoints);
     }
 
     protected function createStreamCache(ProjectionOption $option): StreamCache
@@ -185,7 +192,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function BatchStreamsAware(ProjectionOption $option): BatchStreamObserver
+    protected function BatchStreamObserver(ProjectionOption $option): BatchStreamObserver
     {
         $sleep = $option->getSleep();
 
