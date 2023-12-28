@@ -13,6 +13,8 @@ interface HookHub
 
     public function trigger(object $hook): void;
 
+    public function addListener(string $listener, string|callable $callback): void;
+
     /**
      * @param class-string|object $notification
      */

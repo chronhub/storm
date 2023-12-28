@@ -29,7 +29,7 @@ interface Subscriptor
 
     public function setProcessedStream(string $streamName): void;
 
-    public function setStreamIterator(MergeStreamIterator $streamIterator): void;
+    public function setStreamIterator(?MergeStreamIterator $streamIterator): void;
 
     public function pullStreamIterator(): ?MergeStreamIterator;
 

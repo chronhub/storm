@@ -38,5 +38,5 @@ interface ProjectorManagerInterface
     /**
      * Get the projector monitor.
      */
-    public function monitor(): ProjectorMonitorInterface;
+    public function monitor(): ProjectorSupervisorInterface;
 }

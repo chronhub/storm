@@ -11,7 +11,6 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
@@ -38,28 +37,17 @@ final class LoadStreams
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $hasStreams = $this->handleStreams($hub);
-
-        $hub->interact(BatchLoaded::class, $hasStreams); // todo when listener set in hub
-
-        return $next($hub);
-    }
-
-    private function handleStreams(HookHub $hub): bool
-    {
         $checkpoints = $hub->interact(GetCheckpoints::class);
 
         $iterators = $this->collectStreams($this->batchStreams($checkpoints));
 
-        if ($iterators) {
-            $streams = new MergeStreamIterator($this->clock, $iterators);
-
-            $hub->interact(StreamIteratorSet::class, $streams);
-
-            return true;
+        if ($iterators !== null) {
+            $iterators = new MergeStreamIterator($this->clock, $iterators);
         }
 
-        return false;
+        $hub->interact(StreamIteratorSet::class, $iterators);
+
+        return $next($hub);
     }
 
     private function collectStreams(array $streams): ?Collection

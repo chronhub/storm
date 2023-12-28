@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryScope;
 use Chronhub\Storm\Contracts\Projector\ProjectorManagerInterface;
-use Chronhub\Storm\Contracts\Projector\ProjectorMonitorInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorSupervisorInterface;
 use Chronhub\Storm\Contracts\Projector\QueryProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
@@ -15,7 +15,7 @@ use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 
 final class ProjectorManager implements ProjectorManagerInterface
 {
-    private ?ProjectorMonitorInterface $monitor = null;
+    private ?ProjectorSupervisorInterface $monitor = null;
 
     public function __construct(private readonly SubscriptionFactory $factory)
     {
@@ -53,9 +53,9 @@ final class ProjectorManager implements ProjectorManagerInterface
         return $this->factory->getQueryScope();
     }
 
-    public function monitor(): ProjectorMonitorInterface
+    public function monitor(): ProjectorSupervisorInterface
     {
-        return $this->monitor ??= new ProjectorMonitor(
+        return $this->monitor ??= new ProjectorSupervisor(
             $this->factory->getProjectionProvider(),
             $this->factory->getSerializer(),
         );

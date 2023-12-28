@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Uses;
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
-use Chronhub\Storm\Projector\ProjectorMonitor;
+use Chronhub\Storm\Projector\ProjectorSupervisor;
 use PHPUnit\Framework\MockObject\MockObject;
 use tests\TestCase;
 
@@ -19,7 +19,7 @@ trait TestingProjectorMonitor
 
     protected ProjectionModel&MockObject $model;
 
-    protected ProjectorMonitor $projectorMonitor;
+    protected ProjectorSupervisor $projectorMonitor;
 
     protected string $projectionName = 'foo';
 
@@ -30,7 +30,7 @@ trait TestingProjectorMonitor
         $this->serializer = $this->createMock(JsonSerializer::class);
         $this->model = $this->createMock(ProjectionModel::class);
 
-        $this->projectorMonitor = new ProjectorMonitor($this->projections, $this->serializer);
+        $this->projectorMonitor = new ProjectorSupervisor($this->projections, $this->serializer);
     }
 
     protected function callUpdate(string $status): void

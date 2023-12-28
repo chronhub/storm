@@ -6,21 +6,21 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventEmitted;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionDiscarded;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionFreed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionPersistedWhenThresholdIsReached;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRestarted;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRevised;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRise;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionStatusDisclosed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionStored;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionFreed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRestarted;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRise;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
 
-final class EventManagement
+final class HookHandler
 {
     public static function subscribe(HookHub $task, PersistentManagement $management): void
     {

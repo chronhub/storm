@@ -8,9 +8,9 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\HookHub;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventEmitted;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 

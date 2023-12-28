@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;

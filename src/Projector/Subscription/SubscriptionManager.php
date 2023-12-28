@@ -96,7 +96,7 @@ final class SubscriptionManager implements Subscriptor
         return $this->streamName;
     }
 
-    public function setStreamIterator(MergeStreamIterator $streamIterator): void
+    public function setStreamIterator(?MergeStreamIterator $streamIterator): void
     {
         $this->streamIterator = $streamIterator;
     }

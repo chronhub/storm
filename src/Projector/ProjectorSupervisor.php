@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ProjectionModel;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
-use Chronhub\Storm\Contracts\Projector\ProjectorMonitorInterface;
+use Chronhub\Storm\Contracts\Projector\ProjectorSupervisorInterface;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\Repository\Mapper\UpdateStatusDataDto;
 use Throwable;
 
-final readonly class ProjectorMonitor implements ProjectorMonitorInterface
+final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
 {
     public function __construct(
         private ProjectionProvider $projectionProvider,

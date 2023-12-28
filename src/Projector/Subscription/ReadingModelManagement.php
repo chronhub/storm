@@ -21,7 +21,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {
-        EventManagement::subscribe($hub, $this);
+        HookHandler::subscribe($hub, $this);
     }
 
     public function rise(): void

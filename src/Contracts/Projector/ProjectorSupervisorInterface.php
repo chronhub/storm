@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 
-interface ProjectorMonitorInterface
+interface ProjectorSupervisorInterface
 {
     /**
      * Stop the projection.

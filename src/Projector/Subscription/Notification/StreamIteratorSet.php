@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 
 final readonly class StreamIteratorSet
 {
-    public function __construct(private MergeStreamIterator $iterator)
+    public function __construct(public ?MergeStreamIterator $iterator)
     {
     }
 

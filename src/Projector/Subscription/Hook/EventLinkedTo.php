@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Subscription\Engagement;
+namespace Chronhub\Storm\Projector\Subscription\Hook;
 
 use Chronhub\Storm\Reporter\DomainEvent;
 

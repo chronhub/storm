@@ -7,19 +7,19 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventEmitted;
-use Chronhub\Storm\Projector\Subscription\Engagement\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionDiscarded;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionFreed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionPersistedWhenThresholdIsReached;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRestarted;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRevised;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionRise;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionStatusDisclosed;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionStored;
-use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionFreed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRestarted;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRise;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
 
 use function array_key_exists;
 use function is_string;
@@ -45,6 +45,11 @@ final class NotificationManager implements HookHub
         EventLinkedTo::class => [],
     ];
 
+    /**
+     * @var array<string, array<string|callable>>
+     */
+    private array $listeners = [];
+
     public function __construct(private readonly Subscriptor $subscriptor)
     {
     }
@@ -67,11 +72,28 @@ final class NotificationManager implements HookHub
         }
     }
 
+    public function addListener(string $listener, string|callable $callback): void
+    {
+        $this->listeners[$listener][] = $callback;
+    }
+
     public function interact(string|object $notification, mixed ...$arguments): mixed
     {
         $event = is_string($notification) ? new $notification(...$arguments) : $notification;
 
-        return $this->subscriptor->receive($event);
+        $result = $this->subscriptor->receive($event);
+
+        if (array_key_exists($event::class, $this->listeners)) {
+            foreach ($this->listeners[$event::class] as $listener) {
+                if (is_string($listener)) {
+                    $listener = new $listener();
+                }
+
+                $listener($this, $event, $result);
+            }
+        }
+
+        return $result;
     }
 
     private function assertHookIsSupported(string $hook): void

@@ -29,7 +29,7 @@ final readonly class EmittingManagement implements EmitterManagement
         private StreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
-        EventManagement::subscribe($hub, $this);
+        HookHandler::subscribe($hub, $this);
     }
 
     public function emit(DomainEvent $event): void
