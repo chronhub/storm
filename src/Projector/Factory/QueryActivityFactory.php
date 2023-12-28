@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Workflow\Activity\FinalizeProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Workflow\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
@@ -31,7 +30,6 @@ final readonly class QueryActivityFactory extends AbstractActivityFactory
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new SleepForQuery(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
-            fn (): callable => new FinalizeProjection(),
         ];
     }
 }

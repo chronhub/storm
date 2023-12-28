@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintDaemonize;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopHasStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopReset;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAckedReset;
 
 final class StartLoop
 {
@@ -20,6 +22,8 @@ final class StartLoop
         $response = $next($hub);
 
         $this->shouldEndLoop($hub, $response);
+
+        $this->finalize($hub);
 
         return $response;
     }
@@ -43,5 +47,12 @@ final class StartLoop
         $keepRunning = $hub->interact(IsSprintDaemonize::class);
 
         return ! $keepRunning || ! $inProgress;
+    }
+
+    private function finalize(HookHub $hub): void
+    {
+        $hub->interact(BatchReset::class);
+
+        $hub->interact(StreamEventAckedReset::class);
     }
 }

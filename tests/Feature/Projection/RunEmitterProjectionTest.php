@@ -35,7 +35,6 @@ it('can run emitter projection 1111', function (): void {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
-        ->until(3)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -49,7 +48,7 @@ it('can run emitter projection 1111', function (): void {
                 });
 
             expect($scope->streamName())->not()->toBeNull();
-        })->run(true);
+        })->run(false);
 
     expect($projector->getState())->toBe(['count' => 2]);
 });

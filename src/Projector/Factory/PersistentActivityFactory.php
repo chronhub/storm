@@ -10,7 +10,6 @@ use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
-use Chronhub\Storm\Projector\Workflow\Activity\FinalizeProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
@@ -42,7 +41,6 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
             fn (): callable => new ResetEventCounter(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
             fn (): callable => new RefreshProjection(),
-            fn (): callable => new FinalizeProjection(),
         ];
     }
 }

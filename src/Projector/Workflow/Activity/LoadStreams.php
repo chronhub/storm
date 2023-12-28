@@ -15,6 +15,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\BatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
+use Illuminate\Support\Collection;
 
 use function array_keys;
 use function array_values;
@@ -39,28 +40,37 @@ final class LoadStreams
     {
         $hasStreams = $this->handleStreams($hub);
 
-        $hub->interact(BatchLoaded::class, $hasStreams);
+        $hub->interact(BatchLoaded::class, $hasStreams); // todo when listener set in hub
 
         return $next($hub);
     }
 
     private function handleStreams(HookHub $hub): bool
     {
-        $streams = $this->batchStreams($hub->interact(GetCheckpoints::class));
+        $checkpoints = $hub->interact(GetCheckpoints::class);
 
-        if ($streams !== []) {
-            $iterators = collect(array_values($streams))->map(
-                fn (StreamIterator $iterator, int $key): array => [$iterator, array_keys($streams)[$key]]
-            );
+        $iterators = $this->collectStreams($this->batchStreams($checkpoints));
 
-            $iterator = new MergeStreamIterator($this->clock, $iterators);
+        if ($iterators) {
+            $streams = new MergeStreamIterator($this->clock, $iterators);
 
-            $hub->interact(StreamIteratorSet::class, $iterator);
+            $hub->interact(StreamIteratorSet::class, $streams);
 
             return true;
         }
 
         return false;
+    }
+
+    private function collectStreams(array $streams): ?Collection
+    {
+        if ($streams === []) {
+            return null;
+        }
+
+        return collect(array_values($streams))->map(
+            fn (StreamIterator $iterator, int $key): array => [$iterator, array_keys($streams)[$key]]
+        );
     }
 
     /**
