@@ -9,12 +9,12 @@ use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
-use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
+use Chronhub\Storm\Projector\Subscription\Notification\EventCounterReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
 use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
-use Chronhub\Storm\Projector\Subscription\Notification\IsEventReached;
+use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReachSize;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
@@ -85,10 +85,10 @@ trait InteractWithManagement
 
     public function persistWhenThresholdIsReached(): void
     {
-        if ($this->hub->interact(IsEventReached::class)) {
+        if ($this->hub->interact(IsEventCounterReachSize::class)) {
             $this->store();
 
-            $this->hub->interact(EventReset::class);
+            $this->hub->interact(EventCounterReset::class);
 
             $this->disclose();
 

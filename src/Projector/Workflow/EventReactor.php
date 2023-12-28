@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
-use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
+use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
@@ -41,7 +41,7 @@ final readonly class EventReactor
             return false;
         }
 
-        $hub->interact(EventIncremented::class);
+        $hub->interact(EventCounterIncremented::class);
 
         $this->reactOn($hub, $event);
 
