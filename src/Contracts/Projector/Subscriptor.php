@@ -17,9 +17,7 @@ interface Subscriptor
 
     public function getContext(): ?ContextReader;
 
-    public function userState(): UserState;
-
-    public function setOriginalUserState(): void;
+    public function restoreUserState(): void;
 
     public function isUserStateInitialized(): bool;
 
@@ -35,7 +33,7 @@ interface Subscriptor
 
     public function pullStreamIterator(): ?MergeStreamIterator;
 
-    public function streamManager(): CheckpointRecognition;
+    public function recognition(): CheckpointRecognition;
 
     public function monitor(): MonitorManager;
 

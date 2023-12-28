@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
-use Chronhub\Storm\Contracts\Projector\Subscriber;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\PullStreamIterator;
@@ -17,7 +16,7 @@ use function gc_collect_cycles;
 final class HandleStreamEvent
 {
     /**
-     * @var callable{Subscriber,DomainEvent,int<0,max>}
+     * @var callable{HookHub,string,DomainEvent,int<1,max>}
      */
     private $eventProcessor;
 
@@ -39,7 +38,7 @@ final class HandleStreamEvent
 
             $hub->interact(StreamProcessed::class, $streamName);
 
-            $continue = ($this->eventProcessor)($hub, $event, $position);
+            $continue = ($this->eventProcessor)($hub, $streamName, $event, $position);
 
             if (! $continue || ! $hub->interact(IsSprintRunning::class)) {
                 break;

@@ -37,7 +37,7 @@ trait InteractWithPersistentSubscription
         $this->validateContext($context);
 
         $this->subscriptor->setContext($context, true);
-        $this->subscriptor->setOriginalUserState();
+        $this->subscriptor->restoreUserState();
         $this->subscriptor->monitor()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->monitor()->sprint()->continue();
     }

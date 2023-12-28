@@ -47,10 +47,11 @@ use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
 use Chronhub\Storm\Projector\Workflow\Monitor\AckedStreamMonitor;
 use Chronhub\Storm\Projector\Workflow\Monitor\BatchStreamMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\EventCounterMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\InMemoryUserState;
 use Chronhub\Storm\Projector\Workflow\Monitor\LoopMonitor;
 use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
 use Chronhub\Storm\Projector\Workflow\Monitor\SprintMonitor;
-use Chronhub\Storm\Projector\Workflow\Monitor\StreamEventCounterMonitor;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function is_array;
@@ -200,7 +201,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new MonitorManager(
             new LoopMonitor(),
             new SprintMonitor(),
-            new StreamEventCounterMonitor($option->getBlockSize()),
+            new InMemoryUserState(),
+            new EventCounterMonitor($option->getBlockSize()),
             new AckedStreamMonitor(),
             $this->batchStreamMonitor($option)
         );

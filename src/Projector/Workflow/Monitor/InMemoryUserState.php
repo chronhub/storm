@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow;
+namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
 use Chronhub\Storm\Contracts\Projector\UserState;
 

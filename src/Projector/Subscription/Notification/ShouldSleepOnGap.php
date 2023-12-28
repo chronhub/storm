@@ -10,8 +10,8 @@ final class ShouldSleepOnGap
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        if ($subscriptor->streamManager()->hasGap()) {
-            $subscriptor->streamManager()->sleepWhenGap();
+        if ($subscriptor->recognition()->hasGap()) {
+            $subscriptor->recognition()->sleepWhenGap();
 
             return true;
         }

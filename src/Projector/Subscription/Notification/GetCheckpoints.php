@@ -10,6 +10,6 @@ final class GetCheckpoints
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->streamManager()->checkpoints();
+        return $subscriptor->recognition()->checkpoints();
     }
 }

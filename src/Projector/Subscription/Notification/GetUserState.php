@@ -10,6 +10,6 @@ final class GetUserState
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->userState()->get();
+        return $subscriptor->monitor()->userState()->get();
     }
 }

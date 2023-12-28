@@ -10,6 +10,6 @@ final class HasGap
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->streamManager()->hasGap();
+        return $subscriptor->recognition()->hasGap();
     }
 }

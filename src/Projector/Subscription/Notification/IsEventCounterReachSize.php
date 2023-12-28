@@ -10,6 +10,6 @@ final class IsEventCounterReachSize
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->monitor()->streamEventCounter()->isReached();
+        return $subscriptor->monitor()->eventCounter()->isReached();
     }
 }

@@ -14,6 +14,6 @@ final readonly class UserStateChanged
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->userState()->put($this->userState);
+        $subscriptor->monitor()->userState()->put($this->userState);
     }
 }

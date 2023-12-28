@@ -9,12 +9,10 @@ use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Contracts\Projector\UserState;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
 use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
 use Closure;
 
@@ -28,16 +26,13 @@ final class SubscriptionManager implements Subscriptor
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    private UserState $userState;
-
     public function __construct(
-        private readonly EventStreamDiscovery $streamDiscovery,
-        private readonly CheckpointRecognition $streamManager,
+        private readonly EventStreamDiscovery $eventStreamDiscovery,
+        private readonly CheckpointRecognition $checkpointRecognition,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         private readonly MonitorManager $monitor,
     ) {
-        $this->userState = new InMemoryUserState(); // todo use monitor and leave contract or set in default constructor
     }
 
     public function receive(callable $event): mixed
@@ -59,9 +54,9 @@ final class SubscriptionManager implements Subscriptor
         return $this->context;
     }
 
-    public function streamManager(): CheckpointRecognition
+    public function recognition(): CheckpointRecognition
     {
-        return $this->streamManager;
+        return $this->checkpointRecognition;
     }
 
     public function monitor(): MonitorManager
@@ -79,16 +74,11 @@ final class SubscriptionManager implements Subscriptor
         $this->status = $status;
     }
 
-    public function userState(): UserState
-    {
-        return $this->userState;
-    }
-
-    public function setOriginalUserState(): void
+    public function restoreUserState(): void
     {
         $originalUserState = value($this->context->userState()) ?? [];
 
-        $this->userState->put($originalUserState);
+        $this->monitor->userState()->put($originalUserState);
     }
 
     public function isUserStateInitialized(): bool
@@ -123,9 +113,9 @@ final class SubscriptionManager implements Subscriptor
     public function discoverStreams(): void
     {
         tap($this->context->queries(), function (callable $query): void {
-            $eventStreams = $this->streamDiscovery->query($query);
+            $eventStreams = $this->eventStreamDiscovery->query($query);
 
-            $this->streamManager->refreshStreams($eventStreams);
+            $this->checkpointRecognition->refreshStreams($eventStreams);
         });
     }
 

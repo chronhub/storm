@@ -10,6 +10,6 @@ final class UserStateRestored
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->setOriginalUserState();
+        $subscriptor->restoreUserState();
     }
 }

@@ -14,6 +14,6 @@ final readonly class CheckpointAdded
 
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->streamManager()->insert($this->streamName, $this->streamPosition);
+        return $subscriptor->recognition()->insert($this->streamName, $this->streamPosition);
     }
 }

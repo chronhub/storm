@@ -43,12 +43,12 @@ class Timer
         return $this->startTime instanceof DateTimeImmutable;
     }
 
-    public function getElapsedTime(): ?int
+    public function getElapsedTime(): ?DateInterval
     {
         if ($this->startTime === null) {
             return null;
         }
 
-        return $this->clock->now()->getTimestamp() - $this->startTime->getTimestamp();
+        return $this->clock->now()->diff($this->startTime);
     }
 }

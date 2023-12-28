@@ -14,6 +14,6 @@ final readonly class CheckpointUpdated
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->streamManager()->update($this->checkpoints);
+        $subscriptor->recognition()->update($this->checkpoints);
     }
 }

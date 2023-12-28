@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
+use Chronhub\Storm\Contracts\Projector\UserState;
+
 readonly class MonitorManager
 {
     public function __construct(
         protected LoopMonitor $loopMonitor,
         protected SprintMonitor $sprintMonitor,
-        protected StreamEventCounterMonitor $streamEventCounterMonitor,
+        protected UserState $userState,
+        protected EventCounterMonitor $eventCounterMonitor,
         protected AckedStreamMonitor $ackedStreamMonitor,
         protected BatchStreamMonitor $batchStreamMonitor
     ) {
@@ -25,9 +28,14 @@ readonly class MonitorManager
         return $this->sprintMonitor;
     }
 
-    public function streamEventCounter(): StreamEventCounterMonitor
+    public function userState(): UserState
     {
-        return $this->streamEventCounterMonitor;
+        return $this->userState;
+    }
+
+    public function eventCounter(): EventCounterMonitor
+    {
+        return $this->eventCounterMonitor;
     }
 
     public function ackedStream(): AckedStreamMonitor

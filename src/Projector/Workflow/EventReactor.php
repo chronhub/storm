@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
@@ -33,11 +32,11 @@ final readonly class EventReactor
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(HookHub $hub, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(HookHub $hub, string $streamName, DomainEvent $event, int $expectedPosition): bool
     {
         $this->dispatchSignalIfRequested();
 
-        if (! $this->hasNoGap($hub, $expectedPosition)) {
+        if (! $this->hasNoGap($hub, $streamName, $expectedPosition)) {
             return false;
         }
 
@@ -67,11 +66,9 @@ final readonly class EventReactor
         $resetScope();
     }
 
-    private function hasNoGap(HookHub $hub, int $expectedPosition): bool
+    private function hasNoGap(HookHub $hub, string $streamName, int $expectedPosition): bool
     {
-        return $hub->interact(
-            new CheckpointAdded($hub->interact(GetProcessedStream::class), $expectedPosition)
-        );
+        return $hub->interact(new CheckpointAdded($streamName, $expectedPosition));
     }
 
     private function dispatchWhenThresholdIsReached(HookHub $hub): void

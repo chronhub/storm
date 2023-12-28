@@ -10,6 +10,6 @@ final readonly class CheckpointReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->streamManager()->resets();
+        $subscriptor->recognition()->resets();
     }
 }

@@ -34,9 +34,9 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function resets(): void
     {
-        $this->subscriptor->streamManager()->resets();
+        $this->subscriptor->recognition()->resets();
 
-        $this->subscriptor->setOriginalUserState();
+        $this->subscriptor->restoreUserState();
     }
 
     public function hub(): HookHub
@@ -56,7 +56,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         if ($this->subscriptor->getContext() === null) {
             $this->subscriptor->setContext($context, true);
 
-            $this->subscriptor->setOriginalUserState();
+            $this->subscriptor->restoreUserState();
         }
 
         $this->initializeContextAgain();
@@ -72,7 +72,7 @@ final readonly class QuerySubscription implements QuerySubscriber
                 throw new RuntimeException('Projection context is not initialized. Provide a closure to initialize user state');
             }
         } else {
-            $this->subscriptor->setOriginalUserState();
+            $this->subscriptor->restoreUserState();
         }
     }
 
