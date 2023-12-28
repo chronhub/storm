@@ -10,6 +10,6 @@ final class EventIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->eventCounter()->increment();
+        $subscriptor->monitor()->streamEventCounter()->increment();
     }
 }

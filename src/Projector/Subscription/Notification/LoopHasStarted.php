@@ -10,6 +10,6 @@ final class LoopHasStarted
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->loop()->hasStarted();
+        return $subscriptor->monitor()->loop()->hasStarted();
     }
 }

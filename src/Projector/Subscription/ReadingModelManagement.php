@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
@@ -43,8 +42,6 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         $this->repository->persist($this->getProjectionResult());
 
         $this->readModel->persist();
-
-        $this->hub->interact(BatchReset::class);
     }
 
     public function revise(): void

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow;
+namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
-class EventCounter
+class StreamEventCounterMonitor
 {
     /**
      * @var int<0,max>

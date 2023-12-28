@@ -61,8 +61,8 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $this->initializeContextAgain();
 
-        $this->subscriptor->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->sprint()->continue();
+        $this->subscriptor->monitor()->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->monitor()->sprint()->continue();
     }
 
     private function initializeContextAgain(): void

@@ -43,10 +43,14 @@ use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
 use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
-use Chronhub\Storm\Projector\Support\BatchStreamObserver;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
-use Chronhub\Storm\Projector\Workflow\Loop;
+use Chronhub\Storm\Projector\Workflow\Monitor\AckedStreamMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\BatchStreamMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\LoopMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
+use Chronhub\Storm\Projector\Workflow\Monitor\SprintMonitor;
+use Chronhub\Storm\Projector\Workflow\Monitor\StreamEventCounterMonitor;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function is_array;
@@ -150,11 +154,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         return new SubscriptionManager(
             $this->createEventStreamDiscovery(),
-            $this->createCheckpointManager($option, $detectGap), // todo query does not handle gaps
+            $this->createCheckpointRecognition($option, $detectGap),
             $this->clock,
             $option,
-            new Loop(),
-            $this->BatchStreamObserver($option),
+            $this->createMonitorManager($option),
         );
     }
 
@@ -168,7 +171,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createCheckpointManager(ProjectionOption $option, bool $detectGap): CheckpointRecognition
+    protected function createCheckpointRecognition(ProjectionOption $option, bool $detectGap): CheckpointRecognition
     {
         $checkpoints = new CheckpointCollection($this->clock);
 
@@ -192,16 +195,27 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function BatchStreamObserver(ProjectionOption $option): BatchStreamObserver
+    protected function createMonitorManager(ProjectionOption $option): MonitorManager
+    {
+        return new MonitorManager(
+            new LoopMonitor(),
+            new SprintMonitor(),
+            new StreamEventCounterMonitor($option->getBlockSize()),
+            new AckedStreamMonitor(),
+            $this->batchStreamMonitor($option)
+        );
+    }
+
+    protected function batchStreamMonitor(ProjectionOption $option): BatchStreamMonitor
     {
         $sleep = $option->getSleep();
 
         if (is_array($sleep)) {
             $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
 
-            return new BatchStreamObserver($bucket);
+            return new BatchStreamMonitor($bucket);
         }
 
-        return new BatchStreamObserver(null, $sleep);
+        return new BatchStreamMonitor(null, $sleep);
     }
 }

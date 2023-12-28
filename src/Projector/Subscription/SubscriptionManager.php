@@ -14,12 +14,8 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Support\AckedStreamObserver;
-use Chronhub\Storm\Projector\Support\BatchStreamObserver;
-use Chronhub\Storm\Projector\Workflow\EventCounter;
 use Chronhub\Storm\Projector\Workflow\InMemoryUserState;
-use Chronhub\Storm\Projector\Workflow\Loop;
-use Chronhub\Storm\Projector\Workflow\Sprint;
+use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
 use Closure;
 
 final class SubscriptionManager implements Subscriptor
@@ -32,26 +28,16 @@ final class SubscriptionManager implements Subscriptor
 
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
-    private EventCounter $eventCounter;
-
     private UserState $userState;
-
-    private Sprint $sprint;
-
-    private AckedStreamObserver $acked;
 
     public function __construct(
         private readonly EventStreamDiscovery $streamDiscovery,
         private readonly CheckpointRecognition $streamManager,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
-        private readonly Loop $loop,
-        private readonly BatchStreamObserver $batchStreamsAware
+        private readonly MonitorManager $monitor,
     ) {
-        $this->eventCounter = new EventCounter($option->getBlockSize());
-        $this->userState = new InMemoryUserState();
-        $this->sprint = new Sprint();
-        $this->acked = new AckedStreamObserver();
+        $this->userState = new InMemoryUserState(); // todo use monitor and leave contract or set in default constructor
     }
 
     public function receive(callable $event): mixed
@@ -73,29 +59,14 @@ final class SubscriptionManager implements Subscriptor
         return $this->context;
     }
 
-    public function eventCounter(): EventCounter
-    {
-        return $this->eventCounter;
-    }
-
-    public function sprint(): Sprint
-    {
-        return $this->sprint;
-    }
-
     public function streamManager(): CheckpointRecognition
     {
         return $this->streamManager;
     }
 
-    public function batch(): BatchStreamObserver
+    public function monitor(): MonitorManager
     {
-        return $this->batchStreamsAware;
-    }
-
-    public function acked(): AckedStreamObserver
-    {
-        return $this->acked;
+        return $this->monitor;
     }
 
     public function currentStatus(): ProjectionStatus
@@ -156,11 +127,6 @@ final class SubscriptionManager implements Subscriptor
 
             $this->streamManager->refreshStreams($eventStreams);
         });
-    }
-
-    public function loop(): Loop
-    {
-        return $this->loop;
     }
 
     public function option(): ProjectionOption

@@ -11,6 +11,6 @@ final class GetLoop
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->loop()->cycle();
+        return $subscriptor->monitor()->loop()->cycle();
     }
 }

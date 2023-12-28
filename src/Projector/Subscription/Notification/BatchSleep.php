@@ -11,8 +11,8 @@ final class BatchSleep
     public function __invoke(Subscriptor $subscriptor): void
     {
         // sleep only when no stream events are acked
-        if (! $subscriptor->acked()->hasStreams()) {
-            $subscriptor->batch()->sleep();
+        if (! $subscriptor->monitor()->ackedStream()->hasStreams()) {
+            $subscriptor->monitor()->batchStream()->sleep();
         }
     }
 }

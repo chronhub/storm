@@ -38,8 +38,8 @@ trait InteractWithPersistentSubscription
 
         $this->subscriptor->setContext($context, true);
         $this->subscriptor->setOriginalUserState();
-        $this->subscriptor->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->sprint()->continue();
+        $this->subscriptor->monitor()->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->monitor()->sprint()->continue();
     }
 
     private function startProjection(bool $keepRunning): void

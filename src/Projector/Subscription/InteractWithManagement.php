@@ -11,8 +11,8 @@ use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventReached;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
@@ -20,7 +20,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
-use Chronhub\Storm\Projector\Subscription\Notification\UserStateResetAgain;
+use Chronhub\Storm\Projector\Subscription\Notification\UserStateRestored;
 
 use function in_array;
 
@@ -108,7 +108,7 @@ trait InteractWithManagement
 
     public function getProcessedStream(): string
     {
-        return $this->hub->interact(GetStreamName::class);
+        return $this->hub->interact(GetProcessedStream::class);
     }
 
     public function hub(): HookHub
@@ -134,7 +134,7 @@ trait InteractWithManagement
     protected function resetState(): void
     {
         $this->hub->interact(CheckpointReset::class);
-        $this->hub->interact(UserStateResetAgain::class);
+        $this->hub->interact(UserStateRestored::class);
     }
 
     protected function onStatusChanged(ProjectionStatus $status): void

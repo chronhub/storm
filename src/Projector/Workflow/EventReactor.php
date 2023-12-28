@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
+use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
@@ -70,7 +70,7 @@ final readonly class EventReactor
     private function hasNoGap(HookHub $hub, int $expectedPosition): bool
     {
         return $hub->interact(
-            new CheckpointAdded($hub->interact(GetStreamName::class), $expectedPosition)
+            new CheckpointAdded($hub->interact(GetProcessedStream::class), $expectedPosition)
         );
     }
 

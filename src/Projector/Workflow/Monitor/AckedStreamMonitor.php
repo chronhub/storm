@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Support;
+namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
-class AckedStreamObserver
+class AckedStreamMonitor
 {
     private array $streams = [];
 

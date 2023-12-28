@@ -11,7 +11,6 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
-use Chronhub\Storm\Projector\Subscription\Notification\BatchReset;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
@@ -71,15 +70,13 @@ final readonly class EmittingManagement implements EmitterManagement
     public function store(): void
     {
         $this->repository->persist($this->getProjectionResult());
-
-        $this->hub->interact(BatchReset::class);
     }
 
     public function revise(): void
     {
-        $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
-
         $this->resetState();
+
+        $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
 
         $this->deleteStream();
     }

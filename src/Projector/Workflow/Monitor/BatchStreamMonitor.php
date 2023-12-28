@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Support;
+namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
 use Chronhub\Storm\Contracts\Projector\TokenBucket;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function usleep;
 
-class BatchStreamObserver
+class BatchStreamMonitor
 {
     private int $counter;
 

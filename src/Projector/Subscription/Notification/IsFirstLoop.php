@@ -10,6 +10,6 @@ final class IsFirstLoop
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->loop()->isFirstLoop();
+        return $subscriptor->monitor()->loop()->isFirstLoop();
     }
 }

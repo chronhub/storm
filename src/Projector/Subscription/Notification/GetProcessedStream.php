@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-class GetStreamName
+class GetProcessedStream
 {
     public function __invoke(Subscriptor $subscriptor): string
     {

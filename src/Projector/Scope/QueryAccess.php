@@ -8,7 +8,7 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
+use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 
 final class QueryAccess implements ArrayAccess, QueryProjectorScope
@@ -28,7 +28,7 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
 
     public function streamName(): string
     {
-        return $this->task->interact(GetStreamName::class);
+        return $this->task->interact(GetProcessedStream::class);
     }
 
     public function clock(): SystemClock

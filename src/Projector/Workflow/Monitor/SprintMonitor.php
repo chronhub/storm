@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow;
+namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
-class Sprint
+class SprintMonitor
 {
     protected bool $inBackground = false;
 

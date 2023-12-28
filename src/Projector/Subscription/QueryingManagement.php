@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
+use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 
 final readonly class QueryingManagement implements QueryManagement
@@ -22,7 +22,7 @@ final readonly class QueryingManagement implements QueryManagement
 
     public function getProcessedStream(): string
     {
-        return $this->hub->interact(GetStreamName::class);
+        return $this->hub->interact(GetProcessedStream::class);
     }
 
     public function hub(): HookHub

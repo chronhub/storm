@@ -10,6 +10,6 @@ final class IsSprintDaemonize
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->sprint()->inBackground();
+        return $subscriptor->monitor()->sprint()->inBackground();
     }
 }

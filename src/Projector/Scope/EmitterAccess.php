@@ -8,7 +8,7 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Contracts\Projector\HookHub;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStreamName;
+use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Observer\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Observer\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Observer\ProjectionClosed;
@@ -41,7 +41,7 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
 
     public function streamName(): string
     {
-        return $this->hub->interact(GetStreamName::class);
+        return $this->hub->interact(GetProcessedStream::class);
     }
 
     public function clock(): SystemClock

@@ -10,6 +10,6 @@ final class LoopStarted
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->loop()->start();
+        $subscriptor->monitor()->loop()->start();
     }
 }

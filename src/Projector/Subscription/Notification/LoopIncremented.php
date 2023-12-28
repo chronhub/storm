@@ -10,6 +10,6 @@ final class LoopIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->loop()->next();
+        $subscriptor->monitor()->loop()->next();
     }
 }
