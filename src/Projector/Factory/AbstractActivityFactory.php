@@ -55,7 +55,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
             $this->chronicler,
             $subscriptor->clock(),
             $subscriptor->option()->getLoadLimiter(),
-            $this->getQueryFilterResolver($subscriptor)
+            $this->getQueryFilterResolver($subscriptor) // todo should be configurable in integration
         );
     }
 

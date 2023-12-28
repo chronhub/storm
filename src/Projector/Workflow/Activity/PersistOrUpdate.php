@@ -28,7 +28,8 @@ final readonly class PersistOrUpdate
     private function getHook(HookHub $hub): object
     {
         if ($hub->interact(IsEventCounterReset::class)) {
-            // we only sleep when the counter has been reset and no event has been processed
+            // we only sleep when the counter has been reset and no event has been processed,
+            // in short, we are running blank and increment the sleep time.
             if ($hub->interact(HasStreamEventAcked::class)) {
                 $hub->interact(BatchSleep::class);
             }

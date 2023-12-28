@@ -15,7 +15,7 @@ use Chronhub\Storm\Projector\Subscription\Engagement\ProjectionSynchronized;
 use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintDaemonize;
 
-final class MonitorRemoteStatus
+trait MonitorRemoteStatus
 {
     private bool $onRise = true;
 

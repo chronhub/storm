@@ -7,15 +7,13 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 
-final readonly class RefreshProjection
+final class RefreshProjection
 {
-    public function __construct(private MonitorRemoteStatus $monitor)
-    {
-    }
+    use MonitorRemoteStatus;
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $this->monitor->refreshStatus($hub);
+        $this->refreshStatus($hub);
 
         // watch again for event streams which may have changed after the first watch.
         $hub->interact(StreamsDiscovered::class);

@@ -13,7 +13,6 @@ use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\FinalizeProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Workflow\Activity\MonitorRemoteStatus;
 use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Chronhub\Storm\Projector\Workflow\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\ResetEventCounter;
@@ -31,19 +30,18 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
 
         $timer = $this->getTimer($subscriptor);
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
-        $monitor = new MonitorRemoteStatus();
 
         return [
             fn (): callable => new StartLoop(),
             fn (): callable => new RunUntil($timer),
-            fn (): callable => new RisePersistentProjection($monitor),
+            fn (): callable => new RisePersistentProjection(),
             fn (): callable => $this->getStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
             fn (): callable => new ResetEventCounter(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
-            fn (): callable => new RefreshProjection($monitor),
+            fn (): callable => new RefreshProjection(),
             fn (): callable => new FinalizeProjection(),
         ];
     }
