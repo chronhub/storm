@@ -29,7 +29,7 @@ final readonly class PersistOrUpdate
     {
         if ($hub->interact(IsEventCounterReset::class)) {
             // we only sleep when the counter has been reset and no event has been processed,
-            if ($hub->interact(HasStreamEventAcked::class)) {
+            if (! $hub->interact(HasStreamEventAcked::class)) {
                 $hub->interact(BatchSleep::class);
             }
 

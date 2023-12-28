@@ -6,8 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Monitor;
 
 use Chronhub\Storm\Contracts\Projector\TokenBucket;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-
-use function usleep;
+use Illuminate\Support\Sleep;
 
 class BatchStreamMonitor
 {
@@ -22,11 +21,6 @@ class BatchStreamMonitor
         }
 
         $this->reset();
-
-        // Overflow the bucket to sleep for every increment
-        // issue: on the first increment which does not sleep at all
-        // because of the exact zero token
-        $this->bucket?->consume($this->bucket->getCapacity());
     }
 
     public function hasLoadedStreams(bool $hasLoadedStreams): void
@@ -42,22 +36,15 @@ class BatchStreamMonitor
     public function sleep(): void
     {
         if ($this->fixedSleepTime !== null) {
-            usleep($this->fixedSleepTime);
+            Sleep::usleep($this->fixedSleepTime);
+        } else {
+            //dump('Count : '.$this->counter);
 
-            return;
+            $this->bucket?->consume($this->counter);
+
+            if ($this->counter >= $this->bucket->getCapacity()) {
+                $this->reset();
+            }
         }
-
-        // dump('Consume tokens: '.$this->counter);
-
-        $this->consumeTokens();
-
-        if ($this->counter >= $this->bucket->getCapacity()) {
-            $this->reset();
-        }
-    }
-
-    private function consumeTokens(): void
-    {
-        $this->bucket?->consume($this->counter);
     }
 }

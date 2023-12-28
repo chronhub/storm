@@ -9,10 +9,10 @@ use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
+use Chronhub\Storm\Projector\Workflow\Activity\LoopHandler;
 use Chronhub\Storm\Projector\Workflow\Activity\RiseQueryProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 use Chronhub\Storm\Projector\Workflow\Activity\SleepForQuery;
-use Chronhub\Storm\Projector\Workflow\Activity\StartLoop;
 
 final readonly class QueryActivityFactory extends AbstractActivityFactory
 {
@@ -23,7 +23,7 @@ final readonly class QueryActivityFactory extends AbstractActivityFactory
         $streamLoader = $this->getStreamLoader($subscriptor);
 
         return [
-            fn (): callable => new StartLoop(),
+            fn (): callable => new LoopHandler(),
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RiseQueryProjection(),
             fn (): callable => $streamLoader,

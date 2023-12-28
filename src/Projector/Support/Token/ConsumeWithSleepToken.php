@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Support\Token;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Illuminate\Support\Sleep;
 
 use function max;
-use function usleep;
 
 final class ConsumeWithSleepToken extends AbstractTokenBucket
 {
@@ -17,14 +17,19 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
             throw new InvalidArgumentException('Requested tokens exceed the capacity of the token bucket.');
         }
 
+        // overflow the bucket
+        $this->doConsume($this->capacity);
+
+        //dump('remaining: '.$this->tokens);
+
         while (! $this->doConsume($tokens)) {
             $remainingTime = $this->getRemainingTimeUntilNextToken($tokens);
 
             $us = (int) ($remainingTime * 1000000);
 
-            // dump('Sleep for: '.$remainingTime);
+            //dump('Sleep for: '.$remainingTime);
 
-            usleep($us);
+            Sleep::usleep($us);
         }
 
         return true;
@@ -35,6 +40,8 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
      */
     private function getRemainingTimeUntilNextToken(float $tokens = 1): float
     {
+        $this->refillTokens();
+
         return max(0, ($tokens - $this->tokens) / $this->rate);
     }
 }

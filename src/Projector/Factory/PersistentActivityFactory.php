@@ -12,12 +12,11 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
+use Chronhub\Storm\Projector\Workflow\Activity\LoopHandler;
 use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Chronhub\Storm\Projector\Workflow\Activity\RefreshProjection;
-use Chronhub\Storm\Projector\Workflow\Activity\ResetEventCounter;
 use Chronhub\Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
-use Chronhub\Storm\Projector\Workflow\Activity\StartLoop;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
@@ -31,14 +30,13 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
 
         return [
-            fn (): callable => new StartLoop(),
+            fn (): callable => new LoopHandler(),
             fn (): callable => new RunUntil($timer),
             fn (): callable => new RisePersistentProjection(),
             fn (): callable => $this->getStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
-            fn (): callable => new ResetEventCounter(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
             fn (): callable => new RefreshProjection(),
         ];
