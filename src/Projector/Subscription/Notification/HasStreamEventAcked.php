@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class BatchSleep
+class HasStreamEventAcked
 {
-    public function __invoke(Subscriptor $subscriptor): void
+    public function __invoke(Subscriptor $subscriptor): bool
     {
-        $subscriptor->monitor()->batchStream()->sleep();
+        return $subscriptor->monitor()->ackedStream()->hasStreams();
     }
 }

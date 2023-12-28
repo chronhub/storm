@@ -8,14 +8,8 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final class ShouldSleepOnGap
 {
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): void
     {
-        if ($subscriptor->recognition()->hasGap()) {
-            $subscriptor->recognition()->sleepWhenGap();
-
-            return true;
-        }
-
-        return false;
+        $subscriptor->recognition()->sleepWhenGap();
     }
 }
