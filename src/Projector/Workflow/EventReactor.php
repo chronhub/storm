@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
@@ -74,7 +74,7 @@ final readonly class EventReactor
     private function getUserState(HookHub $hub): ?array
     {
         return $hub->expect(IsUserStateInitialized::class)
-            ? $hub->expect(GetUserState::class) : null;
+            ? $hub->expect(ExpectUserState::class) : null;
     }
 
     private function updateUserState(HookHub $hub, ?array $initializedState, ?array $userState): void

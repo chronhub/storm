@@ -8,9 +8,9 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
+use Chronhub\Storm\Projector\Subscription\Notification\EventStreamDiscovered;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
-use Chronhub\Storm\Projector\Subscription\Notification\StreamsDiscovered;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
@@ -32,7 +32,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->hub->notify(StreamsDiscovered::class);
+        $this->hub->notify(EventStreamDiscovered::class);
 
         $this->synchronise();
     }
@@ -48,7 +48,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(GetStatus::class));
+        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(ExpectStatus::class));
 
         $this->readModel->reset();
     }

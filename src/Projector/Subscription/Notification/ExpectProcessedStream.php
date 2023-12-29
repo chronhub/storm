@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class GetCheckpoints
+class ExpectProcessedStream
 {
-    public function __invoke(Subscriptor $subscriptor): array
+    public function __invoke(Subscriptor $subscriptor): string
     {
-        return $subscriptor->recognition()->checkpoints();
+        return $subscriptor->getProcessedStream();
     }
 }

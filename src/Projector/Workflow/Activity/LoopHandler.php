@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterReset;
-use Chronhub\Storm\Projector\Subscription\Notification\IsSprintDaemonize;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectSprintTermination;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopHasStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopReset;
@@ -21,7 +21,7 @@ final class LoopHandler
 
         $response = $next($hub);
 
-        $this->shouldEndLoop($hub, $response);
+        $this->shouldEndLoop($hub);
 
         $this->finalizeCycle($hub);
 
@@ -35,18 +35,16 @@ final class LoopHandler
         }
     }
 
-    private function shouldEndLoop(HookHub $hub, bool $inProgress): void
+    private function shouldEndLoop(HookHub $hub): void
     {
-        $eventLoop = $this->shouldStop($hub, $inProgress) ? LoopReset::class : LoopIncremented::class;
+        $loopNotification = $this->shouldStop($hub) ? LoopReset::class : LoopIncremented::class;
 
-        $hub->notify($eventLoop);
+        $hub->notify($loopNotification);
     }
 
-    private function shouldStop(HookHub $hub, bool $inProgress): bool
+    private function shouldStop(HookHub $hub): bool
     {
-        $keepRunning = $hub->expect(IsSprintDaemonize::class);
-
-        return ! $keepRunning || ! $inProgress;
+        return $hub->expect(ExpectSprintTermination::class);
     }
 
     private function finalizeCycle(HookHub $hub): void

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
 use Closure;
 use DateInterval;
 use Illuminate\Support\Str;
@@ -79,7 +79,7 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->hub()->expect(GetUserState::class);
+        return $this->subscriber->hub()->expect(ExpectUserState::class);
     }
 
     protected function identifyProjectionIfNeeded(): void

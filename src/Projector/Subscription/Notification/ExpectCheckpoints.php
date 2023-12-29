@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class GetUserState
+final class ExpectCheckpoints
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->monitor()->userState()->get();
+        return $subscriptor->recognition()->checkpoints();
     }
 }

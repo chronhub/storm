@@ -6,10 +6,11 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-class GetProcessedStream
+// todo
+final class ExpectLoop
 {
-    public function __invoke(Subscriptor $subscriptor): string
+    public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->getProcessedStream();
+        return $subscriptor->monitor()->loop()->cycle();
     }
 }

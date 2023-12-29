@@ -6,11 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-// todo
-final class GetLoop
+final class SleepOnGap
 {
-    public function __invoke(Subscriptor $subscriptor): int
+    public function __invoke(Subscriptor $subscriptor): void
     {
-        return $subscriptor->monitor()->loop()->cycle();
+        $subscriptor->recognition()->sleepWhenGap();
     }
 }

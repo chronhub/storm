@@ -10,12 +10,12 @@ use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterReset;
-use Chronhub\Storm\Projector\Subscription\Notification\GetCheckpoints;
-use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
-use Chronhub\Storm\Projector\Subscription\Notification\GetStatus;
-use Chronhub\Storm\Projector\Subscription\Notification\GetUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectProcessedStream;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectStatus;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReached;
-use Chronhub\Storm\Projector\Subscription\Notification\SprintRunning;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintContinue;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusDisclosed;
@@ -51,7 +51,7 @@ trait InteractWithManagement
 
     public function restart(): void
     {
-        $this->hub->notify(SprintRunning::class);
+        $this->hub->notify(SprintContinue::class);
 
         $runningStatus = ProjectionStatus::RUNNING;
 
@@ -66,7 +66,7 @@ trait InteractWithManagement
 
         $this->hub->notify(
             StatusDisclosed::class,
-            $this->hub->expect(GetStatus::class), $disclosedStatus
+            $this->hub->expect(ExpectStatus::class), $disclosedStatus
         );
     }
 
@@ -95,7 +95,7 @@ trait InteractWithManagement
             // todo check if Idle still needed
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->hub->expect(GetStatus::class), $keepProjectionRunning, true)) {
+            if (! in_array($this->hub->expect(ExpectStatus::class), $keepProjectionRunning, true)) {
                 $this->hub->notify(SprintStopped::class);
             }
         }
@@ -108,7 +108,7 @@ trait InteractWithManagement
 
     public function getProcessedStream(): string
     {
-        return $this->hub->expect(GetProcessedStream::class);
+        return $this->hub->expect(ExpectProcessedStream::class);
     }
 
     public function hub(): HookHub
@@ -118,10 +118,10 @@ trait InteractWithManagement
 
     protected function mountProjection(): void
     {
-        $this->hub->notify(SprintRunning::class);
+        $this->hub->notify(SprintContinue::class);
 
         if (! $this->repository->exists()) {
-            $this->repository->create($this->hub->expect(GetStatus::class));
+            $this->repository->create($this->hub->expect(ExpectStatus::class));
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
@@ -141,15 +141,15 @@ trait InteractWithManagement
     {
         $this->hub->notify(
             StatusChanged::class,
-            $this->hub->expect(GetStatus::class), $status
+            $this->hub->expect(ExpectStatus::class), $status
         );
     }
 
     protected function getProjectionResult(): ProjectionResult
     {
         return new ProjectionResult(
-            $this->hub->expect(GetCheckpoints::class),
-            $this->hub->expect(GetUserState::class)
+            $this->hub->expect(ExpectCheckpoints::class),
+            $this->hub->expect(ExpectUserState::class)
         );
     }
 }

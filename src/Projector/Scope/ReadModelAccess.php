@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\HookHub;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Notification\GetProcessedStream;
+use Chronhub\Storm\Projector\Subscription\Notification\ExpectProcessedStream;
 
 final class ReadModelAccess implements ArrayAccess, ReadModelScope
 {
@@ -42,7 +42,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function streamName(): string
     {
-        return $this->hook->expect(GetProcessedStream::class);
+        return $this->hook->expect(ExpectProcessedStream::class);
     }
 
     public function clock(): SystemClock

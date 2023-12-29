@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class ShouldSleepOnGap
+final readonly class SprintContinue
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->recognition()->sleepWhenGap();
+        $subscriptor->monitor()->sprint()->continue();
     }
 }

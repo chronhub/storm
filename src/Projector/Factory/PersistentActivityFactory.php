@@ -38,7 +38,7 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
-            fn (): callable => new RefreshProjection(),
+            fn (): callable => new RefreshProjection($subscriptor->option()->getOnlyOnceDiscovery()),
         ];
     }
 }

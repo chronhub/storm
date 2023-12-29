@@ -21,5 +21,6 @@ final class InMemoryOptionFixed implements ProjectionOptionImmutable
         $this->loadLimiter = 100;
         $this->retries = [];
         $this->detectionWindows = null;
+        $this->onlyOnceDiscovery = false;
     }
 }

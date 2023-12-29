@@ -55,6 +55,8 @@ interface ProjectionOption extends JsonSerializable
      */
     public const LOAD_LIMITER = 'loadLimiter';
 
+    public const ONLY_ONCE_DISCOVERY = 'onlyOnceDiscovery';
+
     /**
      * Dispatch async signal
      */
@@ -123,4 +125,12 @@ interface ProjectionOption extends JsonSerializable
      * @see LoadLimiterProjectionQueryFilter
      */
     public function getLoadLimiter(): int;
+
+    /**
+     * Get only once discovery
+     *
+     * Projection will discover event streams only once on rising,
+     * to avoid querying after each end of a cycle.
+     */
+    public function getOnlyOnceDiscovery(): bool;
 }

@@ -49,6 +49,8 @@ trait ProvideOption
 
     protected readonly ?string $detectionWindows;
 
+    protected readonly bool $onlyOnceDiscovery;
+
     public function getSignal(): bool
     {
         return $this->signal;
@@ -94,6 +96,11 @@ trait ProvideOption
         return $this->detectionWindows;
     }
 
+    public function getOnlyOnceDiscovery(): bool
+    {
+        return $this->onlyOnceDiscovery;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -106,6 +113,7 @@ trait ProvideOption
             self::RETRIES => $this->getRetries(),
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),
             self::LOAD_LIMITER => $this->getLoadLimiter(),
+            self::ONLY_ONCE_DISCOVERY => $this->getOnlyOnceDiscovery(),
         ];
     }
 
