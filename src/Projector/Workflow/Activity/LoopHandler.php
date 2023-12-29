@@ -30,8 +30,8 @@ final class LoopHandler
 
     private function shouldStartLoop(HookHub $hub): void
     {
-        if (! $hub->interact(LoopHasStarted::class)) {
-            $hub->interact(LoopStarted::class);
+        if (! $hub->expect(LoopHasStarted::class)) {
+            $hub->notify(LoopStarted::class);
         }
     }
 
@@ -39,20 +39,20 @@ final class LoopHandler
     {
         $eventLoop = $this->shouldStop($hub, $inProgress) ? LoopReset::class : LoopIncremented::class;
 
-        $hub->interact($eventLoop);
+        $hub->notify($eventLoop);
     }
 
     private function shouldStop(HookHub $hub, bool $inProgress): bool
     {
-        $keepRunning = $hub->interact(IsSprintDaemonize::class);
+        $keepRunning = $hub->expect(IsSprintDaemonize::class);
 
         return ! $keepRunning || ! $inProgress;
     }
 
     private function finalizeCycle(HookHub $hub): void
     {
-        $hub->interact(EventCounterReset::class);
+        $hub->notify(EventCounterReset::class);
 
-        $hub->interact(StreamEventAckedReset::class);
+        $hub->notify(StreamEventAckedReset::class);
     }
 }

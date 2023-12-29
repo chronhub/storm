@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\TokenBucket;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Sleep;
 
-class BatchStreamMonitor
+class BatchStreamWatcher
 {
     private int $counter;
 

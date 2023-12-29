@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\UserState;
 
-final class InMemoryUserState implements UserState
+final class UserStateWatcher implements UserState
 {
     private array $state = [];
 

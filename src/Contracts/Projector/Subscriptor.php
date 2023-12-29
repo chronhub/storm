@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
+use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 
 interface Subscriptor
 {
@@ -35,7 +35,7 @@ interface Subscriptor
 
     public function recognition(): CheckpointRecognition;
 
-    public function monitor(): MonitorManager;
+    public function monitor(): WatcherManager;
 
     public function receive(callable $event): mixed;
 

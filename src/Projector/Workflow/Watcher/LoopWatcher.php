@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-class LoopMonitor
+class LoopWatcher
 {
     protected int $cycle = 0;
 

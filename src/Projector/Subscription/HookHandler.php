@@ -24,32 +24,25 @@ final class HookHandler
 {
     public static function subscribe(HookHub $task, PersistentManagement $management): void
     {
-        $task->addHook(ProjectionRise::class, fn () => $management->rise());
-
-        $task->addHook(ProjectionLockUpdated::class, fn () => $management->tryUpdateLock());
-
-        $task->addHook(ProjectionStored::class, fn () => $management->store());
-
-        $task->addHook(ProjectionPersistedWhenThresholdIsReached::class, fn () => $management->persistWhenThresholdIsReached());
-
-        $task->addHook(ProjectionClosed::class, fn () => $management->close());
-
-        $task->addHook(ProjectionRevised::class, fn () => $management->revise());
-
-        $task->addHook(ProjectionDiscarded::class, fn ($listener) => $management->discard($listener->withEmittedEvents));
-
-        $task->addHook(ProjectionFreed::class, fn () => $management->freed());
-
-        $task->addHook(ProjectionRestarted::class, fn () => $management->restart());
-
-        $task->addHook(ProjectionStatusDisclosed::class, fn () => $management->disclose());
-
-        $task->addHook(ProjectionSynchronized::class, fn () => $management->synchronise());
+        $task->addHooks([
+            ProjectionRise::class => fn () => $management->rise(),
+            ProjectionLockUpdated::class => fn () => $management->tryUpdateLock(),
+            ProjectionStored::class => fn () => $management->store(),
+            ProjectionPersistedWhenThresholdIsReached::class => fn () => $management->persistWhenThresholdIsReached(),
+            ProjectionClosed::class => fn () => $management->close(),
+            ProjectionRevised::class => fn () => $management->revise(),
+            ProjectionDiscarded::class => fn ($listener) => $management->discard($listener->withEmittedEvents),
+            ProjectionFreed::class => fn () => $management->freed(),
+            ProjectionRestarted::class => fn () => $management->restart(),
+            ProjectionStatusDisclosed::class => fn () => $management->disclose(),
+            ProjectionSynchronized::class => fn () => $management->synchronise(),
+        ]);
 
         if ($management instanceof EmittingManagement) {
-            $task->addHook(EventEmitted::class, fn ($listener) => $management->emit($listener->event));
-
-            $task->addHook(EventLinkedTo::class, fn ($listener) => $management->linkTo($listener->streamName, $listener->event));
+            $task->addHooks([
+                EventEmitted::class => fn ($listener) => $management->emit($listener->event),
+                EventLinkedTo::class => fn ($listener) => $management->linkTo($listener->streamName, $listener->event),
+            ]);
         }
     }
 }

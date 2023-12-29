@@ -16,7 +16,7 @@ final readonly class PersistOrUpdate
 {
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if (! $hub->interact(HasGap::class)) {
+        if (! $hub->expect(HasGap::class)) {
             $hook = $this->getHook($hub);
 
             $hub->trigger($hook);
@@ -27,10 +27,10 @@ final readonly class PersistOrUpdate
 
     private function getHook(HookHub $hub): object
     {
-        if ($hub->interact(IsEventCounterReset::class)) {
+        if ($hub->expect(IsEventCounterReset::class)) {
             // we only sleep when the counter has been reset and no event has been processed,
-            if (! $hub->interact(HasStreamEventAcked::class)) {
-                $hub->interact(BatchSleep::class);
+            if (! $hub->expect(HasStreamEventAcked::class)) {
+                $hub->notify(BatchSleep::class);
             }
 
             return new ProjectionLockUpdated();

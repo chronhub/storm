@@ -16,7 +16,7 @@ final class RefreshProjection
         $this->refreshStatus($hub);
 
         // watch again for event streams which may have changed after the first watch.
-        $hub->interact(StreamsDiscovered::class);
+        $hub->notify(StreamsDiscovered::class);
 
         return $next($hub);
     }

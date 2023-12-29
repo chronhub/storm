@@ -62,7 +62,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->mountProjection();
 
-        $this->hub->interact(StreamsDiscovered::class);
+        $this->hub->notify(StreamsDiscovered::class);
 
         $this->synchronise();
     }
@@ -76,7 +76,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
+        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(GetStatus::class));
 
         $this->deleteStream();
     }
@@ -89,7 +89,7 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->deleteStream();
         }
 
-        $this->hub->interact(SprintStopped::class);
+        $this->hub->notify(SprintStopped::class);
 
         $this->resetState();
     }

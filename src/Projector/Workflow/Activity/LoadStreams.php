@@ -37,7 +37,7 @@ final class LoadStreams
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        $checkpoints = $hub->interact(GetCheckpoints::class);
+        $checkpoints = $hub->expect(GetCheckpoints::class);
 
         $iterators = $this->collectStreams($this->batchStreams($checkpoints));
 
@@ -45,7 +45,7 @@ final class LoadStreams
             $iterators = new MergeStreamIterator($this->clock, $iterators);
         }
 
-        $hub->interact(StreamIteratorSet::class, $iterators);
+        $hub->notify(StreamIteratorSet::class, $iterators);
 
         return $next($hub);
     }

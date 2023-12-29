@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 class SprintMonitor
 {

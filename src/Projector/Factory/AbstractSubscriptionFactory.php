@@ -45,13 +45,13 @@ use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
-use Chronhub\Storm\Projector\Workflow\Monitor\AckedStreamMonitor;
-use Chronhub\Storm\Projector\Workflow\Monitor\BatchStreamMonitor;
-use Chronhub\Storm\Projector\Workflow\Monitor\EventCounterMonitor;
-use Chronhub\Storm\Projector\Workflow\Monitor\InMemoryUserState;
-use Chronhub\Storm\Projector\Workflow\Monitor\LoopMonitor;
-use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
-use Chronhub\Storm\Projector\Workflow\Monitor\SprintMonitor;
+use Chronhub\Storm\Projector\Workflow\Watcher\AckedStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\EventCounterWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\LoopWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\SprintMonitor;
+use Chronhub\Storm\Projector\Workflow\Watcher\UserStateWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Illuminate\Contracts\Events\Dispatcher;
 
 use function is_array;
@@ -196,28 +196,28 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function createMonitorManager(ProjectionOption $option): MonitorManager
+    protected function createMonitorManager(ProjectionOption $option): WatcherManager
     {
-        return new MonitorManager(
-            new LoopMonitor(),
+        return new WatcherManager(
+            new LoopWatcher(),
             new SprintMonitor(),
-            new InMemoryUserState(),
-            new EventCounterMonitor($option->getBlockSize()),
-            new AckedStreamMonitor(),
+            new UserStateWatcher(),
+            new EventCounterWatcher($option->getBlockSize()),
+            new AckedStreamWatcher(),
             $this->batchStreamMonitor($option)
         );
     }
 
-    protected function batchStreamMonitor(ProjectionOption $option): BatchStreamMonitor
+    protected function batchStreamMonitor(ProjectionOption $option): BatchStreamWatcher
     {
         $sleep = $option->getSleep();
 
         if (is_array($sleep)) {
             $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
 
-            return new BatchStreamMonitor($bucket);
+            return new BatchStreamWatcher($bucket);
         }
 
-        return new BatchStreamMonitor(null, $sleep);
+        return new BatchStreamWatcher(null, $sleep);
     }
 }

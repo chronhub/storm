@@ -12,6 +12,6 @@ final class WhenBatchLoaded
 {
     public function __invoke(HookHub $hub, StreamIteratorSet $event): void
     {
-        $hub->interact(BatchLoaded::class, $event->iterator !== null);
+        $hub->expect(BatchLoaded::class, $event->iterator !== null);
     }
 }

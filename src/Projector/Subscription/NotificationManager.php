@@ -22,6 +22,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
 
 use function array_key_exists;
+use function is_object;
 use function is_string;
 
 final class NotificationManager implements HookHub
@@ -61,13 +62,20 @@ final class NotificationManager implements HookHub
         $this->hooks[$hook][] = $trigger;
     }
 
+    public function addHooks(array $hooks): void
+    {
+        foreach ($hooks as $hook => $trigger) {
+            $this->addHook($hook, $trigger);
+        }
+    }
+
     public function trigger(object $hook): void
     {
-        $hookClass = $hook::class;
+        $hookClassName = $hook::class;
 
-        $this->assertHookIsSupported($hookClass);
+        $this->assertHookIsSupported($hookClassName);
 
-        foreach ($this->hooks[$hookClass] as $trigger) {
+        foreach ($this->hooks[$hookClassName] as $trigger) {
             $trigger($hook);
         }
     }
@@ -77,14 +85,30 @@ final class NotificationManager implements HookHub
         $this->listeners[$listener][] = $callback;
     }
 
-    public function interact(string|object $notification, mixed ...$arguments): mixed
+    public function expect(string|object $notification, mixed ...$arguments): mixed
     {
-        $event = is_string($notification) ? new $notification(...$arguments) : $notification;
+        $event = $this->makeEvent($notification, ...$arguments);
 
         $result = $this->subscriptor->receive($event);
 
+        $this->handleListener($event, $result);
+
+        return $result;
+    }
+
+    public function notify(string|object $notification, mixed ...$arguments): void
+    {
+        $event = $this->makeEvent($notification, ...$arguments);
+
+        $this->subscriptor->receive($event);
+
+        $this->handleListener($event, null);
+    }
+
+    private function handleListener(object $event, mixed $result): void
+    {
         if (array_key_exists($event::class, $this->listeners)) {
-            foreach ($this->listeners[$event::class] as $listener) {
+            foreach ($this->listeners[$event::class] as &$listener) {
                 if (is_string($listener)) {
                     $listener = new $listener();
                 }
@@ -92,14 +116,21 @@ final class NotificationManager implements HookHub
                 $listener($this, $event, $result);
             }
         }
-
-        return $result;
     }
 
-    private function assertHookIsSupported(string $hook): void
+    private function makeEvent(string|object $notification, mixed ...$arguments): object
     {
-        if (! array_key_exists($hook, $this->hooks)) {
-            throw new InvalidArgumentException("Hook $hook is not supported");
+        if (is_object($notification)) {
+            return $notification;
+        }
+
+        return new $notification(...$arguments);
+    }
+
+    private function assertHookIsSupported(string $hookClassName): void
+    {
+        if (! array_key_exists($hookClassName, $this->hooks)) {
+            throw new InvalidArgumentException("Hook $hookClassName is not supported");
         }
     }
 }

@@ -12,7 +12,7 @@ final readonly class SleepForQuery
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
         // checkMe
-        $hub->interact(BatchSleep::class);
+        $hub->notify(BatchSleep::class);
 
         return $next($hub);
     }

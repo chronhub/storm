@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
-use Chronhub\Storm\Projector\Workflow\Monitor\BatchStreamMonitor;
+use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
 use JsonSerializable;
 
 interface ProjectionOption extends JsonSerializable
@@ -94,7 +94,7 @@ interface ProjectionOption extends JsonSerializable
      *
      * @return int|array{int|float, int|float}
      *
-     * @see BatchStreamMonitor
+     * @see BatchStreamWatcher
      * @see ConsumeWithSleepToken
      */
     public function getSleep(): int|array;

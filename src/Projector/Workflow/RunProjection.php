@@ -17,7 +17,7 @@ final readonly class RunProjection
     {
         do {
             $inProgress = $this->workflow->process(
-                fn (HookHub $hub): bool => $hub->interact(IsSprintRunning::class)
+                fn (HookHub $hub): bool => $hub->expect(IsSprintRunning::class)
             );
         } while ($this->keepRunning && $inProgress);
     }

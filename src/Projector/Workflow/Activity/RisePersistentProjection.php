@@ -14,7 +14,7 @@ final class RisePersistentProjection
 
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($hub->interact(IsFirstLoop::class)) {
+        if ($hub->expect(IsFirstLoop::class)) {
             if ($this->shouldStop($hub)) {
                 return false;
             }

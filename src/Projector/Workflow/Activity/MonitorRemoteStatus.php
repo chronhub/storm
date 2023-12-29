@@ -50,7 +50,7 @@ trait MonitorRemoteStatus
     {
         $hub->trigger(new ProjectionRevised());
 
-        if (! $this->onRise && $hub->interact(IsSprintDaemonize::class)) {
+        if (! $this->onRise && $hub->expect(IsSprintDaemonize::class)) {
             $hub->trigger(new ProjectionRestarted());
         }
 
@@ -68,7 +68,7 @@ trait MonitorRemoteStatus
     {
         $hub->trigger(new ProjectionStatusDisclosed());
 
-        return match ($hub->interact(GetStatus::class)->value) {
+        return match ($hub->expect(GetStatus::class)->value) {
             ProjectionStatus::STOPPING->value => $this->onStopping($hub),
             ProjectionStatus::RESETTING->value => $this->onResetting($hub),
             ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),

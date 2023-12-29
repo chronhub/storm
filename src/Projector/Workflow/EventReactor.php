@@ -40,13 +40,13 @@ final readonly class EventReactor
             return false;
         }
 
-        $hub->interact(EventCounterIncremented::class);
+        $hub->notify(EventCounterIncremented::class);
 
         $this->reactOn($hub, $event);
 
-        $this->dispatchWhenThresholdIsReached($hub);
+        $hub->trigger(new ProjectionPersistedWhenThresholdIsReached());
 
-        return $hub->interact(IsSprintRunning::class);
+        return $hub->expect(IsSprintRunning::class);
     }
 
     private function reactOn(HookHub $hub, DomainEvent $event): void
@@ -60,7 +60,7 @@ final readonly class EventReactor
         $this->updateUserState($hub, $initializedState, $this->scope->getState());
 
         if ($this->scope->isAcked()) {
-            $hub->interact(StreamEventAcked::class, $event::class);
+            $hub->notify(StreamEventAcked::class, $event::class);
         }
 
         $resetScope();
@@ -68,24 +68,19 @@ final readonly class EventReactor
 
     private function hasNoGap(HookHub $hub, string $streamName, int $expectedPosition): bool
     {
-        return $hub->interact(new CheckpointAdded($streamName, $expectedPosition));
-    }
-
-    private function dispatchWhenThresholdIsReached(HookHub $hub): void
-    {
-        $hub->trigger(new ProjectionPersistedWhenThresholdIsReached());
+        return $hub->expect(new CheckpointAdded($streamName, $expectedPosition));
     }
 
     private function getUserState(HookHub $hub): ?array
     {
-        return $hub->interact(IsUserStateInitialized::class)
-            ? $hub->interact(GetUserState::class) : null;
+        return $hub->expect(IsUserStateInitialized::class)
+            ? $hub->expect(GetUserState::class) : null;
     }
 
     private function updateUserState(HookHub $hub, ?array $initializedState, ?array $userState): void
     {
         if (is_array($initializedState) && is_array($userState)) {
-            $hub->interact(UserStateChanged::class, $userState);
+            $hub->notify(UserStateChanged::class, $userState);
         }
     }
 

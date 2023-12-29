@@ -13,7 +13,7 @@ use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
-use Chronhub\Storm\Projector\Workflow\Monitor\MonitorManager;
+use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Closure;
 
 final class SubscriptionManager implements Subscriptor
@@ -31,7 +31,7 @@ final class SubscriptionManager implements Subscriptor
         private readonly CheckpointRecognition $checkpointRecognition,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
-        private readonly MonitorManager $monitor,
+        private readonly WatcherManager $monitor,
     ) {
     }
 
@@ -59,7 +59,7 @@ final class SubscriptionManager implements Subscriptor
         return $this->checkpointRecognition;
     }
 
-    public function monitor(): MonitorManager
+    public function monitor(): WatcherManager
     {
         return $this->monitor;
     }

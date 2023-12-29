@@ -17,12 +17,12 @@ final readonly class QueryingManagement implements QueryManagement
 
     public function close(): void
     {
-        $this->hub->interact(SprintStopped::class);
+        $this->hub->notify(SprintStopped::class);
     }
 
     public function getProcessedStream(): string
     {
-        return $this->hub->interact(GetProcessedStream::class);
+        return $this->hub->expect(GetProcessedStream::class);
     }
 
     public function hub(): HookHub

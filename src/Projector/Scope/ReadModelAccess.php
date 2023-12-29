@@ -42,7 +42,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function streamName(): string
     {
-        return $this->hook->interact(GetProcessedStream::class);
+        return $this->hook->expect(GetProcessedStream::class);
     }
 
     public function clock(): SystemClock

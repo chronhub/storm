@@ -14,10 +14,10 @@ final class HandleStreamGap
 {
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($hub->interact(HasGap::class)) {
-            $hub->interact(ShouldSleepOnGap::class);
+        if ($hub->expect(HasGap::class)) {
+            $hub->notify(ShouldSleepOnGap::class);
 
-            if (! $hub->interact(IsEventCounterReset::class)) {
+            if (! $hub->expect(IsEventCounterReset::class)) {
                 $hub->trigger(new ProjectionStored());
             }
         }

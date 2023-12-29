@@ -79,7 +79,7 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->hub()->interact(GetUserState::class);
+        return $this->subscriber->hub()->expect(GetUserState::class);
     }
 
     protected function identifyProjectionIfNeeded(): void

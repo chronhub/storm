@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\UserState;
 
-readonly class MonitorManager
+readonly class WatcherManager
 {
     public function __construct(
-        protected LoopMonitor $loopMonitor,
+        protected LoopWatcher $loopMonitor,
         protected SprintMonitor $sprintMonitor,
         protected UserState $userState,
-        protected EventCounterMonitor $eventCounterMonitor,
-        protected AckedStreamMonitor $ackedStreamMonitor,
-        protected BatchStreamMonitor $batchStreamMonitor
+        protected EventCounterWatcher $eventCounterMonitor,
+        protected AckedStreamWatcher $ackedStreamMonitor,
+        protected BatchStreamWatcher $batchStreamMonitor
     ) {
     }
 
-    public function loop(): LoopMonitor
+    public function loop(): LoopWatcher
     {
         return $this->loopMonitor;
     }
@@ -33,17 +33,17 @@ readonly class MonitorManager
         return $this->userState;
     }
 
-    public function eventCounter(): EventCounterMonitor
+    public function eventCounter(): EventCounterWatcher
     {
         return $this->eventCounterMonitor;
     }
 
-    public function ackedStream(): AckedStreamMonitor
+    public function ackedStream(): AckedStreamWatcher
     {
         return $this->ackedStreamMonitor;
     }
 
-    public function batchStream(): BatchStreamMonitor
+    public function batchStream(): BatchStreamWatcher
     {
         return $this->batchStreamMonitor;
     }

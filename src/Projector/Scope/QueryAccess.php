@@ -16,19 +16,19 @@ final class QueryAccess implements ArrayAccess, QueryProjectorScope
     use ScopeBehaviour;
 
     public function __construct(
-        private readonly HookHub $task,
+        private readonly HookHub $hub,
         private readonly SystemClock $clock
     ) {
     }
 
     public function stop(): void
     {
-        $this->task->interact(SprintStopped::class);
+        $this->hub->notify(SprintStopped::class);
     }
 
     public function streamName(): string
     {
-        return $this->task->interact(GetProcessedStream::class);
+        return $this->hub->expect(GetProcessedStream::class);
     }
 
     public function clock(): SystemClock

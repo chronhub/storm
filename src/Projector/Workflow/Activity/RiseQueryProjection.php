@@ -12,8 +12,8 @@ final readonly class RiseQueryProjection
 {
     public function __invoke(HookHub $hub, callable $next): callable|bool
     {
-        if ($hub->interact(IsFirstLoop::class)) {
-            $hub->interact(StreamsDiscovered::class);
+        if ($hub->expect(IsFirstLoop::class)) {
+            $hub->notify(StreamsDiscovered::class);
         }
 
         return $next($hub);

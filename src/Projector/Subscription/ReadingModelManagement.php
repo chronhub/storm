@@ -32,7 +32,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->hub->interact(StreamsDiscovered::class);
+        $this->hub->notify(StreamsDiscovered::class);
 
         $this->synchronise();
     }
@@ -48,7 +48,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->interact(GetStatus::class));
+        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(GetStatus::class));
 
         $this->readModel->reset();
     }
@@ -61,7 +61,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->down();
         }
 
-        $this->hub->interact(SprintStopped::class);
+        $this->hub->notify(SprintStopped::class);
 
         $this->resetState();
     }

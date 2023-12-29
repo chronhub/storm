@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Workflow\Monitor;
+namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use function in_array;
 
-class AckedStreamMonitor
+class AckedStreamWatcher
 {
     private array $streams = [];
 
