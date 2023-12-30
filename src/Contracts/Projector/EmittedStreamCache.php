@@ -10,7 +10,7 @@ use JsonSerializable;
 /**
  * @property-read int<1,max> $cacheSize
  */
-interface StreamCache extends JsonSerializable
+interface EmittedStreamCache extends JsonSerializable
 {
     /**
      * Add or replace stream name at the current position in the circular buffer.

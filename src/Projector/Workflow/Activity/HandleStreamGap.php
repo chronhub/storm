@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
-use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReset;
+use Chronhub\Storm\Projector\Subscription\Notification\IsBatchCounterReset;
 use Chronhub\Storm\Projector\Subscription\Notification\SleepOnGap;
 
 final class HandleStreamGap
@@ -17,7 +17,7 @@ final class HandleStreamGap
         if ($hub->expect(HasGap::class)) {
             $hub->notify(SleepOnGap::class);
 
-            if (! $hub->expect(IsEventCounterReset::class)) {
+            if (! $hub->expect(IsBatchCounterReset::class)) {
                 $hub->trigger(new ProjectionStored());
             }
         }

@@ -20,6 +20,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
+use Illuminate\Support\Arr;
 
 use function array_key_exists;
 use function is_object;
@@ -47,7 +48,7 @@ final class HubManager implements NotificationHub
     ];
 
     /**
-     * @var array<string, array<string|callable>>
+     * @var array<string, array<string|callable|array<callable>>>
      */
     private array $listeners = [];
 
@@ -80,9 +81,9 @@ final class HubManager implements NotificationHub
         }
     }
 
-    public function addListener(string $listener, string|callable $callback): void
+    public function addListener(string $listener, string|callable|array $callback): void
     {
-        $this->listeners[$listener][] = $callback;
+        $this->listeners[$listener][] = Arr::wrap($callback);
     }
 
     public function addListeners(array $listeners): void
@@ -115,12 +116,14 @@ final class HubManager implements NotificationHub
     private function handleListener(object $event, mixed $result): void
     {
         if (array_key_exists($event::class, $this->listeners)) {
-            foreach ($this->listeners[$event::class] as &$listener) {
-                if (is_string($listener)) {
-                    $listener = new $listener();
-                }
+            foreach ($this->listeners[$event::class] as $listener) {
+                foreach ($listener as $handler) {
+                    if (is_string($handler)) {
+                        $handler = new $handler();
+                    }
 
-                $listener($this, $event, $result);
+                    $handler($this, $event, $result);
+                }
             }
         }
     }

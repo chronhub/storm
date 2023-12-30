@@ -12,7 +12,6 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
 use Chronhub\Storm\Projector\Workflow\EventReactor;
 use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
-use Chronhub\Storm\Projector\Workflow\Timer;
 
 use function array_map;
 
@@ -42,11 +41,6 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
             $scope,
             $subscriptor->option()->getSignal()
         );
-    }
-
-    protected function getTimer(Subscriptor $subscriptor): Timer
-    {
-        return new Timer($subscriptor->clock(), $subscriptor->getContext()->timer());
     }
 
     protected function getStreamLoader(Subscriptor $subscriptor): LoadStreams

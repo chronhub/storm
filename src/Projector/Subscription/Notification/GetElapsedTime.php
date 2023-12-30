@@ -6,11 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-// todo
-final class ExpectLoop
+final class GetElapsedTime
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->loop()->cycle();
+        return $subscriptor->watcher()->time()->getElapsedTime();
     }
 }

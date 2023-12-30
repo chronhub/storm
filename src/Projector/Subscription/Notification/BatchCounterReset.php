@@ -6,12 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class EventCounterIncremented
+final class BatchCounterReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->eventCounter()->increment();
-
-        $subscriptor->watcher()->masterCounter()->increment();
+        $subscriptor->watcher()->batchCounter()->reset();
     }
 }

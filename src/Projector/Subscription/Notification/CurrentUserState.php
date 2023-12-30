@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class EventCounterReset
+final class CurrentUserState
 {
-    public function __invoke(Subscriptor $subscriptor): void
+    public function __invoke(Subscriptor $subscriptor): array
     {
-        $subscriptor->watcher()->eventCounter()->reset();
+        return $subscriptor->watcher()->userState()->get();
     }
 }

@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class LoopHasStarted
+final class IsBatchCounterReset
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->loop()->hasStarted();
+        return $subscriptor->watcher()->batchCounter()->isReset();
     }
 }

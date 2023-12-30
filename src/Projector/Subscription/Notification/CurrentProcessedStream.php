@@ -6,11 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-// todo
-final class BatchReset
+class CurrentProcessedStream
 {
-    public function __invoke(Subscriptor $subscriptor): void
+    public function __invoke(Subscriptor $subscriptor): string
     {
-        $subscriptor->watcher()->batchStream()->reset();
+        return $subscriptor->getProcessedStream();
     }
 }

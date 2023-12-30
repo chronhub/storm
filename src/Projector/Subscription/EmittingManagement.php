@@ -6,13 +6,13 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
+use Chronhub\Storm\Contracts\Projector\EmittedStreamCache;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
-use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\EventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
@@ -26,7 +26,7 @@ final readonly class EmittingManagement implements EmitterManagement
         protected NotificationHub $hub,
         protected Chronicler $chronicler,
         protected ProjectionRepository $repository,
-        private StreamCache $streamCache,
+        private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
         HookHandler::subscribe($hub, $this);
@@ -76,7 +76,7 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(ExpectStatus::class));
+        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
 
         $this->deleteStream();
     }

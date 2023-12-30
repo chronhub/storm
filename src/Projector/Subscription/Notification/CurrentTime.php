@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class ExpectUserState
+final class CurrentTime
 {
-    public function __invoke(Subscriptor $subscriptor): array
+    public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->userState()->get();
+        return $subscriptor->watcher()->time()->getCurrentTime();
     }
 }

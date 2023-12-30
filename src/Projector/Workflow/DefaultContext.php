@@ -13,12 +13,6 @@ use Chronhub\Storm\Projector\Provider\EventStream\DiscoverAllStream;
 use Chronhub\Storm\Projector\Provider\EventStream\DiscoverCategories;
 use Chronhub\Storm\Projector\Provider\EventStream\DiscoverStream;
 use Closure;
-use DateInterval;
-
-use function is_int;
-use function is_string;
-use function mb_strtoupper;
-use function sprintf;
 
 final class DefaultContext implements ContextReader
 {
@@ -32,8 +26,6 @@ final class DefaultContext implements ContextReader
     private ?Closure $reactors = null;
 
     private ?QueryFilter $queryFilter = null;
-
-    private DateInterval|string|int|null $timer = null;
 
     private bool $keepState = false;
 
@@ -81,17 +73,6 @@ final class DefaultContext implements ContextReader
         }
 
         $this->id = $id;
-
-        return $this;
-    }
-
-    public function until(DateInterval|string|int $interval): self
-    {
-        if ($this->timer !== null) {
-            throw new InvalidArgumentException('Projection timer already set');
-        }
-
-        $this->timer = $this->normalizeInterval($interval);
 
         return $this;
     }
@@ -193,24 +174,6 @@ final class DefaultContext implements ContextReader
         $halt = value($this->haltOn, new HaltOn());
 
         return $halt->callbacks();
-    }
-
-    public function timer(): ?DateInterval
-    {
-        return $this->timer;
-    }
-
-    private function normalizeInterval(DateInterval|string|int $interval): DateInterval
-    {
-        if (is_int($interval)) {
-            return new DateInterval(sprintf('PT%dS', $interval));
-        }
-
-        if (is_string($interval)) {
-            return new DateInterval(mb_strtoupper($interval));
-        }
-
-        return $interval;
     }
 
     private function assertQueriesNotSet(): void

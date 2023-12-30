@@ -11,6 +11,8 @@ final class MasterEventCounterWatcher
      */
     protected int $masterCount = 0;
 
+    protected bool $doNotReset = false;
+
     public function increment(): void
     {
         $this->masterCount++;
@@ -18,11 +20,18 @@ final class MasterEventCounterWatcher
 
     public function reset(): void
     {
-        $this->masterCount = 0;
+        if (! $this->doNotReset) {
+            $this->masterCount = 0;
+        }
     }
 
     public function current(): int
     {
         return $this->masterCount;
+    }
+
+    public function doNotReset(bool $doNotReset): void
+    {
+        $this->doNotReset = $doNotReset;
     }
 }

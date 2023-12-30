@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class MasterEventCounterReset
+final class IsFirstCycle
 {
-    public function __invoke(Subscriptor $subscriptor): void
+    public function __invoke(Subscriptor $subscriptor): bool
     {
-        $subscriptor->watcher()->masterCounter()->reset();
+        return $subscriptor->watcher()->loop()->isFirstLoop();
     }
 }

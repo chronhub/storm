@@ -7,9 +7,9 @@ namespace Chronhub\Storm\Projector\Workflow;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
-use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
@@ -38,14 +38,13 @@ final readonly class EventReactor
         $this->dispatchSignalIfRequested();
 
         if (! $this->hasNoGap($hub, $streamName, $expectedPosition)) {
-
             // todo distinct confirmed gap and unconfirmed gap when is still recovering
             $hub->notify(GapDetected::class, $streamName, $event, $expectedPosition);
 
             return false;
         }
 
-        $hub->notify(EventCounterIncremented::class);
+        $hub->notify(BatchCounterIncremented::class);
 
         $this->reactOn($hub, $event);
 
@@ -79,7 +78,7 @@ final readonly class EventReactor
     private function getUserState(NotificationHub $hub): ?array
     {
         return $hub->expect(IsUserStateInitialized::class)
-            ? $hub->expect(ExpectUserState::class) : null;
+            ? $hub->expect(CurrentUserState::class) : null;
     }
 
     private function updateUserState(NotificationHub $hub, ?array $initializedState, ?array $userState): void

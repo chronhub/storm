@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\EmittedStreamCache;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\ProjectionOption;
 use Chronhub\Storm\Contracts\Projector\ProjectionProvider;
@@ -18,7 +19,6 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
-use Chronhub\Storm\Contracts\Projector\StreamCache;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
@@ -34,7 +34,7 @@ use Chronhub\Storm\Projector\Stream\CheckpointManager;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
 use Chronhub\Storm\Projector\Stream\GapDetector;
-use Chronhub\Storm\Projector\Stream\InMemoryStreams;
+use Chronhub\Storm\Projector\Stream\InMemoryEmittedStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
 use Chronhub\Storm\Projector\Subscription\HubManager;
@@ -190,9 +190,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new CheckpointInMemory($checkpoints);
     }
 
-    protected function createStreamCache(ProjectionOption $option): StreamCache
+    protected function createStreamCache(ProjectionOption $option): EmittedStreamCache
     {
-        return new InMemoryStreams($option->getCacheSize());
+        return new InMemoryEmittedStreams($option->getCacheSize());
     }
 
     protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository

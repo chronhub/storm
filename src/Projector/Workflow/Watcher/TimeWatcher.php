@@ -5,22 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Projector\Workflow\Timer;
-use DateInterval;
 
-class TimeWatcher
+readonly class TimeWatcher
 {
-    public function __construct(protected readonly Timer $timer)
+    public function __construct(protected Timer $timer)
     {
     }
 
     public function start(): void
     {
         $this->timer->start();
-    }
-
-    public function isExpired(): bool
-    {
-        return $this->timer->isExpired();
     }
 
     public function isStarted(): bool
@@ -38,8 +32,8 @@ class TimeWatcher
         return $this->timer->getTimestamp();
     }
 
-    public function setInterval(?DateInterval $interval): void
+    public function getElapsedTime(): int
     {
-        $this->timer->setInterval($interval);
+        return $this->timer->getElapsedTime();
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature\Projection;
 
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
+use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -33,14 +34,13 @@ it('can run emitter projection 111', function (): void {
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
-        ->until(5)
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->masterCounterLimit(15000))
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)
                 ->incrementState('count.'.$scope->streamName())
-                ->incrementState('count.total')
-                ->stopWhen($scope['count']['total'] === 1500000);
+                ->incrementState('count.total');
         })->run(true);
 
     expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);

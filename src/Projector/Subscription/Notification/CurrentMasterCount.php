@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class IsEventCounterReached
+final class CurrentMasterCount
 {
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->eventCounter()->isReached();
+        return $subscriptor->watcher()->masterCounter()->current();
     }
 }

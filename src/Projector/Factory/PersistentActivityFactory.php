@@ -9,14 +9,13 @@ use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
+use Chronhub\Storm\Projector\Workflow\Activity\CycleObserver;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamGap;
-use Chronhub\Storm\Projector\Workflow\Activity\LoopHandler;
 use Chronhub\Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Chronhub\Storm\Projector\Workflow\Activity\RefreshProjection;
 use Chronhub\Storm\Projector\Workflow\Activity\RisePersistentProjection;
-use Chronhub\Storm\Projector\Workflow\Activity\RunUntil;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
@@ -26,12 +25,10 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
             throw new RuntimeException('Management must be instance of PersistentManagement');
         }
 
-        $timer = $this->getTimer($subscriptor);
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
 
         return [
-            fn (): callable => new LoopHandler(),
-            fn (): callable => new RunUntil($timer),
+            fn (): callable => new CycleObserver(),
             fn (): callable => new RisePersistentProjection(),
             fn (): callable => $this->getStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),

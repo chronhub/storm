@@ -8,7 +8,6 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
-use DateInterval;
 
 /**
  * @template TInit of array
@@ -82,19 +81,6 @@ interface Context
      * Also, user state must be initialized.
      */
     public function withKeepState(): self;
-
-    /**
-     * Sets the timer interval to run the projection when it runs in the background.
-     *
-     * Note that it could not stop projection at the exact time wanted
-     * as projection should stop gracefully.
-     * Zero int means that projection will run only once.
-     *
-     * @param DateInterval|string|int<0,max> $interval int in seconds, a valid string interval or DateInterval
-     *
-     * @throws InvalidArgumentException When the timer is already set
-     */
-    public function until(DateInterval|string|int $interval): self;
 
     /**
      * Set a projection id to identify it.

@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class StopWhenGapDetected
+final class CurrentCheckpoints
 {
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->watcher()->stopWhen()->gapDetected();
+        return $subscriptor->recognition()->checkpoints();
     }
 }

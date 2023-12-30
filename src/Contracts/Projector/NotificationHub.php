@@ -28,7 +28,7 @@ interface NotificationHub
     /**
      * Add listener
      */
-    public function addListener(string $listener, string|callable $callback): void;
+    public function addListener(string $listener, string|callable|array $callback): void;
 
     /**
      * Add listeners

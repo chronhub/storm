@@ -9,7 +9,6 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
-use DateInterval;
 
 /**
  * @template TState of array|null
@@ -48,11 +47,6 @@ interface ContextReader extends Context
      * @throws InvalidArgumentException When query filter is not set
      */
     public function queryFilter(): QueryFilter;
-
-    /**
-     * Get the timer interval to run the projection.
-     */
-    public function timer(): ?DateInterval;
 
     /**
      * Check if projection should keep state in memory.

@@ -6,10 +6,12 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class LoopIncremented
+final class BatchCounterIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->loop()->next();
+        $subscriptor->watcher()->batchCounter()->increment();
+
+        $subscriptor->watcher()->masterCounter()->increment();
     }
 }

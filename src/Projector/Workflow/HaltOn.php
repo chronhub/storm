@@ -10,6 +10,9 @@ class HaltOn
 {
     private array $callbacks;
 
+    /**
+     * @param positive-int $cycle
+     */
     public function cycleReach(int $cycle): self
     {
         $this->callbacks[StopWatcher::AT_CYCLE] = fn () => $cycle;
@@ -17,9 +20,12 @@ class HaltOn
         return $this;
     }
 
-    public function masterCounterLimit(int $limit): self
+    /**
+     * @param positive-int $limit
+     */
+    public function masterCounterLimit(int $limit, bool $resetOnHalt = true): self
     {
-        $this->callbacks[StopWatcher::MASTER_COUNTER_LIMIT] = fn () => $limit;
+        $this->callbacks[StopWatcher::MASTER_COUNTER_LIMIT] = fn () => [$limit, $resetOnHalt];
 
         return $this;
     }
@@ -31,6 +37,9 @@ class HaltOn
         return $this;
     }
 
+    /**
+     * @param int<0,max> $timestamp
+     */
     public function expiredAt(int $timestamp): self
     {
         $this->callbacks[StopWatcher::EXPIRED_AT] = fn () => $timestamp;

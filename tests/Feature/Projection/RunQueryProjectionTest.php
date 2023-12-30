@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
+use Chronhub\Storm\Clock\PointInTimeFactory;
 use Chronhub\Storm\Contracts\Chronicler\InMemoryQueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Filter\InMemoryLimitByOneQuery;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
+use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
@@ -61,6 +63,7 @@ it('can run query projection until and increment loop', function () {
     // force to only handle one event
     $queryFilter = new InMemoryLimitByOneQuery();
 
+    $expiredAt = PointInTimeFactory::now()->modify('+1 seconds')->getTimestamp();
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
@@ -69,7 +72,7 @@ it('can run query projection until and increment loop', function () {
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
-        ->until(1)
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->expiredAt($expiredAt))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => 5]);

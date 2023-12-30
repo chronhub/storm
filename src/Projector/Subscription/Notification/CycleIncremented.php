@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class ExpectCheckpoints
+final class CycleIncremented
 {
-    public function __invoke(Subscriptor $subscriptor): array
+    public function __invoke(Subscriptor $subscriptor): void
     {
-        return $subscriptor->recognition()->checkpoints();
+        $subscriptor->watcher()->loop()->next();
     }
 }

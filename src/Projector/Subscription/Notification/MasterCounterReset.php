@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class IsTimeExpired
+final class MasterCounterReset
 {
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): void
     {
-        return $subscriptor->watcher()->time()->isExpired();
+        $subscriptor->watcher()->masterCounter()->reset();
     }
 }

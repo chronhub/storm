@@ -28,7 +28,9 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     public function start(ContextReader $context, bool $keepRunning): void
     {
-        $this->initializeContext($context, $keepRunning);
+        $this->initializeContext($context);
+
+        $this->setupWatcher($context, $keepRunning);
 
         $this->startProjection($keepRunning);
     }
@@ -52,7 +54,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         return new Workflow($this->hub(), $activities);
     }
 
-    private function initializeContext(ContextReader $context, bool $keepRunning): void
+    private function initializeContext(ContextReader $context): void
     {
         if ($this->subscriptor->getContext() === null) {
             $this->subscriptor->setContext($context, true);
@@ -61,10 +63,13 @@ final readonly class QuerySubscription implements QuerySubscriber
         }
 
         $this->initializeContextAgain();
+    }
 
+    private function setupWatcher(ContextReader $context, bool $keepRunning): void
+    {
+        $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
-        $this->subscriptor->watcher()->time()->setInterval($context->timer());
     }
 
     private function initializeContextAgain(): void

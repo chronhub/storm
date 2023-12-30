@@ -12,7 +12,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectStatus;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentStatus;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintDaemonize;
 
 trait MonitorRemoteStatus
@@ -68,7 +68,7 @@ trait MonitorRemoteStatus
     {
         $hub->trigger(new ProjectionStatusDisclosed());
 
-        return match ($hub->expect(ExpectStatus::class)->value) {
+        return match ($hub->expect(CurrentStatus::class)->value) {
             ProjectionStatus::STOPPING->value => $this->onStopping($hub),
             ProjectionStatus::RESETTING->value => $this->onResetting($hub),
             ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),

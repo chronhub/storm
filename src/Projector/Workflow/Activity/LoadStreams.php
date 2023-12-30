@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentCheckpoints;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
 use Illuminate\Support\Collection;
@@ -37,7 +37,7 @@ final class LoadStreams
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        $checkpoints = $hub->expect(ExpectCheckpoints::class);
+        $checkpoints = $hub->expect(CurrentCheckpoints::class);
 
         $iterators = $this->collectStreams($this->batchStreams($checkpoints));
 

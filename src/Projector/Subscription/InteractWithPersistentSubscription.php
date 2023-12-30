@@ -42,21 +42,18 @@ trait InteractWithPersistentSubscription
         $this->subscriptor->restoreUserState();
     }
 
-    private function startProjection(bool $keepRunning): void
-    {
-        $project = new RunProjection($this->newWorkflow(), $keepRunning);
-
-        $project->loop();
-    }
-
     private function setupWatcher(ContextReader $context, bool $keepRunning): void
     {
+        $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
+    }
 
-        // todo make listeners inside stopWhen
-        $this->subscriptor->watcher()->stopWhen()->setCallbacks($context->haltOnCallback());
-        $this->subscriptor->watcher()->time()->setInterval($context->timer());
+    private function startProjection(bool $keepRunning): void
+    {
+        $projection = new RunProjection($this->newWorkflow(), $keepRunning);
+
+        $projection->loop();
     }
 
     private function validateContext(ContextReader $context): void

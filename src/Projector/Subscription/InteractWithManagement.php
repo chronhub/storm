@@ -7,14 +7,14 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
+use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointUpdated;
-use Chronhub\Storm\Projector\Subscription\Notification\EventCounterReset;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectCheckpoints;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectProcessedStream;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectStatus;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
-use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReached;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentProcessedStream;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentStatus;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\IsBatchCounterReached;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintContinue;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\StatusChanged;
@@ -66,7 +66,7 @@ trait InteractWithManagement
 
         $this->hub->notify(
             StatusDisclosed::class,
-            $this->hub->expect(ExpectStatus::class), $disclosedStatus
+            $this->hub->expect(CurrentStatus::class), $disclosedStatus
         );
     }
 
@@ -85,17 +85,17 @@ trait InteractWithManagement
 
     public function persistWhenThresholdIsReached(): void
     {
-        if ($this->hub->expect(IsEventCounterReached::class)) {
+        if ($this->hub->expect(IsBatchCounterReached::class)) {
             $this->store();
 
-            $this->hub->notify(EventCounterReset::class);
+            $this->hub->notify(BatchCounterReset::class);
 
             $this->disclose();
 
             // todo check if Idle still needed
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->hub->expect(ExpectStatus::class), $keepProjectionRunning, true)) {
+            if (! in_array($this->hub->expect(CurrentStatus::class), $keepProjectionRunning, true)) {
                 $this->hub->notify(SprintStopped::class);
             }
         }
@@ -108,7 +108,7 @@ trait InteractWithManagement
 
     public function getProcessedStream(): string
     {
-        return $this->hub->expect(ExpectProcessedStream::class);
+        return $this->hub->expect(CurrentProcessedStream::class);
     }
 
     public function hub(): NotificationHub
@@ -121,7 +121,7 @@ trait InteractWithManagement
         $this->hub->notify(SprintContinue::class);
 
         if (! $this->repository->exists()) {
-            $this->repository->create($this->hub->expect(ExpectStatus::class));
+            $this->repository->create($this->hub->expect(CurrentStatus::class));
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
@@ -141,15 +141,15 @@ trait InteractWithManagement
     {
         $this->hub->notify(
             StatusChanged::class,
-            $this->hub->expect(ExpectStatus::class), $status
+            $this->hub->expect(CurrentStatus::class), $status
         );
     }
 
     protected function getProjectionResult(): ProjectionResult
     {
         return new ProjectionResult(
-            $this->hub->expect(ExpectCheckpoints::class),
-            $this->hub->expect(ExpectUserState::class)
+            $this->hub->expect(CurrentCheckpoints::class),
+            $this->hub->expect(CurrentUserState::class)
         );
     }
 }

@@ -9,7 +9,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionLockUpdated;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
-use Chronhub\Storm\Projector\Subscription\Notification\ProcessBlank;
+use Chronhub\Storm\Projector\Subscription\Notification\IsProcessBlank;
 
 final readonly class PersistOrUpdate
 {
@@ -28,7 +28,7 @@ final readonly class PersistOrUpdate
 
     private function getHook(NotificationHub $hub): object
     {
-        if ($hub->expect(ProcessBlank::class)) {
+        if ($hub->expect(IsProcessBlank::class)) {
             $hub->notify(BatchSleep::class);
 
             return new ProjectionLockUpdated();

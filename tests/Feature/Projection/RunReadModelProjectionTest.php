@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
+use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -457,7 +458,9 @@ test('can no stream event loaded', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('debit')
-        ->until(1)
+        ->haltOn(function (HaltOn $halt): HaltOn {
+            return $halt->masterCounterLimit(50);
+        })
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope

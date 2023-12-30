@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentUserState;
 use Closure;
-use DateInterval;
 use Illuminate\Support\Str;
 
 use function property_exists;
@@ -63,13 +62,6 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function until(DateInterval|string|int $interval): static
-    {
-        $this->context->until($interval);
-
-        return $this;
-    }
-
     public function withKeepState(): static
     {
         $this->context->withKeepState();
@@ -86,7 +78,7 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->hub()->expect(ExpectUserState::class);
+        return $this->subscriber->hub()->expect(CurrentUserState::class);
     }
 
     protected function identifyProjectionIfNeeded(): void

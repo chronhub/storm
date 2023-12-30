@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class GetCurrentTime
+final class CycleHasStarted
 {
-    public function __invoke(Subscriptor $subscriptor): int
+    public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->time()->getCurrentTime();
+        return $subscriptor->watcher()->loop()->hasStarted();
     }
 }

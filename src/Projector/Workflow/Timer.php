@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use DateInterval;
 use DateTimeImmutable;
 
 class Timer
 {
     private ?DateTimeImmutable $startTime = null;
-
-    private ?DateInterval $interval = null;
 
     public function __construct(protected readonly SystemClock $clock)
     {
@@ -25,13 +22,9 @@ class Timer
         }
     }
 
-    public function isExpired(): bool
+    public function reset(): void
     {
-        if ($this->interval === null) {
-            return false;
-        }
-
-        return $this->clock->isNowSubGreaterThan($this->interval, $this->startTime);
+        $this->startTime = null;
     }
 
     public function isStarted(): bool
@@ -44,18 +37,8 @@ class Timer
         return $this->startTime->getTimestamp();
     }
 
-    public function getElapsedTime(): DateInterval
+    public function getElapsedTime(): int
     {
-        return $this->clock->now()->diff($this->startTime);
-    }
-
-    public function reset(): void
-    {
-        $this->startTime = null;
-    }
-
-    public function setInterval(?DateInterval $interval): void
-    {
-        $this->interval = $interval;
+        return $this->clock->now()->getTimestamp() - $this->getTimestamp();
     }
 }

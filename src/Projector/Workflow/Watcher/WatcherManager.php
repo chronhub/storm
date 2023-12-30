@@ -36,7 +36,7 @@ readonly class WatcherManager
         return $this->userState;
     }
 
-    public function eventCounter(): BatchCounterWatcher
+    public function batchCounter(): BatchCounterWatcher
     {
         return $this->batchCounterWatcher;
     }

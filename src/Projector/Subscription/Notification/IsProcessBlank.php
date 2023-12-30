@@ -6,11 +6,11 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class ProcessBlank
+final class IsProcessBlank
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->eventCounter()->isReset() &&
+        return $subscriptor->watcher()->batchCounter()->isReset() &&
             ! $subscriptor->watcher()->ackedStream()->hasStreams();
     }
 }

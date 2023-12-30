@@ -20,7 +20,7 @@ class BatchCounterWatcher
     {
         /** @phpstan-ignore-next-line  */
         if ($limit < 1) {
-            throw new InvalidArgumentException('Stream event counter limit must be greater than 0');
+            throw new InvalidArgumentException('Batch counter limit must be greater than 0');
         }
     }
 

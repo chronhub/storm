@@ -6,12 +6,11 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-class StopWhenMasterCounterIsReached
+final class IsSprintTerminated
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        $current = $subscriptor->watcher()->masterCounter()->current();
-
-        return $subscriptor->watcher()->stopWhen()->masterCounterReach($current);
+        return ! $subscriptor->watcher()->sprint()->inBackground()
+            || ! $subscriptor->watcher()->sprint()->inProgress();
     }
 }
