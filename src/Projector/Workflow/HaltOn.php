@@ -17,10 +17,9 @@ class HaltOn
         return $this;
     }
 
-    // todo global counter
-    public function batchCounterLimit(int $limit): self
+    public function masterCounterLimit(int $limit): self
     {
-        $this->callbacks[StopWatcher::BATCH_COUNTER_LIMIT] = fn () => $limit;
+        $this->callbacks[StopWatcher::MASTER_COUNTER_LIMIT] = fn () => $limit;
 
         return $this;
     }

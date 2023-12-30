@@ -10,7 +10,7 @@ class StopWatcher
 
     const AT_CYCLE = 'atCycle';
 
-    const BATCH_COUNTER_LIMIT = 'batchCounterLimit';
+    const MASTER_COUNTER_LIMIT = 'masterCounterLimit';
 
     const EXPIRED_AT = 'expiredAt';
 
@@ -26,30 +26,30 @@ class StopWatcher
 
     public function gapDetected(): bool
     {
-        return $this->findCallback(self::GAP_DETECTED) ?? false;
+        return $this->haltOn(self::GAP_DETECTED, false) ?? false;
+    }
+
+    public function masterCounterReach(int $currentCount): bool
+    {
+        return $this->haltOn(self::MASTER_COUNTER_LIMIT, -1) === $currentCount;
     }
 
     public function atCycle(int $currentCycle): bool
     {
-        return $this->findCallback(self::AT_CYCLE) === $currentCycle;
-    }
-
-    public function batchCounterReach(int $currentCount): bool
-    {
-        return $this->findCallback(self::BATCH_COUNTER_LIMIT) === $currentCount;
+        return $this->haltOn(self::AT_CYCLE, -1) === $currentCycle;
     }
 
     public function expiredAt(int|float $currentTime): bool
     {
-        return $this->findCallback(self::EXPIRED_AT) === $currentTime;
+        return $this->haltOn(self::EXPIRED_AT, PHP_INT_MAX) <= $currentTime;
     }
 
-    private function findCallback(string $name): mixed
+    private function haltOn(string $name, mixed $default): mixed
     {
         if (isset($this->stopWhen[$name])) {
             return value($this->stopWhen[$name]);
         }
 
-        return null;
+        return $default;
     }
 }

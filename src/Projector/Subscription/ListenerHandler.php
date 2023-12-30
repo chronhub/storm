@@ -9,6 +9,8 @@ use Chronhub\Storm\Projector\Subscription\Action\WhenBatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Action\WhenExpectSprintTermination;
 use Chronhub\Storm\Projector\Subscription\Action\WhenGapDetected;
 use Chronhub\Storm\Projector\Subscription\Action\WhenLoopRenew;
+use Chronhub\Storm\Projector\Subscription\Action\WhenMasterCounterIsReached;
+use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\ExpectSprintTermination;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\LoopRenew;
@@ -23,6 +25,7 @@ final class ListenerHandler
             GapDetected::class => WhenGapDetected::class,
             LoopRenew::class => WhenLoopRenew::class,
             ExpectSprintTermination::class => WhenExpectSprintTermination::class,
+            EventCounterIncremented::class => WhenMasterCounterIsReached::class,
         ]);
     }
 }

@@ -53,6 +53,8 @@ trait InteractWithPersistentSubscription
     {
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
+
+        // todo make listeners inside stopWhen
         $this->subscriptor->watcher()->stopWhen()->setCallbacks($context->haltOnCallback());
         $this->subscriptor->watcher()->time()->setInterval($context->timer());
     }
