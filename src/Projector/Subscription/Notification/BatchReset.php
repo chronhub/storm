@@ -10,6 +10,6 @@ final class BatchReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->batchStream()->reset();
+        $subscriptor->watcher()->batchStream()->reset();
     }
 }

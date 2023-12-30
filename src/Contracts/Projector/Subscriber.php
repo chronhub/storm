@@ -8,5 +8,5 @@ interface Subscriber
 {
     public function start(ContextReader $context, bool $keepRunning): void;
 
-    public function hub(): HookHub;
+    public function hub(): NotificationHub;
 }

@@ -10,6 +10,6 @@ final class LoopReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->loop()->reset();
+        $subscriptor->watcher()->loop()->reset();
     }
 }

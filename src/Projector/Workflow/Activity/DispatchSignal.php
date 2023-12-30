@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 
 use function pcntl_signal_dispatch;
 
@@ -14,7 +14,7 @@ final readonly class DispatchSignal
     {
     }
 
-    public function __invoke(HookHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
         if ($this->dispatchSignal) {
             pcntl_signal_dispatch();

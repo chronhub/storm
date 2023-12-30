@@ -14,6 +14,6 @@ final readonly class BatchLoaded
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->batchStream()->hasLoadedStreams($this->hasBatchStreams);
+        $subscriptor->watcher()->batchStream()->hasLoadedStreams($this->hasBatchStreams);
     }
 }

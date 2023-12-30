@@ -11,6 +11,6 @@ final class ExpectLoop
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->monitor()->loop()->cycle();
+        return $subscriptor->watcher()->loop()->cycle();
     }
 }

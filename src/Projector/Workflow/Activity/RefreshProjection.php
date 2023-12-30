@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Notification\EventStreamDiscovered;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 
@@ -16,7 +16,7 @@ final class RefreshProjection
     {
     }
 
-    public function __invoke(HookHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
         // monitor update in the remote status
         $this->refreshStatus($hub);
@@ -35,7 +35,7 @@ final class RefreshProjection
      *
      * checkMe: do we need to discover again when sprint stops?
      */
-    private function shouldDiscoverAgain(HookHub $hub): bool
+    private function shouldDiscoverAgain(NotificationHub $hub): bool
     {
         if ($this->onlyOnceDiscovery) {
             return false;

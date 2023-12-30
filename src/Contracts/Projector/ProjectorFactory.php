@@ -55,6 +55,13 @@ interface ProjectorFactory extends Projector
     public function when(Closure $reactors): static;
 
     /**
+     * Proxy method to set the stop when.
+     *
+     * @see Context::haltOn()
+     */
+    public function haltOn(Closure $haltOn): static;
+
+    /**
      * Proxy method to set the query filter.
      *
      * @see Context::withQueryFilter()

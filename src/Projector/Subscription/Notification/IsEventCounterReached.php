@@ -10,6 +10,6 @@ final class IsEventCounterReached
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->monitor()->eventCounter()->isReached();
+        return $subscriptor->watcher()->eventCounter()->isReached();
     }
 }

@@ -40,7 +40,7 @@ it('can run emitter projection 111', function (): void {
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)
                 ->incrementState('count.'.$scope->streamName())
                 ->incrementState('count.total')
-                ->stopWhen($scope['count']['total'] === 15000);
+                ->stopWhen($scope['count']['total'] === 1500000);
         })->run(true);
 
     expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);

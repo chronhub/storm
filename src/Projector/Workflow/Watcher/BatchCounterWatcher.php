@@ -6,12 +6,12 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
-class EventCounterWatcher
+class BatchCounterWatcher
 {
     /**
      * @var int<0,max>
      */
-    protected int $counter = 0;
+    protected int $perBatchCount = 0;
 
     /**
      * @param positive-int $limit
@@ -26,26 +26,26 @@ class EventCounterWatcher
 
     public function increment(): void
     {
-        $this->counter++;
+        $this->perBatchCount++;
     }
 
     public function reset(): void
     {
-        $this->counter = 0;
+        $this->perBatchCount = 0;
     }
 
     public function isReset(): bool
     {
-        return $this->counter === 0;
+        return $this->perBatchCount === 0;
     }
 
     public function isReached(): bool
     {
-        return $this->counter >= $this->limit;
+        return $this->perBatchCount >= $this->limit;
     }
 
     public function count(): int
     {
-        return $this->counter;
+        return $this->perBatchCount;
     }
 }

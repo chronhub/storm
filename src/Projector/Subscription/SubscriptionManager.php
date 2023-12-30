@@ -16,6 +16,8 @@ use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
 use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Closure;
 
+use function is_callable;
+
 final class SubscriptionManager implements Subscriptor
 {
     private ?string $streamName = null;
@@ -31,13 +33,13 @@ final class SubscriptionManager implements Subscriptor
         private readonly CheckpointRecognition $checkpointRecognition,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
-        private readonly WatcherManager $monitor,
+        private readonly WatcherManager $watcher,
     ) {
     }
 
-    public function receive(callable $event): mixed
+    public function receive(callable|object $event): mixed
     {
-        return $event($this);
+        return is_callable($event) ? $event($this) : $event;
     }
 
     public function setContext(ContextReader $context, bool $allowRerun): void
@@ -59,9 +61,9 @@ final class SubscriptionManager implements Subscriptor
         return $this->checkpointRecognition;
     }
 
-    public function monitor(): WatcherManager
+    public function watcher(): WatcherManager
     {
-        return $this->monitor;
+        return $this->watcher;
     }
 
     public function currentStatus(): ProjectionStatus
@@ -78,7 +80,7 @@ final class SubscriptionManager implements Subscriptor
     {
         $originalUserState = value($this->context->userState()) ?? [];
 
-        $this->monitor->userState()->put($originalUserState);
+        $this->watcher->userState()->put($originalUserState);
     }
 
     public function isUserStateInitialized(): bool

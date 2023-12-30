@@ -35,9 +35,9 @@ interface Subscriptor
 
     public function recognition(): CheckpointRecognition;
 
-    public function monitor(): WatcherManager;
+    public function watcher(): WatcherManager;
 
-    public function receive(callable $event): mixed;
+    public function receive(callable|object $event): mixed;
 
     public function option(): ProjectionOption;
 

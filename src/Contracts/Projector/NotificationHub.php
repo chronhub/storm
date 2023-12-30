@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface HookHub
+interface NotificationHub
 {
     /**
      * Add hook
@@ -29,6 +29,13 @@ interface HookHub
      * Add listener
      */
     public function addListener(string $listener, string|callable $callback): void;
+
+    /**
+     * Add listeners
+     *
+     * @param array<class-string, string|callable> $listeners
+     */
+    public function addListeners(array $listeners): void;
 
     /**
      * Fire event and forget

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionDiscarded;
@@ -19,7 +19,7 @@ trait MonitorRemoteStatus
 {
     private bool $onRise = true;
 
-    public function shouldStop(HookHub $hub): bool
+    public function shouldStop(NotificationHub $hub): bool
     {
         $shouldStop = $this->discovering($hub);
 
@@ -28,14 +28,14 @@ trait MonitorRemoteStatus
         return $shouldStop;
     }
 
-    public function refreshStatus(HookHub $hub): void
+    public function refreshStatus(NotificationHub $hub): void
     {
         $this->onRise = false;
 
         $this->discovering($hub);
     }
 
-    private function onStopping(HookHub $hub): bool
+    private function onStopping(NotificationHub $hub): bool
     {
         if ($this->onRise) {
             $hub->trigger(new ProjectionSynchronized());
@@ -46,7 +46,7 @@ trait MonitorRemoteStatus
         return $this->onRise;
     }
 
-    private function onResetting(HookHub $hub): bool
+    private function onResetting(NotificationHub $hub): bool
     {
         $hub->trigger(new ProjectionRevised());
 
@@ -57,14 +57,14 @@ trait MonitorRemoteStatus
         return false;
     }
 
-    private function onDeleting(HookHub $notification, bool $shouldDiscardEvents): bool
+    private function onDeleting(NotificationHub $notification, bool $shouldDiscardEvents): bool
     {
         $notification->trigger(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }
 
-    private function discovering(HookHub $hub): bool
+    private function discovering(NotificationHub $hub): bool
     {
         $hub->trigger(new ProjectionStatusDisclosed());
 

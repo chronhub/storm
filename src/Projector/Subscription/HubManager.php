@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
@@ -25,7 +25,7 @@ use function array_key_exists;
 use function is_object;
 use function is_string;
 
-final class NotificationManager implements HookHub
+final class HubManager implements NotificationHub
 {
     /**
      * @var array<string, array<callable>>
@@ -83,6 +83,13 @@ final class NotificationManager implements HookHub
     public function addListener(string $listener, string|callable $callback): void
     {
         $this->listeners[$listener][] = $callback;
+    }
+
+    public function addListeners(array $listeners): void
+    {
+        foreach ($listeners as $listener => $callback) {
+            $this->addListener($listener, $callback);
+        }
     }
 
     public function expect(string|object $notification, mixed ...$arguments): mixed

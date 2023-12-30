@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
 use Chronhub\Storm\Projector\Subscription\Notification\EventCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\ExpectUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
@@ -32,11 +33,15 @@ final readonly class EventReactor
     /**
      * @param positive-int $expectedPosition
      */
-    public function __invoke(HookHub $hub, string $streamName, DomainEvent $event, int $expectedPosition): bool
+    public function __invoke(NotificationHub $hub, string $streamName, DomainEvent $event, int $expectedPosition): bool
     {
         $this->dispatchSignalIfRequested();
 
         if (! $this->hasNoGap($hub, $streamName, $expectedPosition)) {
+
+            // todo distinct confirmed gap and unconfirmed gap when is still recovering
+            $hub->notify(GapDetected::class, $streamName, $event, $expectedPosition);
+
             return false;
         }
 
@@ -49,7 +54,7 @@ final readonly class EventReactor
         return $hub->expect(IsSprintRunning::class);
     }
 
-    private function reactOn(HookHub $hub, DomainEvent $event): void
+    private function reactOn(NotificationHub $hub, DomainEvent $event): void
     {
         $initializedState = $this->getUserState($hub);
 
@@ -66,18 +71,18 @@ final readonly class EventReactor
         $resetScope();
     }
 
-    private function hasNoGap(HookHub $hub, string $streamName, int $expectedPosition): bool
+    private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition): bool
     {
         return $hub->expect(new CheckpointAdded($streamName, $expectedPosition));
     }
 
-    private function getUserState(HookHub $hub): ?array
+    private function getUserState(NotificationHub $hub): ?array
     {
         return $hub->expect(IsUserStateInitialized::class)
             ? $hub->expect(ExpectUserState::class) : null;
     }
 
-    private function updateUserState(HookHub $hub, ?array $initializedState, ?array $userState): void
+    private function updateUserState(NotificationHub $hub, ?array $initializedState, ?array $userState): void
     {
         if (is_array($initializedState) && is_array($userState)) {
             $hub->notify(UserStateChanged::class, $userState);

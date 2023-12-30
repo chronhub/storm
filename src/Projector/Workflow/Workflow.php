@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Exceptions\ProjectionAlreadyRunning;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionFreed;
 use Closure;
@@ -18,7 +18,7 @@ final readonly class Workflow
     /**
      * @param array<callable> $activities
      */
-    public function __construct(private HookHub $hub, private array $activities)
+    public function __construct(private NotificationHub $hub, private array $activities)
     {
     }
 
@@ -46,12 +46,12 @@ final readonly class Workflow
 
     private function prepareDestination(Closure $destination): Closure
     {
-        return fn (HookHub $hub) => $destination($hub);
+        return fn (NotificationHub $hub) => $destination($hub);
     }
 
     private function carry(): Closure
     {
-        return fn (callable $stack, callable $activity) => fn (HookHub $hub) => $activity($hub, $stack);
+        return fn (callable $stack, callable $activity) => fn (NotificationHub $hub) => $activity($hub, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void

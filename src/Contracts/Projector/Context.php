@@ -61,6 +61,13 @@ interface Context
     public function when(Closure $reactors): self;
 
     /**
+     * Stop the projection when a condition is met.
+     *
+     * @return $this
+     */
+    public function haltOn(Closure $haltOn): self;
+
+    /**
      * Sets the query filter to filter events.
      *
      * @throws InvalidArgumentException When query filter is already set

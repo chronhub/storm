@@ -12,9 +12,8 @@ interface CheckpointRecognition extends JsonSerializable
     /**
      * Refresh event streams.
      *
-     * Happens once when projector is started and at the end of each loop.
-     * todo: could avoid refreshing event streams at the end of each loop,
-     *  but it should be explicitly called by dev in factory to set only once discover
+     * Happens once when projector is started and at the end of each loop,
+     * unless projection is stopped or only once discovery is enabled
      */
     public function refreshStreams(array $eventStreams): void;
 

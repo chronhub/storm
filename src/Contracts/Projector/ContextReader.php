@@ -65,4 +65,11 @@ interface ContextReader extends Context
      * Get the projection identifier.
      */
     public function id(): ?string;
+
+    /**
+     * Get the condition to stop the projection.
+     *
+     * @return array<string,callable>
+     */
+    public function haltOnCallback(): array;
 }

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Scope;
 
 use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelScope;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
@@ -17,7 +17,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
     use ScopeBehaviour;
 
     public function __construct(
-        private readonly HookHub $hook,
+        private readonly NotificationHub $hook,
         private readonly ReadModel $readModel,
         private readonly SystemClock $clock
     ) {

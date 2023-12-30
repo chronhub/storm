@@ -10,6 +10,8 @@ final class EventCounterIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->eventCounter()->increment();
+        $subscriptor->watcher()->eventCounter()->increment();
+
+        $subscriptor->watcher()->masterCounter()->increment();
     }
 }

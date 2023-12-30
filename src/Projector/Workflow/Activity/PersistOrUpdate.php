@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionLockUpdated;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchSleep;
 use Chronhub\Storm\Projector\Subscription\Notification\HasGap;
-use Chronhub\Storm\Projector\Subscription\Notification\HasStreamEventAcked;
-use Chronhub\Storm\Projector\Subscription\Notification\IsEventCounterReset;
+use Chronhub\Storm\Projector\Subscription\Notification\ProcessBlank;
 
 final readonly class PersistOrUpdate
 {
-    public function __invoke(HookHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
+        // when no gap, we either update the lock if we are running blank
+        // or we store the projection result
         if (! $hub->expect(HasGap::class)) {
             $hook = $this->getHook($hub);
 
@@ -25,13 +26,10 @@ final readonly class PersistOrUpdate
         return $next($hub);
     }
 
-    private function getHook(HookHub $hub): object
+    private function getHook(NotificationHub $hub): object
     {
-        if ($hub->expect(IsEventCounterReset::class)) {
-            // we only sleep when the counter has been reset and no event has been processed,
-            if (! $hub->expect(HasStreamEventAcked::class)) {
-                $hub->notify(BatchSleep::class);
-            }
+        if ($hub->expect(ProcessBlank::class)) {
+            $hub->notify(BatchSleep::class);
 
             return new ProjectionLockUpdated();
         }

@@ -10,6 +10,6 @@ final class ExpectUserState
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->monitor()->userState()->get();
+        return $subscriptor->watcher()->userState()->get();
     }
 }

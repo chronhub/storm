@@ -10,6 +10,6 @@ final class IsSprintRunning
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->monitor()->sprint()->inProgress();
+        return $subscriptor->watcher()->sprint()->inProgress();
     }
 }

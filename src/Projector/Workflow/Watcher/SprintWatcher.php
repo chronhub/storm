@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-class SprintMonitor
+class SprintWatcher
 {
     protected bool $inBackground = false;
 

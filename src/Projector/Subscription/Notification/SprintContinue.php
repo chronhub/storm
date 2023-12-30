@@ -10,6 +10,6 @@ final readonly class SprintContinue
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->sprint()->continue();
+        $subscriptor->watcher()->sprint()->continue();
     }
 }

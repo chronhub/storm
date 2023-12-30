@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\RunProjection;
@@ -15,12 +15,14 @@ trait InteractWithPersistentSubscription
 {
     public function start(ContextReader $context, bool $keepRunning): void
     {
-        $this->initializeContext($context, $keepRunning);
+        $this->initializeContext($context);
+
+        $this->setupWatcher($context, $keepRunning);
 
         $this->startProjection($keepRunning);
     }
 
-    public function hub(): HookHub
+    public function hub(): NotificationHub
     {
         return $this->management->hub();
     }
@@ -32,14 +34,12 @@ trait InteractWithPersistentSubscription
         return new Workflow($this->hub(), $activities);
     }
 
-    private function initializeContext(ContextReader $context, bool $keepRunning): void
+    private function initializeContext(ContextReader $context): void
     {
         $this->validateContext($context);
 
         $this->subscriptor->setContext($context, true);
         $this->subscriptor->restoreUserState();
-        $this->subscriptor->monitor()->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->monitor()->sprint()->continue();
     }
 
     private function startProjection(bool $keepRunning): void
@@ -47,6 +47,14 @@ trait InteractWithPersistentSubscription
         $project = new RunProjection($this->newWorkflow(), $keepRunning);
 
         $project->loop();
+    }
+
+    private function setupWatcher(ContextReader $context, bool $keepRunning): void
+    {
+        $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->watcher()->sprint()->continue();
+        $this->subscriptor->watcher()->stopWhen()->setCallbacks($context->haltOnCallback());
+        $this->subscriptor->watcher()->time()->setInterval($context->timer());
     }
 
     private function validateContext(ContextReader $context): void

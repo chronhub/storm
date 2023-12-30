@@ -37,7 +37,7 @@ use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
-use Chronhub\Storm\Projector\Subscription\NotificationManager;
+use Chronhub\Storm\Projector\Subscription\HubManager;
 use Chronhub\Storm\Projector\Subscription\QueryingManagement;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
@@ -45,11 +45,15 @@ use Chronhub\Storm\Projector\Subscription\ReadModelSubscription;
 use Chronhub\Storm\Projector\Subscription\SubscriptionManager;
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Chronhub\Storm\Projector\Workflow\DefaultContext;
+use Chronhub\Storm\Projector\Workflow\Timer;
 use Chronhub\Storm\Projector\Workflow\Watcher\AckedStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\BatchCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
-use Chronhub\Storm\Projector\Workflow\Watcher\EventCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\LoopWatcher;
-use Chronhub\Storm\Projector\Workflow\Watcher\SprintMonitor;
+use Chronhub\Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\SprintWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\TimeWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\UserStateWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -80,7 +84,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
         $subscriptor = $this->createSubscriptor($option, false);
-        $notification = new NotificationManager($subscriptor);
+        $notification = new HubManager($subscriptor);
         $activities = new QueryActivityFactory($this->chronicler);
         $scope = new QueryAccess($notification, $this->clock);
 
@@ -90,7 +94,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
         $subscriptor = $this->createSubscriptor($option, true);
-        $notification = new NotificationManager($subscriptor);
+        $notification = new HubManager($subscriptor);
 
         $management = new EmittingManagement(
             $notification,
@@ -109,7 +113,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
         $subscriptor = $this->createSubscriptor($option, true);
-        $notification = new NotificationManager($subscriptor);
+        $notification = new HubManager($subscriptor);
         $repository = $this->createProjectionRepository($streamName, $option);
 
         $management = new ReadingModelManagement($notification, $repository, $readModel);
@@ -200,15 +204,18 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         return new WatcherManager(
             new LoopWatcher(),
-            new SprintMonitor(),
+            new SprintWatcher(),
             new UserStateWatcher(),
-            new EventCounterWatcher($option->getBlockSize()),
+            new BatchCounterWatcher($option->getBlockSize()),
             new AckedStreamWatcher(),
-            $this->batchStreamMonitor($option)
+            $this->batchStreamWatcher($option),
+            new TimeWatcher(new Timer($this->clock)),
+            new StopWatcher(),
+            new MasterEventCounterWatcher(),
         );
     }
 
-    protected function batchStreamMonitor(ProjectionOption $option): BatchStreamWatcher
+    protected function batchStreamWatcher(ProjectionOption $option): BatchStreamWatcher
     {
         $sleep = $option->getSleep();
 

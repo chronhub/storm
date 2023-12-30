@@ -408,12 +408,12 @@ test('can run read model projection from many streams and sort events by ascendi
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream1 = $this->testFactory->getStream('debit', 1, '-50 second', $eventId);
-    $stream2 = $this->testFactory->getStream('debit', 1, '-30 second', $eventId);
+    $stream2 = $this->testFactory->getStream('debit', 1, '-30 second', $eventId, SomeEvent::class, 2);
     $this->eventStore->firstCommit($stream1);
     $this->eventStore->amend($stream2);
 
     $stream3 = $this->testFactory->getStream('credit', 1, '-40 seconds', $eventId, AnotherEvent::class);
-    $stream4 = $this->testFactory->getStream('credit', 1, '-20 seconds', $eventId, AnotherEvent::class);
+    $stream4 = $this->testFactory->getStream('credit', 1, '-20 seconds', $eventId, AnotherEvent::class, 2);
     $this->eventStore->firstCommit($stream3);
     $this->eventStore->amend($stream4);
 
@@ -436,7 +436,6 @@ test('can run read model projection from many streams and sort events by ascendi
                 ->ack(AnotherEvent::class)
                 ?->incrementState('index')
                 ->updateState('order.'.$scope->streamName().'.'.$scope['index'], $scope->event()::class);
-
         })->run(false);
 
     expect($projector->getState()['order'])->toBe([

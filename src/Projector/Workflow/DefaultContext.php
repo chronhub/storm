@@ -39,6 +39,8 @@ final class DefaultContext implements ContextReader
 
     private ?string $id = null;
 
+    private ?Closure $haltOn = null;
+
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
@@ -132,6 +134,13 @@ final class DefaultContext implements ContextReader
         return $this;
     }
 
+    public function haltOn(Closure $haltOn): self
+    {
+        $this->haltOn = $haltOn;
+
+        return $this;
+    }
+
     public function userState(): ?Closure
     {
         return $this->userState;
@@ -172,6 +181,18 @@ final class DefaultContext implements ContextReader
     public function id(): ?string
     {
         return $this->id;
+    }
+
+    public function haltOnCallback(): array
+    {
+        if ($this->haltOn === null) {
+            return [];
+        }
+
+        /** @var HaltOn $halt */
+        $halt = value($this->haltOn, new HaltOn());
+
+        return $halt->callbacks();
     }
 
     public function timer(): ?DateInterval

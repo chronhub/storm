@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Projector\GapRecognition;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function array_key_exists;
 use function usleep;
@@ -16,15 +17,13 @@ final class GapDetector implements GapRecognition
     private bool $gapDetected = false;
 
     /**
-     * @param array<int<0,max>>     $retriesInMs      The array of retry durations in milliseconds.
-     * @param non-empty-string|null $detectionWindows The interval detection windows.
+     * @param array<int<0,max>> $retriesInMs The array of retry durations in milliseconds.
      */
-    public function __construct(
-        public readonly array $retriesInMs,
-        public readonly ?string $detectionWindows = null
-    ) {
-        // todo probably remove detectionWindows as we can enforce replay from a checkpoint
-        // checkMe enforce retriesInMs
+    public function __construct(public readonly array $retriesInMs)
+    {
+        if ($this->retriesInMs === []) {
+            throw new InvalidArgumentException('Provide at least one retry duration');
+        }
     }
 
     public function isRecoverable(): bool

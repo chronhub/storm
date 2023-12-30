@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
@@ -17,7 +17,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected HookHub $hub,
+        protected NotificationHub $hub,
         protected ProjectionRepository $repository,
         private ReadModel $readModel
     ) {

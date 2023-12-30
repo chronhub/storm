@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 use Chronhub\Storm\Chronicler\Exceptions\StreamNotFound;
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
@@ -35,7 +35,7 @@ final class LoadStreams
         $this->queryFilterResolver = $queryFilterResolver;
     }
 
-    public function __invoke(HookHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
         $checkpoints = $hub->expect(ExpectCheckpoints::class);
 

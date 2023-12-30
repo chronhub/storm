@@ -16,5 +16,5 @@ interface Management
      */
     public function getProcessedStream(): string;
 
-    public function hub(): HookHub;
+    public function hub(): NotificationHub;
 }

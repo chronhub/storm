@@ -49,6 +49,13 @@ trait InteractWithProjection
         return $this;
     }
 
+    public function haltOn(Closure $haltOn): static
+    {
+        $this->context->haltOn($haltOn);
+
+        return $this;
+    }
+
     public function withQueryFilter(QueryFilter $queryFilter): static
     {
         $this->context->withQueryFilter($queryFilter);
@@ -84,18 +91,16 @@ trait InteractWithProjection
 
     protected function identifyProjectionIfNeeded(): void
     {
-        if ($this->context->id() !== null) {
-            return;
+        if ($this->context->id() === null) {
+            $prefix = Str::kebab(class_basename($this));
+
+            if (property_exists($this, 'streamName')) {
+                $prefix .= '.'.$this->streamName;
+            }
+
+            $id = $prefix.'.'.Str::kebab(class_basename($this->context->queries()));
+
+            $this->context->withId($id);
         }
-
-        $prefix = Str::kebab(class_basename($this));
-
-        if (property_exists($this, 'streamName')) {
-            $prefix .= '.'.$this->streamName;
-        }
-
-        $id = $prefix.'.'.Str::kebab(class_basename($this->context->queries()));
-
-        $this->context->withId($id);
     }
 }

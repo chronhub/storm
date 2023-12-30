@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Projector\Subscription\Notification\ExpectProcessedStream;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 
 final readonly class QueryingManagement implements QueryManagement
 {
-    public function __construct(private HookHub $hub)
+    public function __construct(private NotificationHub $hub)
     {
     }
 
@@ -25,7 +25,7 @@ final readonly class QueryingManagement implements QueryManagement
         return $this->hub->expect(ExpectProcessedStream::class);
     }
 
-    public function hub(): HookHub
+    public function hub(): NotificationHub
     {
         return $this->hub;
     }

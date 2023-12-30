@@ -111,7 +111,7 @@ it('can run query projection in background with timer 1000', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->until(0)
+        ->until(1)
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();

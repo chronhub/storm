@@ -10,7 +10,7 @@ final class ExpectSprintTermination
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return ! $subscriptor->monitor()->sprint()->inBackground()
-            || ! $subscriptor->monitor()->sprint()->inProgress();
+        return ! $subscriptor->watcher()->sprint()->inBackground()
+            || ! $subscriptor->watcher()->sprint()->inProgress();
     }
 }

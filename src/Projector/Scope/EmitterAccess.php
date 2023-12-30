@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Scope;
 use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
@@ -19,7 +19,7 @@ final class EmitterAccess implements ArrayAccess, EmitterScope
     use ScopeBehaviour;
 
     public function __construct(
-        private readonly HookHub $hub,
+        private readonly NotificationHub $hub,
         private readonly SystemClock $clock
     ) {
     }

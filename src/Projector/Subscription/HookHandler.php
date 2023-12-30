@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
@@ -22,7 +22,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
 
 final class HookHandler
 {
-    public static function subscribe(HookHub $task, PersistentManagement $management): void
+    public static function subscribe(NotificationHub $task, PersistentManagement $management): void
     {
         $task->addHooks([
             ProjectionRise::class => fn () => $management->rise(),

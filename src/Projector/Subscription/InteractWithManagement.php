@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription;
 
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointReset;
@@ -111,7 +111,7 @@ trait InteractWithManagement
         return $this->hub->expect(ExpectProcessedStream::class);
     }
 
-    public function hub(): HookHub
+    public function hub(): NotificationHub
     {
         return $this->hub;
     }

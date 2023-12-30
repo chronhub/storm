@@ -10,6 +10,6 @@ final class IsEventCounterReset
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->monitor()->eventCounter()->isReset();
+        return $subscriptor->watcher()->eventCounter()->isReset();
     }
 }

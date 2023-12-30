@@ -40,6 +40,7 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         if ($this->hasNextPosition($checkpoint, $position)) {
+
             $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
 
             return true;

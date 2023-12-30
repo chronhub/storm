@@ -10,6 +10,6 @@ final class EventCounterReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->eventCounter()->reset();
+        $subscriptor->watcher()->eventCounter()->reset();
     }
 }

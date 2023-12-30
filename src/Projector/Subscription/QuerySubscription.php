@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
-use Chronhub\Storm\Contracts\Projector\HookHub;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
@@ -40,7 +40,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->subscriptor->restoreUserState();
     }
 
-    public function hub(): HookHub
+    public function hub(): NotificationHub
     {
         return $this->management->hub();
     }
@@ -62,8 +62,9 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $this->initializeContextAgain();
 
-        $this->subscriptor->monitor()->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->monitor()->sprint()->continue();
+        $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->watcher()->sprint()->continue();
+        $this->subscriptor->watcher()->time()->setInterval($context->timer());
     }
 
     private function initializeContextAgain(): void

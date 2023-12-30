@@ -10,6 +10,6 @@ final class BatchSleep
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->monitor()->batchStream()->sleep();
+        $subscriptor->watcher()->batchStream()->sleep();
     }
 }
