@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Projector\Workflow\Timer;
 
-readonly class TimeWatcher
+class TimeWatcher
 {
-    public function __construct(protected Timer $timer)
+    public function __construct(protected readonly Timer $timer)
     {
     }
 

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-use Chronhub\Storm\Contracts\Projector\UserState;
-
-final class UserStateWatcher implements UserState
+class UserStateWatcher
 {
-    private array $state = [];
+    protected array $state = [];
 
     public function put(array $state): void
     {

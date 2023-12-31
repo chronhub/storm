@@ -10,7 +10,7 @@ use Illuminate\Support\Sleep;
 
 class BatchStreamWatcher
 {
-    private int $counter;
+    protected int $counter;
 
     public function __construct(
         protected readonly ?TokenBucket $bucket,

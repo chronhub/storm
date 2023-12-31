@@ -8,7 +8,7 @@ use function in_array;
 
 class AckedStreamWatcher
 {
-    private array $streams = [];
+    protected array $streams = [];
 
     public function ack(string $streamName): void
     {

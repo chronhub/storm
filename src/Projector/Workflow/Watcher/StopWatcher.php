@@ -34,7 +34,7 @@ class StopWatcher
     /**
      * @var array<class-string>
      */
-    private array $listeners = [];
+    protected array $events = [];
 
     public function subscribe(NotificationHub $hub, array $callbacks): void
     {
@@ -42,71 +42,76 @@ class StopWatcher
             $method = 'stopWhen'.ucfirst($name);
 
             /**
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenGapDetected
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCounterReach
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCycleReach
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenTimeExpired
+             * @covers stopWhenGapDetected
+             * @covers stopWhenCounterReach
+             * @covers stopWhenCycleReach
+             * @covers stopWhenTimeExpired
              */
             if (! method_exists($this, $method)) {
                 throw new InvalidArgumentException("Invalid stop watcher callback $name");
             }
 
-            $this->{$method}($hub, value($callback));
+            $this->events[] = $this->{$method}($hub, value($callback));
         }
 
         $hub->addListener(SprintTerminated::class, function (NotificationHub $hub): void {
-            foreach ($this->listeners as $event) {
+            foreach ($this->events as $event) {
                 $hub->forgetListener($event);
             }
 
-            $this->listeners = [];
+            $this->events = [];
         });
     }
 
-    protected function stopWhenGapDetected(NotificationHub $hub): void
+    protected function stopWhenGapDetected(NotificationHub $hub): string
     {
-        $this->listeners[] = GapDetected::class;
+        $listener = GapDetected::class;
 
-        $hub->addListener(GapDetected::class, function (NotificationHub $hub): void {
+        $hub->addListener($listener, function (NotificationHub $hub): void {
             $this->notifySprintStopped($hub);
         });
+
+        return $listener;
     }
 
-    protected function stopWhenCounterReach(NotificationHub $hub, array $values): void
+    protected function stopWhenCounterReach(NotificationHub $hub, array $values): string
     {
         [$limit, $resetOnStop] = $values;
+        $listener = BatchCounterIncremented::class;
 
         $hub->notify(KeepMasterCounterOnStop::class, ! $resetOnStop);
 
-        $this->listeners[] = BatchCounterIncremented::class;
-
-        $hub->addListener(BatchCounterIncremented::class, function (NotificationHub $hub) use ($limit): void {
+        $hub->addListener($listener, function (NotificationHub $hub) use ($limit): void {
             $currentCount = $hub->expect(CurrentMasterCount::class);
 
             if ($limit <= $currentCount) {
                 $this->notifySprintStopped($hub);
             }
         });
+
+        return $listener;
     }
 
-    protected function stopWhenCycleReach(NotificationHub $hub, int $expectedCycle): void
+    protected function stopWhenCycleReach(NotificationHub $hub, int $expectedCycle): string
     {
-        $this->listeners[] = CycleIncremented::class;
+        $listener = CycleIncremented::class;
 
-        $hub->addListener(CycleIncremented::class, function (NotificationHub $hub) use ($expectedCycle): void {
+        $hub->addListener($listener, function (NotificationHub $hub) use ($expectedCycle): void {
             $currentCycle = $hub->expect(CurrentCycle::class);
 
             if ($currentCycle === $expectedCycle) {
                 $this->notifySprintStopped($hub);
             }
         });
+
+        return $listener;
     }
 
-    protected function stopWhenTimeExpired(NotificationHub $hub, int $expiredAt): void
+    protected function stopWhenTimeExpired(NotificationHub $hub, int $expiredAt): string
     {
-        $this->listeners[] = CycleChanged::class;
+        $listener = CycleChanged::class;
 
-        $hub->addListener(CycleChanged::class, function (NotificationHub $hub) use ($expiredAt): void {
+        $hub->addListener($listener, function (NotificationHub $hub) use ($expiredAt): void {
             $currentTime = (int) $hub->expect(CurrentTime::class);
             $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
 
@@ -114,6 +119,8 @@ class StopWatcher
                 $this->notifySprintStopped($hub);
             }
         });
+
+        return $listener;
     }
 
     protected function notifySprintStopped(NotificationHub $hub): void

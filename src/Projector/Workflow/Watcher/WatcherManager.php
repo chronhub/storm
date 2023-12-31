@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-use Chronhub\Storm\Contracts\Projector\UserState;
-
 readonly class WatcherManager
 {
     public function __construct(
         protected LoopWatcher $loopWatcher,
         protected SprintWatcher $sprintWatcher,
-        protected UserState $userState,
+        protected UserStateWatcher $userState,
         protected BatchCounterWatcher $batchCounterWatcher,
         protected AckedStreamWatcher $ackedStreamWatcher,
         protected BatchStreamWatcher $batchStreamWatcher,
@@ -31,7 +29,7 @@ readonly class WatcherManager
         return $this->sprintWatcher;
     }
 
-    public function userState(): UserState
+    public function userState(): UserStateWatcher
     {
         return $this->userState;
     }

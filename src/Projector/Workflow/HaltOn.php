@@ -8,7 +8,7 @@ use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
 
 class HaltOn
 {
-    private array $callbacks;
+    protected array $callbacks;
 
     /**
      * @param positive-int $cycle
