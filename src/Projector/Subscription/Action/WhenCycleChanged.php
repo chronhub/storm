@@ -27,7 +27,8 @@ final class WhenCycleChanged
 
     private function endCycle(NotificationHub $hub, bool $sprintTerminated): void
     {
-        $hub->notifyWhen($sprintTerminated, CycleReset::class, null,
+        $hub->notifyWhen($sprintTerminated,
+            fn (NotificationHub $hub) => $hub->notify(CycleReset::class),
             fn (NotificationHub $hub) => $hub->notify(CycleIncremented::class)
         );
     }

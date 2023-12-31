@@ -58,7 +58,10 @@ interface NotificationHub
      */
     public function notifyMany(string|object ...$events): void;
 
-    public function notifyWhen(bool $condition, string|object $event, ?Closure $onSuccess = null, ?Closure $fallback = null): self;
+    /**
+     * Fire event with condition and notify on success or fallback
+     */
+    public function notifyWhen(bool $condition, ?Closure $onSuccess = null, ?Closure $fallback = null): self;
 
     /**
      * Fire event and wait for response

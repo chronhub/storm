@@ -18,8 +18,12 @@ final readonly class PersistOrUpdate
         // when no gap, we either update the lock, after sleeping, if we are running blank
         // or, we store the projection result
         if (! $hub->expect(HasGap::class)) {
-            $hub->notifyWhen($hub->expect(IsProcessBlank::class), BatchSleep::class,
-                fn (NotificationHub $hub) => $hub->trigger(new ProjectionLockUpdated()),
+            $hub->notifyWhen($hub->expect(IsProcessBlank::class),
+                function (NotificationHub $hub) {
+                    $hub->notify(BatchSleep::class);
+
+                    $hub->trigger(new ProjectionLockUpdated());
+                },
                 fn (NotificationHub $hub) => $hub->trigger(new ProjectionStored()),
             );
         }

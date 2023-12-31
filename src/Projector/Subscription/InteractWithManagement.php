@@ -78,7 +78,7 @@ trait InteractWithManagement
 
         $state = $projectionDetail->userState;
 
-        $this->hub->notifyWhen($state !== [], new UserStateChanged($state));
+        $this->hub->notifyWhen($state !== [], fn (NotificationHub $hub) => $hub->notify(UserStateChanged::class, $state));
     }
 
     public function persistWhenThresholdIsReached(): void

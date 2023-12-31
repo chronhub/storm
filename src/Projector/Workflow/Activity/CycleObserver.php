@@ -27,8 +27,8 @@ final class CycleObserver
     private function onCycleStarted(NotificationHub $hub): void
     {
         $hub
-            ->notifyWhen(! $hub->expect(CycleHasStarted::class), CycleStarted::class)
-            ->notifyWhen(! $hub->expect(IsTimeStarted::class), TimeStarted::class);
+            ->notifyWhen(! $hub->expect(CycleHasStarted::class), fn (NotificationHub $hub) => $hub->notify(CycleStarted::class))
+            ->notifyWhen(! $hub->expect(IsTimeStarted::class), fn (NotificationHub $hub) => $hub->notify(TimeStarted::class));
     }
 
     private function onCycleChanged(NotificationHub $hub): bool
@@ -36,7 +36,7 @@ final class CycleObserver
         $shouldStop = $hub->expect(IsSprintTerminated::class);
 
         $hub
-            ->notifyWhen($shouldStop, SprintTerminated::class)
+            ->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(SprintTerminated::class))
             ->notify(CycleChanged::class, $shouldStop);
 
         return ! $shouldStop;
