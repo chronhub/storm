@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentCycle;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentMasterCount;
@@ -39,15 +40,18 @@ class StopWatcher
     {
         foreach ($callbacks as $name => $callback) {
             $method = 'stopWhen'.ucfirst($name);
+
             /**
              * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenGapDetected
              * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCounterReach
              * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCycleReach
              * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenTimeExpired
              */
-            if (method_exists($this, $method)) {
-                $this->{$method}($hub, value($callback));
+            if (! method_exists($this, $method)) {
+                throw new InvalidArgumentException("Invalid stop watcher callback $name");
             }
+
+            $this->{$method}($hub, value($callback));
         }
 
         $hub->addListener(SprintTerminated::class, function (NotificationHub $hub): void {

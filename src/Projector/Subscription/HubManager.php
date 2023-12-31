@@ -137,9 +137,7 @@ final class HubManager implements NotificationHub
 
     public function notifyWhen(bool $condition, ?Closure $onSuccess = null, ?Closure $fallback = null): self
     {
-        $condition
-            ? ($onSuccess ? $onSuccess($this) : null)
-            : ($fallback ? $fallback($this) : null);
+        value($condition ? $onSuccess : $fallback, $this);
 
         return $this;
     }

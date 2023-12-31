@@ -15,18 +15,21 @@ final readonly class PersistOrUpdate
 {
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
+        if ($hub->expect(HasGap::class)) {
+            return $next($hub);
+        }
+
         // when no gap, we either update the lock, after sleeping, if we are running blank
         // or, we store the projection result
-        if (! $hub->expect(HasGap::class)) {
-            $hub->notifyWhen($hub->expect(IsProcessBlank::class),
-                function (NotificationHub $hub) {
-                    $hub->notify(BatchSleep::class);
+        $hub->notifyWhen(
+            $hub->expect(IsProcessBlank::class),
+            function (NotificationHub $hub) {
+                $hub->notify(BatchSleep::class);
 
-                    $hub->trigger(new ProjectionLockUpdated());
-                },
-                fn (NotificationHub $hub) => $hub->trigger(new ProjectionStored()),
-            );
-        }
+                $hub->trigger(new ProjectionLockUpdated());
+            },
+            fn (NotificationHub $hub) => $hub->trigger(new ProjectionStored()),
+        );
 
         return $next($hub);
     }

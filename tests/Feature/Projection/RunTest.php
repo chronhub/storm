@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests\Feature\Projection;
 
+use Chronhub\Storm\Clock\PointInTimeFactory;
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -30,11 +31,13 @@ it('can run emitter projection 111', function (): void {
     // create a projection
     $projector = $this->projectorManager->newEmitterProjector('customer');
 
+    $expiredAt = PointInTimeFactory::now()->modify('+10 seconds')->getTimestamp();
+
     // run projection
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(15000))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired($expiredAt))
         ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope

@@ -37,11 +37,6 @@ final class SubscriptionManager implements Subscriptor
     ) {
     }
 
-    public function capture(callable|object $event): mixed
-    {
-        return is_callable($event) ? $event($this) : $event;
-    }
-
     public function setContext(ContextReader $context, bool $allowRerun): void
     {
         if ($this->context !== null && ! $allowRerun) {
@@ -54,16 +49,6 @@ final class SubscriptionManager implements Subscriptor
     public function getContext(): ?ContextReader
     {
         return $this->context;
-    }
-
-    public function recognition(): CheckpointRecognition
-    {
-        return $this->checkpointRecognition;
-    }
-
-    public function watcher(): WatcherManager
-    {
-        return $this->watcher;
     }
 
     public function currentStatus(): ProjectionStatus
@@ -121,6 +106,16 @@ final class SubscriptionManager implements Subscriptor
         });
     }
 
+    public function recognition(): CheckpointRecognition
+    {
+        return $this->checkpointRecognition;
+    }
+
+    public function watcher(): WatcherManager
+    {
+        return $this->watcher;
+    }
+
     public function option(): ProjectionOption
     {
         return $this->option;
@@ -129,5 +124,10 @@ final class SubscriptionManager implements Subscriptor
     public function clock(): SystemClock
     {
         return $this->clock;
+    }
+
+    public function capture(callable|object $event): mixed
+    {
+        return is_callable($event) ? $event($this) : $event;
     }
 }

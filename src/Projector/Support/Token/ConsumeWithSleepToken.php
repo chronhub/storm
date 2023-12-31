@@ -27,7 +27,7 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
 
             $us = (int) ($remainingTime * 1000000);
 
-            // dump('Sleep for: '.$remainingTime);
+            //dump('Sleep for: '.$remainingTime);
 
             Sleep::usleep($us);
         }

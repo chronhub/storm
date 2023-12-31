@@ -28,11 +28,6 @@ class BatchStreamWatcher
         $hasLoadedStreams ? $this->reset() : $this->counter++;
     }
 
-    public function reset(): void
-    {
-        $this->counter = 0;
-    }
-
     public function sleep(): void
     {
         if ($this->fixedSleepTime !== null) {
@@ -46,5 +41,10 @@ class BatchStreamWatcher
                 $this->reset();
             }
         }
+    }
+
+    protected function reset(): void
+    {
+        $this->counter = 0;
     }
 }
