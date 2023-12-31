@@ -15,7 +15,7 @@ class HaltOn
      */
     public function cycleReach(int $cycle): self
     {
-        $this->callbacks[StopWatcher::AT_CYCLE] = fn () => $cycle;
+        $this->callbacks[StopWatcher::CYCLE_REACH] = fn () => $cycle;
 
         return $this;
     }
@@ -23,9 +23,9 @@ class HaltOn
     /**
      * @param positive-int $limit
      */
-    public function masterCounterLimit(int $limit, bool $resetOnHalt = true): self
+    public function streamEventLimitReach(int $limit, bool $resetOnHalt = true): self
     {
-        $this->callbacks[StopWatcher::MASTER_COUNTER_LIMIT] = fn () => [$limit, $resetOnHalt];
+        $this->callbacks[StopWatcher::COUNTER_REACH] = fn () => [$limit, $resetOnHalt];
 
         return $this;
     }
@@ -40,9 +40,9 @@ class HaltOn
     /**
      * @param int<0,max> $timestamp
      */
-    public function expiredAt(int $timestamp): self
+    public function timeExpired(int $timestamp): self
     {
-        $this->callbacks[StopWatcher::EXPIRED_AT] = fn () => $timestamp;
+        $this->callbacks[StopWatcher::TIME_EXPIRED] = fn () => $timestamp;
 
         return $this;
     }

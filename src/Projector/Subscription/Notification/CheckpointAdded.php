@@ -8,8 +8,10 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
 final readonly class CheckpointAdded
 {
-    public function __construct(public string $streamName, public int $streamPosition)
-    {
+    public function __construct(
+        public string $streamName,
+        public int $streamPosition
+    ) {
     }
 
     public function __invoke(Subscriptor $subscriptor): bool

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Subscription\Notification;
 
-final class CycleRenew
+final class CycleChanged
 {
+    public function __construct(public bool $sprintTerminated)
+    {
+    }
 }

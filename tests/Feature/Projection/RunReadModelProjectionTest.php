@@ -459,7 +459,7 @@ test('can no stream event loaded', function () {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('debit')
         ->haltOn(function (HaltOn $halt): HaltOn {
-            return $halt->masterCounterLimit(50);
+            return $halt->streamEventLimitReach(50);
         })
         ->withQueryFilter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {

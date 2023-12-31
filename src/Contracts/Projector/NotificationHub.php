@@ -28,7 +28,7 @@ interface NotificationHub
     /**
      * Add listener
      */
-    public function addListener(string $listener, string|callable|array $callback): void;
+    public function addListener(string $event, string|callable|array $callback): void;
 
     /**
      * Add listeners
@@ -38,16 +38,21 @@ interface NotificationHub
     public function addListeners(array $listeners): void;
 
     /**
+     * Forget event and all its callbacks
+     */
+    public function forgetListener(string $event): void;
+
+    /**
      * Fire event and forget
      *
-     * @param class-string|object $notification
+     * @param class-string|object $event
      */
-    public function notify(string|object $notification, mixed ...$arguments): void;
+    public function notify(string|object $event, mixed ...$arguments): void;
 
     /**
      * Fire event and wait for response
      *
-     * @param class-string|object $notification
+     * @param class-string|object $event
      */
-    public function expect(string|object $notification, mixed ...$arguments): mixed;
+    public function expect(string|object $event, mixed ...$arguments): mixed;
 }

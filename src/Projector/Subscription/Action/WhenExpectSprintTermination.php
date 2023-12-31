@@ -11,7 +11,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\TimeReset;
 
 final class WhenExpectSprintTermination
 {
-    // todo change action for subscriber
     public function __invoke(NotificationHub $hub, IsSprintTerminated $capture, bool $shouldStop): void
     {
         if ($shouldStop) {

@@ -37,7 +37,7 @@ interface Subscriptor
 
     public function watcher(): WatcherManager;
 
-    public function receive(callable|object $event): mixed;
+    public function capture(callable|object $event): mixed;
 
     public function option(): ProjectionOption;
 

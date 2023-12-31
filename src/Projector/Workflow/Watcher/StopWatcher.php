@@ -8,11 +8,12 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentCycle;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentMasterCount;
+use Chronhub\Storm\Projector\Subscription\Notification\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\CycleRenew;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\KeepMasterCounterOnStop;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
 
 use function method_exists;
 use function time;
@@ -22,93 +23,89 @@ class StopWatcher
 {
     const GAP_DETECTED = 'gapDetected';
 
-    const AT_CYCLE = 'atCycle';
+    const CYCLE_REACH = 'cycleReach';
 
-    const MASTER_COUNTER_LIMIT = 'masterCounterLimit';
+    const COUNTER_REACH = 'counterReach';
 
-    const EXPIRED_AT = 'expiredAt';
+    const TIME_EXPIRED = 'timeExpired';
 
-    private array $handlers = [];
-
-    // todo on rerun, listeners still exists
-    // todo forget handlers on stop
-    public function getHandlers(): array
-    {
-        return $this->handlers;
-    }
+    /**
+     * @var array<class-string>
+     */
+    private array $listeners = [];
 
     public function subscribe(NotificationHub $hub, array $callbacks): void
     {
         foreach ($callbacks as $name => $callback) {
-            $method = 'subscribe'.ucfirst($name);
+            $method = 'stopWhen'.ucfirst($name);
             /**
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::subscribeGapDetected
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::subscribeMasterCounterLimit
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::subscribeAtCycle
-             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::subscribeExpiredAt
+             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenGapDetected
+             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCounterReach
+             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenCycleReach
+             * @covers \Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher::stopWhenTimeExpired
              */
             if (method_exists($this, $method)) {
                 $this->{$method}($hub, value($callback));
             }
         }
+
+        $hub->addListener(SprintTerminated::class, function (NotificationHub $hub): void {
+            foreach ($this->listeners as $event) {
+                $hub->forgetListener($event);
+            }
+
+            $this->listeners = [];
+        });
     }
 
-    protected function subscribeGapDetected(NotificationHub $hub): void
+    protected function stopWhenGapDetected(NotificationHub $hub): void
     {
-        $handler = function (NotificationHub $hub): void {
+        $this->listeners[] = GapDetected::class;
+
+        $hub->addListener(GapDetected::class, function (NotificationHub $hub): void {
             $this->notifySprintStopped($hub);
-        };
-
-        $this->handlers[GapDetected::class] = $handler;
-
-        $hub->addListener(GapDetected::class, $handler);
+        });
     }
 
-    protected function subscribeMasterCounterLimit(NotificationHub $hub, array $values): void
+    protected function stopWhenCounterReach(NotificationHub $hub, array $values): void
     {
-        $handler = function (NotificationHub $hub) use ($values): void {
+        [$limit, $resetOnStop] = $values;
+
+        $hub->notify(KeepMasterCounterOnStop::class, ! $resetOnStop);
+
+        $this->listeners[] = BatchCounterIncremented::class;
+
+        $hub->addListener(BatchCounterIncremented::class, function (NotificationHub $hub) use ($limit): void {
             $currentCount = $hub->expect(CurrentMasterCount::class);
-
-            [$limit, $resetOnStop] = $values;
-
-            $hub->notify(KeepMasterCounterOnStop::class, ! $resetOnStop);
 
             if ($limit <= $currentCount) {
                 $this->notifySprintStopped($hub);
             }
-        };
-
-        $this->handlers[BatchCounterIncremented::class] = $handler;
-
-        $hub->addListener(BatchCounterIncremented::class, $handler);
+        });
     }
 
-    protected function subscribeAtCycle(NotificationHub $hub, int $expectedCycle): void
+    protected function stopWhenCycleReach(NotificationHub $hub, int $expectedCycle): void
     {
-        $handler = function (NotificationHub $hub) use ($expectedCycle): void {
+        $this->listeners[] = CycleIncremented::class;
+
+        $hub->addListener(CycleIncremented::class, function (NotificationHub $hub) use ($expectedCycle): void {
             $currentCycle = $hub->expect(CurrentCycle::class);
 
             if ($currentCycle === $expectedCycle) {
                 $this->notifySprintStopped($hub);
             }
-        };
-
-        $this->handlers[CycleIncremented::class] = $handler;
-
-        $hub->addListener(CycleIncremented::class, $handler);
+        });
     }
 
-    protected function subscribeExpiredAt(NotificationHub $hub, int $expiredAt): void
+    protected function stopWhenTimeExpired(NotificationHub $hub, int $expiredAt): void
     {
-        $handler = function (NotificationHub $hub) use ($expiredAt): void {
+        $this->listeners[] = CycleChanged::class;
+
+        $hub->addListener(CycleChanged::class, function (NotificationHub $hub) use ($expiredAt): void {
             if ($expiredAt < time()) {
                 $this->notifySprintStopped($hub);
             }
-        };
-
-        $this->handlers[] = $handler;
-
-        $hub->addListener(CycleRenew::class, $handler);
+        });
     }
 
     protected function notifySprintStopped(NotificationHub $hub): void

@@ -103,7 +103,7 @@ it('stop when counter is reached', function (): void {
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
         ->withQueryFilter($fromIncludedPosition)
-        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->masterCounterLimit(22))
+        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->streamEventLimitReach(22))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
@@ -125,20 +125,20 @@ it('stop when time expires', function (): void {
     $haltOn = $this->projectorManager->newEmitterProjector('customer');
 
     $start = time();
-    $expiredAt = $start + 5;
+    $expiredAt = $start + 2;
 
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
         ->withQueryFilter($fromIncludedPosition)
-        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->expiredAt($expiredAt))
+        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->timeExpired($expiredAt))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
         ->run(true);
 
     expect($haltOn->getState())->toBe(['count' => 5])
-        ->and(time() - $start)->toBeGreaterThan(5);
+        ->and(time() - $start)->toBeGreaterThan(2);
 });
 
 it('stop after first cycle when expired time is zero', function (): void {
@@ -150,14 +150,13 @@ it('stop after first cycle when expired time is zero', function (): void {
 
     expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
-    // run for 5 seconds
     $haltOn = $this->projectorManager->newEmitterProjector('customer');
 
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
         ->withQueryFilter($fromIncludedPosition)
-        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->expiredAt(0))
+        ->haltOn(fn (HaltOn $halt): HaltOn => $halt->timeExpired(0))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
@@ -204,7 +203,7 @@ it('can run emitter again and reset main limit', function (): void {
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->masterCounterLimit(10000, true))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, true))
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
@@ -220,7 +219,7 @@ it('can run emitter again and reset main limit', function (): void {
     $this->eventStore->firstCommit($stream1);
 
     $projector
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->masterCounterLimit(5000))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(5000))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);
@@ -239,7 +238,7 @@ it('can run emitter again and do not reset main limit', function (): void {
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->masterCounterLimit(10000, false))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, false))
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
@@ -255,7 +254,7 @@ it('can run emitter again and do not reset main limit', function (): void {
     $this->eventStore->firstCommit($stream1);
 
     $projector
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->masterCounterLimit(15000))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(15000))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => ['user' => 10000, 'foo' => 5000, 'total' => 15000]]);

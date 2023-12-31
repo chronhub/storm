@@ -72,7 +72,7 @@ it('can run query projection until and increment loop', function () {
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->expiredAt($expiredAt))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired($expiredAt))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => 5]);

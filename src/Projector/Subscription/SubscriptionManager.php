@@ -37,7 +37,7 @@ final class SubscriptionManager implements Subscriptor
     ) {
     }
 
-    public function receive(callable|object $event): mixed
+    public function capture(callable|object $event): mixed
     {
         return is_callable($event) ? $event($this) : $event;
     }
