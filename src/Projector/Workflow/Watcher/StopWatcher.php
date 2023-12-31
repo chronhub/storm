@@ -15,6 +15,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\CycleIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\GetElapsedTime;
 use Chronhub\Storm\Projector\Subscription\Notification\KeepMasterCounterOnStop;
+use Chronhub\Storm\Projector\Subscription\Notification\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
 
@@ -63,9 +64,9 @@ class StopWatcher
         });
     }
 
-    protected function stopWhenGapDetected(NotificationHub $hub): string
+    protected function stopWhenGapDetected(NotificationHub $hub, bool $recoverableGap): string
     {
-        $listener = GapDetected::class;
+        $listener = $recoverableGap ? RecoverableGapDetected::class : GapDetected::class;
 
         $hub->addListener($listener, function (NotificationHub $hub): void {
             $this->notifySprintStopped($hub);

@@ -30,9 +30,9 @@ class HaltOn
         return $this;
     }
 
-    public function gapDetected(): self
+    public function gapDetected(bool $recoverableGaps): self
     {
-        $this->callbacks[StopWatcher::GAP_DETECTED] = fn () => true;
+        $this->callbacks[StopWatcher::GAP_DETECTED] = fn () => $recoverableGaps;
 
         return $this;
     }

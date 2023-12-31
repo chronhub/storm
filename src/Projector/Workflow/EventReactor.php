@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CheckpointAdded;
@@ -13,11 +14,13 @@ use Chronhub\Storm\Projector\Subscription\Notification\CurrentUserState;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Notification\IsUserStateInitialized;
+use Chronhub\Storm\Projector\Subscription\Notification\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\Notification\UserStateChanged;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
+use function in_array;
 use function is_array;
 use function pcntl_signal_dispatch;
 
@@ -37,10 +40,7 @@ final readonly class EventReactor
     {
         $this->dispatchSignalIfRequested();
 
-        if (! $this->hasNoGap($hub, $streamName, $expectedPosition)) {
-            // todo distinct confirmed gap and unconfirmed gap when is still recovering
-            $hub->notify(GapDetected::class, $streamName, $event, $expectedPosition);
-
+        if (! $this->hasNoGap($hub, $streamName, $event, $expectedPosition)) {
             return false;
         }
 
@@ -70,9 +70,11 @@ final readonly class EventReactor
         $resetScope();
     }
 
-    private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition): bool
+    private function hasNoGap(NotificationHub $hub, string $streamName, DomainEvent $event, int $expectedPosition): bool
     {
-        return $hub->expect(new CheckpointAdded($streamName, $expectedPosition));
+        $checkPoint = $hub->expect(new CheckpointAdded($streamName, $expectedPosition));
+
+        return $this->notifyGapDetected($hub, $streamName, $event, $expectedPosition, $checkPoint);
     }
 
     private function getUserState(NotificationHub $hub): ?array
@@ -93,5 +95,30 @@ final readonly class EventReactor
         if ($this->dispatchSignal) {
             pcntl_signal_dispatch();
         }
+    }
+
+    // rewrite checkpoint manager
+    // we should handle when gap is not recoverable
+    // count retries left, if one only(handle in next activity, then we can warn of an unsolvable gap)
+    private function notifyGapDetected(
+        NotificationHub $hub,
+        string $streamName,
+        DomainEvent $event,
+        int $expectedPosition,
+        Checkpoint $lastCheckpoint
+    ): bool {
+        if (in_array($expectedPosition - 1, $lastCheckpoint->gaps, true)) {
+            $hub->notify(GapDetected::class, $streamName, $event, $expectedPosition);
+
+            return true;
+        }
+
+        if ($lastCheckpoint->position !== $expectedPosition) {
+            $hub->notify(RecoverableGapDetected::class, $streamName, $event, $expectedPosition);
+
+            return false;
+        }
+
+        return true;
     }
 }

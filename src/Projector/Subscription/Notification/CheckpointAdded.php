@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 
 final readonly class CheckpointAdded
 {
@@ -14,7 +15,7 @@ final readonly class CheckpointAdded
     ) {
     }
 
-    public function __invoke(Subscriptor $subscriptor): bool
+    public function __invoke(Subscriptor $subscriptor): Checkpoint
     {
         return $subscriptor->recognition()->insert($this->streamName, $this->streamPosition);
     }

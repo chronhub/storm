@@ -19,14 +19,14 @@ beforeEach(function () {
     $this->testFactory = new InMemoryFactory();
     $this->eventStore = $this->testFactory->getEventStore();
     $this->projectorManager = $this->testFactory->getManager();
+    $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
-it('stop when gap detected', function (): void {
+it('stop when a recoverable gap is detected', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, null, $eventId);
     $this->eventStore->firstCommit($stream);
-    $fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 
     // induce gap
     $stream = $this->testFactory->getStream('user', 10, null, $eventId, SomeEvent::class, 12);
@@ -39,7 +39,7 @@ it('stop when gap detected', function (): void {
 
     $keepEmitting->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->filter($fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -59,16 +59,65 @@ it('stop when gap detected', function (): void {
     $haltOnGap
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->filter($fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->haltOn(function (HaltOn $halt): HaltOn {
-            return $halt->gapDetected();
+            return $halt->gapDetected(true);
         })
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
         ->run(true);
 
-    expect($haltOnGap->getState())->toBe(['count' => 10]);
+    expect($haltOnGap->getState())->toBe(['count' => 10]); // gap is still recoverable and not inserted in checkpoint
+});
+
+it('stop when a non recoverable gap is detected', function (): void {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // induce gap
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId, SomeEvent::class, 12);
+    $this->eventStore->amend($stream);
+
+    expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
+
+    // run without halting on gap
+    $keepEmitting = $this->projectorManager->newEmitterProjector('customer');
+
+    $keepEmitting->initialize(fn () => ['count' => 0])
+        ->subscribeToStream('user')
+        ->filter($this->fromIncludedPosition)
+        ->when(function (EmitterAccess $scope): void {
+            $scope
+                ->ack(SomeEvent::class)
+                ->incrementState()
+                ->stopWhen($scope['count'] === 20);
+        })
+        ->run(true);
+
+    expect($keepEmitting->getState())->toBe(['count' => 20]);
+
+    // delete projection
+    $keepEmitting->delete(false);
+
+    // expect halt on gap
+    $haltOnGap = $this->projectorManager->newEmitterProjector('customer');
+
+    $haltOnGap
+        ->initialize(fn () => ['count' => 0])
+        ->subscribeToStream('user')
+        ->filter($this->fromIncludedPosition)
+        ->haltOn(function (HaltOn $halt): HaltOn {
+            return $halt->gapDetected(false);
+        })
+        ->when(function (EmitterAccess $scope): void {
+            $scope->ack(SomeEvent::class)->incrementState();
+        })
+        ->run(true);
+
+    expect($haltOnGap->getState())->toBe(['count' => 11]); // 11 because of the gap
 });
 
 it('stop when counter is reached', function (): void {
@@ -76,7 +125,6 @@ it('stop when counter is reached', function (): void {
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 50, null, $eventId);
     $this->eventStore->firstCommit($stream);
-    $fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 
     expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
@@ -85,7 +133,7 @@ it('stop when counter is reached', function (): void {
 
     $keepEmitting->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->filter($fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
@@ -102,7 +150,7 @@ it('stop when counter is reached', function (): void {
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->filter($fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->streamEventLimitReach(22))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -117,7 +165,6 @@ it('stop when time expires', function (): void {
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 5, null, $eventId);
     $this->eventStore->firstCommit($stream);
-    $fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 
     expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
@@ -130,7 +177,7 @@ it('stop when time expires', function (): void {
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->filter($fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->timeExpired($expiredAt))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -203,7 +250,7 @@ it('can run emitter again and reset main limit', function (): void {
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
         ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, true))
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)
@@ -238,7 +285,7 @@ it('can run emitter again and do not reset main limit', function (): void {
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
         ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, false))
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)

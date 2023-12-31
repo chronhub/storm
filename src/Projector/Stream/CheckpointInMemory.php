@@ -26,7 +26,7 @@ final class CheckpointInMemory implements CheckpointRecognition
         $this->checkpoints->onDiscover(...$eventStreams);
     }
 
-    public function insert(string $streamName, int $position): bool
+    public function insert(string $streamName, int $position): Checkpoint
     {
         $this->validate($streamName, $position);
 
@@ -38,7 +38,7 @@ final class CheckpointInMemory implements CheckpointRecognition
 
         $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
 
-        return true;
+        return $this->checkpoints->last($streamName);
     }
 
     public function update(array $checkpoints): void

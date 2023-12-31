@@ -29,7 +29,7 @@ final class CheckpointManager implements CheckpointRecognition
         $this->checkpoints->onDiscover(...$eventStreams);
     }
 
-    public function insert(string $streamName, int $position): bool
+    public function insert(string $streamName, int $position): Checkpoint
     {
         $this->validate($streamName, $position);
 
@@ -40,19 +40,18 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         if ($this->hasNextPosition($checkpoint, $position)) {
-
             $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
 
-            return true;
+            return $this->checkpoints->last($streamName);
         }
 
         if (! $this->gapDetector->isRecoverable()) {
             $this->checkpoints->nextWithGap($checkpoint, $position);
 
-            return true;
+            return $this->checkpoints->last($streamName);
         }
 
-        return false;
+        return $checkpoint;
     }
 
     public function update(array $checkpoints): void
