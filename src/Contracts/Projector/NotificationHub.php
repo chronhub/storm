@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
+use Closure;
+
 interface NotificationHub
 {
     /**
@@ -48,6 +50,15 @@ interface NotificationHub
      * @param class-string|object $event
      */
     public function notify(string|object $event, mixed ...$arguments): void;
+
+    /**
+     * Fire many events and forget
+     *
+     * @param class-string|object ...$events
+     */
+    public function notifyMany(string|object ...$events): void;
+
+    public function notifyWhen(bool $condition, string|object $event, ?Closure $onSuccess = null, ?Closure $fallback = null): self;
 
     /**
      * Fire event and wait for response

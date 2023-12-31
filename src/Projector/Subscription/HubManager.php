@@ -20,6 +20,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -125,6 +126,28 @@ final class HubManager implements NotificationHub
         $result = is_callable($notification) ? $this->subscriptor->capture($notification) : null;
 
         $this->handleListener($notification, $result);
+    }
+
+    public function notifyMany(string|object ...$events): void
+    {
+        foreach ($events as $event) {
+            $this->notify($event);
+        }
+    }
+
+    public function notifyWhen(bool $condition, string|object $event, ?Closure $onSuccess = null, ?Closure $fallback = null): self
+    {
+        if ($condition) {
+            $this->notify($event);
+
+            if ($onSuccess !== null) {
+                $onSuccess($this);
+            }
+        } elseif ($fallback !== null) {
+            $fallback($this);
+        }
+
+        return $this;
     }
 
     private function handleListener(object $event, mixed $result): void

@@ -14,8 +14,7 @@ final class WhenExpectSprintTermination
     public function __invoke(NotificationHub $hub, IsSprintTerminated $capture, bool $shouldStop): void
     {
         if ($shouldStop) {
-            $hub->notify(TimeReset::class);
-            $hub->notify(MasterCounterReset::class);
+            $hub->notifyMany(TimeReset::class, MasterCounterReset::class);
         }
     }
 }

@@ -12,9 +12,7 @@ final readonly class RiseQueryProjection
 {
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        if ($hub->expect(IsFirstCycle::class)) {
-            $hub->notify(EventStreamDiscovered::class);
-        }
+        $hub->notifyWhen($hub->expect(IsFirstCycle::class), EventStreamDiscovered::class);
 
         return $next($hub);
     }

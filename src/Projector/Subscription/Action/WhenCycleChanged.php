@@ -22,15 +22,13 @@ final class WhenCycleChanged
 
     private function resetCounter(NotificationHub $hub): void
     {
-        $hub->notify(BatchCounterReset::class);
-
-        $hub->notify(StreamEventAckedReset::class);
+        $hub->notifyMany(BatchCounterReset::class, StreamEventAckedReset::class);
     }
 
     private function endCycle(NotificationHub $hub, bool $sprintTerminated): void
     {
-        $cycleEvent = $sprintTerminated ? CycleReset::class : CycleIncremented::class;
-
-        $hub->notify($cycleEvent);
+        $hub->notifyWhen($sprintTerminated, CycleReset::class, null,
+            fn (NotificationHub $hub) => $hub->notify(CycleIncremented::class)
+        );
     }
 }

@@ -14,13 +14,12 @@ final class HandleStreamGap
 {
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        if ($hub->expect(HasGap::class)) {
-            $hub->notify(SleepOnGap::class);
-
-            if (! $hub->expect(IsBatchCounterReset::class)) {
-                $hub->trigger(new ProjectionStored());
-            }
-        }
+        $hub->notifyWhen($hub->expect(HasGap::class), SleepOnGap::class,
+            function (NotificationHub $hub): void {
+                if (! $hub->expect(IsBatchCounterReset::class)) {
+                    $hub->trigger(new ProjectionStored());
+                }
+            });
 
         return $next($hub);
     }

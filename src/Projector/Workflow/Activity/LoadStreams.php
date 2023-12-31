@@ -16,9 +16,6 @@ use Chronhub\Storm\Projector\Subscription\Notification\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
 use Illuminate\Support\Collection;
 
-use function array_keys;
-use function array_values;
-
 final class LoadStreams
 {
     /**
@@ -39,9 +36,9 @@ final class LoadStreams
     {
         $checkpoints = $hub->expect(CurrentCheckpoints::class);
 
-        $iterators = $this->collectStreams($this->batchStreams($checkpoints));
+        $iterators = $this->batchStreams($checkpoints);
 
-        if ($iterators !== null) {
+        if ($iterators) {
             $iterators = new MergeStreamIterator($this->clock, $iterators);
         }
 
@@ -50,36 +47,25 @@ final class LoadStreams
         return $next($hub);
     }
 
-    private function collectStreams(array $streams): ?Collection
-    {
-        if ($streams === []) {
-            return null;
-        }
-
-        return collect(array_values($streams))->map(
-            fn (StreamIterator $iterator, int $key): array => [$iterator, array_keys($streams)[$key]]
-        );
-    }
-
     /**
-     * @param  array<string,Checkpoint>     $streams
-     * @return array<string,StreamIterator>
+     * @param  array<string,Checkpoint>               $streams
+     * @return null|Collection<string,StreamIterator>
      */
-    private function batchStreams(array $streams): array
+    private function batchStreams(array $streams): ?Collection
     {
-        $streamEvents = [];
+        $streamEvents = new Collection();
 
         foreach ($streams as $streamName => $stream) {
             $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $this->loadLimiter);
 
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
-                $streamEvents[$streamName] = new StreamIterator($events);
+                $streamEvents->push([new StreamIterator($events), $streamName]);
             } catch (StreamNotFound) {
                 continue;
             }
         }
 
-        return $streamEvents;
+        return $streamEvents->isEmpty() ? null : $streamEvents;
     }
 }

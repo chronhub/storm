@@ -26,24 +26,18 @@ final class CycleObserver
 
     private function onCycleStarted(NotificationHub $hub): void
     {
-        if (! $hub->expect(CycleHasStarted::class)) {
-            $hub->notify(CycleStarted::class);
-        }
-
-        if (! $hub->expect(IsTimeStarted::class)) {
-            $hub->notify(TimeStarted::class);
-        }
+        $hub
+            ->notifyWhen(! $hub->expect(CycleHasStarted::class), CycleStarted::class)
+            ->notifyWhen(! $hub->expect(IsTimeStarted::class), TimeStarted::class);
     }
 
     private function onCycleChanged(NotificationHub $hub): bool
     {
         $shouldStop = $hub->expect(IsSprintTerminated::class);
 
-        if ($shouldStop) {
-            $hub->notify(SprintTerminated::class);
-        }
-
-        $hub->notify(CycleChanged::class, $shouldStop);
+        $hub
+            ->notifyWhen($shouldStop, SprintTerminated::class)
+            ->notify(CycleChanged::class, $shouldStop);
 
         return ! $shouldStop;
     }
