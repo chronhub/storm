@@ -78,9 +78,7 @@ trait InteractWithManagement
 
         $state = $projectionDetail->userState;
 
-        if ($state !== []) {
-            $this->hub->notify(UserStateChanged::class, $state);
-        }
+        $this->hub->notifyWhen($state !== [], new UserStateChanged($state));
     }
 
     public function persistWhenThresholdIsReached(): void
@@ -133,8 +131,7 @@ trait InteractWithManagement
 
     protected function resetState(): void
     {
-        $this->hub->notify(CheckpointReset::class);
-        $this->hub->notify(UserStateRestored::class);
+        $this->hub->notifyMany(CheckpointReset::class, UserStateRestored::class);
     }
 
     protected function onStatusChanged(ProjectionStatus $status): void

@@ -12,7 +12,7 @@ readonly class EventStreamDiscovery
     {
     }
 
-    public function query(callable $query): array
+    public function discover(callable $query): array
     {
         return $query($this->eventStreamProvider);
     }

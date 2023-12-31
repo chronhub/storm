@@ -115,7 +115,7 @@ final class SubscriptionManager implements Subscriptor
     public function discoverStreams(): void
     {
         tap($this->context->queries(), function (callable $query): void {
-            $eventStreams = $this->eventStreamDiscovery->query($query);
+            $eventStreams = $this->eventStreamDiscovery->discover($query);
 
             $this->checkpointRecognition->refreshStreams($eventStreams);
         });
