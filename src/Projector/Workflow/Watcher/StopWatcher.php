@@ -8,15 +8,16 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentCycle;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentMasterCount;
+use Chronhub\Storm\Projector\Subscription\Notification\CurrentTime;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\GapDetected;
+use Chronhub\Storm\Projector\Subscription\Notification\GetElapsedTime;
 use Chronhub\Storm\Projector\Subscription\Notification\KeepMasterCounterOnStop;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
 
 use function method_exists;
-use function time;
 use function ucfirst;
 
 class StopWatcher
@@ -102,7 +103,10 @@ class StopWatcher
         $this->listeners[] = CycleChanged::class;
 
         $hub->addListener(CycleChanged::class, function (NotificationHub $hub) use ($expiredAt): void {
-            if ($expiredAt < time()) {
+            $currentTime = (int) $hub->expect(CurrentTime::class);
+            $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
+
+            if ($expiredAt < $currentTime + $elapsedTime) {
                 $this->notifySprintStopped($hub);
             }
         });

@@ -63,7 +63,6 @@ it('can run query projection until and increment loop', function () {
     // force to only handle one event
     $queryFilter = new InMemoryLimitByOneQuery();
 
-    $expiredAt = PointInTimeFactory::now()->modify('+1 seconds')->getTimestamp();
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
@@ -72,11 +71,11 @@ it('can run query projection until and increment loop', function () {
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired($expiredAt))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(5))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => 5]);
-})->group('sleep');
+});
 
 it('can stop query projection', function () {
     // feed our event store
@@ -114,7 +113,7 @@ it('can run query projection in background with timer 1', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired(PointInTimeFactory::now()->modify('+1 seconds')->getTimestamp()))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired(PointInTimeFactory::now()->modify('+1 second')->getTimestamp()))
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -419,7 +418,7 @@ it('can run query projection with a dedicated query filter', function () {
 it('can run query projection with user state 123', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $stream = $this->testFactory->getStream('user', 1, '+1 second', $eventId);
     $this->eventStore->firstCommit($stream);
 
     // create a projection

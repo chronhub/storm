@@ -39,11 +39,11 @@ final class CycleObserver
     {
         $shouldStop = $hub->expect(IsSprintTerminated::class);
 
-        $hub->notify(CycleChanged::class, $shouldStop);
-
         if ($shouldStop) {
             $hub->notify(SprintTerminated::class);
         }
+
+        $hub->notify(CycleChanged::class, $shouldStop);
 
         return ! $shouldStop;
     }

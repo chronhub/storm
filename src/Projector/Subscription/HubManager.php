@@ -21,6 +21,7 @@ use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 use function array_key_exists;
 use function is_callable;
@@ -49,12 +50,13 @@ final class HubManager implements NotificationHub
     ];
 
     /**
-     * @var array<string, array<string|callable|array<callable>>>
+     * @var Collection<string, array<string|callable>>
      */
-    private array $listeners = [];
+    private Collection $listeners;
 
     public function __construct(private readonly Subscriptor $subscriptor)
     {
+        $this->listeners = new Collection();
     }
 
     public function addHook(string $hook, callable $trigger): void
@@ -84,7 +86,11 @@ final class HubManager implements NotificationHub
 
     public function addListener(string $event, string|callable|array $callback): void
     {
-        $this->listeners[$event][] = Arr::wrap($callback);
+        $callbacks = Arr::wrap($callback);
+
+        $this->listeners = ! $this->listeners->has($event)
+            ? $this->listeners->put($event, $callbacks)
+            : $this->listeners->mergeRecursive([$event => $callback]);
     }
 
     public function addListeners(array $listeners): void
@@ -96,9 +102,7 @@ final class HubManager implements NotificationHub
 
     public function forgetListener(string $event): void
     {
-        if (array_key_exists($event, $this->listeners)) {
-            unset($this->listeners[$event]);
-        }
+        $this->listeners = $this->listeners->forget($event);
     }
 
     public function expect(string|object $event, mixed ...$arguments): mixed
@@ -117,7 +121,7 @@ final class HubManager implements NotificationHub
         $notification = $this->makeEvent($event, ...$arguments);
 
         // when the event provided is not callable, it means that it is a notification object,
-        // so we just pass it to the handleListener method
+        // so we just pass it to his handlers
         $result = is_callable($notification) ? $this->subscriptor->capture($notification) : null;
 
         $this->handleListener($notification, $result);
@@ -125,20 +129,16 @@ final class HubManager implements NotificationHub
 
     private function handleListener(object $event, mixed $result): void
     {
-        if (array_key_exists($event::class, $this->listeners)) {
-            foreach ($this->listeners[$event::class] as $listener) {
-                foreach ($listener as $handler) {
-                    if (is_string($handler)) {
-                        $handler = new $handler();
-                    }
-
-                    if (! is_callable($handler)) {
-                        throw new InvalidArgumentException('Listener handler must be callable');
-                    }
-
-                    $handler($this, $event, $result);
-                }
+        foreach ($this->listeners->get($event::class, []) as $handler) {
+            if (is_string($handler)) {
+                $handler = new $handler();
             }
+
+            if (! is_callable($handler)) {
+                throw new InvalidArgumentException('Listener handler must be a callable');
+            }
+
+            $handler($this, $event, $result);
         }
     }
 

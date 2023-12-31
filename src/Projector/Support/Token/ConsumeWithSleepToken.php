@@ -8,6 +8,8 @@ use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Sleep;
 
 use function max;
+use function microtime;
+use function min;
 
 final class ConsumeWithSleepToken extends AbstractTokenBucket
 {
@@ -20,14 +22,12 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
         // overflow the bucket
         $this->doConsume($this->capacity);
 
-        //dump('remaining: '.$this->tokens);
-
         while (! $this->doConsume($tokens)) {
             $remainingTime = $this->getRemainingTimeUntilNextToken($tokens);
 
             $us = (int) ($remainingTime * 1000000);
 
-            //dump('Sleep for: '.$remainingTime);
+            // dump('Sleep for: '.$remainingTime);
 
             Sleep::usleep($us);
         }
@@ -43,5 +43,13 @@ final class ConsumeWithSleepToken extends AbstractTokenBucket
         $this->refillTokens();
 
         return max(0, ($tokens - $this->tokens) / $this->rate);
+    }
+
+    protected function refillTokens(): void
+    {
+        $now = microtime(true);
+        $timePassed = max(0, $now - $this->lastRefillTime);
+        $this->tokens = min($this->capacity, $this->tokens + $timePassed * $this->rate);
+        $this->lastRefillTime = $now;
     }
 }
