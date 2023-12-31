@@ -137,6 +137,7 @@ final class HubManager implements NotificationHub
 
     public function notifyWhen(bool $condition, string|object $event, ?Closure $onSuccess = null, ?Closure $fallback = null): self
     {
+        // todo pass event as closure in success
         if ($condition) {
             $this->notify($event);
 
