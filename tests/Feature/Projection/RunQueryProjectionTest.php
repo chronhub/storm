@@ -21,6 +21,7 @@ beforeEach(function () {
     $this->testFactory = new InMemoryFactory();
     $this->eventStore = $this->testFactory->getEventStore();
     $this->projectorManager = $this->testFactory->getManager();
+    $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
 it('can run query projection 1', function () {
@@ -36,7 +37,7 @@ it('can run query projection 1', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -67,7 +68,7 @@ it('can run query projection until and increment loop', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($queryFilter)
+        ->filter($queryFilter)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
@@ -90,7 +91,7 @@ it('can stop query projection', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -109,12 +110,13 @@ it('can run query projection in background with timer 1', function () {
     // create a projection
     $projector = $this->projectorManager->newQueryProjector();
 
+    $expiredAt = PointInTimeFactory::now()->modify('+1 second')->getTimestamp();
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired(PointInTimeFactory::now()->modify('+1 second')->getTimestamp()))
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired($expiredAt))
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(true);
@@ -135,7 +137,7 @@ it('rerun a completed query projection will return the original initialized stat
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
@@ -160,7 +162,7 @@ it('can rerun query projection from incomplete run and override state', function
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -199,7 +201,7 @@ it('assert query projection does not handle gap', function () {
     $projector
         ->initialize(fn () => ['count' => 0, 'ids' => []])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -222,9 +224,9 @@ it('can rerun query projection while keeping state in memory', function () {
     // run projection
     $projector
         ->initialize(fn () => ['count' => 0])
-        ->withKeepState()
+        ->keepState()
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
@@ -250,9 +252,9 @@ it('raise exception when keeping state in memory but user state has not been ini
 
     // run projection
     $projector
-        ->withKeepState()
+        ->keepState()
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (): void {
             throw new RuntimeException('Should not be called');
         })->run(false);
@@ -275,7 +277,7 @@ it('can reset query projection and re run from scratch', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
@@ -306,7 +308,7 @@ it('can run query projection from category', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToCategory('balance')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
@@ -335,7 +337,7 @@ it('can run query projection from all streams', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToAll()
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })->run(false);
@@ -349,7 +351,7 @@ it('can run query projection from current stream position', function () {
     $stream = $this->testFactory->getStream('user', 5, null, $eventId);
     $this->eventStore->firstCommit($stream);
 
-    $queryFilter = new InMemoryLimitByOneQuery();
+    $limitByOne = new InMemoryLimitByOneQuery();
 
     // create a projection
     $projector = $this->projectorManager->newQueryProjector();
@@ -358,7 +360,7 @@ it('can run query projection from current stream position', function () {
     $projector
         ->initialize(fn () => ['position' => []])
         ->subscribeToAll()
-        ->withQueryFilter($queryFilter)
+        ->filter($limitByOne)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -405,7 +407,7 @@ it('can run query projection with a dedicated query filter', function () {
     $projector
         ->initialize(fn () => ['positions' => []])
         ->subscribeToAll()
-        ->withQueryFilter($queryFilter)
+        ->filter($queryFilter)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -428,7 +430,7 @@ it('can run query projection with user state 123', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             expect($scope->getState())->toBeArray()->and($scope['count'])->toBe(0);
         })->run(false);
@@ -449,7 +451,7 @@ it('can run query projection with empty user state', function () {
     $projector
         ->initialize(fn () => [])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             expect($scope->getState())->toBeArray()->toBeEmpty();
 
@@ -473,7 +475,7 @@ it('can run query projection without user state', function () {
     // run projection
     $projector
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             expect($scope->getState())->toBeNull();
         })->run(false);

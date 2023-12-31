@@ -46,7 +46,7 @@ test('can run read model projection with scope', function () use ($eventStore) {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope) use ($readModel): void {
             $scope->ack(SomeEvent::class)?->incrementState();
 
@@ -72,7 +72,7 @@ test('raise exception when event was not acked when calling event', function () 
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope->event();
         })->run(false);
@@ -90,7 +90,7 @@ test('raise exception when event was not acked when calling stack event', functi
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->incrementState()
@@ -111,7 +111,7 @@ test('can run read model projection with new scope', function () use ($eventStor
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -146,7 +146,7 @@ test('can run read model projection and count events', function () {
     $projector
         ->initialize(fn () => ['count' => 0, 'other' => 0])
         ->subscribeToStream('user', 'foo')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class)
@@ -179,7 +179,7 @@ test('can stop read model projection', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -210,7 +210,7 @@ test('can reset read model projection', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -253,7 +253,7 @@ test('can delete read model projection with read model', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -297,7 +297,7 @@ test('can delete read model projection without read model', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -341,7 +341,7 @@ test('can rerun read model projection by catchup', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -384,7 +384,7 @@ test('11can run read model projection from many streams', function () {
     $projector
         ->initialize(fn () => ['some_event' => 0, 'another_event' => 0])
         ->subscribeToStream('debit', 'credit')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -426,7 +426,7 @@ test('can run read model projection from many streams and sort events by ascendi
     $projector
         ->initialize(fn () => ['order' => [], 'index' => 0])
         ->subscribeToStream('debit', 'credit')
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -461,7 +461,7 @@ test('can no stream event loaded', function () {
         ->haltOn(function (HaltOn $halt): HaltOn {
             return $halt->streamEventLimitReach(50);
         })
-        ->withQueryFilter($this->fromIncludedPosition)
+        ->filter($this->fromIncludedPosition)
         ->when(function (ReadModelAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -482,7 +482,7 @@ test('raise exception when query filter is not a projection query filter', funct
 
     $projector
         ->subscribeToStream('user')
-        ->withQueryFilter($this->createMock(QueryFilter::class))
+        ->filter($this->createMock(QueryFilter::class))
         ->when(function (DomainEvent $event): void {
         })->run(false);
 })->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');

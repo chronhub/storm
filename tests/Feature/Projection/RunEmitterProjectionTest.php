@@ -19,6 +19,7 @@ beforeEach(function () {
     $this->testFactory = new InMemoryFactory();
     $this->eventStore = $this->testFactory->getEventStore();
     $this->projectorManager = $this->testFactory->getManager();
+    $this->fromIncludedPosition = $this->projectorManager->queryScope()->fromIncludedPosition();
 });
 
 it('can run emitter projection 1111', function (): void {
@@ -34,7 +35,7 @@ it('can run emitter projection 1111', function (): void {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -68,7 +69,7 @@ it('can emit event to a new stream named from projection', function (): void {
     $emitter
         ->initialize(fn () => ['events' => []])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -85,7 +86,7 @@ it('can emit event to a new stream named from projection', function (): void {
     $query
         ->initialize(fn () => ['events' => []])
         ->subscribeToStream('customer')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -112,7 +113,7 @@ it('can link event to a new stream', function (): void {
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -141,7 +142,7 @@ it('can link event to a new stream', function (): void {
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->subscribeToStream('user_odd', 'user_even')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -174,7 +175,7 @@ it('can link event to new categories', function (): void {
     $emitter
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->subscribeToStream('user')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -203,7 +204,7 @@ it('can link event to new categories', function (): void {
     $query
         ->initialize(fn () => ['odd' => [], 'even' => []])
         ->subscribeToCategory('customer')
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -225,7 +226,7 @@ it('raise exception when query filter is not a projection query filter', functio
 
     $projector
         ->subscribeToStream('user')
-        ->withQueryFilter($this->createMock(QueryFilter::class))
+        ->filter($this->createMock(QueryFilter::class))
         ->when(fn () => null)
         ->run(false);
 })->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');

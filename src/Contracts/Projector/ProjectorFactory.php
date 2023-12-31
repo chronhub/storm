@@ -65,19 +65,19 @@ interface ProjectorFactory extends Projector
      *
      * @see Context::withQueryFilter()
      */
-    public function withQueryFilter(QueryFilter $queryFilter): static;
+    public function filter(QueryFilter $queryFilter): static;
 
     /**
      * Proxy method to keep the state in memory.
      *
      * @see Context::withKeepState()
      */
-    public function withKeepState(): static;
+    public function keepState(): static;
 
     /**
      * Proxy method to set the projector id.
      *
      * @see Context::withId()
      */
-    public function withId(string $id): static;
+    public function describe(string $id): static;
 }

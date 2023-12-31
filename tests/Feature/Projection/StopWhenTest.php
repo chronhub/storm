@@ -39,7 +39,7 @@ it('stop when gap detected', function (): void {
 
     $keepEmitting->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope
                 ->ack(SomeEvent::class)
@@ -59,7 +59,7 @@ it('stop when gap detected', function (): void {
     $haltOnGap
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->haltOn(function (HaltOn $halt): HaltOn {
             return $halt->gapDetected();
         })
@@ -85,7 +85,7 @@ it('stop when counter is reached', function (): void {
 
     $keepEmitting->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
@@ -102,7 +102,7 @@ it('stop when counter is reached', function (): void {
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->streamEventLimitReach(22))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -125,12 +125,12 @@ it('stop when time expires', function (): void {
     $haltOn = $this->projectorManager->newEmitterProjector('customer');
 
     $start = time();
-    $expiredAt = $start + 5;
+    $expiredAt = $start + 2;
 
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->timeExpired($expiredAt))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -154,7 +154,7 @@ it('stop after first cycle when expired time is zero', function (): void {
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->timeExpired(0))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -179,7 +179,7 @@ it('stop at cycle', function (): void {
     $haltOn
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->withQueryFilter($fromIncludedPosition)
+        ->filter($fromIncludedPosition)
         ->haltOn(fn (HaltOn $halt): HaltOn => $halt->cycleReach(2))
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -203,7 +203,7 @@ it('can run emitter again and reset main limit', function (): void {
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
         ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, true))
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)
@@ -238,7 +238,7 @@ it('can run emitter again and do not reset main limit', function (): void {
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
         ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(10000, false))
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)

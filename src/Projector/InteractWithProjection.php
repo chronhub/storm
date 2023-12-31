@@ -55,21 +55,21 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function withQueryFilter(QueryFilter $queryFilter): static
+    public function filter(QueryFilter $queryFilter): static
     {
         $this->context->withQueryFilter($queryFilter);
 
         return $this;
     }
 
-    public function withKeepState(): static
+    public function keepState(): static
     {
         $this->context->withKeepState();
 
         return $this;
     }
 
-    public function withId(string $id): static
+    public function describe(string $id): static
     {
         $this->context->withId($id);
 

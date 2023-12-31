@@ -35,7 +35,7 @@ it('can run emitter projection 111', function (): void {
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
         ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(15000))
-        ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope
                 ->ackOneOf(SomeEvent::class, AnotherEvent::class)
