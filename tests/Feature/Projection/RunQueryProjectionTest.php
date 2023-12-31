@@ -101,7 +101,7 @@ it('can stop query projection', function () {
     expect($projector->getState())->toBe(['count' => 5]);
 });
 
-it('can run query projection in background with timer 1000', function () {
+it('can run query projection in background with timer 1', function () {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10, '+1 seconds', $eventId);
@@ -114,7 +114,7 @@ it('can run query projection in background with timer 1000', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->until(1)
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired(PointInTimeFactory::now()->modify('+1 seconds')->getTimestamp()))
         ->withQueryFilter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();

@@ -183,7 +183,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         if ($detectGap) {
             return new CheckpointManager(
                 $checkpoints,
-                new GapDetector($option->getRetries(), $option->getDetectionWindows())
+                new GapDetector($option->getRetries())
             );
         }
 
