@@ -23,7 +23,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function run(bool $inBackground): void
     {
-        $this->identifyProjectionIfNeeded();
+        $this->describeIfNeeded();
 
         $this->subscriber->start($this->context, $inBackground);
     }

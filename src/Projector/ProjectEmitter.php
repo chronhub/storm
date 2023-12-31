@@ -23,7 +23,7 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function run(bool $inBackground): void
     {
-        $this->identifyProjectionIfNeeded();
+        $this->describeIfNeeded();
 
         $this->subscriber->start($this->context, $inBackground);
     }

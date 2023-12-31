@@ -81,7 +81,7 @@ trait InteractWithProjection
         return $this->subscriber->hub()->expect(CurrentUserState::class);
     }
 
-    protected function identifyProjectionIfNeeded(): void
+    protected function describeIfNeeded(): void
     {
         if ($this->context->id() === null) {
             $prefix = Str::kebab(class_basename($this));
