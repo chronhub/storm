@@ -14,7 +14,8 @@ final class HandleStreamGap
 {
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        $hub->notifyWhen($hub->expect(HasGap::class),
+        $hub->notifyWhen(
+            $hub->expect(HasGap::class),
             function (NotificationHub $hub): void {
                 $hub->notify(SleepOnGap::class);
 
