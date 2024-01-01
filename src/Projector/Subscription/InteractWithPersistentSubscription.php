@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Workflow\RunProjection;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 
 trait InteractWithPersistentSubscription
@@ -19,7 +19,7 @@ trait InteractWithPersistentSubscription
 
         $this->setupWatcher($context, $keepRunning);
 
-        $this->startProjection($keepRunning);
+        $this->startProjection();
     }
 
     public function hub(): NotificationHub
@@ -27,11 +27,17 @@ trait InteractWithPersistentSubscription
         return $this->management->hub();
     }
 
-    private function newWorkflow(): Workflow
+    private function startProjection(): void
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope);
 
-        return new Workflow($this->hub(), $activities);
+        $workflow = new Workflow($this->hub(), $activities);
+
+        do {
+            $inProgress = $workflow->process(
+                fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class)
+            );
+        } while ($inProgress);
     }
 
     private function initializeContext(ContextReader $context): void
@@ -47,13 +53,6 @@ trait InteractWithPersistentSubscription
         $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
-    }
-
-    private function startProjection(bool $keepRunning): void
-    {
-        $projection = new RunProjection($this->newWorkflow(), $keepRunning);
-
-        $projection->loop();
     }
 
     private function validateContext(ContextReader $context): void

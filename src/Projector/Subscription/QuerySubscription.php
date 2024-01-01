@@ -12,7 +12,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Workflow\RunProjection;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 
 final readonly class QuerySubscription implements QuerySubscriber
@@ -31,7 +31,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $this->setupWatcher($context, $keepRunning);
 
-        $this->startProjection($keepRunning);
+        $this->startProjection();
     }
 
     public function resets(): void
@@ -46,11 +46,17 @@ final readonly class QuerySubscription implements QuerySubscriber
         return $this->management->hub();
     }
 
-    private function newWorkflow(): Workflow
+    private function startProjection(): void
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope);
 
-        return new Workflow($this->hub(), $activities);
+        $workflow = new Workflow($this->hub(), $activities);
+
+        do {
+            $inProgress = $workflow->process(
+                fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class)
+            );
+        } while ($inProgress);
     }
 
     private function initializeContext(ContextReader $context): void
@@ -64,13 +70,6 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->initializeContextAgain();
     }
 
-    private function setupWatcher(ContextReader $context, bool $keepRunning): void
-    {
-        $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
-        $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->watcher()->sprint()->continue();
-    }
-
     private function initializeContextAgain(): void
     {
         if ($this->subscriptor->getContext()->keepState() === true) {
@@ -82,10 +81,10 @@ final readonly class QuerySubscription implements QuerySubscriber
         }
     }
 
-    private function startProjection(bool $keepRunning): void
+    private function setupWatcher(ContextReader $context, bool $keepRunning): void
     {
-        $project = new RunProjection($this->newWorkflow(), $keepRunning);
-
-        $project->loop();
+        $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
+        $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
+        $this->subscriptor->watcher()->sprint()->continue();
     }
 }
