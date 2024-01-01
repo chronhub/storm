@@ -11,6 +11,8 @@ final class WhenFinalizeProjection
 {
     public function __invoke(NotificationHub $hub, EmptyListeners $capture): void
     {
-        $hub->forgetAll();
+        if ($capture->shouldStop) {
+            $hub->forgetAll();
+        }
     }
 }

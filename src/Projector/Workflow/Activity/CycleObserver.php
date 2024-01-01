@@ -44,7 +44,7 @@ final class CycleObserver
 
         $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(SprintTerminated::class));
         $hub->notify(CycleChanged::class, $shouldStop);
-        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(EmptyListeners::class));
+        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(EmptyListeners::class, $shouldStop));
 
         return ! $shouldStop;
     }

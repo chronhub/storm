@@ -40,12 +40,12 @@ class CheckpointCollection
         return $this->checkpoints->get($streamName);
     }
 
-    public function next(string $streamName, int $position, array $gaps, ?GapType $checkpointType): void
+    public function next(string $streamName, int $position, array $gaps, ?GapType $gapType): void
     {
-        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $gaps, $checkpointType));
+        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $gaps, $gapType));
     }
 
-    public function nextWithGap(Checkpoint $checkpoint, int $position, GapType $checkpointType): void
+    public function nextWithGap(Checkpoint $checkpoint, int $position, GapType $gapType): void
     {
         if ($position - $checkpoint->position < 0) {
             throw new InvalidArgumentException('Invalid position: no gap or checkpoints are outdated');
@@ -76,7 +76,7 @@ class CheckpointCollection
             $checkpoint->streamName,
             $position,
             array_merge($checkpoint->gaps, $gapsToAdd),
-            $checkpointType
+            $gapType
         );
 
         $this->checkpoints->put($checkpoint->streamName, $newCheckpoint);
@@ -102,8 +102,8 @@ class CheckpointCollection
         return $this->checkpoints;
     }
 
-    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $checkpointType): Checkpoint
+    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $gapType): Checkpoint
     {
-        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $checkpointType);
+        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $gapType);
     }
 }

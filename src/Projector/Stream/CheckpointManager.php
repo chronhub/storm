@@ -106,11 +106,14 @@ final class CheckpointManager implements CheckpointRecognition
             $this->checkpoints->nextWithGap($checkpoint, $position, GapType::IN_GAP);
 
             return $this->checkpoints->last($streamName);
-        } elseif ($this->gapDetector->retryLeft() === 1) {
-            return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::UNRECOVERABLE_GAP);
-        } else {
-            return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
         }
+
+        if ($this->gapDetector->retryLeft() === 1) {
+            return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::UNRECOVERABLE_GAP);
+        }
+
+        return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
+
     }
 
     private function validate(string $streamName, int $eventPosition): void
