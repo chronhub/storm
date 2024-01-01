@@ -21,6 +21,7 @@ use Chronhub\Storm\Projector\Subscription\Sprint\SprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Stream\NoEventStreamDiscovered;
 use Chronhub\Storm\Projector\Subscription\Timer\CurrentTime;
 use Chronhub\Storm\Projector\Subscription\Timer\GetElapsedTime;
+use Closure;
 
 use function method_exists;
 use function ucfirst;
@@ -74,22 +75,11 @@ class StopWatcher
     {
         $listener = NoEventStreamDiscovered::class;
 
-        if ($expiredAt === null) {
-            $hub->addListener($listener, function (NotificationHub $hub): void {
-                $this->notifySprintStopped($hub);
-            });
+        $callback = $expiredAt === null
+            ? fn (NotificationHub $hub) => $this->notifySprintStopped($hub)
+            : $this->expirationCallback($expiredAt);
 
-            return $listener;
-        } else {
-            $hub->addListener($listener, function (NotificationHub $hub) use ($expiredAt): void {
-                $currentTime = (int) $hub->expect(CurrentTime::class);
-                $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
-
-                if ($expiredAt < $currentTime + $elapsedTime) {
-                    $this->notifySprintStopped($hub);
-                }
-            });
-        }
+        $hub->addListener($listener, $callback);
 
         return $listener;
     }
@@ -102,9 +92,7 @@ class StopWatcher
             GapType::IN_GAP => GapDetected::class,
         };
 
-        $hub->addListener($listener, function (NotificationHub $hub): void {
-            $this->notifySprintStopped($hub);
-        });
+        $hub->addListener($listener, fn (NotificationHub $hub) => $this->notifySprintStopped($hub));
 
         return $listener;
     }
@@ -146,16 +134,21 @@ class StopWatcher
     {
         $listener = CycleChanged::class;
 
-        $hub->addListener($listener, function (NotificationHub $hub) use ($expiredAt): void {
+        $hub->addListener($listener, $this->expirationCallback($expiredAt));
+
+        return $listener;
+    }
+
+    protected function expirationCallback(int $expiredAt): Closure
+    {
+        return function (NotificationHub $hub) use ($expiredAt): void {
             $currentTime = (int) $hub->expect(CurrentTime::class);
             $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
 
             if ($expiredAt < $currentTime + $elapsedTime) {
                 $this->notifySprintStopped($hub);
             }
-        });
-
-        return $listener;
+        };
     }
 
     protected function notifySprintStopped(NotificationHub $hub): void

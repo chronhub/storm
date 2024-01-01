@@ -60,8 +60,6 @@ use Chronhub\Storm\Projector\Workflow\Watcher\UserStateWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Illuminate\Contracts\Events\Dispatcher;
 
-use function is_array;
-
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
     protected Chronicler $chronicler;
@@ -222,14 +220,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function batchStreamWatcher(ProjectionOption $option): BatchStreamWatcher
     {
-        $sleep = $option->getSleep();
+        [$capacity, $rate] = $option->getSleep();
 
-        if (is_array($sleep)) {
-            $bucket = new ConsumeWithSleepToken($sleep[0], $sleep[1]);
+        $bucket = new ConsumeWithSleepToken($capacity, $rate);
 
-            return new BatchStreamWatcher($bucket);
-        }
-
-        return new BatchStreamWatcher(null, $sleep);
+        return new BatchStreamWatcher($bucket);
     }
 }

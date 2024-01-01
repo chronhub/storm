@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription\Checkpoint;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 
-final readonly class CheckpointAdded
+final readonly class CheckpointInserted
 {
     public function __construct(
         public string $streamName,

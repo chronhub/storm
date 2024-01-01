@@ -14,7 +14,7 @@ final class DefaultOption implements ProjectionOption
         protected readonly bool $signal = false,
         protected readonly int $cacheSize = 1000,
         protected readonly int $blockSize = 1000,
-        protected readonly int|array $sleep = [5, 2.5],
+        protected readonly array $sleep = [1, 5], // one query with a sleep time of 0.2
         protected readonly int $timeout = 10000,
         protected readonly int $lockout = 1000000,
         protected readonly int $loadLimiter = 1000,

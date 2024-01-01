@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Subscription\Checkpoint;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 
-final class CurrentCheckpoints
+final class CurrentCheckpoint
 {
     /**
      * @return array<string, Checkpoint>

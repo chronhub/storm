@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterIncremented;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointAdded;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Stream\StreamEventAcked;
@@ -74,7 +74,7 @@ final readonly class StreamEventReactor
 
     private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition): bool
     {
-        $checkPoint = $hub->expect(new CheckpointAdded($streamName, $expectedPosition));
+        $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition));
 
         return $checkPoint->type === null || $checkPoint->type === GapType::IN_GAP;
     }

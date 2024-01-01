@@ -33,8 +33,9 @@ final class CheckpointManager implements CheckpointRecognition
     {
         $this->validate($streamName, $streamPosition);
 
-        $checkpoint = $this->checkpoints->last($streamName);
+        $checkpoint = $this->lastCheckpoint($streamName);
 
+        // todo need strategy to handle reset, from last checkpoint or from current position
         if ($streamPosition < $checkpoint->position) {
             throw new InvalidArgumentException("Position given for stream $streamName is outdated");
         }
@@ -42,7 +43,7 @@ final class CheckpointManager implements CheckpointRecognition
         if ($this->hasNextPosition($checkpoint, $streamPosition)) {
             $this->checkpoints->next($streamName, $streamPosition, $checkpoint->gaps, null);
 
-            return $this->checkpoints->last($streamName);
+            return $this->lastCheckpoint($streamName);
         }
 
         return $this->handleGap($streamName, $streamPosition, $checkpoint);
@@ -53,9 +54,11 @@ final class CheckpointManager implements CheckpointRecognition
         foreach ($checkpoints as $checkpoint) {
             $streamName = $checkpoint['stream_name'];
 
-            if (in_array($streamName, $this->eventStreams, true)) {
-                $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint)); //todo factory should be called earlier
+            if (! in_array($streamName, $this->eventStreams, true)) {
+                throw new InvalidArgumentException("Update checkpoints fails for stream $streamName which is not currently watched");
             }
+
+            $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint));
         }
     }
 
@@ -74,9 +77,6 @@ final class CheckpointManager implements CheckpointRecognition
         return $this->checkpoints->all()->toArray();
     }
 
-    /**
-     * @return array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>}
-     */
     public function jsonSerialize(): array
     {
         /** @phpstan-ignore-next-line */
@@ -95,6 +95,11 @@ final class CheckpointManager implements CheckpointRecognition
         return $expectedPosition === $checkpoint->position + 1;
     }
 
+    private function lastCheckpoint(string $streamName): Checkpoint
+    {
+        return $this->checkpoints->last($streamName);
+    }
+
     /**
      * FixMe : this is a temporary solution
      * By now the only way to make it work is to have at least two retries in gap detection
@@ -105,7 +110,7 @@ final class CheckpointManager implements CheckpointRecognition
         if (! $this->gapDetector->isRecoverable()) {
             $this->checkpoints->nextWithGap($checkpoint, $streamPosition, GapType::IN_GAP);
 
-            return $this->checkpoints->last($streamName);
+            return $this->lastCheckpoint($streamName);
         }
 
         if ($this->gapDetector->retryLeft() === 1) {
@@ -113,7 +118,6 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         return $this->checkpoints->newCheckpoint($streamName, $streamPosition, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
-
     }
 
     private function validate(string $streamName, int $eventPosition): void

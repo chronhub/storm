@@ -82,6 +82,11 @@ class CheckpointCollection
         $this->checkpoints->put($checkpoint->streamName, $newCheckpoint);
     }
 
+    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $gapType): Checkpoint
+    {
+        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $gapType);
+    }
+
     public function update(string $streamName, Checkpoint $checkpoint): void
     {
         $this->checkpoints->put($streamName, $checkpoint);
@@ -100,10 +105,5 @@ class CheckpointCollection
     public function all(): Collection
     {
         return $this->checkpoints;
-    }
-
-    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $gapType): Checkpoint
-    {
-        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $gapType);
     }
 }

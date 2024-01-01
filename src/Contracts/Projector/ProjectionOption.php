@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\Support\Token\ConsumeWithSleepToken;
+use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
 use JsonSerializable;
 
 interface ProjectionOption extends JsonSerializable
@@ -64,7 +66,7 @@ interface ProjectionOption extends JsonSerializable
 
     /**
      * Get the number of streams to keep in cache
-     * to only apply for emitter projection
+     * Available for emitter projection
      *
      * @return positive-int
      */
@@ -72,6 +74,7 @@ interface ProjectionOption extends JsonSerializable
 
     /**
      * Get the threshold of events to keep in memory before persisting
+     * Available for persistent projection
      *
      * @return positive-int
      */
@@ -79,30 +82,43 @@ interface ProjectionOption extends JsonSerializable
 
     /**
      * Get lock timeout in milliseconds
+     * Available for persistent projection
      *
      * @return positive-int
      */
     public function getTimeout(): int;
 
     /**
-     * Get lock Threshold in milliseconds
+     * Get the lock threshold in milliseconds
+     * Available for persistent projection
      *
      * @return int<0,max>
      */
     public function getLockout(): int;
 
     /**
-     * Get sleep
+     * Get sleep times
      *
-     * @return int|array{int|float, int|float}
+     * @return array{int|float, int|float}
      *
      * @see BatchStreamWatcher
      * @see ConsumeWithSleepToken
+     *
+     * @example [1, 2] fixed sleep time of 0.5 second on each query
+     * @example [5, 2.5] increment sleep times of a total of 6 seconds for five queries
      */
-    public function getSleep(): int|array;
+    public function getSleep(): array;
 
     /**
      * Get retries in milliseconds when a gap detected
+     * Available for persistent projection
+     *
+     * By now, two retries are mandatory,
+     * as the last retry could be considered as an UnrecoverableGap
+     * when halt is set to stop projection on an unrecoverable gap.
+     *
+     * @see StopWatcher
+     * @see HaltOn
      *
      * @return array<int<0,max>>
      */
@@ -110,6 +126,8 @@ interface ProjectionOption extends JsonSerializable
 
     /**
      * Get detection windows
+     *
+     * @deprecated still need to set a replacement with checkpoints
      *
      * @return null|string as date interval duration
      */
@@ -127,10 +145,12 @@ interface ProjectionOption extends JsonSerializable
     public function getLoadLimiter(): int;
 
     /**
-     * Get only once discovery
+     * Get "only once discovery"
+     * Available for persistent projection
+     * Query projection already use this option by default
      *
-     * Projection will discover event streams only once on rising,
-     * to avoid querying after each end of a cycle.
+     * Discovery is done on rising projection and at the end of each cycle,
+     * use the option prevent to discover and save a query.
      */
     public function getOnlyOnceDiscovery(): bool;
 }

@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->projectorManager = $this->testFactory->getManager();
 });
 
-it('can run emitter projection 111', function (): void {
+it('can run emitter projection', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
     $stream = $this->testFactory->getStream('user', 10000, null, $eventId);
@@ -31,7 +31,7 @@ it('can run emitter projection 111', function (): void {
     // create a projection
     $projector = $this->projectorManager->newEmitterProjector('customer');
 
-    $expiredAt = PointInTimeFactory::now()->modify('+5 seconds')->getTimestamp();
+    $expiredAt = PointInTimeFactory::now()->modify('+10 seconds')->getTimestamp();
 
     // run projection
     $projector

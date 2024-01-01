@@ -11,7 +11,7 @@ use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
 use Chronhub\Storm\Projector\Subscription\Batch\IsBatchCounterReached;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointUpdated;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\CurrentCheckpoints;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\CurrentCheckpoint;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintContinue;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
@@ -148,7 +148,7 @@ trait InteractWithManagement
     protected function getProjectionResult(): ProjectionResult
     {
         return new ProjectionResult(
-            $this->hub->expect(CurrentCheckpoints::class),
+            $this->hub->expect(CurrentCheckpoint::class),
             $this->hub->expect(CurrentUserState::class)
         );
     }

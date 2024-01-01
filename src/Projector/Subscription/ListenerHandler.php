@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointAdded;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Handler\WhenBatchLoaded;
 use Chronhub\Storm\Projector\Subscription\Handler\WhenCheckpointAdded;
@@ -21,7 +21,7 @@ final class ListenerHandler
         $hub->addListeners([
             CycleChanged::class => WhenCycleChanged::class,
             StreamIteratorSet::class => WhenBatchLoaded::class,
-            CheckpointAdded::class => WhenCheckpointAdded::class,
+            CheckpointInserted::class => WhenCheckpointAdded::class,
             EventStreamDiscovered::class => WhenEventStreamDiscovered::class,
         ]);
     }

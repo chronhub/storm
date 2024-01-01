@@ -23,12 +23,9 @@ class EventStreamWatcher
     {
         $eventStreams = $query($this->eventStreamProvider);
 
-        $newEventStreams = array_diff($eventStreams, $this->eventStreams);
+        $this->newEventStreams = array_diff($eventStreams, $this->eventStreams);
 
-        $this->eventStreams = $eventStreams;
-        $this->newEventStreams = $newEventStreams;
-
-        return $eventStreams;
+        return $this->eventStreams = $eventStreams;
     }
 
     public function hasEventStreams(): bool

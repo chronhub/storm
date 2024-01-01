@@ -34,9 +34,7 @@ trait InteractWithPersistentSubscription
         $workflow = new Workflow($this->hub(), $activities);
 
         do {
-            $inProgress = $workflow->process(
-                fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class)
-            );
+            $inProgress = $workflow->process(fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class));
         } while ($inProgress);
     }
 

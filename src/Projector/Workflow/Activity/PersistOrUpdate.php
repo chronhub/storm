@@ -26,7 +26,7 @@ final readonly class PersistOrUpdate
             $hub->expect(IsProcessBlank::class),
             function (NotificationHub $hub) {
                 $hub->notifyWhen(
-                    $hub->expect(IsSprintTerminated::class),
+                    ! $hub->expect(IsSprintTerminated::class),
                     fn (NotificationHub $hub) => $hub->notify(BatchSleep::class)
                 );
 
