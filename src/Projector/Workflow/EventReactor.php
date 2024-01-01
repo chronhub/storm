@@ -41,6 +41,11 @@ final readonly class EventReactor
             return false;
         }
 
+        return $this->handleEvent($hub, $event);
+    }
+
+    private function handleEvent(NotificationHub $hub, DomainEvent $event): bool
+    {
         $hub->notify(BatchCounterIncremented::class);
 
         $this->reactOn($hub, $event);

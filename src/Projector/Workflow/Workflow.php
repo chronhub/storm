@@ -13,13 +13,15 @@ use Throwable;
 use function array_reduce;
 use function array_reverse;
 
-final readonly class Workflow
+class Workflow
 {
     /**
      * @param array<callable> $activities
      */
-    public function __construct(private NotificationHub $hub, private array $activities)
-    {
+    public function __construct(
+        private readonly NotificationHub $hub,
+        private readonly array $activities
+    ) {
     }
 
     public function process(Closure $destination): bool

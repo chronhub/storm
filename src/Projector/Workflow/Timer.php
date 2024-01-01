@@ -9,7 +9,7 @@ use DateTimeImmutable;
 
 class Timer
 {
-    private ?DateTimeImmutable $startTime = null;
+    protected ?DateTimeImmutable $startTime = null;
 
     public function __construct(protected readonly SystemClock $clock)
     {
