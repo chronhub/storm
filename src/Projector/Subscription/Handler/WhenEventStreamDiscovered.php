@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\EventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\GetNewEventStreams;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\HasEventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\NewEventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\NoEventStreamDiscovered;
+use Chronhub\Storm\Projector\Subscription\Stream\EventStreamDiscovered;
+use Chronhub\Storm\Projector\Subscription\Stream\GetNewEventStreams;
+use Chronhub\Storm\Projector\Subscription\Stream\HasEventStreamDiscovered;
+use Chronhub\Storm\Projector\Subscription\Stream\NewEventStreamDiscovered;
+use Chronhub\Storm\Projector\Subscription\Stream\NoEventStreamDiscovered;
 
 final class WhenEventStreamDiscovered
 {

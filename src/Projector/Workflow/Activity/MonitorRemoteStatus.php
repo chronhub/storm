@@ -12,8 +12,8 @@ use Chronhub\Storm\Projector\Subscription\Management\ProjectionRestarted;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionRevised;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionSynchronized;
-use Chronhub\Storm\Projector\Subscription\Notification\Sprint\IsSprintDaemonize;
-use Chronhub\Storm\Projector\Subscription\Notification\Status\CurrentStatus;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintDaemonize;
+use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
 
 trait MonitorRemoteStatus
 {

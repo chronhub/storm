@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\Sprint\IsSprintRunning;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
 
 final readonly class RunProjection
 {

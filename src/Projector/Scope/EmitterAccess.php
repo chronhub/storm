@@ -11,7 +11,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Management\EventEmitted;
 use Chronhub\Storm\Projector\Subscription\Management\EventLinkedTo;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\CurrentProcessedStream;
+use Chronhub\Storm\Projector\Subscription\Stream\CurrentProcessedStream;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 final class EmitterAccess implements ArrayAccess, EmitterScope

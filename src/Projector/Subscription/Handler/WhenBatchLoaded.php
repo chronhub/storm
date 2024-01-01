@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\Batch\BatchLoaded;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\StreamIteratorSet;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchLoaded;
+use Chronhub\Storm\Projector\Subscription\Stream\StreamIteratorSet;
 
 final class WhenBatchLoaded
 {

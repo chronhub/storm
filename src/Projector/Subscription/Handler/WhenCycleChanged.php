@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\Batch\BatchCounterReset;
-use Chronhub\Storm\Projector\Subscription\Notification\Cycle\CycleChanged;
-use Chronhub\Storm\Projector\Subscription\Notification\Cycle\CycleIncremented;
-use Chronhub\Storm\Projector\Subscription\Notification\Cycle\CycleReset;
-use Chronhub\Storm\Projector\Subscription\Notification\MasterCounter\MasterCounterReset;
-use Chronhub\Storm\Projector\Subscription\Notification\Sprint\IsSprintTerminated;
-use Chronhub\Storm\Projector\Subscription\Notification\Sprint\SprintTerminated;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\NewEventStreamReset;
-use Chronhub\Storm\Projector\Subscription\Notification\Stream\StreamEventAckedReset;
-use Chronhub\Storm\Projector\Subscription\Notification\Timer\TimeReset;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
+use Chronhub\Storm\Projector\Subscription\Cycle\CycleChanged;
+use Chronhub\Storm\Projector\Subscription\Cycle\CycleIncremented;
+use Chronhub\Storm\Projector\Subscription\Cycle\CycleReset;
+use Chronhub\Storm\Projector\Subscription\MasterCounter\MasterCounterReset;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
+use Chronhub\Storm\Projector\Subscription\Sprint\SprintTerminated;
+use Chronhub\Storm\Projector\Subscription\Stream\NewEventStreamReset;
+use Chronhub\Storm\Projector\Subscription\Stream\StreamEventAckedReset;
+use Chronhub\Storm\Projector\Subscription\Timer\TimeReset;
 
 final class WhenCycleChanged
 {

@@ -7,10 +7,10 @@ namespace Chronhub\Storm\Projector\Subscription\Handler;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Stream\GapType;
-use Chronhub\Storm\Projector\Subscription\Notification\Checkpoint\CheckpointAdded;
-use Chronhub\Storm\Projector\Subscription\Notification\Checkpoint\GapDetected;
-use Chronhub\Storm\Projector\Subscription\Notification\Checkpoint\RecoverableGapDetected;
-use Chronhub\Storm\Projector\Subscription\Notification\Checkpoint\UnrecoverableGapDetected;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointAdded;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\GapDetected;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\RecoverableGapDetected;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\UnrecoverableGapDetected;
 
 class WhenCheckpointAdded
 {
