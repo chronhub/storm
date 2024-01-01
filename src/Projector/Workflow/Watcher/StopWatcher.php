@@ -18,6 +18,7 @@ use Chronhub\Storm\Projector\Subscription\MasterCounter\CurrentMasterCount;
 use Chronhub\Storm\Projector\Subscription\MasterCounter\KeepMasterCounterOnStop;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintTerminated;
+use Chronhub\Storm\Projector\Subscription\Stream\NoEventStreamDiscovered;
 use Chronhub\Storm\Projector\Subscription\Timer\CurrentTime;
 use Chronhub\Storm\Projector\Subscription\Timer\GetElapsedTime;
 
@@ -26,6 +27,8 @@ use function ucfirst;
 
 class StopWatcher
 {
+    const EMPTY_EVENT_STREAM = 'emptyEventStream';
+
     const GAP_DETECTED = 'gapDetected';
 
     const CYCLE_REACH = 'cycleReach';
@@ -45,6 +48,7 @@ class StopWatcher
             $method = 'stopWhen'.ucfirst($name);
 
             /**
+             * @covers stopWhenEmptyEventStream
              * @covers stopWhenGapDetected
              * @covers stopWhenCounterReach
              * @covers stopWhenCycleReach
@@ -64,6 +68,30 @@ class StopWatcher
 
             $this->events = [];
         });
+    }
+
+    protected function stopWhenEmptyEventStream(NotificationHub $hub, ?int $expiredAt): string
+    {
+        $listener = NoEventStreamDiscovered::class;
+
+        if ($expiredAt === null) {
+            $hub->addListener($listener, function (NotificationHub $hub): void {
+                $this->notifySprintStopped($hub);
+            });
+
+            return $listener;
+        } else {
+            $hub->addListener($listener, function (NotificationHub $hub) use ($expiredAt): void {
+                $currentTime = (int) $hub->expect(CurrentTime::class);
+                $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
+
+                if ($expiredAt < $currentTime + $elapsedTime) {
+                    $this->notifySprintStopped($hub);
+                }
+            });
+        }
+
+        return $listener;
     }
 
     protected function stopWhenGapDetected(NotificationHub $hub, GapType $gapType): string

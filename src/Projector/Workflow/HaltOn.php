@@ -11,10 +11,17 @@ class HaltOn
 {
     protected array $callbacks;
 
+    public function whenEmptyEventStream(?int $expiredAt = null): self
+    {
+        $this->callbacks[StopWatcher::EMPTY_EVENT_STREAM] = fn () => $expiredAt;
+
+        return $this;
+    }
+
     /**
      * @param positive-int $cycle
      */
-    public function cycleReach(int $cycle): self
+    public function whenCycleReach(int $cycle): self
     {
         $this->callbacks[StopWatcher::CYCLE_REACH] = fn () => $cycle;
 
@@ -24,14 +31,14 @@ class HaltOn
     /**
      * @param positive-int $limit
      */
-    public function streamEventLimitReach(int $limit, bool $resetOnHalt = true): self
+    public function whenStreamEventLimitReach(int $limit, bool $resetOnHalt = true): self
     {
         $this->callbacks[StopWatcher::COUNTER_REACH] = fn () => [$limit, $resetOnHalt];
 
         return $this;
     }
 
-    public function gapDetected(GapType $gapType): self
+    public function whenGapDetected(GapType $gapType): self
     {
         $this->callbacks[StopWatcher::GAP_DETECTED] = fn () => $gapType;
 
@@ -41,7 +48,7 @@ class HaltOn
     /**
      * @param int<0,max> $timestamp
      */
-    public function timeExpired(int $timestamp): self
+    public function whenTimeExpired(int $timestamp): self
     {
         $this->callbacks[StopWatcher::TIME_EXPIRED] = fn () => $timestamp;
 

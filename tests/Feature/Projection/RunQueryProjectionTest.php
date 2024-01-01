@@ -72,7 +72,7 @@ it('can run query projection until and increment loop', function () {
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->streamEventLimitReach(5))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->whenStreamEventLimitReach(5))
         ->run(true);
 
     expect($projector->getState())->toBe(['count' => 5]);
@@ -115,7 +115,7 @@ it('can run query projection in background with timer 1', function () {
     $projector
         ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->timeExpired($expiredAt))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->whenTimeExpired($expiredAt))
         ->filter($this->fromIncludedPosition)
         ->when(function (QueryAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();

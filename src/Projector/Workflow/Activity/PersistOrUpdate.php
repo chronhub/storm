@@ -10,6 +10,7 @@ use Chronhub\Storm\Projector\Subscription\Batch\IsProcessBlank;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\HasGap;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionLockUpdated;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
 
 final readonly class PersistOrUpdate
 {
@@ -20,11 +21,14 @@ final readonly class PersistOrUpdate
         }
 
         // when no gap, we either update the lock, after sleeping, if we are running blank
-        // or, we store the projection result
+        // or, we store the projection result with the last processed events
         $hub->notifyWhen(
             $hub->expect(IsProcessBlank::class),
             function (NotificationHub $hub) {
-                $hub->notify(BatchSleep::class);
+                $hub->notifyWhen(
+                    $hub->expect(IsSprintTerminated::class),
+                    fn (NotificationHub $hub) => $hub->notify(BatchSleep::class)
+                );
 
                 $hub->trigger(new ProjectionLockUpdated());
             },

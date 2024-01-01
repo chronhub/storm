@@ -35,7 +35,7 @@ trait MonitorRemoteStatus
         $this->discovering($hub);
     }
 
-    private function onStopping(NotificationHub $hub): bool
+    protected function onStopping(NotificationHub $hub): bool
     {
         if ($this->onRise) {
             $hub->trigger(new ProjectionSynchronized());
@@ -46,7 +46,7 @@ trait MonitorRemoteStatus
         return $this->onRise;
     }
 
-    private function onResetting(NotificationHub $hub): bool
+    protected function onResetting(NotificationHub $hub): bool
     {
         $hub->trigger(new ProjectionRevised());
 
@@ -57,14 +57,14 @@ trait MonitorRemoteStatus
         return false;
     }
 
-    private function onDeleting(NotificationHub $notification, bool $shouldDiscardEvents): bool
+    protected function onDeleting(NotificationHub $notification, bool $shouldDiscardEvents): bool
     {
         $notification->trigger(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }
 
-    private function discovering(NotificationHub $hub): bool
+    protected function discovering(NotificationHub $hub): bool
     {
         $hub->trigger(new ProjectionStatusDisclosed());
 
