@@ -18,7 +18,7 @@ final class InMemoryOption implements ProjectionOption
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
         protected readonly int $loadLimiter = 100,
-        array|string $retries = [1],
+        array|string $retries = [1, 2],
         protected readonly ?string $detectionWindows = null,
         protected readonly bool $onlyOnceDiscovery = false,
     ) {

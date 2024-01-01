@@ -40,18 +40,12 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         if ($this->hasNextPosition($checkpoint, $position)) {
-            $this->checkpoints->next($streamName, $position, $checkpoint->gaps);
+            $this->checkpoints->next($streamName, $position, $checkpoint->gaps, null);
 
             return $this->checkpoints->last($streamName);
         }
 
-        if (! $this->gapDetector->isRecoverable()) {
-            $this->checkpoints->nextWithGap($checkpoint, $position);
-
-            return $this->checkpoints->last($streamName);
-        }
-
-        return $checkpoint;
+        return $this->handleGap($streamName, $position, $checkpoint);
     }
 
     public function update(array $checkpoints): void
@@ -99,6 +93,24 @@ final class CheckpointManager implements CheckpointRecognition
     private function hasNextPosition(Checkpoint $checkpoint, int $expectedPosition): bool
     {
         return $expectedPosition === $checkpoint->position + 1;
+    }
+
+    /**
+     * FixMe : this is a temporary solution
+     * By now the only way to make it work is to have at least two retries in gap detection
+     * and assume that the last retry would fail
+     */
+    private function handleGap(string $streamName, int $position, Checkpoint $checkpoint): Checkpoint
+    {
+        if (! $this->gapDetector->isRecoverable()) {
+            $this->checkpoints->nextWithGap($checkpoint, $position, GapType::IN_GAP);
+
+            return $this->checkpoints->last($streamName);
+        } elseif ($this->gapDetector->retryLeft() === 1) {
+            return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::UNRECOVERABLE_GAP);
+        } else {
+            return $this->checkpoints->newCheckpoint($streamName, $position, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
+        }
     }
 
     private function validate(string $streamName, int $eventPosition): void

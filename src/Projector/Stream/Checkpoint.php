@@ -12,7 +12,8 @@ final readonly class Checkpoint implements JsonSerializable
         public string $streamName,
         public int $position,
         public string $createdAt,
-        public array $gaps
+        public array $gaps,
+        public ?GapType $type = null
     ) {
     }
 

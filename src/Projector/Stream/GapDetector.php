@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\GapRecognition;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 
 use function array_key_exists;
+use function count;
 use function usleep;
 
 final class GapDetector implements GapRecognition
@@ -47,6 +48,11 @@ final class GapDetector implements GapRecognition
     public function hasRetry(): bool
     {
         return array_key_exists($this->retries, $this->retriesInMs);
+    }
+
+    public function retryLeft(): int
+    {
+        return count($this->retriesInMs) - $this->retries;
     }
 
     public function sleep(): void

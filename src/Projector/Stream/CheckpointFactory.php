@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Stream;
 
 class CheckpointFactory
 {
-    public static function from(string $streamName, int $position, string $createdAt, array $gaps): Checkpoint
+    public static function from(string $streamName, int $position, string $createdAt, array $gaps, ?GapType $checkpointType): Checkpoint
     {
-        return new Checkpoint($streamName, $position, $createdAt, $gaps);
+        return new Checkpoint($streamName, $position, $createdAt, $gaps, $checkpointType);
     }
 
     public static function fromArray(array $checkpoint): Checkpoint

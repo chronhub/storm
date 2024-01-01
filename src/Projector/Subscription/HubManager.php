@@ -106,6 +106,11 @@ final class HubManager implements NotificationHub
         $this->listeners = $this->listeners->forget($event);
     }
 
+    public function forgetAll(): void
+    {
+        $this->listeners = new Collection();
+    }
+
     public function expect(string|object $event, mixed ...$arguments): mixed
     {
         $notification = $this->makeEvent($event, ...$arguments);

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription\Notification;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-class HasStreamEventAcked
+final class HasStreamEventAcked
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {

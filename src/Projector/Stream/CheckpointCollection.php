@@ -30,7 +30,7 @@ class CheckpointCollection
     {
         foreach ($streamNames as $streamName) {
             if (! $this->has($streamName)) {
-                $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, 0, []));
+                $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, 0, [], null));
             }
         }
     }
@@ -40,12 +40,12 @@ class CheckpointCollection
         return $this->checkpoints->get($streamName);
     }
 
-    public function next(string $streamName, int $position, array $gaps): void
+    public function next(string $streamName, int $position, array $gaps, ?GapType $checkpointType): void
     {
-        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $gaps));
+        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $gaps, $checkpointType));
     }
 
-    public function nextWithGap(Checkpoint $checkpoint, int $position): void
+    public function nextWithGap(Checkpoint $checkpoint, int $position, GapType $checkpointType): void
     {
         if ($position - $checkpoint->position < 0) {
             throw new InvalidArgumentException('Invalid position: no gap or checkpoints are outdated');
@@ -75,7 +75,8 @@ class CheckpointCollection
         $newCheckpoint = $this->newCheckpoint(
             $checkpoint->streamName,
             $position,
-            array_merge($checkpoint->gaps, $gapsToAdd)
+            array_merge($checkpoint->gaps, $gapsToAdd),
+            $checkpointType
         );
 
         $this->checkpoints->put($checkpoint->streamName, $newCheckpoint);
@@ -101,8 +102,8 @@ class CheckpointCollection
         return $this->checkpoints;
     }
 
-    private function newCheckpoint(string $streamName, int $position, array $gaps): Checkpoint
+    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $checkpointType): Checkpoint
     {
-        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps);
+        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $checkpointType);
     }
 }

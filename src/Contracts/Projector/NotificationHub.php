@@ -40,9 +40,14 @@ interface NotificationHub
     public function addListeners(array $listeners): void;
 
     /**
-     * Forget event and all its callbacks
+     * Forget the event and all its callbacks
      */
     public function forgetListener(string $event): void;
+
+    /**
+     * Forget all events and all its callbacks
+     */
+    public function forgetAll(): void;
 
     /**
      * Fire event and forget

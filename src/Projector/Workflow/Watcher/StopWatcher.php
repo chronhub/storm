@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Subscription\Notification\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentCycle;
 use Chronhub\Storm\Projector\Subscription\Notification\CurrentMasterCount;
@@ -18,6 +19,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\KeepMasterCounterOnStop;
 use Chronhub\Storm\Projector\Subscription\Notification\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
+use Chronhub\Storm\Projector\Subscription\Notification\UnrecoverableGapDetected;
 
 use function method_exists;
 use function ucfirst;
@@ -64,9 +66,13 @@ class StopWatcher
         });
     }
 
-    protected function stopWhenGapDetected(NotificationHub $hub, bool $recoverableGap): string
+    protected function stopWhenGapDetected(NotificationHub $hub, GapType $gapType): string
     {
-        $listener = $recoverableGap ? RecoverableGapDetected::class : GapDetected::class;
+        $listener = match ($gapType) {
+            GapType::RECOVERABLE_GAP => RecoverableGapDetected::class,
+            GapType::UNRECOVERABLE_GAP => UnrecoverableGapDetected::class,
+            GapType::IN_GAP => GapDetected::class,
+        };
 
         $hub->addListener($listener, function (NotificationHub $hub): void {
             $this->notifySprintStopped($hub);

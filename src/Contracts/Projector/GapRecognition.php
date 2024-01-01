@@ -12,22 +12,27 @@ interface GapRecognition
     public function isRecoverable(): bool;
 
     /**
-     * Check if gap is detected.
+     * Check if a gap is detected.
      */
     public function hasGap(): bool;
 
     /**
-     * Check if has retry when gap is detected.
+     * Check if it has retry when gap is detected.
      */
     public function hasRetry(): bool;
 
     /**
-     * Sleep when gap is detected.
+     * Get retry left.
+     */
+    public function retryLeft(): int;
+
+    /**
+     * Sleep when a gap is detected.
      */
     public function sleep(): void;
 
     /**
-     * Reset gaps detected.
+     * Reset gaps detection.
      */
     public function reset(): void;
 }

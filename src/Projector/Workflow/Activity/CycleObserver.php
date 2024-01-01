@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleHasStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\EmptyListeners;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Notification\IsTimeStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
@@ -41,9 +42,9 @@ final class CycleObserver
     {
         $shouldStop = $hub->expect(IsSprintTerminated::class);
 
-        $hub
-            ->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(SprintTerminated::class))
-            ->notify(CycleChanged::class, $shouldStop);
+        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(SprintTerminated::class));
+        $hub->notify(CycleChanged::class, $shouldStop);
+        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(EmptyListeners::class));
 
         return ! $shouldStop;
     }

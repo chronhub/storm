@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Tests\Feature\Projection;
 
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
+use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
@@ -34,25 +35,6 @@ it('stop when a recoverable gap is detected', function (): void {
 
     expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
-    // run without halting on gap
-    $keepEmitting = $this->projectorManager->newEmitterProjector('customer');
-
-    $keepEmitting->initialize(fn () => ['count' => 0])
-        ->subscribeToStream('user')
-        ->filter($this->fromIncludedPosition)
-        ->when(function (EmitterAccess $scope): void {
-            $scope
-                ->ack(SomeEvent::class)
-                ->incrementState()
-                ->stopWhen($scope['count'] === 20);
-        })
-        ->run(true);
-
-    expect($keepEmitting->getState())->toBe(['count' => 20]);
-
-    // delete projection
-    $keepEmitting->delete(false);
-
     // expect halt on gap
     $haltOnGap = $this->projectorManager->newEmitterProjector('customer');
 
@@ -61,7 +43,7 @@ it('stop when a recoverable gap is detected', function (): void {
         ->subscribeToStream('user')
         ->filter($this->fromIncludedPosition)
         ->haltOn(function (HaltOn $halt): HaltOn {
-            return $halt->gapDetected(true);
+            return $halt->gapDetected(GapType::RECOVERABLE_GAP);
         })
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
@@ -83,24 +65,35 @@ it('stop when a non recoverable gap is detected', function (): void {
 
     expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
-    // run without halting on gap
-    $keepEmitting = $this->projectorManager->newEmitterProjector('customer');
+    // expect halt on gap
+    $haltOnGap = $this->projectorManager->newEmitterProjector('customer');
 
-    $keepEmitting->initialize(fn () => ['count' => 0])
+    $haltOnGap
+        ->initialize(fn () => ['count' => 0])
         ->subscribeToStream('user')
         ->filter($this->fromIncludedPosition)
+        ->haltOn(function (HaltOn $halt): HaltOn {
+            return $halt->gapDetected(GapType::UNRECOVERABLE_GAP);
+        })
         ->when(function (EmitterAccess $scope): void {
-            $scope
-                ->ack(SomeEvent::class)
-                ->incrementState()
-                ->stopWhen($scope['count'] === 20);
+            $scope->ack(SomeEvent::class)->incrementState();
         })
         ->run(true);
 
-    expect($keepEmitting->getState())->toBe(['count' => 20]);
+    expect($haltOnGap->getState())->toBe(['count' => 10]); // 10 is the last position before gap
+});
 
-    // delete projection
-    $keepEmitting->delete(false);
+it('stop when gap is detected', function (): void {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // induce gap
+    $stream = $this->testFactory->getStream('user', 10, null, $eventId, SomeEvent::class, 12);
+    $this->eventStore->amend($stream);
+
+    expect($this->eventStore->hasStream(new StreamName('customer')))->toBeFalse();
 
     // expect halt on gap
     $haltOnGap = $this->projectorManager->newEmitterProjector('customer');
@@ -110,14 +103,14 @@ it('stop when a non recoverable gap is detected', function (): void {
         ->subscribeToStream('user')
         ->filter($this->fromIncludedPosition)
         ->haltOn(function (HaltOn $halt): HaltOn {
-            return $halt->gapDetected(false);
+            return $halt->gapDetected(GapType::IN_GAP);
         })
         ->when(function (EmitterAccess $scope): void {
             $scope->ack(SomeEvent::class)->incrementState();
         })
         ->run(true);
 
-    expect($haltOnGap->getState())->toBe(['count' => 11]); // 11 because of the gap
+    expect($haltOnGap->getState())->toBe(['count' => 11]); // 11 is the last position with gap
 });
 
 it('stop when counter is reached', function (): void {

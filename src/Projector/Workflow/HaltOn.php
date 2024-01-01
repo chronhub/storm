@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
+use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
 
 class HaltOn
@@ -30,9 +31,9 @@ class HaltOn
         return $this;
     }
 
-    public function gapDetected(bool $recoverableGaps): self
+    public function gapDetected(GapType $gapType): self
     {
-        $this->callbacks[StopWatcher::GAP_DETECTED] = fn () => $recoverableGaps;
+        $this->callbacks[StopWatcher::GAP_DETECTED] = fn () => $gapType;
 
         return $this;
     }

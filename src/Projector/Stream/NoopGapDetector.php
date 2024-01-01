@@ -23,6 +23,11 @@ class NoopGapDetector implements GapRecognition
         return false;
     }
 
+    public function retryLeft(): int
+    {
+        return 0;
+    }
+
     public function sleep(): void
     {
     }
