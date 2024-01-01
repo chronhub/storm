@@ -8,9 +8,9 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\CurrentStatus;
-use Chronhub\Storm\Projector\Subscription\Notification\EventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\Sprint\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\Status\CurrentStatus;
+use Chronhub\Storm\Projector\Subscription\Notification\Stream\EventStreamDiscovered;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {

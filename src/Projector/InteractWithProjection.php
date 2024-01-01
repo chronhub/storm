@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Projector\Subscription\Notification\CurrentUserState;
+use Chronhub\Storm\Projector\Subscription\Notification\UserState\CurrentUserState;
 use Closure;
 use Illuminate\Support\Str;
 

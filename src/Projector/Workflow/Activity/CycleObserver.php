@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\CycleChanged;
-use Chronhub\Storm\Projector\Subscription\Notification\CycleStarted;
-use Chronhub\Storm\Projector\Subscription\Notification\IsCycleStarted;
-use Chronhub\Storm\Projector\Subscription\Notification\IsSprintTerminated;
-use Chronhub\Storm\Projector\Subscription\Notification\IsTimeStarted;
-use Chronhub\Storm\Projector\Subscription\Notification\TimeStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\Cycle\CycleChanged;
+use Chronhub\Storm\Projector\Subscription\Notification\Cycle\CycleStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\Cycle\IsCycleStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\Sprint\IsSprintTerminated;
+use Chronhub\Storm\Projector\Subscription\Notification\Timer\IsTimeStarted;
+use Chronhub\Storm\Projector\Subscription\Notification\Timer\TimeStarted;
 
 final class CycleObserver
 {

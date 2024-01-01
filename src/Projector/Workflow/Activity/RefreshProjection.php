@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Notification\EventStreamDiscovered;
-use Chronhub\Storm\Projector\Subscription\Notification\IsSprintRunning;
+use Chronhub\Storm\Projector\Subscription\Notification\Sprint\IsSprintRunning;
+use Chronhub\Storm\Projector\Subscription\Notification\Stream\EventStreamDiscovered;
 
 final class RefreshProjection
 {

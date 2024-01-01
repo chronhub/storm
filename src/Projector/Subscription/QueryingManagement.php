@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
-use Chronhub\Storm\Projector\Subscription\Notification\CurrentProcessedStream;
-use Chronhub\Storm\Projector\Subscription\Notification\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\Sprint\SprintStopped;
+use Chronhub\Storm\Projector\Subscription\Notification\Stream\CurrentProcessedStream;
 
 final readonly class QueryingManagement implements QueryManagement
 {

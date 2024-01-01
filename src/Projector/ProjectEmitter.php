@@ -7,8 +7,8 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionDiscarded;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionRevised;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {

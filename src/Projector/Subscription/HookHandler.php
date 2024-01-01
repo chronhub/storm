@@ -6,19 +6,19 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\PersistentManagement;
-use Chronhub\Storm\Projector\Subscription\Hook\EventEmitted;
-use Chronhub\Storm\Projector\Subscription\Hook\EventLinkedTo;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionDiscarded;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionFreed;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionPersistedWhenThresholdIsReached;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRestarted;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRevised;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionRise;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStatusDisclosed;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionStored;
-use Chronhub\Storm\Projector\Subscription\Hook\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Subscription\Management\EventEmitted;
+use Chronhub\Storm\Projector\Subscription\Management\EventLinkedTo;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionClosed;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionFreed;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionRestarted;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionRevised;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionRise;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionStatusDisclosed;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
+use Chronhub\Storm\Projector\Subscription\Management\ProjectionSynchronized;
 
 final class HookHandler
 {
