@@ -32,7 +32,6 @@ use Chronhub\Storm\Projector\Stream\CheckpointCollection;
 use Chronhub\Storm\Projector\Stream\CheckpointInMemory;
 use Chronhub\Storm\Projector\Stream\CheckpointManager;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
-use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
 use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryEmittedStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
@@ -51,6 +50,7 @@ use Chronhub\Storm\Projector\Workflow\Timer;
 use Chronhub\Storm\Projector\Workflow\Watcher\AckedStreamWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\EventStreamWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\LoopWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\SprintWatcher;
@@ -168,17 +168,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createSubscriptor(ProjectionOption $option, bool $detectGap): Subscriptor
     {
         return new SubscriptionManager(
-            $this->createEventStreamDiscovery(),
             $this->createCheckpointRecognition($option, $detectGap),
             $this->clock,
             $option,
             $this->createMonitorManager($option),
         );
-    }
-
-    protected function createEventStreamDiscovery(): EventStreamDiscovery
-    {
-        return new EventStreamDiscovery($this->eventStreamProvider);
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager
@@ -216,6 +210,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             new LoopWatcher(),
             new SprintWatcher(),
             new UserStateWatcher(),
+            new EventStreamWatcher($this->eventStreamProvider),
             new BatchCounterWatcher($option->getBlockSize()),
             new AckedStreamWatcher(),
             $this->batchStreamWatcher($option),

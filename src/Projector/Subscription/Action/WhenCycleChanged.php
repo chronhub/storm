@@ -11,6 +11,7 @@ use Chronhub\Storm\Projector\Subscription\Notification\CycleIncremented;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleReset;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Notification\MasterCounterReset;
+use Chronhub\Storm\Projector\Subscription\Notification\NewEventStreamReset;
 use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Notification\StreamEventAckedReset;
 use Chronhub\Storm\Projector\Subscription\Notification\TimeReset;
@@ -38,7 +39,7 @@ final class WhenCycleChanged
 
     private function resetCycle(NotificationHub $hub): void
     {
-        $hub->notifyMany(BatchCounterReset::class, StreamEventAckedReset::class);
+        $hub->notifyMany(BatchCounterReset::class, StreamEventAckedReset::class, NewEventStreamReset::class);
 
         if ($hub->expect(IsSprintTerminated::class)) {
             $hub->notifyMany(TimeReset::class, MasterCounterReset::class);

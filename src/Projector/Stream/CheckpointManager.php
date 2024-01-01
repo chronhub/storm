@@ -54,7 +54,7 @@ final class CheckpointManager implements CheckpointRecognition
             $streamName = $checkpoint['stream_name'];
 
             if (in_array($streamName, $this->eventStreams, true)) {
-                $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint));
+                $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint)); //todo factory should be called earlier
             }
         }
     }

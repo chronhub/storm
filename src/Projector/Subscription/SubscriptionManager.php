@@ -12,7 +12,6 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Stream\EventStreamDiscovery;
 use Chronhub\Storm\Projector\Workflow\Watcher\WatcherManager;
 use Closure;
 
@@ -29,7 +28,6 @@ final class SubscriptionManager implements Subscriptor
     private ProjectionStatus $status = ProjectionStatus::IDLE;
 
     public function __construct(
-        private readonly EventStreamDiscovery $eventStreamDiscovery,
         private readonly CheckpointRecognition $checkpointRecognition,
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
@@ -100,7 +98,7 @@ final class SubscriptionManager implements Subscriptor
     public function discoverStreams(): void
     {
         tap($this->context->queries(), function (callable $query): void {
-            $eventStreams = $this->eventStreamDiscovery->discover($query);
+            $eventStreams = $this->watcher->streamDiscovery()->discover($query);
 
             $this->checkpointRecognition->refreshStreams($eventStreams);
         });

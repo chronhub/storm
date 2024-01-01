@@ -10,6 +10,7 @@ readonly class WatcherManager
         protected LoopWatcher $loopWatcher,
         protected SprintWatcher $sprintWatcher,
         protected UserStateWatcher $userState,
+        protected EventStreamWatcher $streamWatcher,
         protected BatchCounterWatcher $batchCounterWatcher,
         protected AckedStreamWatcher $ackedStreamWatcher,
         protected BatchStreamWatcher $batchStreamWatcher,
@@ -52,6 +53,11 @@ readonly class WatcherManager
     public function batchStream(): BatchStreamWatcher
     {
         return $this->batchStreamWatcher;
+    }
+
+    public function streamDiscovery(): EventStreamWatcher
+    {
+        return $this->streamWatcher;
     }
 
     public function time(): TimeWatcher
