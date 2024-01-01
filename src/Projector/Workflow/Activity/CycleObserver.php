@@ -6,12 +6,10 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleChanged;
-use Chronhub\Storm\Projector\Subscription\Notification\CycleHasStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\CycleStarted;
-use Chronhub\Storm\Projector\Subscription\Notification\EmptyListeners;
+use Chronhub\Storm\Projector\Subscription\Notification\IsCycleStarted;
 use Chronhub\Storm\Projector\Subscription\Notification\IsSprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Notification\IsTimeStarted;
-use Chronhub\Storm\Projector\Subscription\Notification\SprintTerminated;
 use Chronhub\Storm\Projector\Subscription\Notification\TimeStarted;
 
 final class CycleObserver
@@ -25,27 +23,21 @@ final class CycleObserver
         return $this->onCycleChanged($hub);
     }
 
-    private function onCycleStarted(NotificationHub $hub): void
+    public function onCycleStarted(NotificationHub $hub): void
     {
-        $hub
-            ->notifyWhen(
-                ! $hub->expect(CycleHasStarted::class),
-                fn (NotificationHub $hub) => $hub->notify(CycleStarted::class)
-            )
-            ->notifyWhen(
-                ! $hub->expect(IsTimeStarted::class),
-                fn (NotificationHub $hub) => $hub->notify(TimeStarted::class)
-            );
+        $hub->notifyWhen(
+            ! $hub->expect(IsCycleStarted::class),
+            fn () => $hub->notify(CycleStarted::class)
+        )->notifyWhen(
+            ! $hub->expect(IsTimeStarted::class),
+            fn () => $hub->notify(TimeStarted::class)
+        );
     }
 
     private function onCycleChanged(NotificationHub $hub): bool
     {
-        $shouldStop = $hub->expect(IsSprintTerminated::class);
+        $hub->notify(CycleChanged::class);
 
-        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(SprintTerminated::class));
-        $hub->notify(CycleChanged::class, $shouldStop);
-        $hub->notifyWhen($shouldStop, fn (NotificationHub $hub) => $hub->notify(EmptyListeners::class, $shouldStop));
-
-        return ! $shouldStop;
+        return ! $hub->expect(IsSprintTerminated::class);
     }
 }
