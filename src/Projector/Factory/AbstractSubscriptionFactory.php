@@ -37,7 +37,9 @@ use Chronhub\Storm\Projector\Stream\GapDetector;
 use Chronhub\Storm\Projector\Stream\InMemoryEmittedStreams;
 use Chronhub\Storm\Projector\Subscription\EmitterSubscription;
 use Chronhub\Storm\Projector\Subscription\EmittingManagement;
+use Chronhub\Storm\Projector\Subscription\HookHandler;
 use Chronhub\Storm\Projector\Subscription\HubManager;
+use Chronhub\Storm\Projector\Subscription\ListenerHandler;
 use Chronhub\Storm\Projector\Subscription\QueryingManagement;
 use Chronhub\Storm\Projector\Subscription\QuerySubscription;
 use Chronhub\Storm\Projector\Subscription\ReadingModelManagement;
@@ -85,6 +87,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscriptor = $this->createSubscriptor($option, false);
         $notification = new HubManager($subscriptor);
+        ListenerHandler::listen($notification);
+
         $activities = new QueryActivityFactory($this->chronicler);
         $scope = new QueryAccess($notification, $this->clock);
 
@@ -95,6 +99,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscriptor = $this->createSubscriptor($option, true);
         $notification = new HubManager($subscriptor);
+        ListenerHandler::listen($notification);
 
         $management = new EmittingManagement(
             $notification,
@@ -103,6 +108,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->createStreamCache($option),
             new EmittedStream(),
         );
+
+        HookHandler::subscribe($notification, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);
         $scope = new EmitterAccess($notification, $this->clock);
@@ -114,9 +121,12 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $subscriptor = $this->createSubscriptor($option, true);
         $notification = new HubManager($subscriptor);
+        ListenerHandler::listen($notification);
+
         $repository = $this->createProjectionRepository($streamName, $option);
 
         $management = new ReadingModelManagement($notification, $repository, $readModel);
+        HookHandler::subscribe($notification, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);
         $scope = new ReadModelAccess($notification, $readModel, $this->clock);

@@ -21,7 +21,7 @@ use Closure;
 use function is_array;
 use function pcntl_signal_dispatch;
 
-final readonly class EventReactor
+final readonly class StreamEventReactor
 {
     public function __construct(
         private Closure $reactors,

@@ -26,17 +26,17 @@ final class CheckpointInMemory implements CheckpointRecognition
         $this->checkpoints->onDiscover(...$eventStreams);
     }
 
-    public function insert(string $streamName, int $position): Checkpoint
+    public function insert(string $streamName, int $streamPosition): Checkpoint
     {
-        $this->validate($streamName, $position);
+        $this->validate($streamName, $streamPosition);
 
         $checkpoint = $this->checkpoints->last($streamName);
 
-        if ($position < $checkpoint->position) {
+        if ($streamPosition < $checkpoint->position) {
             throw new InvalidArgumentException("Position given for stream $streamName is outdated");
         }
 
-        $this->checkpoints->next($streamName, $position, $checkpoint->gaps, null);
+        $this->checkpoints->next($streamName, $streamPosition, $checkpoint->gaps, null);
 
         return $this->checkpoints->last($streamName);
     }

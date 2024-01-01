@@ -6,12 +6,11 @@ namespace Chronhub\Storm\Projector\Factory;
 
 use Chronhub\Storm\Contracts\Chronicler\Chronicler;
 use Chronhub\Storm\Contracts\Projector\ActivityFactory;
-use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\LoadStreams;
-use Chronhub\Storm\Projector\Workflow\EventReactor;
 use Chronhub\Storm\Projector\Workflow\QueryFilterResolver;
+use Chronhub\Storm\Projector\Workflow\StreamEventReactor;
 
 use function array_map;
 
@@ -21,11 +20,11 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
     {
     }
 
-    public function __invoke(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
+    public function __invoke(Subscriptor $subscriptor, ProjectorScope $projectorScope): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
-            $this->activities($subscriptor, $scope, $management)
+            $this->activities($subscriptor, $projectorScope)
         );
     }
 
@@ -34,11 +33,11 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         return new QueryFilterResolver($subscriptor->getContext()->queryFilter());
     }
 
-    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $scope): EventReactor
+    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $projectorScope): StreamEventReactor
     {
-        return new EventReactor(
+        return new StreamEventReactor(
             $subscriptor->getContext()->reactors(),
-            $scope,
+            $projectorScope,
             $subscriptor->option()->getSignal()
         );
     }
@@ -56,5 +55,5 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
     /**
      * @return array<callable>
      */
-    abstract protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array;
+    abstract protected function activities(Subscriptor $subscriptor, ProjectorScope $scope): array;
 }

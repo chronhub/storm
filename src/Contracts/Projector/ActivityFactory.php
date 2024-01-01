@@ -6,5 +6,5 @@ namespace Chronhub\Storm\Contracts\Projector;
 
 interface ActivityFactory
 {
-    public function __invoke(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array;
+    public function __invoke(Subscriptor $subscriptor, ProjectorScope $projectorScope): array;
 }

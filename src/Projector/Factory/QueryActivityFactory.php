@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Factory;
 
-use Chronhub\Storm\Contracts\Projector\Management;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Workflow\Activity\CycleObserver;
@@ -15,7 +14,7 @@ use Chronhub\Storm\Projector\Workflow\Activity\SleepForQuery;
 
 final readonly class QueryActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
+    protected function activities(Subscriptor $subscriptor, ProjectorScope $scope): array
     {
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
 

@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Factory;
 
-use Chronhub\Storm\Contracts\Projector\Management;
-use Chronhub\Storm\Contracts\Projector\PersistentManagement;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Workflow\Activity\CycleObserver;
 use Chronhub\Storm\Projector\Workflow\Activity\DispatchSignal;
 use Chronhub\Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -19,12 +16,8 @@ use Chronhub\Storm\Projector\Workflow\Activity\RisePersistentProjection;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(Subscriptor $subscriptor, ProjectorScope $scope, Management $management): array
+    protected function activities(Subscriptor $subscriptor, ProjectorScope $scope): array
     {
-        if (! $management instanceof PersistentManagement) {
-            throw new RuntimeException('Management must be instance of PersistentManagement');
-        }
-
         $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
 
         return [

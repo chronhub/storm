@@ -20,6 +20,5 @@ final readonly class EmitterSubscription implements EmitterSubscriber
         protected ActivityFactory $activities,
         protected EmitterScope $scope
     ) {
-        ListenerHandler::listen($this->hub());
     }
 }

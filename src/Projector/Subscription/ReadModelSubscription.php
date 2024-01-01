@@ -20,6 +20,5 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
         protected ActivityFactory $activities,
         protected ReadModelScope $scope
     ) {
-        ListenerHandler::listen($this->hub());
     }
 }

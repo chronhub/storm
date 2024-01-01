@@ -18,10 +18,10 @@ interface CheckpointRecognition extends JsonSerializable
     public function refreshStreams(array $eventStreams): void;
 
     /**
-     * @param  positive-int $position
+     * @param  positive-int $streamPosition
      * @return Checkpoint   the last checkpoint inserted with or without gap
      */
-    public function insert(string $streamName, int $position): Checkpoint;
+    public function insert(string $streamName, int $streamPosition): Checkpoint;
 
     /**
      * @param array<array{stream_name: string, position: positive-int, created_at: string, gaps: array<positive-int>}> $checkpoints

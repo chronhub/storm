@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Contracts\Projector\StateManagement;
-use Chronhub\Storm\Projector\Workflow\EventReactor;
+use Chronhub\Storm\Projector\Workflow\StreamEventReactor;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
 use Chronhub\Storm\Tests\Uses\TestingSubscriptionFactory;
@@ -27,7 +27,7 @@ $assertEventProcessed = function (bool $inProgress) {
     $this->fakeInitializeUserState();
     $this->streamManager->expects($this->once())->method('bind')->with($this->currentStreamName, 5, false)->willReturn(true);
 
-    $eventProcessor = new EventReactor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
+    $eventProcessor = new StreamEventReactor(function (DomainEvent $event, array $state, ProjectorScope $scope): array {
         expect($event)
             ->toBe($this->event)
             ->and($state)->toBe($this->state->get())
