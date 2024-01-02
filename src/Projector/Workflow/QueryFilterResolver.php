@@ -9,9 +9,9 @@ use Chronhub\Storm\Contracts\Projector\LoadLimiterProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\StreamNameAwareQueryFilter;
 
-final readonly class QueryFilterResolver
+class QueryFilterResolver
 {
-    public function __construct(private QueryFilter $queryFilter)
+    public function __construct(private readonly QueryFilter $queryFilter)
     {
     }
 

@@ -19,8 +19,8 @@ class Workflow
      * @param array<callable> $activities
      */
     public function __construct(
-        private readonly NotificationHub $hub,
-        private readonly array $activities
+        protected readonly NotificationHub $hub,
+        protected readonly array $activities
     ) {
     }
 

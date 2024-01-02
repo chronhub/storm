@@ -50,8 +50,8 @@ use Chronhub\Storm\Projector\Workflow\Timer;
 use Chronhub\Storm\Projector\Workflow\Watcher\AckedStreamWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\CycleWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\EventStreamWatcher;
-use Chronhub\Storm\Projector\Workflow\Watcher\LoopWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\SprintWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
@@ -205,7 +205,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createMonitorManager(ProjectionOption $option): WatcherManager
     {
         return new WatcherManager(
-            new LoopWatcher(),
+            new CycleWatcher(),
             new SprintWatcher(),
             new UserStateWatcher(),
             new EventStreamWatcher($this->eventStreamProvider),

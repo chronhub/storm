@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 readonly class WatcherManager
 {
     public function __construct(
-        protected LoopWatcher $loopWatcher,
+        protected CycleWatcher $cycleWatcher,
         protected SprintWatcher $sprintWatcher,
         protected UserStateWatcher $userState,
         protected EventStreamWatcher $streamWatcher,
@@ -20,9 +20,9 @@ readonly class WatcherManager
     ) {
     }
 
-    public function loop(): LoopWatcher
+    public function cycle(): CycleWatcher
     {
-        return $this->loopWatcher;
+        return $this->cycleWatcher;
     }
 
     public function sprint(): SprintWatcher

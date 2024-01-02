@@ -126,9 +126,13 @@ final class HubManager implements NotificationHub
     {
         $notification = $this->makeEvent($event, ...$arguments);
 
-        // when the event provided is not callable, it means that it is a notification object,
-        // so we just pass it to his handlers
-        $result = is_callable($notification) ? $this->subscriptor->capture($notification) : null;
+        // we still pass non-callable event to subscriptor
+        // means that event is only a notification, and could hold his own state
+        $result = $this->subscriptor->capture($notification);
+
+        if ($result === $event) {
+            $result = null;
+        }
 
         $this->handleListener($notification, $result);
     }

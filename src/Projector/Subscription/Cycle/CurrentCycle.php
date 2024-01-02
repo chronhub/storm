@@ -10,6 +10,6 @@ final class CurrentCycle
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->loop()->cycle();
+        return $subscriptor->watcher()->cycle()->cycle();
     }
 }

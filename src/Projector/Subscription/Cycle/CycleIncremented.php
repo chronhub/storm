@@ -10,6 +10,6 @@ final class CycleIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->loop()->next();
+        $subscriptor->watcher()->cycle()->next();
     }
 }

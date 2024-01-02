@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-class LoopWatcher
+class CycleWatcher
 {
     protected int $cycle = 0;
 
@@ -28,7 +28,7 @@ class LoopWatcher
         return $this->cycle;
     }
 
-    public function isFirstLoop(): bool
+    public function isFirstCycle(): bool
     {
         return $this->cycle === 1;
     }

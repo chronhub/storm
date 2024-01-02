@@ -21,12 +21,12 @@ use Closure;
 use function is_array;
 use function pcntl_signal_dispatch;
 
-final readonly class StreamEventReactor
+class StreamEventReactor
 {
     public function __construct(
-        private Closure $reactors,
-        private ProjectorScope $scope,
-        private bool $dispatchSignal
+        protected readonly Closure $reactors,
+        protected readonly ProjectorScope $scope,
+        protected readonly bool $dispatchSignal
     ) {
     }
 
