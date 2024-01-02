@@ -19,6 +19,7 @@ use Chronhub\Storm\Projector\Subscription\Management\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
 
 final class HookHandler
 {
@@ -36,6 +37,7 @@ final class HookHandler
             ProjectionRestarted::class => fn () => $management->restart(),
             ProjectionStatusDisclosed::class => fn () => $management->disclose(),
             ProjectionSynchronized::class => fn () => $management->synchronise(),
+            SnapshotCheckpointCaptured::class => fn ($listener) => $management->snapshot($listener->checkpoint),
         ]);
 
         if ($management instanceof EmittingManagement) {

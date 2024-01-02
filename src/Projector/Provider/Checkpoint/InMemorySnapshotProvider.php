@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\RecognitionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Collection;
 
-class InMemoryCheckpointProvider implements RecognitionProvider
+final class InMemorySnapshotProvider implements RecognitionProvider
 {
     private Collection $checkpoints;
 
@@ -26,9 +26,6 @@ class InMemoryCheckpointProvider implements RecognitionProvider
         $this->checkpoints->put($model->id(), $model);
     }
 
-    /**
-     * @param array<CheckpointDTO> $checkpoints
-     */
     public function insertBatch(array $checkpoints): void
     {
         // do we need to fail all when one fails?
@@ -45,11 +42,11 @@ class InMemoryCheckpointProvider implements RecognitionProvider
         $this->checkpoints = $this->checkpoints->merge($models);
     }
 
-    /**
-     * Get the last checkpoint for each stream
-     *
-     * @return Collection<InMemoryCheckpointModel>
-     */
+    public function exists(CheckpointId $checkpointId): bool
+    {
+        return $this->checkpoints->contains($checkpointId->toString());
+    }
+
     public function lastCheckpointByProjectionName(string $projectionName): Collection
     {
         return $this->checkpoints
@@ -61,9 +58,6 @@ class InMemoryCheckpointProvider implements RecognitionProvider
             );
     }
 
-    /**
-     * Get the last checkpoint for a projection and stream
-     */
     public function lastCheckpoint(string $projectionName, string $streamName): ?InMemoryCheckpointModel
     {
         return $this->checkpoints
@@ -72,9 +66,6 @@ class InMemoryCheckpointProvider implements RecognitionProvider
             ->first();
     }
 
-    /**
-     * Delete checkpoint by projection name
-     */
     public function delete(string $projectionName): void
     {
         $this->checkpoints = $this->checkpoints->reject(
@@ -82,9 +73,6 @@ class InMemoryCheckpointProvider implements RecognitionProvider
         );
     }
 
-    /**
-     * Delete checkpoint by projection name and stream name
-     */
     public function deleteByNames(string $projectionName, string $streamName): void
     {
         $this->checkpoints = $this->checkpoints->reject(
@@ -92,9 +80,7 @@ class InMemoryCheckpointProvider implements RecognitionProvider
         );
     }
 
-    /**
-     * Delete checkpoint by projection name, stream name and position
-     */
+    // todo model id
     public function deleteById(string $projectionName, string $streamName, int $position): void
     {
         $this->checkpoints = $this->checkpoints->reject(
@@ -104,9 +90,6 @@ class InMemoryCheckpointProvider implements RecognitionProvider
         );
     }
 
-    /**
-     * Delete checkpoint where created at is lower than given datetime
-     */
     public function deleteByDateLowerThan(string $projectionName, string $datetime): void
     {
         $this->checkpoints = $this->checkpoints->reject(
@@ -159,6 +142,7 @@ class InMemoryCheckpointProvider implements RecognitionProvider
             $checkpoint->projectionName,
             $checkpoint->streamName,
             $checkpoint->position,
+            $checkpoint->eventTime,
             $checkpoint->createdAt,
             $checkpoint->gaps
         );

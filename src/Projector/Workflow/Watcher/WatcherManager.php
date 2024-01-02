@@ -16,7 +16,8 @@ readonly class WatcherManager
         protected BatchStreamWatcher $batchStreamWatcher,
         protected TimeWatcher $timeWatcher,
         protected StopWatcher $stopWatcher,
-        protected MasterEventCounterWatcher $masterCounterWatcher
+        protected MasterEventCounterWatcher $masterCounterWatcher,
+        protected SnapshotWatcher $snapshotWatcher
     ) {
     }
 
@@ -68,5 +69,10 @@ readonly class WatcherManager
     public function stopWhen(): StopWatcher
     {
         return $this->stopWatcher;
+    }
+
+    public function snapshot(): SnapshotWatcher
+    {
+        return $this->snapshotWatcher;
     }
 }

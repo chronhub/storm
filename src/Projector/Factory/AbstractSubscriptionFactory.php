@@ -19,10 +19,13 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
+use Chronhub\Storm\Contracts\Projector\SnapshotRepository;
 use Chronhub\Storm\Contracts\Projector\SubscriptionFactory;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
+use Chronhub\Storm\Projector\Provider\Checkpoint\InMemorySnapshotProvider;
+use Chronhub\Storm\Projector\Provider\Checkpoint\InMemorySnapshotRepository;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
@@ -53,6 +56,7 @@ use Chronhub\Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\CycleWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\EventStreamWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
+use Chronhub\Storm\Projector\Workflow\Watcher\SnapshotWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\SprintWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
 use Chronhub\Storm\Projector\Workflow\Watcher\TimeWatcher;
@@ -103,6 +107,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $notification,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
+            $this->getSnapshotRepository(),
             $this->createStreamCache($option),
             new EmittedStream(),
         );
@@ -121,9 +126,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $notification = new HubManager($subscriptor);
         ListenerHandler::listen($notification);
 
-        $repository = $this->createProjectionRepository($streamName, $option);
+        $projectionRepository = $this->createProjectionRepository($streamName, $option);
+        $snapshotRepository = $this->getSnapshotRepository();
 
-        $management = new ReadingModelManagement($notification, $repository, $readModel);
+        $management = new ReadingModelManagement($notification, $projectionRepository, $snapshotRepository, $readModel);
         HookHandler::subscribe($notification, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);
@@ -173,6 +179,17 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         );
     }
 
+    // todo:
+    //  - snapshot provider in constructor
+    //  - set option ?
+    //  - we snapshot per stream name but we could also work per projection name,
+    //     and insert in batch
+    //  - should not support fromAll (option enableSnapshot)
+    protected function getSnapshotRepository(): SnapshotRepository
+    {
+        return new InMemorySnapshotRepository(new InMemorySnapshotProvider());
+    }
+
     protected function createLockManager(ProjectionOption $option): LockManager
     {
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
@@ -215,6 +232,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             new TimeWatcher(new Timer($this->clock)),
             new StopWatcher(),
             new MasterEventCounterWatcher(),
+            $this->snapshotWatcher($option),
         );
     }
 
@@ -225,5 +243,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $bucket = new ConsumeWithSleepToken($capacity, $rate);
 
         return new BatchStreamWatcher($bucket);
+    }
+
+    protected function snapshotWatcher(ProjectionOption $option): SnapshotWatcher
+    {
+        return new SnapshotWatcher($this->clock, everyPosition: 2000, everySeconds: null, usleep: null);
     }
 }

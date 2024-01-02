@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use DateTimeImmutable;
 
 use function array_map;
 use function array_merge;
@@ -26,7 +27,7 @@ final class CheckpointInMemory implements CheckpointRecognition
         $this->checkpoints->onDiscover(...$eventStreams);
     }
 
-    public function insert(string $streamName, int $streamPosition): Checkpoint
+    public function insert(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint
     {
         $this->validate($streamName, $streamPosition);
 
@@ -36,7 +37,7 @@ final class CheckpointInMemory implements CheckpointRecognition
             throw new InvalidArgumentException("Position given for stream $streamName is outdated");
         }
 
-        $this->checkpoints->next($streamName, $streamPosition, $checkpoint->gaps, null);
+        $this->checkpoints->next($streamName, $streamPosition, $eventTime, $checkpoint->gaps, null);
 
         return $this->checkpoints->last($streamName);
     }

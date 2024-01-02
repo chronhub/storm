@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 
 interface PersistentManagement extends Management
 {
@@ -19,7 +20,7 @@ interface PersistentManagement extends Management
     public function restart(): void;
 
     /**
-     * Synchronize the current state and positions of the projection,
+     * Synchronize the current state and positions of the projection.
      *
      * @throws ProjectionNotFound
      */
@@ -49,11 +50,13 @@ interface PersistentManagement extends Management
 
     /**
      * Reset the projection.
+     * Note it also deletes all snapshots taken for the current projection.
      */
     public function revise(): void;
 
     /**
      * Delete the projection with or without emitted events.
+     * Note it also deletes all snapshots taken for the current projection.
      */
     public function discard(bool $withEmittedEvents): void;
 
@@ -61,6 +64,11 @@ interface PersistentManagement extends Management
      * Release the projection lock.
      */
     public function freed(): void;
+
+    /**
+     * Take a snapshot of the projection.
+     */
+    public function snapshot(Checkpoint $checkpoint): void;
 
     /**
      * Get the projection name (aka stream name).

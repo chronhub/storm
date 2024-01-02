@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use DateTimeImmutable;
 use Illuminate\Support\Collection;
 
 use function array_merge;
@@ -17,7 +18,7 @@ use function range;
 class CheckpointCollection
 {
     /**
-     * @var Collection<string,Checkpoint>
+     * @var Collection<string, Checkpoint>
      */
     private Collection $checkpoints;
 
@@ -30,7 +31,7 @@ class CheckpointCollection
     {
         foreach ($streamNames as $streamName) {
             if (! $this->has($streamName)) {
-                $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, 0, [], null));
+                $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, 0, null, [], null));
             }
         }
     }
@@ -40,12 +41,12 @@ class CheckpointCollection
         return $this->checkpoints->get($streamName);
     }
 
-    public function next(string $streamName, int $position, array $gaps, ?GapType $gapType): void
+    public function next(string $streamName, int $position, string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): void
     {
-        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $gaps, $gapType));
+        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $eventTime, $gaps, $gapType));
     }
 
-    public function nextWithGap(Checkpoint $checkpoint, int $position, GapType $gapType): void
+    public function nextWithGap(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, GapType $gapType): void
     {
         if ($position - $checkpoint->position < 0) {
             throw new InvalidArgumentException('Invalid position: no gap or checkpoints are outdated');
@@ -61,12 +62,12 @@ class CheckpointCollection
         // meant the projection state is probably invalid
         foreach ($gapsToAdd as $gap) {
             if (in_array($gap, $checkpoint->gaps, true)) {
-                throw new InvalidArgumentException('Gap '.$gap.' already registered');
+                throw new InvalidArgumentException('Gap '.$gap.' already recorded');
             }
         }
 
         if ($checkpoint->gaps !== [] && (max($checkpoint->gaps) > min($gapsToAdd))) {
-            throw new InvalidArgumentException('Cannot register gaps which are lower than previous registered gaps');
+            throw new InvalidArgumentException('Cannot record gaps which are lower than previous recorded gaps');
         }
 
         // another scenario is the event position is no longer part of the gaps,
@@ -75,6 +76,7 @@ class CheckpointCollection
         $newCheckpoint = $this->newCheckpoint(
             $checkpoint->streamName,
             $position,
+            $eventTime,
             array_merge($checkpoint->gaps, $gapsToAdd),
             $gapType
         );
@@ -82,9 +84,13 @@ class CheckpointCollection
         $this->checkpoints->put($checkpoint->streamName, $newCheckpoint);
     }
 
-    public function newCheckpoint(string $streamName, int $position, array $gaps, ?GapType $gapType): Checkpoint
+    public function newCheckpoint(string $streamName, int $position, null|string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): Checkpoint
     {
-        return CheckpointFactory::from($streamName, $position, $this->clock->toString(), $gaps, $gapType);
+        if ($eventTime instanceof DateTimeImmutable) {
+            $eventTime = $this->clock->format($eventTime);
+        }
+
+        return CheckpointFactory::from($streamName, $position, $eventTime, $this->clock->toString(), $gaps, $gapType);
     }
 
     public function update(string $streamName, Checkpoint $checkpoint): void

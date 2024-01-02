@@ -14,6 +14,7 @@ final readonly class InMemoryCheckpointModel implements CheckpointModel
         public string $projectionName,
         public string $streamName,
         public int $position,
+        public string $eventTime,
         public string $createdAt,
         public ?string $gaps = '{}'
     ) {
@@ -37,6 +38,11 @@ final readonly class InMemoryCheckpointModel implements CheckpointModel
     public function position(): int
     {
         return $this->position;
+    }
+
+    public function eventTime(): string
+    {
+        return $this->eventTime;
     }
 
     public function createdAt(): string

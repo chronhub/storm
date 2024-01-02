@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
+use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Stream\GapType;
+use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionPersistedWhenThresholdIsReached;
-use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
 use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Stream\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\UserState\CurrentUserState;
@@ -18,6 +19,7 @@ use Chronhub\Storm\Projector\Subscription\UserState\IsUserStateInitialized;
 use Chronhub\Storm\Projector\Subscription\UserState\UserStateChanged;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
+use DateTimeImmutable;
 
 use function is_array;
 use function pcntl_signal_dispatch;
@@ -38,7 +40,7 @@ class StreamEventReactor
     {
         $this->dispatchSignalIfRequested();
 
-        if (! $this->hasNoGap($hub, $streamName, $expectedPosition)) {
+        if (! $this->hasNoGap($hub, $streamName, $expectedPosition, $event->header(Header::EVENT_TIME))) {
             return false;
         }
 
@@ -73,17 +75,17 @@ class StreamEventReactor
         $resetScope();
     }
 
-    private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition): bool
+    private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
     {
-        $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition));
+        $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
-        if ($checkPoint->type === null) {
-            $hub->trigger(new SnapshotCheckpointCaptured($checkPoint));
+        if ($checkPoint->type === null || $checkPoint->type === GapType::IN_GAP) {
+            $hub->notify(ShouldSnapshotCheckpoint::class, $checkPoint);
 
             return true;
         }
 
-        return $checkPoint->type === GapType::IN_GAP;
+        return false;
     }
 
     private function getUserState(NotificationHub $hub): ?array

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Projector\GapRecognition;
 
-class NoopGapDetector implements GapRecognition
+final class NoopGapDetector implements GapRecognition
 {
     public function isRecoverable(): bool
     {

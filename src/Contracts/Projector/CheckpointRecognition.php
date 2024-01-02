@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Projector\Stream\Checkpoint;
+use DateTimeImmutable;
 use JsonSerializable;
 
 interface CheckpointRecognition extends JsonSerializable
@@ -21,7 +22,7 @@ interface CheckpointRecognition extends JsonSerializable
      * @param  positive-int $streamPosition
      * @return Checkpoint   the last checkpoint inserted with or without gap
      */
-    public function insert(string $streamName, int $streamPosition): Checkpoint;
+    public function insert(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint;
 
     /**
      * Update stream checkpoints.
@@ -33,7 +34,7 @@ interface CheckpointRecognition extends JsonSerializable
     /**
      * Returns the last inserted stream checkpoints.
      *
-     * @return array<string,Checkpoint>
+     * @return array<string, Checkpoint>
      */
     public function checkpoints(): array;
 

@@ -14,6 +14,8 @@ interface CheckpointModel
 
     public function position(): int;
 
+    public function eventTime(): string;
+
     public function createdAt(): string;
 
     public function gaps(): string;

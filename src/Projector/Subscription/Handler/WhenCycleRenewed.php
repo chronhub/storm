@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleIncremented;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleRenewed;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleReset;
@@ -48,10 +50,18 @@ final class WhenCycleRenewed
 
     private function notifyCycledEnded(NotificationHub $hub): void
     {
+        $isSprintTerminated = $hub->expect(IsSprintTerminated::class);
+
         $hub->notifyWhen(
-            $hub->expect(IsSprintTerminated::class),
+            $isSprintTerminated,
             fn (NotificationHub $hub) => $hub->notify(CycleReset::class),
-            fn (NotificationHub $hub) => $hub->notify(CycleIncremented::class)
+            fn (NotificationHub $hub) => $hub->notify(CycleIncremented::class),
         );
+
+        // required when rerun projection
+        if ($isSprintTerminated) {
+            $hub->forgetListener(ShouldSnapshotCheckpoint::class);
+            $hub->forgetListener(CheckpointInserted::class);
+        }
     }
 }

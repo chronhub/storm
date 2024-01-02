@@ -21,23 +21,23 @@ beforeEach(function () {
 it('can run emitter projection', function (): void {
     // feed our event store
     $eventId = Uuid::v4()->toRfc4122();
-    $stream = $this->testFactory->getStream('user', 10000, null, $eventId);
+    $stream = $this->testFactory->getStream('user', 10000, '-10 seconds', $eventId);
     $this->eventStore->firstCommit($stream);
 
     $eventId1 = Uuid::v4()->toRfc4122();
-    $stream1 = $this->testFactory->getStream('foo', 5000, '+10 seconds', $eventId1);
+    $stream1 = $this->testFactory->getStream('foo', 5000, '-1 second', $eventId1);
     $this->eventStore->firstCommit($stream1);
 
     // create a projection
     $projector = $this->projectorManager->newEmitterProjector('customer');
 
-    $expiredAt = PointInTimeFactory::now()->modify('+10 seconds')->getTimestamp();
+    //$expiredAt = PointInTimeFactory::now()->modify('+10 seconds')->getTimestamp();
 
     // run projection
     $projector
         ->initialize(fn () => ['count' => ['user' => 0, 'foo' => 0, 'total' => 0]])
         ->subscribeToStream('user', 'foo')
-        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->whenTimeExpired($expiredAt))
+        ->haltOn(fn (HaltOn $haltOn): HaltOn => $haltOn->whenStreamEventLimitReach(15000))
         ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->when(function (EmitterScope $scope): void {
             $scope

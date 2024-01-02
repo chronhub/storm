@@ -7,11 +7,13 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
 use Chronhub\Storm\Projector\Subscription\Batch\IsBatchCounterReached;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CurrentCheckpoint;
+use Chronhub\Storm\Projector\Subscription\Checkpoint\SnapshotTaken;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintContinue;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
@@ -28,12 +30,12 @@ trait InteractWithManagement
 {
     public function tryUpdateLock(): void
     {
-        $this->repository->updateLock();
+        $this->projectionRepository->updateLock();
     }
 
     public function freed(): void
     {
-        $this->repository->release();
+        $this->projectionRepository->release();
 
         $this->onStatusChanged(ProjectionStatus::IDLE);
     }
@@ -42,7 +44,7 @@ trait InteractWithManagement
     {
         $idleStatus = ProjectionStatus::IDLE;
 
-        $this->repository->stop($this->getProjectionResult(), $idleStatus);
+        $this->projectionRepository->stop($this->getProjectionResult(), $idleStatus);
 
         $this->onStatusChanged($idleStatus);
 
@@ -55,14 +57,14 @@ trait InteractWithManagement
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->repository->startAgain($runningStatus);
+        $this->projectionRepository->startAgain($runningStatus);
 
         $this->onStatusChanged($runningStatus);
     }
 
     public function disclose(): void
     {
-        $disclosedStatus = $this->repository->loadStatus();
+        $disclosedStatus = $this->projectionRepository->loadStatus();
 
         $this->hub->notify(
             StatusDisclosed::class,
@@ -72,7 +74,7 @@ trait InteractWithManagement
 
     public function synchronise(): void
     {
-        $projectionDetail = $this->repository->loadDetail();
+        $projectionDetail = $this->projectionRepository->loadDetail();
 
         $this->hub->notify(CheckpointUpdated::class, $projectionDetail->checkpoints);
 
@@ -102,9 +104,18 @@ trait InteractWithManagement
         }
     }
 
+    public function snapshot(Checkpoint $checkpoint): void
+    {
+        $this->snapshotRepository->snapshot($this->getName(), $checkpoint);
+
+        $this->hub->notify(SnapshotTaken::class, $checkpoint);
+
+        dump($checkpoint);
+    }
+
     public function getName(): string
     {
-        return $this->repository->projectionName();
+        return $this->projectionRepository->projectionName();
     }
 
     public function getProcessedStream(): string
@@ -121,13 +132,13 @@ trait InteractWithManagement
     {
         $this->hub->notify(SprintContinue::class);
 
-        if (! $this->repository->exists()) {
-            $this->repository->create($this->hub->expect(CurrentStatus::class));
+        if (! $this->projectionRepository->exists()) {
+            $this->projectionRepository->create($this->hub->expect(CurrentStatus::class));
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->repository->start($runningStatus);
+        $this->projectionRepository->start($runningStatus);
 
         $this->onStatusChanged($runningStatus);
     }

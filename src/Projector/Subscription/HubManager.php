@@ -20,6 +20,7 @@ use Chronhub\Storm\Projector\Subscription\Management\ProjectionRise;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStatusDisclosed;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -48,6 +49,7 @@ final class HubManager implements NotificationHub
         ProjectionPersistedWhenThresholdIsReached::class => [],
         EventEmitted::class => [],
         EventLinkedTo::class => [],
+        SnapshotCheckpointCaptured::class => [],
     ];
 
     /**
@@ -117,6 +119,12 @@ final class HubManager implements NotificationHub
 
         $result = $this->subscriptor->capture($notification);
 
+        // we still pass non-callable event to subscriptor
+        // means that event is only a notification, and could hold his own state
+        if ($result === $notification) {
+            $result = null;
+        }
+
         $this->handleListener($notification, $result);
 
         return $result;
@@ -130,7 +138,7 @@ final class HubManager implements NotificationHub
         // means that event is only a notification, and could hold his own state
         $result = $this->subscriptor->capture($notification);
 
-        if ($result === $event) {
+        if ($result === $notification) {
             $result = null;
         }
 

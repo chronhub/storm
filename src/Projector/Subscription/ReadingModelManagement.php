@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Projector\ReadModel;
 use Chronhub\Storm\Contracts\Projector\ReadModelManagement;
+use Chronhub\Storm\Contracts\Projector\SnapshotRepository;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
 use Chronhub\Storm\Projector\Subscription\Stream\EventStreamDiscovered;
@@ -18,7 +19,8 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function __construct(
         protected NotificationHub $hub,
-        protected ProjectionRepository $repository,
+        protected ProjectionRepository $projectionRepository,
+        protected SnapshotRepository $snapshotRepository,
         private ReadModel $readModel
     ) {
     }
@@ -38,7 +40,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionResult());
+        $this->projectionRepository->persist($this->getProjectionResult());
 
         $this->readModel->persist();
     }
@@ -47,14 +49,18 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
+        $this->projectionRepository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
 
         $this->readModel->reset();
+
+        $this->snapshotRepository->deleteByProjectionName($this->getName());
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete($withEmittedEvents);
+        $this->projectionRepository->delete($withEmittedEvents);
+
+        $this->snapshotRepository->deleteByProjectionName($this->getName());
 
         if ($withEmittedEvents) {
             $this->readModel->down();

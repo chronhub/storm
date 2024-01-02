@@ -89,8 +89,8 @@ readonly class StreamEventsFactory
      * @param positive-int|null $internalPosition
      */
     public function withHeaders(
-        DateTimeImmutable|string $eventTime = null,
-        int $internalPosition = null,
+        DateTimeImmutable|string|null $eventTime = null,
+        ?int $internalPosition = null,
         array $content = []
     ): DomainEvent {
 
@@ -101,7 +101,7 @@ readonly class StreamEventsFactory
         return $this->makeEvent($headers, $content);
     }
 
-    public function timesWithHeaders(int $times, string $modifier = null, Uuid|string $eventId = null, int $positionStartAt = 1): Generator
+    public function timesWithHeaders(int $times, ?string $modifier = null, Uuid|string|null $eventId = null, int $positionStartAt = 1): Generator
     {
         $count = $positionStartAt;
         $now = PointInTimeFactory::now();

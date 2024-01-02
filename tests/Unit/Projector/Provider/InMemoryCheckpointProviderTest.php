@@ -7,14 +7,14 @@ namespace Chronhub\Storm\Tests\Unit\Projector\Provider;
 use Chronhub\Storm\Clock\PointInTime;
 use Chronhub\Storm\Projector\Provider\Checkpoint\CheckpointDTO;
 use Chronhub\Storm\Projector\Provider\Checkpoint\InMemoryCheckpointModel;
-use Chronhub\Storm\Projector\Provider\Checkpoint\InMemoryCheckpointProvider;
+use Chronhub\Storm\Projector\Provider\Checkpoint\InMemorySnapshotProvider;
 use DateInterval;
 
 use function sha1;
 
 beforeEach(function (): void {
     $this->clock = new PointInTime();
-    $this->provider = new InMemoryCheckpointProvider($this->clock);
+    $this->provider = new InMemorySnapshotProvider($this->clock);
 });
 
 it('can be instantiated', function (): void {

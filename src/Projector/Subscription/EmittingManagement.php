@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Projector\EmittedStreamCache;
 use Chronhub\Storm\Contracts\Projector\EmitterManagement;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
+use Chronhub\Storm\Contracts\Projector\SnapshotRepository;
 use Chronhub\Storm\Projector\Stream\EmittedStream;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
@@ -25,7 +26,8 @@ final readonly class EmittingManagement implements EmitterManagement
     public function __construct(
         protected NotificationHub $hub,
         protected Chronicler $chronicler,
-        protected ProjectionRepository $repository,
+        protected ProjectionRepository $projectionRepository,
+        protected SnapshotRepository $snapshotRepository,
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
@@ -68,21 +70,25 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function store(): void
     {
-        $this->repository->persist($this->getProjectionResult());
+        $this->projectionRepository->persist($this->getProjectionResult());
     }
 
     public function revise(): void
     {
         $this->resetState();
 
-        $this->repository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
+        $this->projectionRepository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
 
         $this->deleteStream();
+
+        $this->snapshotRepository->deleteByProjectionName($this->getName());
     }
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->repository->delete($withEmittedEvents);
+        $this->projectionRepository->delete($withEmittedEvents);
+
+        $this->snapshotRepository->deleteByProjectionName($this->getName());
 
         if ($withEmittedEvents) {
             $this->deleteStream();
@@ -113,7 +119,7 @@ final readonly class EmittingManagement implements EmitterManagement
     private function deleteStream(): void
     {
         try {
-            $streamName = new StreamName($this->repository->projectionName());
+            $streamName = new StreamName($this->projectionRepository->projectionName());
 
             $this->chronicler->delete($streamName);
         } catch (StreamNotFound) {

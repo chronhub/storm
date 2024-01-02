@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector\Stream;
 use Chronhub\Storm\Contracts\Projector\CheckpointRecognition;
 use Chronhub\Storm\Contracts\Projector\GapRecognition;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
+use DateTimeImmutable;
 
 use function array_map;
 use function array_merge;
@@ -29,7 +30,7 @@ final class CheckpointManager implements CheckpointRecognition
         $this->checkpoints->onDiscover(...$eventStreams);
     }
 
-    public function insert(string $streamName, int $streamPosition): Checkpoint
+    public function insert(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint
     {
         $this->validate($streamName, $streamPosition);
 
@@ -41,12 +42,12 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         if ($this->hasNextPosition($checkpoint, $streamPosition)) {
-            $this->checkpoints->next($streamName, $streamPosition, $checkpoint->gaps, null);
+            $this->checkpoints->next($streamName, $streamPosition, $eventTime, $checkpoint->gaps, null);
 
             return $this->lastCheckpoint($streamName);
         }
 
-        return $this->handleGap($streamName, $streamPosition, $checkpoint);
+        return $this->handleGap($streamName, $streamPosition, $eventTime, $checkpoint);
     }
 
     public function update(array $checkpoints): void
@@ -105,19 +106,19 @@ final class CheckpointManager implements CheckpointRecognition
      * By now the only way to make it work is to have at least two retries in gap detection
      * and assume that the last retry would fail
      */
-    private function handleGap(string $streamName, int $streamPosition, Checkpoint $checkpoint): Checkpoint
+    private function handleGap(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime, Checkpoint $checkpoint): Checkpoint
     {
         if (! $this->gapDetector->isRecoverable()) {
-            $this->checkpoints->nextWithGap($checkpoint, $streamPosition, GapType::IN_GAP);
+            $this->checkpoints->nextWithGap($checkpoint, $streamPosition, $eventTime, GapType::IN_GAP);
 
             return $this->lastCheckpoint($streamName);
         }
 
         if ($this->gapDetector->retryLeft() === 1) {
-            return $this->checkpoints->newCheckpoint($streamName, $streamPosition, $checkpoint->gaps, GapType::UNRECOVERABLE_GAP);
+            return $this->checkpoints->newCheckpoint($streamName, $streamPosition, $eventTime, $checkpoint->gaps, GapType::UNRECOVERABLE_GAP);
         }
 
-        return $this->checkpoints->newCheckpoint($streamName, $streamPosition, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
+        return $this->checkpoints->newCheckpoint($streamName, $streamPosition, $eventTime, $checkpoint->gaps, GapType::RECOVERABLE_GAP);
     }
 
     private function validate(string $streamName, int $eventPosition): void

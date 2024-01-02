@@ -10,6 +10,7 @@ final readonly class CheckpointDTO
         public string $projectionName,
         public string $streamName,
         public int $position,
+        public string $eventTime,
         public string $createdAt,
         public string $gaps
     ) {
