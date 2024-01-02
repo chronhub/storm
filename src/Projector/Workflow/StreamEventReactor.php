@@ -10,6 +10,7 @@ use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterIncremented;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionPersistedWhenThresholdIsReached;
+use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
 use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
 use Chronhub\Storm\Projector\Subscription\Stream\StreamEventAcked;
 use Chronhub\Storm\Projector\Subscription\UserState\CurrentUserState;
@@ -76,7 +77,13 @@ class StreamEventReactor
     {
         $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition));
 
-        return $checkPoint->type === null || $checkPoint->type === GapType::IN_GAP;
+        if ($checkPoint->type === null) {
+            $hub->trigger(new SnapshotCheckpointCaptured($checkPoint));
+
+            return true;
+        }
+
+        return $checkPoint->type === GapType::IN_GAP;
     }
 
     private function getUserState(NotificationHub $hub): ?array

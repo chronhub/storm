@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Provider\Checkpoint;
 
+use Chronhub\Storm\Contracts\Projector\RecognitionProvider;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Collection;
 
-class InMemoryCheckpointProvider
+class InMemoryCheckpointProvider implements RecognitionProvider
 {
     private Collection $checkpoints;
 
@@ -31,8 +32,8 @@ class InMemoryCheckpointProvider
     public function insertBatch(array $checkpoints): void
     {
         // do we need to fail all when one fails?
-
         $models = [];
+
         foreach ($checkpoints as $checkpoint) {
             $model = $this->newCheckpoint($checkpoint);
 
@@ -49,7 +50,7 @@ class InMemoryCheckpointProvider
      *
      * @return Collection<InMemoryCheckpointModel>
      */
-    public function lastCheckpointsByProjectionName(string $projectionName): Collection
+    public function lastCheckpointByProjectionName(string $projectionName): Collection
     {
         return $this->checkpoints
             ->filter(fn (InMemoryCheckpointModel $model) => $model->projectionName === $projectionName)

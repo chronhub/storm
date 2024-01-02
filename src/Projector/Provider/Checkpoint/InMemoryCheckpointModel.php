@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Provider\Checkpoint;
 
+use Chronhub\Storm\Contracts\Projector\CheckpointModel;
+
 use function sha1;
 
-final readonly class InMemoryCheckpointModel
+final readonly class InMemoryCheckpointModel implements CheckpointModel
 {
     public function __construct(
         public string $projectionName,
@@ -45,10 +47,5 @@ final readonly class InMemoryCheckpointModel
     public function gaps(): string
     {
         return $this->gaps;
-    }
-
-    public function isEqualTo(InMemoryCheckpointModel $checkpoint): bool
-    {
-        return $this->id() === $checkpoint->id();
     }
 }

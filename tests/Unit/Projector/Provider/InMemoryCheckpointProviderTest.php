@@ -97,7 +97,7 @@ it('retrieve all unique and last checkpoints per projection', function () {
 
     $this->assertCount(4, $this->provider->all());
 
-    $checkpoints = $this->provider->lastCheckpointsByProjectionName('projection');
+    $checkpoints = $this->provider->lastCheckpointByProjectionName('projection');
 
     expect($checkpoints)->toHaveCount(2)
         ->and($checkpoints->first())->toBeInstanceOf(InMemoryCheckpointModel::class)
