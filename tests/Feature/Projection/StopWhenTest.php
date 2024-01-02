@@ -43,7 +43,7 @@ it('stop when no event stream has been discovered', function (): void {
     expect($haltOnEmpty->getState())->toBe(['count' => 0]);
 });
 
-it('stop when no event stream has been discovered with expiration time', function (): void {
+it('stop when no event stream discovered with expiration time', function (): void {
     expect($this->eventStore->hasStream(new StreamName('user')))->toBeFalse();
 
     $haltOnEmpty = $this->projectorManager->newEmitterProjector('customer');

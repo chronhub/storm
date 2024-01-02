@@ -12,8 +12,8 @@ use Chronhub\Storm\Projector\Subscription\Checkpoint\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\UnrecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Cycle\CurrentCycle;
-use Chronhub\Storm\Projector\Subscription\Cycle\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleIncremented;
+use Chronhub\Storm\Projector\Subscription\Cycle\CycleRenewed;
 use Chronhub\Storm\Projector\Subscription\MasterCounter\CurrentMasterCount;
 use Chronhub\Storm\Projector\Subscription\MasterCounter\KeepMasterCounterOnStop;
 use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
@@ -132,7 +132,7 @@ class StopWatcher
 
     protected function stopWhenTimeExpired(NotificationHub $hub, int $expiredAt): string
     {
-        $listener = CycleChanged::class;
+        $listener = CycleRenewed::class;
 
         $hub->addListener($listener, $this->expirationCallback($expiredAt));
 

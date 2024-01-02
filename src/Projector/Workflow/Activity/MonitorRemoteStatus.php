@@ -19,6 +19,9 @@ trait MonitorRemoteStatus
 {
     private bool $onRise = true;
 
+    /**
+     * Stop projection early if remote status is stopping or deleting
+     */
     public function shouldStop(NotificationHub $hub): bool
     {
         $shouldStop = $this->discovering($hub);
@@ -28,6 +31,9 @@ trait MonitorRemoteStatus
         return $shouldStop;
     }
 
+    /**
+     * Refresh projection status at the end of each cycle
+     */
     public function refreshStatus(NotificationHub $hub): void
     {
         $this->onRise = false;
@@ -64,6 +70,9 @@ trait MonitorRemoteStatus
         return $this->onRise;
     }
 
+    /**
+     * Discover remote status and act accordingly
+     */
     protected function discovering(NotificationHub $hub): bool
     {
         $hub->trigger(new ProjectionStatusDisclosed());

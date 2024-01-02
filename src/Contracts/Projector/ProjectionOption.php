@@ -147,10 +147,6 @@ interface ProjectionOption extends JsonSerializable
     /**
      * Get "only once discovery"
      * Available for persistent projection
-     * Query projection already use this option by default
-     *
-     * Discovery is done on rising projection and at the end of each cycle,
-     * use the option prevent to discover and save a query.
      */
     public function getOnlyOnceDiscovery(): bool;
 }

@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Contracts\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
 /**
  * @template TInit of array
- * @template TWhen of array{DomainEvent,TInit,ProjectorScope}|array<DomainEvent,ProjectorScope>
+ * @template TWhen of array{ProjectorScope}
  */
 interface ProjectorFactory extends Projector
 {
@@ -47,14 +46,14 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the reactos.
      *
-     * @param Closure(TWhen): ?TInit $reactors
+     * @param Closure(TWhen): void $reactors
      *
      * @see Context::when()
      */
     public function when(Closure $reactors): static;
 
     /**
-     * Proxy method to set the stop when.
+     * Proxy method to set the stop watch callback.
      *
      * @see Context::haltOn()
      */

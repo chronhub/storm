@@ -36,13 +36,13 @@ final class LoadStreams
     {
         $checkpoints = $hub->expect(CurrentCheckpoint::class);
 
-        $iterators = $this->batchStreams($checkpoints);
+        $streams = $this->collectStreams($checkpoints);
 
-        if ($iterators) {
-            $iterators = new MergeStreamIterator($this->clock, $iterators);
+        if ($streams) {
+            $streams = new MergeStreamIterator($this->clock, $streams);
         }
 
-        $hub->notify(StreamIteratorSet::class, $iterators);
+        $hub->notify(StreamIteratorSet::class, $streams);
 
         return $next($hub);
     }
@@ -51,7 +51,7 @@ final class LoadStreams
      * @param  array<string,Checkpoint>               $streams
      * @return null|Collection<string,StreamIterator>
      */
-    private function batchStreams(array $streams): ?Collection
+    private function collectStreams(array $streams): ?Collection
     {
         $streamEvents = new Collection();
 

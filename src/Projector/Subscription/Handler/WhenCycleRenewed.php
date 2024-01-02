@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
-use Chronhub\Storm\Projector\Subscription\Cycle\CycleChanged;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleIncremented;
+use Chronhub\Storm\Projector\Subscription\Cycle\CycleRenewed;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleReset;
 use Chronhub\Storm\Projector\Subscription\MasterCounter\MasterCounterReset;
 use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
@@ -16,17 +16,15 @@ use Chronhub\Storm\Projector\Subscription\Stream\NewEventStreamReset;
 use Chronhub\Storm\Projector\Subscription\Stream\StreamEventAckedReset;
 use Chronhub\Storm\Projector\Subscription\Timer\TimeReset;
 
-final class WhenCycleChanged
+final class WhenCycleRenewed
 {
-    public function __invoke(NotificationHub $hub, CycleChanged $event): void
+    public function __invoke(NotificationHub $hub, CycleRenewed $event): void
     {
         $this->notifySprintTerminated($hub);
 
         $this->notifyCycledEnded($hub);
 
-        $this->resetCycle($hub);
-
-        $this->forgetListenersOnTermination($hub);
+        $this->flushWatcher($hub);
     }
 
     private function notifySprintTerminated(NotificationHub $hub): void
@@ -37,10 +35,12 @@ final class WhenCycleChanged
         );
     }
 
-    private function resetCycle(NotificationHub $hub): void
+    private function flushWatcher(NotificationHub $hub): void
     {
+        // reset every cycle
         $hub->notifyMany(BatchCounterReset::class, StreamEventAckedReset::class, NewEventStreamReset::class);
 
+        // reset only when sprint is terminated
         if ($hub->expect(IsSprintTerminated::class)) {
             $hub->notifyMany(TimeReset::class, MasterCounterReset::class);
         }
@@ -53,12 +53,5 @@ final class WhenCycleChanged
             fn (NotificationHub $hub) => $hub->notify(CycleReset::class),
             fn (NotificationHub $hub) => $hub->notify(CycleIncremented::class)
         );
-    }
-
-    private function forgetListenersOnTermination(NotificationHub $hub): void
-    {
-        if ($hub->expect(IsSprintTerminated::class)) {
-            $hub->forgetAll();
-        }
     }
 }

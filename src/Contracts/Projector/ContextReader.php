@@ -7,12 +7,11 @@ namespace Chronhub\Storm\Contracts\Projector;
 use Chronhub\Storm\Contracts\Chronicler\EventStreamProvider;
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Closure;
 
 /**
  * @template TState of array|null
- * @template TReactor of array{DomainEvent,TState,ProjectorScope}|array<DomainEvent,ProjectorScope>
+ * @template TReactor of array<ProjectorScope>
  */
 interface ContextReader extends Context
 {
@@ -26,7 +25,7 @@ interface ContextReader extends Context
     /**
      * Get the event handlers as an array to be called when an event is received.
      *
-     * @return Closure(TReactor): ?TState
+     * @return Closure(TReactor): void
      *
      * @throws InvalidArgumentException When reactors are not set
      */
@@ -50,8 +49,11 @@ interface ContextReader extends Context
 
     /**
      * Check if projection should keep state in memory.
+     * Note that user state must be initialized.
      *
-     * Default is false
+     * Default to false
+     *
+     * @throws InvalidArgumentException When user state is not initialized
      */
     public function keepState(): bool;
 
@@ -63,7 +65,7 @@ interface ContextReader extends Context
     /**
      * Get the condition to stop the projection.
      *
-     * @return array<string,callable>
+     * @return array<string, callable>
      */
     public function haltOnCallback(): array;
 }

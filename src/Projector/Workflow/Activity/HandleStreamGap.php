@@ -14,9 +14,8 @@ final class HandleStreamGap
 {
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        // when a gap is detected, we first, sleep for a while,
-        // to let the remote storage to fix it, and then
-        // we store the projection result if some stream events
+        // when a gap is detected, we first, sleep for a while, to let the remote storage to fix it,
+        // and then we store the projection results if some stream events
         // have been processed before the gap detection.
         $hub->notifyWhen(
             $hub->expect(HasGap::class),

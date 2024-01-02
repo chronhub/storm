@@ -24,14 +24,16 @@ class Workflow
     ) {
     }
 
-    public function process(Closure $destination): bool
+    public function process(Closure $destination): void
     {
         $process = $this->prepareProcess($destination);
 
         try {
-            return $process($this->hub);
+            do {
+                $inProgress = $process($this->hub);
+            } while ($inProgress);
         } catch (Throwable $exception) {
-            return false;
+            //
         } finally {
             $this->conditionallyReleaseLock($exception ?? null);
         }

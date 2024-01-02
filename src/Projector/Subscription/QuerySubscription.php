@@ -52,11 +52,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
         $workflow = new Workflow($this->hub(), $activities);
 
-        do {
-            $inProgress = $workflow->process(
-                fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class)
-            );
-        } while ($inProgress);
+        $workflow->process(fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class));
     }
 
     private function initializeContext(ContextReader $context): void

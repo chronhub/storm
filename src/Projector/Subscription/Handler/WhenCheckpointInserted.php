@@ -12,7 +12,7 @@ use Chronhub\Storm\Projector\Subscription\Checkpoint\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\UnrecoverableGapDetected;
 
-class WhenCheckpointAdded
+class WhenCheckpointInserted
 {
     public function __invoke(NotificationHub $hub, CheckpointInserted $event, Checkpoint $checkpoint): void
     {
