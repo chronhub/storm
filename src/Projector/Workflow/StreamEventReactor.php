@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow;
 
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Contracts\Projector\PersistentProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
@@ -80,7 +81,10 @@ class StreamEventReactor
         $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
         if ($checkPoint->type === null || $checkPoint->type === GapType::IN_GAP) {
-            $hub->notify(ShouldSnapshotCheckpoint::class, $checkPoint);
+            $hub->notifyWhen(
+                $this->scope instanceof PersistentProjectorScope,
+                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkPoint)
+            );
 
             return true;
         }
