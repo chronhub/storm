@@ -53,7 +53,7 @@ interface RecognitionProvider
     /**
      * Delete checkpoint by projection name, stream name and position.
      */
-    public function deleteById(string $projectionName, string $streamName, int $position): void;
+    public function deleteById(CheckpointId $checkpointId): void;
 
     /**
      * Delete checkpoint where created at is lower than given datetime.

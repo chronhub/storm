@@ -81,12 +81,10 @@ final class InMemorySnapshotProvider implements RecognitionProvider
     }
 
     // todo model id
-    public function deleteById(string $projectionName, string $streamName, int $position): void
+    public function deleteById(CheckpointId $checkpointId): void
     {
         $this->checkpoints = $this->checkpoints->reject(
-            fn (InMemoryCheckpointModel $model) => $model->projectionName === $projectionName
-                && $model->streamName === $streamName
-                && $model->position === $position
+            fn (InMemoryCheckpointModel $model): bool => $model->id() === $checkpointId->toString()
         );
     }
 
