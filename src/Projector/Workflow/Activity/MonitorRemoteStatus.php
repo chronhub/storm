@@ -6,14 +6,14 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionClosed;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionDiscarded;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionRestarted;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionRevised;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionStatusDisclosed;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionSynchronized;
-use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintDaemonize;
-use Chronhub\Storm\Projector\Subscription\Status\CurrentStatus;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionClosed;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionRestarted;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionRevised;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionStatusDisclosed;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionSynchronized;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintDaemonize;
+use Chronhub\Storm\Projector\Support\Notification\Status\CurrentStatus;
 
 trait MonitorRemoteStatus
 {

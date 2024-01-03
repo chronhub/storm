@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Cycle\IsFirstCycle;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionRise;
+use Chronhub\Storm\Projector\Support\Notification\Cycle\IsFirstCycle;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionRise;
 
 final class RisePersistentProjection
 {

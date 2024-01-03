@@ -8,8 +8,8 @@ use ArrayAccess;
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
-use Chronhub\Storm\Projector\Subscription\Sprint\SprintStopped;
-use Chronhub\Storm\Projector\Subscription\Stream\CurrentProcessedStream;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\SprintStopped;
+use Chronhub\Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
 
 final class QueryAccess implements ArrayAccess, QueryProjectorScope
 {

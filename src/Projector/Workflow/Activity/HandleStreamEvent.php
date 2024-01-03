@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
-use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
-use Chronhub\Storm\Projector\Subscription\Stream\PullStreamIterator;
-use Chronhub\Storm\Projector\Subscription\Stream\StreamProcessed;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintRunning;
+use Chronhub\Storm\Projector\Support\Notification\Stream\PullStreamIterator;
+use Chronhub\Storm\Projector\Support\Notification\Stream\StreamProcessed;
 use Chronhub\Storm\Reporter\DomainEvent;
 
 use function gc_collect_cycles;

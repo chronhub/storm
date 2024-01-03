@@ -9,7 +9,7 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
-use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
+use Chronhub\Storm\Projector\Support\Notification\Management\SnapshotCheckpointCaptured;
 use Closure;
 use Illuminate\Support\Sleep;
 

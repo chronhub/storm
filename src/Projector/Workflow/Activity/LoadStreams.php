@@ -11,8 +11,8 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Iterator\MergeStreamIterator;
 use Chronhub\Storm\Projector\Iterator\StreamIterator;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\CurrentCheckpoint;
-use Chronhub\Storm\Projector\Subscription\Stream\StreamIteratorSet;
+use Chronhub\Storm\Projector\Support\Notification\Checkpoint\CurrentCheckpoint;
+use Chronhub\Storm\Projector\Support\Notification\Stream\StreamIteratorSet;
 use Chronhub\Storm\Stream\StreamName;
 use Illuminate\Support\Collection;
 

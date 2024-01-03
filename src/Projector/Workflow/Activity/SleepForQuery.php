@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchSleep;
+use Chronhub\Storm\Projector\Support\Notification\Batch\BatchSleep;
 
 final readonly class SleepForQuery
 {

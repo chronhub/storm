@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Cycle\CycleBegan;
-use Chronhub\Storm\Projector\Subscription\Cycle\CycleRenewed;
-use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
+use Chronhub\Storm\Projector\Support\Notification\Cycle\CycleBegan;
+use Chronhub\Storm\Projector\Support\Notification\Cycle\CycleRenewed;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
 
 final class CycleObserver
 {

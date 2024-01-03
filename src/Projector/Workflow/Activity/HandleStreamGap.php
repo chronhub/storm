@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Batch\IsBatchReset;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\HasGap;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\SleepOnGap;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
+use Chronhub\Storm\Projector\Support\Notification\Batch\IsBatchReset;
+use Chronhub\Storm\Projector\Support\Notification\Checkpoint\HasGap;
+use Chronhub\Storm\Projector\Support\Notification\Checkpoint\SleepOnGap;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionStored;
 
 final class HandleStreamGap
 {

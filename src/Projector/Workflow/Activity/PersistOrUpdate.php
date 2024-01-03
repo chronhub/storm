@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchSleep;
-use Chronhub\Storm\Projector\Subscription\Batch\IsProcessBlank;
-use Chronhub\Storm\Projector\Subscription\Checkpoint\HasGap;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionLockUpdated;
-use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
+use Chronhub\Storm\Projector\Support\Notification\Batch\BatchSleep;
+use Chronhub\Storm\Projector\Support\Notification\Batch\IsProcessBlank;
+use Chronhub\Storm\Projector\Support\Notification\Checkpoint\HasGap;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionLockUpdated;
+use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionStored;
 
 final readonly class PersistOrUpdate
 {

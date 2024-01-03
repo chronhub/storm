@@ -8,7 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 
 trait InteractWithPersistentSubscription

@@ -12,7 +12,7 @@ use Chronhub\Storm\Contracts\Projector\QueryProjectorScope;
 use Chronhub\Storm\Contracts\Projector\QuerySubscriber;
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
-use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintTerminated;
+use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 
 final readonly class QuerySubscription implements QuerySubscriber
