@@ -109,8 +109,6 @@ trait InteractWithManagement
         $this->snapshotRepository->snapshot($this->getName(), $checkpoint);
 
         $this->hub->notify(SnapshotTaken::class, $checkpoint);
-
-        dump($checkpoint);
     }
 
     public function getName(): string
