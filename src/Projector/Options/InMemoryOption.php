@@ -21,6 +21,7 @@ final class InMemoryOption implements ProjectionOption
         array|string $retries = [1, 2],
         protected readonly ?string $detectionWindows = null,
         protected readonly bool $onlyOnceDiscovery = false,
+        protected readonly array $snapshotInterval = ['position' => 100, 'time' => null, 'usleep' => null],
     ) {
         $this->setUpRetries($retries);
     }

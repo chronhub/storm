@@ -6,10 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Batch;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class IsBatchCounterReached
+final class IsBatchReset
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->batchCounter()->isReached();
+        return $subscriptor->watcher()->batch()->isReset();
     }
 }

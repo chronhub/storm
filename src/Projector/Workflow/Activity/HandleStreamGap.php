@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Workflow\Activity;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Subscription\Batch\IsBatchCounterReset;
+use Chronhub\Storm\Projector\Subscription\Batch\IsBatchReset;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\HasGap;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\SleepOnGap;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionStored;
@@ -23,7 +23,7 @@ final class HandleStreamGap
                 // sleep and decrement retries left
                 $hub->notify(SleepOnGap::class);
 
-                if (! $hub->expect(IsBatchCounterReset::class)) {
+                if (! $hub->expect(IsBatchReset::class)) {
                     $hub->trigger(new ProjectionStored());
                 }
             });

@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\PersistentProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
 use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterIncremented;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchIncremented;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Management\ProjectionPersistedWhenThresholdIsReached;
 use Chronhub\Storm\Projector\Subscription\Sprint\IsSprintRunning;
@@ -50,7 +50,7 @@ class StreamEventReactor
 
     private function handleEvent(NotificationHub $hub, DomainEvent $event): bool
     {
-        $hub->notify(BatchCounterIncremented::class);
+        $hub->notify(BatchIncremented::class);
 
         $this->reactOn($hub, $event);
 

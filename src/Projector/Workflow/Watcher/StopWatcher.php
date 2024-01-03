@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Stream\GapType;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterIncremented;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchIncremented;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\GapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\RecoverableGapDetected;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\UnrecoverableGapDetected;
@@ -100,7 +100,7 @@ class StopWatcher
     protected function stopWhenCounterReach(NotificationHub $hub, array $values): string
     {
         [$limit, $resetOnStop] = $values;
-        $listener = BatchCounterIncremented::class;
+        $listener = BatchIncremented::class;
 
         $hub->notify(KeepMasterCounterOnStop::class, ! $resetOnStop);
 

@@ -8,8 +8,8 @@ use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
-use Chronhub\Storm\Projector\Subscription\Batch\IsBatchCounterReached;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchReset;
+use Chronhub\Storm\Projector\Subscription\Batch\IsBatchReached;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointReset;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointUpdated;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CurrentCheckpoint;
@@ -88,10 +88,10 @@ trait InteractWithManagement
 
     public function persistWhenThresholdIsReached(): void
     {
-        if ($this->hub->expect(IsBatchCounterReached::class)) {
+        if ($this->hub->expect(IsBatchReached::class)) {
             $this->store();
 
-            $this->hub->notify(BatchCounterReset::class);
+            $this->hub->notify(BatchReset::class);
 
             $this->disclose();
 

@@ -19,6 +19,7 @@ final class DefaultOption implements ProjectionOption
         protected readonly int $lockout = 1000000,
         protected readonly int $loadLimiter = 1000,
         protected readonly bool $onlyOnceDiscovery = false,
+        protected readonly array $snapshotInterval = ['position' => 1000, 'time' => null, 'usleep' => null],
         array|string $retries = [0, 5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
         protected readonly ?string $detectionWindows = null
     ) {

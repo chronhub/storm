@@ -59,6 +59,8 @@ interface ProjectionOption extends JsonSerializable
 
     public const ONLY_ONCE_DISCOVERY = 'onlyOnceDiscovery';
 
+    public const SNAPSHOT_INTERVAL = 'snapshotInterval';
+
     /**
      * Dispatch async signal
      */
@@ -149,4 +151,13 @@ interface ProjectionOption extends JsonSerializable
      * Available for persistent projection
      */
     public function getOnlyOnceDiscovery(): bool;
+
+    /**
+     * Get a snapshot interval periodically.
+     *
+     * Usleep meant for testing purpose and usleep while taking snapshot per interval
+     *
+     * @return array{position: null|positive-int, time: null|positive-int, usleep: null|positive-int}
+     */
+    public function getSnapshotInterval(): array;
 }

@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Subscription\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
-use Chronhub\Storm\Projector\Subscription\Batch\BatchCounterReset;
+use Chronhub\Storm\Projector\Subscription\Batch\BatchReset;
 use Chronhub\Storm\Projector\Subscription\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleIncremented;
 use Chronhub\Storm\Projector\Subscription\Cycle\CycleRenewed;
@@ -40,7 +40,7 @@ final class WhenCycleRenewed
     private function flushWatcher(NotificationHub $hub): void
     {
         // reset every cycle
-        $hub->notifyMany(BatchCounterReset::class, StreamEventAckedReset::class, NewEventStreamReset::class);
+        $hub->notifyMany(BatchReset::class, StreamEventAckedReset::class, NewEventStreamReset::class);
 
         // reset only when sprint is terminated
         if ($hub->expect(IsSprintTerminated::class)) {

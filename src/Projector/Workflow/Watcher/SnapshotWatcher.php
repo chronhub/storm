@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Subscription\Management\SnapshotCheckpointCaptured;
@@ -26,16 +27,28 @@ class SnapshotWatcher
 
     public function __construct(
         protected ?SystemClock $clock,
-        protected readonly ?int $everyPosition,
-        protected readonly ?int $everySeconds,
+        protected readonly ?int $positionInterval,
+        protected readonly ?int $timeInterval,
         protected readonly ?int $usleep
     ) {
-        if ($this->everyPosition) {
-            $this->callbacks['position'] = $this->onPosition();
+        if ($positionInterval === null && $timeInterval === null) {
+            throw new InvalidArgumentException('Provide at least one interval');
         }
 
-        if ($this->everySeconds) {
-            $this->callbacks['interval'] = $this->onInterval();
+        if ($this->positionInterval && $this->positionInterval < 1) {
+            throw new InvalidArgumentException('Position interval must be greater than 0');
+        }
+
+        if ($this->timeInterval && $this->timeInterval < 1) {
+            throw new InvalidArgumentException('Position interval must be greater than 0');
+        }
+
+        if ($this->positionInterval) {
+            $this->callbacks[] = $this->onPosition();
+        }
+
+        if ($this->timeInterval) {
+            $this->callbacks[] = $this->onInterval();
         }
     }
 
@@ -60,7 +73,7 @@ class SnapshotWatcher
                 $this->checkpointCreatedAt[$checkpoint->streamName] = $checkpointTime;
             }
 
-            if (($this->checkpointCreatedAt[$checkpoint->streamName] + $this->everySeconds) < $checkpointTime) {
+            if (($this->checkpointCreatedAt[$checkpoint->streamName] + $this->timeInterval) < $checkpointTime) {
                 unset($this->checkpointCreatedAt[$checkpoint->streamName]);
 
                 return true;
@@ -76,6 +89,6 @@ class SnapshotWatcher
 
     protected function onPosition(): Closure
     {
-        return fn (Checkpoint $checkpoint): bool => $this->everyPosition && $checkpoint->position % $this->everyPosition === 0;
+        return fn (Checkpoint $checkpoint): bool => $checkpoint->position % $this->positionInterval === 0;
     }
 }

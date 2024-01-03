@@ -22,5 +22,6 @@ final class InMemoryOptionFixed implements ProjectionOptionImmutable
         $this->retries = [1];
         $this->detectionWindows = null;
         $this->onlyOnceDiscovery = false;
+        $this->snapshotInterval = ['position' => 100, 'time' => null, 'usleep' => null];
     }
 }

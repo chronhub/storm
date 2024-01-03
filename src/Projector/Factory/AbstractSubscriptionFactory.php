@@ -25,7 +25,7 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Options\ProjectionOptionResolver;
 use Chronhub\Storm\Projector\Provider\Checkpoint\InMemorySnapshotProvider;
-use Chronhub\Storm\Projector\Provider\Checkpoint\InMemorySnapshotRepository;
+use Chronhub\Storm\Projector\Provider\Checkpoint\SnapshotCheckpointRepository;
 use Chronhub\Storm\Projector\Repository\EventDispatcherRepository;
 use Chronhub\Storm\Projector\Repository\LockManager;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
@@ -181,13 +181,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     // todo:
     //  - snapshot provider in constructor
-    //  - set option ?
-    //  - we snapshot per stream name but we could also work per projection name,
-    //     and insert in batch
+    //  - we snapshot per stream name but we could also work per projection name, and insert in batch
     //  - should not support fromAll (option enableSnapshot)
     protected function getSnapshotRepository(): SnapshotRepository
     {
-        return new InMemorySnapshotRepository(new InMemorySnapshotProvider());
+        return new SnapshotCheckpointRepository(new InMemorySnapshotProvider());
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager
@@ -247,6 +245,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function snapshotWatcher(ProjectionOption $option): SnapshotWatcher
     {
-        return new SnapshotWatcher($this->clock, everyPosition: 2000, everySeconds: null, usleep: null);
+        $interval = $option->getSnapshotInterval();
+
+        return new SnapshotWatcher($this->clock, $interval['position'], $interval['time'], $interval['usleep']);
     }
 }

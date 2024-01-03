@@ -6,12 +6,10 @@ namespace Chronhub\Storm\Projector\Subscription\Batch;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
 
-final class BatchCounterIncremented
+final class BatchReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->batchCounter()->increment();
-
-        $subscriptor->watcher()->masterCounter()->increment();
+        $subscriptor->watcher()->batch()->reset();
     }
 }

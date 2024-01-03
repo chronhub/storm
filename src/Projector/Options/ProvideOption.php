@@ -51,6 +51,11 @@ trait ProvideOption
 
     protected readonly bool $onlyOnceDiscovery;
 
+    /**
+     * @var array{position: null|positive-int, time: null|positive-int, usleep: null|positive-int}
+     */
+    protected readonly array $snapshotInterval;
+
     public function getSignal(): bool
     {
         return $this->signal;
@@ -101,6 +106,11 @@ trait ProvideOption
         return $this->onlyOnceDiscovery;
     }
 
+    public function getSnapshotInterval(): array
+    {
+        return $this->snapshotInterval;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -114,6 +124,7 @@ trait ProvideOption
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),
             self::LOAD_LIMITER => $this->getLoadLimiter(),
             self::ONLY_ONCE_DISCOVERY => $this->getOnlyOnceDiscovery(),
+            self::SNAPSHOT_INTERVAL => $this->getSnapshotInterval(),
         ];
     }
 

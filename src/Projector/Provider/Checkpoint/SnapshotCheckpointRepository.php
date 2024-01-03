@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 use function json_encode;
 
-final readonly class InMemorySnapshotRepository implements SnapshotRepository
+final readonly class SnapshotCheckpointRepository implements SnapshotRepository
 {
     public function __construct(private RecognitionProvider $recognitionProvider)
     {
