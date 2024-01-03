@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\PersistentProjectorScope;
 use Chronhub\Storm\Contracts\Projector\ProjectorScope;
+use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Support\Notification\Batch\BatchIncremented;
@@ -48,7 +49,7 @@ class StreamEventReactor
         return $this->handleEvent($hub, $event);
     }
 
-    private function handleEvent(NotificationHub $hub, DomainEvent $event): bool
+    protected function handleEvent(NotificationHub $hub, DomainEvent $event): bool
     {
         $hub->notify(BatchIncremented::class);
 
@@ -59,7 +60,7 @@ class StreamEventReactor
         return $hub->expect(IsSprintRunning::class);
     }
 
-    private function reactOn(NotificationHub $hub, DomainEvent $event): void
+    protected function reactOn(NotificationHub $hub, DomainEvent $event): void
     {
         $initializedState = $this->getUserState($hub);
 
@@ -76,14 +77,32 @@ class StreamEventReactor
         $resetScope();
     }
 
-    private function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
+    protected function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
     {
         $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
-        if ($checkPoint->type === null || $checkPoint->type === GapType::IN_GAP) {
+        return $this->onCheckpointInserted($hub, $checkPoint);
+    }
+
+    protected function getUserState(NotificationHub $hub): ?array
+    {
+        return $hub->expect(IsUserStateInitialized::class)
+            ? $hub->expect(CurrentUserState::class) : null;
+    }
+
+    protected function updateUserState(NotificationHub $hub, ?array $initializedState, ?array $userState): void
+    {
+        if (is_array($initializedState) && is_array($userState)) {
+            $hub->notify(UserStateChanged::class, $userState);
+        }
+    }
+
+    protected function onCheckpointInserted(NotificationHub $hub, Checkpoint $checkpoint): bool
+    {
+        if ($checkpoint->type === null || $checkpoint->type === GapType::IN_GAP) {
             $hub->notifyWhen(
                 $this->scope instanceof PersistentProjectorScope,
-                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkPoint)
+                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkpoint)
             );
 
             return true;
@@ -92,20 +111,7 @@ class StreamEventReactor
         return false;
     }
 
-    private function getUserState(NotificationHub $hub): ?array
-    {
-        return $hub->expect(IsUserStateInitialized::class)
-            ? $hub->expect(CurrentUserState::class) : null;
-    }
-
-    private function updateUserState(NotificationHub $hub, ?array $initializedState, ?array $userState): void
-    {
-        if (is_array($initializedState) && is_array($userState)) {
-            $hub->notify(UserStateChanged::class, $userState);
-        }
-    }
-
-    private function dispatchSignalIfRequested(): void
+    protected function dispatchSignalIfRequested(): void
     {
         if ($this->dispatchSignal) {
             pcntl_signal_dispatch();
