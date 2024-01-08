@@ -28,12 +28,12 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         );
     }
 
-    protected function getQueryFilterResolver(Subscriptor $subscriptor): QueryFilterResolver
+    protected function createQueryFilterResolver(Subscriptor $subscriptor): QueryFilterResolver
     {
         return new QueryFilterResolver($subscriptor->getContext()->queryFilter());
     }
 
-    protected function getEventProcessor(Subscriptor $subscriptor, ProjectorScope $projectorScope): StreamEventReactor
+    protected function createStreamEventReactor(Subscriptor $subscriptor, ProjectorScope $projectorScope): StreamEventReactor
     {
         return new StreamEventReactor(
             $subscriptor->getContext()->reactors(),
@@ -42,13 +42,13 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         );
     }
 
-    protected function getStreamLoader(Subscriptor $subscriptor): LoadStreams
+    protected function createStreamLoader(Subscriptor $subscriptor): LoadStreams
     {
         return new LoadStreams(
             $this->chronicler,
             $subscriptor->clock(),
             $subscriptor->option()->getLoadLimiter(),
-            $this->getQueryFilterResolver($subscriptor) // todo should be configurable in integration
+            $this->createQueryFilterResolver($subscriptor) // todo should be configurable in integration
         );
     }
 

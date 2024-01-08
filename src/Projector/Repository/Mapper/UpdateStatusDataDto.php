@@ -10,6 +10,9 @@ final readonly class UpdateStatusDataDto extends ProjectionDataDTO
     {
     }
 
+    /**
+     * @return array{'status': string}
+     */
     public function toArray(): array
     {
         return ['status' => $this->status];

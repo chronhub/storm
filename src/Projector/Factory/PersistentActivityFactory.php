@@ -18,12 +18,12 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscriptor $subscriptor, ProjectorScope $scope): array
     {
-        $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
+        $eventProcessor = $this->createStreamEventReactor($subscriptor, $scope);
 
         return [
             fn (): callable => new CycleObserver(),
             fn (): callable => new RisePersistentProjection(),
-            fn (): callable => $this->getStreamLoader($subscriptor),
+            fn (): callable => $this->createStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),

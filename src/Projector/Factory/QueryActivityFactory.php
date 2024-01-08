@@ -16,12 +16,12 @@ final readonly class QueryActivityFactory extends AbstractActivityFactory
 {
     protected function activities(Subscriptor $subscriptor, ProjectorScope $scope): array
     {
-        $eventProcessor = $this->getEventProcessor($subscriptor, $scope);
+        $eventProcessor = $this->createStreamEventReactor($subscriptor, $scope);
 
         return [
             fn (): callable => new CycleObserver(),
             fn (): callable => new RiseQueryProjection(),
-            fn (): callable => $this->getStreamLoader($subscriptor),
+            fn (): callable => $this->createStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new SleepForQuery(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),

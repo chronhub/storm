@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-readonly class WatcherManager
+class WatcherManager
 {
     public function __construct(
         protected CycleWatcher $cycleWatcher,
         protected SprintWatcher $sprintWatcher,
         protected UserStateWatcher $userState,
-        protected EventStreamWatcher $streamWatcher,
+        protected EventStreamWatcher $eventStreamWatcher,
         protected BatchCounterWatcher $batchCounterWatcher,
         protected AckedStreamWatcher $ackedStreamWatcher,
         protected BatchStreamWatcher $batchStreamWatcher,
@@ -58,7 +58,7 @@ readonly class WatcherManager
 
     public function streamDiscovery(): EventStreamWatcher
     {
-        return $this->streamWatcher;
+        return $this->eventStreamWatcher;
     }
 
     public function time(): TimeWatcher

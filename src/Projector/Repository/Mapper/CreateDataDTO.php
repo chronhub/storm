@@ -11,12 +11,10 @@ final readonly class CreateDataDTO extends ProjectionDataDTO
     }
 
     /**
-     * @return array{'status', string}
+     * @return array{'status': string}
      */
     public function toArray(): array
     {
-        return [
-            'status' => $this->status,
-        ];
+        return ['status' => $this->status];
     }
 }
