@@ -17,10 +17,10 @@ final class CycleObserver
 
         $next($hub);
 
-        return $this->onCycleChanged($hub);
+        return $this->onCycleRenewed($hub);
     }
 
-    private function onCycleChanged(NotificationHub $hub): bool
+    private function onCycleRenewed(NotificationHub $hub): bool
     {
         $hub->notify(CycleRenewed::class);
 

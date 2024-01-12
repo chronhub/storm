@@ -132,17 +132,7 @@ final class HubManager implements NotificationHub
 
     public function notify(string|object $event, mixed ...$arguments): void
     {
-        $notification = $this->makeEvent($event, ...$arguments);
-
-        // we still pass non-callable event to subscriptor
-        // means that event is only a notification, and could hold his own state
-        $result = $this->subscriptor->capture($notification);
-
-        if ($result === $notification) {
-            $result = null;
-        }
-
-        $this->handleListener($notification, $result);
+        $this->expect($event, ...$arguments);
     }
 
     public function notifyMany(string|object ...$events): void
@@ -167,7 +157,7 @@ final class HubManager implements NotificationHub
             }
 
             if (! is_callable($handler)) {
-                throw new InvalidArgumentException('Listener handler must be a callable');
+                throw new InvalidArgumentException('Event listener handler must be a callable for event ' . $event::class);
             }
 
             $handler($this, $event, $result);

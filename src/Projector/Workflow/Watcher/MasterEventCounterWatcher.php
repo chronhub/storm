@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
-final class MasterEventCounterWatcher
+class MasterEventCounterWatcher
 {
     /**
      * @var int<0,max>

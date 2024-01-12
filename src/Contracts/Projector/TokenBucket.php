@@ -37,14 +37,29 @@ namespace Chronhub\Storm\Contracts\Projector;
  *
  * Note: when using withSleep, requested token cannot exceed the capacity of the bucket to avoid infinite loop
  * and the bucket is overflowed immediately.
+ *
+ * @property-read int|float $capacity
+ * @property-read int|float $rate
  */
 interface TokenBucket
 {
+    /**
+     * Consume tokens from the bucket.
+     */
     public function consume(float $tokens = 1): bool;
 
+    /**
+     * Get the number of remaining tokens in the bucket.
+     */
     public function remainingTokens(): int|float;
 
+    /**
+     * Get the capacity of the bucket.
+     */
     public function getCapacity(): int|float;
 
+    /**
+     * Get the rate of the bucket.
+     */
     public function getRate(): int|float;
 }
