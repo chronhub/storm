@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Closure;
 
 /**
@@ -58,20 +57,6 @@ interface ProjectorFactory extends Projector
      * @see Context::haltOn()
      */
     public function haltOn(Closure $haltOn): static;
-
-    /**
-     * Proxy method to set the query filter.
-     *
-     * @see Context::withQueryFilter()
-     */
-    public function filter(QueryFilter $queryFilter): static;
-
-    /**
-     * Proxy method to keep the state in memory.
-     *
-     * @see Context::withKeepState()
-     */
-    public function keepState(): static;
 
     /**
      * Proxy method to set the projector id.

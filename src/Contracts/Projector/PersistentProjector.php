@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-interface PersistentProjector extends ProjectorFactory
+interface PersistentProjector extends PersistentProjectorFactory
 {
     /**
      * Get the projection name.
