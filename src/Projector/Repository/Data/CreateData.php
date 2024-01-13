@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Repository\Mapper;
+namespace Chronhub\Storm\Projector\Repository\Data;
 
 final readonly class CreateData extends ProjectionDTO
 {

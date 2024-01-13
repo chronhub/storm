@@ -11,14 +11,14 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\Mapper\CreateData;
-use Chronhub\Storm\Projector\Repository\Mapper\PersistData;
-use Chronhub\Storm\Projector\Repository\Mapper\ReleaseData;
-use Chronhub\Storm\Projector\Repository\Mapper\ResetData;
-use Chronhub\Storm\Projector\Repository\Mapper\StartAgainData;
-use Chronhub\Storm\Projector\Repository\Mapper\StartData;
-use Chronhub\Storm\Projector\Repository\Mapper\StopData;
-use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockData;
+use Chronhub\Storm\Projector\Repository\Data\CreateData;
+use Chronhub\Storm\Projector\Repository\Data\PersistData;
+use Chronhub\Storm\Projector\Repository\Data\ReleaseData;
+use Chronhub\Storm\Projector\Repository\Data\ResetData;
+use Chronhub\Storm\Projector\Repository\Data\StartAgainData;
+use Chronhub\Storm\Projector\Repository\Data\StartData;
+use Chronhub\Storm\Projector\Repository\Data\StopData;
+use Chronhub\Storm\Projector\Repository\Data\UpdateLockData;
 
 // add datetime created_at, stopped_at, updated_at, reset_at, deleted_at, deleted_with_emitted_events_at
 // which should be handled by a ProjectionTimeTracker for storage, log, db, etc...

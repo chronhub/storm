@@ -10,7 +10,7 @@ use Chronhub\Storm\Contracts\Projector\ProjectorSupervisorInterface;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionFailed;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
-use Chronhub\Storm\Projector\Repository\Mapper\UpdateStatusData;
+use Chronhub\Storm\Projector\Repository\Data\UpdateStatusData;
 use Throwable;
 
 final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
