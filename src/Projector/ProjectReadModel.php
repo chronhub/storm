@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
@@ -30,12 +31,17 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function reset(): void
     {
-        $this->subscriber->hub()->trigger(new ProjectionRevised());
+        $this->subscriber->interact(
+            fn(NotificationHub $hub) => $hub->trigger(new ProjectionRevised())
+        );
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-        $this->subscriber->hub()->trigger(new ProjectionDiscarded($deleteEmittedEvents));
+
+        $this->subscriber->interact(
+            fn(NotificationHub $hub) => $hub->trigger(new ProjectionDiscarded($deleteEmittedEvents))
+        );
     }
 
     public function getName(): string

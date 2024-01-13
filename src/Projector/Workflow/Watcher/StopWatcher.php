@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
+use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
 use Chronhub\Storm\Projector\Stream\GapType;
@@ -43,8 +44,10 @@ class StopWatcher
      */
     protected array $events = [];
 
-    public function subscribe(NotificationHub $hub, array $callbacks): void
+    public function subscribe(NotificationHub $hub, ContextReader $context): void
     {
+        $callbacks = $context->haltOnCallback();
+
         foreach ($callbacks as $name => $callback) {
             $method = 'stopWhen'.ucfirst($name);
 

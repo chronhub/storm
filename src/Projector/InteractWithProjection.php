@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Support\Notification\UserState\CurrentUserState;
 use Closure;
 use Illuminate\Support\Str;
@@ -78,7 +79,9 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->hub()->expect(CurrentUserState::class);
+        return $this->subscriber->interact(
+            fn(NotificationHub $hub): array => $hub->expect(CurrentUserState::class)
+        );
     }
 
     protected function describeIfNeeded(): void

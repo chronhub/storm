@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Projector;
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
+use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionRevised;
 
@@ -30,12 +31,16 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function reset(): void
     {
-        $this->subscriber->hub()->trigger(new ProjectionRevised());
+        $this->subscriber->interact(
+            fn(NotificationHub $hub) => $hub->trigger(new ProjectionRevised())
+        );
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-        $this->subscriber->hub()->trigger(new ProjectionDiscarded($deleteEmittedEvents));
+        $this->subscriber->interact(
+            fn(NotificationHub $hub) => $hub->trigger(new ProjectionDiscarded($deleteEmittedEvents))
+        );
     }
 
     public function getName(): string

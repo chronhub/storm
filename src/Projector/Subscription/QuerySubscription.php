@@ -14,6 +14,7 @@ use Chronhub\Storm\Contracts\Projector\Subscriptor;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
+use Closure;
 
 final readonly class QuerySubscription implements QuerySubscriber
 {
@@ -41,16 +42,16 @@ final readonly class QuerySubscription implements QuerySubscriber
         $this->subscriptor->restoreUserState();
     }
 
-    public function hub(): NotificationHub
+    public function interact(Closure $callback): mixed
     {
-        return $this->management->hub();
+        return value($callback, $this->management->hub());
     }
 
     private function startProjection(): void
     {
         $activities = ($this->activities)($this->subscriptor, $this->scope);
 
-        $workflow = new Workflow($this->hub(), $activities);
+        $workflow = new Workflow($this->management->hub(), $activities);
 
         $workflow->process(fn (NotificationHub $hub): bool => $hub->expect(IsSprintTerminated::class));
     }
@@ -79,7 +80,7 @@ final readonly class QuerySubscription implements QuerySubscriber
 
     private function setupWatcher(ContextReader $context, bool $keepRunning): void
     {
-        $this->subscriptor->watcher()->stopWhen()->subscribe($this->hub(), $context->haltOnCallback());
+        $this->subscriptor->watcher()->subscribe($this->management->hub(), $context);
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
     }
