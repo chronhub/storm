@@ -6,8 +6,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
 use Chronhub\Storm\Projector\Workflow\Workflow;
 use Closure;
@@ -39,9 +37,8 @@ trait InteractWithPersistentSubscription
 
     private function initializeContext(ContextReader $context): void
     {
-        $this->validateContext($context);
-
         $this->subscriptor->setContext($context, true);
+
         $this->subscriptor->restoreUserState();
     }
 
@@ -50,16 +47,5 @@ trait InteractWithPersistentSubscription
         $this->subscriptor->watcher()->subscribe($this->management->hub(), $context);
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
-    }
-
-    private function validateContext(ContextReader $context): void
-    {
-        if (! $context->queryFilter() instanceof ProjectionQueryFilter) {
-            throw new RuntimeException('Persistent subscription requires a projection query filter.');
-        }
-
-        if ($context->keepState() === true) {
-            throw new RuntimeException('Keep state is only available for query projection.');
-        }
     }
 }

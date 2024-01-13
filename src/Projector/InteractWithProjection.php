@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector;
 
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Projector\Support\Notification\UserState\CurrentUserState;
 use Closure;
@@ -52,20 +51,6 @@ trait InteractWithProjection
     public function haltOn(Closure $haltOn): static
     {
         $this->context->haltOn($haltOn);
-
-        return $this;
-    }
-
-    public function filter(QueryFilter $queryFilter): static
-    {
-        $this->context->withQueryFilter($queryFilter);
-
-        return $this;
-    }
-
-    public function keepState(): static
-    {
-        $this->context->withKeepState();
 
         return $this;
     }

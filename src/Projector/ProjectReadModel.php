@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Projector;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Contracts\Projector\ReadModelProjector;
 use Chronhub\Storm\Contracts\Projector\ReadModelSubscriber;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
@@ -20,6 +21,13 @@ final readonly class ProjectReadModel implements ReadModelProjector
         protected ContextReader $context,
         protected string $streamName
     ) {
+    }
+
+    public function filter(ProjectionQueryFilter $queryFilter): static
+    {
+        $this->context->withQueryFilter($queryFilter);
+
+        return $this;
     }
 
     public function run(bool $inBackground): void

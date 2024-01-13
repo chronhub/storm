@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\Header;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\ReadModelAccess;
 use Chronhub\Storm\Projector\Workflow\HaltOn;
-use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\Stream;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;
 use Chronhub\Storm\Tests\Stubs\Double\AnotherEvent;
@@ -475,14 +473,3 @@ test('can no stream event loaded', function () {
 
     expect($projector->getState())->toBe(['count' => 50]);
 });
-
-test('raise exception when query filter is not a projection query filter', function () {
-    $readModel = $this->testFactory->readModel;
-    $projector = $this->projectorManager->newReadModelProjector('customer', $readModel);
-
-    $projector
-        ->subscribeToStream('user')
-        ->filter($this->createMock(QueryFilter::class))
-        ->when(function (DomainEvent $event): void {
-        })->run(false);
-})->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');

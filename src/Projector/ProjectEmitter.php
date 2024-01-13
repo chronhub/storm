@@ -8,6 +8,7 @@ use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\EmitterProjector;
 use Chronhub\Storm\Contracts\Projector\EmitterSubscriber;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Contracts\Projector\ProjectionQueryFilter;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
 use Chronhub\Storm\Projector\Support\Notification\Management\ProjectionRevised;
 
@@ -20,6 +21,13 @@ final readonly class ProjectEmitter implements EmitterProjector
         protected ContextReader $context,
         protected string $streamName
     ) {
+    }
+
+    public function filter(ProjectionQueryFilter $queryFilter): static
+    {
+        $this->context->withQueryFilter($queryFilter);
+
+        return $this;
     }
 
     public function run(bool $inBackground): void

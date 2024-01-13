@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature;
 
 use Chronhub\Storm\Clock\PointInTime;
-use Chronhub\Storm\Contracts\Chronicler\QueryFilter;
 use Chronhub\Storm\Contracts\Message\EventHeader;
-use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
 use Chronhub\Storm\Projector\Scope\QueryAccess;
 use Chronhub\Storm\Stream\StreamName;
@@ -220,13 +218,3 @@ it('can link event to new categories', function (): void {
 
     expect($query->getState())->toBe($emitter->getState());
 });
-
-it('raise exception when query filter is not a projection query filter', function () {
-    $projector = $this->projectorManager->newEmitterProjector('customer');
-
-    $projector
-        ->subscribeToStream('user')
-        ->filter($this->createMock(QueryFilter::class))
-        ->when(fn () => null)
-        ->run(false);
-})->throws(RuntimeException::class, 'Persistent subscription requires a projection query filter');
