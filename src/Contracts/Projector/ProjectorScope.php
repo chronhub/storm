@@ -17,14 +17,14 @@ interface ProjectorScope
     public function ack(string $event): ?static;
 
     /**
-     * Acknowledge one of the events.
+     * Acknowledge one of the given events.
      *
-     * The purpose of this method is to handle stream events
-     * in the same manner as e.g., updating the status of a read model.
+     * This method is designed to handle stream events in a manner similar
+     * to updating the status of a read model.
+     * It allows acknowledgment only once, and all related operations
+     * should be performed within this method; otherwise, it returns null.
      *
-     * You can only acknowledge once and all operations
-     * must be done inside the method.
-     * Otherwise, it will return null.
+     * Use the `isOf()` method to verify if the event is one of the acknowledged events.
      */
     public function ackOneOf(string ...$events): ?static;
 

@@ -13,7 +13,6 @@ use function array_merge;
 use function array_walk;
 use function in_array;
 use function is_array;
-use function str_contains;
 
 trait ScopeBehaviour
 {
@@ -68,7 +67,7 @@ trait ScopeBehaviour
 
     public function mergeState(string $field, mixed $value): static
     {
-        $oldValue = $this->getFieldValue($field);
+        $oldValue = data_get($this->state, $field);
 
         $withMerge = is_array($oldValue) ? array_merge($oldValue, Arr::wrap($value)) : $value;
 
@@ -139,6 +138,9 @@ trait ScopeBehaviour
         unset($this->state[$offset]);
     }
 
+    /**
+     * @internal
+     */
     public function __invoke(DomainEvent $event, ?array $state): Closure
     {
         $this->event = $event;
@@ -156,19 +158,10 @@ trait ScopeBehaviour
 
     private function updateUserState(string $field, $value, bool $increment): void
     {
-        $oldValue = $this->getFieldValue($field);
+        $oldValue = data_get($this->state, $field);
 
         $withIncrement = $increment ? $oldValue + $value : $value;
 
         Arr::set($this->state, $field, $withIncrement);
-    }
-
-    private function getFieldValue(string $field): mixed
-    {
-        // fixMe is this really needed ?
-        //  we also have to prevent dot notation in user state field
-        return str_contains($field, '.') !== false
-            ? Arr::get($this->state, $field)
-            : $this->state[$field];
     }
 }

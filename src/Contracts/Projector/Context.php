@@ -17,6 +17,8 @@ interface Context
 {
     /**
      * Sets the optional callback to initialize the state.
+     * checkMe: Do not use dot notation in array keys, as we use it internally.
+     * Wip unless we move to a collection object
      *
      * @param Closure():TInit $userState
      *

@@ -461,6 +461,32 @@ it('can run query projection with empty user state', function () {
     expect($projector->getState())->toBe(['count' => 1]);
 });
 
+it('can not run query projection with dot notation as array key', function () {
+    // feed our event store
+    $eventId = Uuid::v4()->toRfc4122();
+    $stream = $this->testFactory->getStream('user', 1, '+1 seconds', $eventId);
+    $this->eventStore->firstCommit($stream);
+
+    // create a projection
+    $projector = $this->projectorManager->newQueryProjector();
+
+    // run projection
+    $projector
+        ->initialize(fn () => ['foo.bar' => 0])
+        ->subscribeToStream('user')
+        ->filter($this->fromIncludedPosition)
+        ->when(function (QueryAccess $scope): void {
+            expect($scope->getState())->toBeArray()->toBe(['foo.bar' => 0]);
+
+            $scope->ack(SomeEvent::class)->incrementState('foo.bar');
+
+            //$scope['foo.bar'] = 1; this works
+        })->run(false);
+
+    expect($projector->getState())->not()->toBe(['foo.bar' => 1])
+        ->and($projector->getState())->toBe(['foo.bar' => 0, 'foo' => ['bar' => 1]]);
+});
+
 it('can run query projection without user state', function () {
     // unless, dev uses his own state, a query projection is useless without an initial state
 
