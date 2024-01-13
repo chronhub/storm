@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Aggregate;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Reporter\DomainEvent;
 use Generator;
+
 use function end;
 use function explode;
 

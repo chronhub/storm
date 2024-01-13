@@ -80,7 +80,7 @@ trait InteractWithProjection
     public function getState(): array
     {
         return $this->subscriber->interact(
-            fn(NotificationHub $hub): array => $hub->expect(CurrentUserState::class)
+            fn (NotificationHub $hub): array => $hub->expect(CurrentUserState::class)
         );
     }
 

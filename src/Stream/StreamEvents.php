@@ -8,11 +8,12 @@ use ArrayObject;
 use Countable;
 use IteratorAggregate;
 use Traversable;
+
 use function is_array;
 use function iterator_count;
 use function iterator_to_array;
 
-final class StreamEvents implements IteratorAggregate, Countable
+final class StreamEvents implements Countable, IteratorAggregate
 {
     private IteratorAggregate $events;
 
@@ -46,6 +47,6 @@ final class StreamEvents implements IteratorAggregate, Countable
 
     public function count(): int
     {
-       return iterator_count($this->events);
+        return iterator_count($this->events);
     }
 }

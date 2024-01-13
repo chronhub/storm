@@ -157,7 +157,7 @@ final class HubManager implements NotificationHub
             }
 
             if (! is_callable($handler)) {
-                throw new InvalidArgumentException('Event listener handler must be a callable for event ' . $event::class);
+                throw new InvalidArgumentException('Event listener handler must be a callable for event '.$event::class);
             }
 
             $handler($this, $event, $result);

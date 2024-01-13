@@ -13,6 +13,7 @@ use Chronhub\Storm\Producer\ProducerStrategy;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use JsonSerializable;
+
 use function array_merge;
 use function is_a;
 

@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Message\MessageDecorator;
 use Chronhub\Storm\Message\Message;
 use Chronhub\Storm\Reporter\DomainEvent;
+
 use function array_map;
 use function count;
 use function reset;

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Message;
 
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use InvalidArgumentException;
+
 use function basename;
 use function class_exists;
 use function ctype_lower;

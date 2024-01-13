@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Message\Message;
 use DomainException;
+
 use function is_a;
 use function is_int;
 

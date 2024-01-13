@@ -9,6 +9,7 @@ use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Chronhub\Storm\Routing\Group;
 use Chronhub\Storm\Routing\Route;
+
 use function count;
 
 final readonly class RequireOneHandlerRule implements RoutingRule

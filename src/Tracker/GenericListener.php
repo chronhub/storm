@@ -41,6 +41,6 @@ final class GenericListener implements Listener
     {
         $origin = new ReflectionFunction($this->story);
 
-       return $origin->getClosureScopeClass()->name;
+        return $origin->getClosureScopeClass()->name;
     }
 }

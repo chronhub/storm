@@ -28,6 +28,6 @@ final class ConsumeCommand implements MessageSubscriber
                 if ($messageHandler !== null || $story->message()->header(Header::EVENT_DISPATCHED) === true) {
                     $story->markHandled(true);
                 }
-        }, OnDispatchPriority::INVOKE_HANDLER->value);
+            }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Message;
 
 use Chronhub\Storm\Contracts\Message\MessageAlias;
 use InvalidArgumentException;
+
 use function class_exists;
 
 final readonly class AliasFromMap implements MessageAlias

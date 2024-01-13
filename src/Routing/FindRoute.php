@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+
 use function is_callable;
 use function is_string;
 use function method_exists;

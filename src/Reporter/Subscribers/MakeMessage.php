@@ -26,6 +26,6 @@ final class MakeMessage implements MessageSubscriber
                 $message = ($this->messageFactory)($story->pullTransientMessage());
 
                 $story->withMessage($message);
-        }, OnDispatchPriority::MESSAGE_FACTORY->value);
+            }, OnDispatchPriority::MESSAGE_FACTORY->value);
     }
 }

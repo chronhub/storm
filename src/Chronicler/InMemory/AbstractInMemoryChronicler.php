@@ -18,6 +18,7 @@ use Chronhub\Storm\Reporter\DomainEvent;
 use Chronhub\Storm\Stream\StreamName;
 use Generator;
 use Illuminate\Support\Collection;
+
 use function array_map;
 
 abstract class AbstractInMemoryChronicler implements InMemoryChronicler
@@ -97,7 +98,7 @@ abstract class AbstractInMemoryChronicler implements InMemoryChronicler
         }
 
         $streamEvents = (new Collection($this->streams->get($streamName->name)))
-            ->sortBy(static fn (DomainEvent $event): int => $event->header(EventHeader::AGGREGATE_VERSION), SORT_NUMERIC, 'desc' === $query->orderBy())
+            ->sortBy(static fn (DomainEvent $event): int => $event->header(EventHeader::AGGREGATE_VERSION), SORT_NUMERIC, $query->orderBy() === 'desc')
             ->filter($query->apply());
 
         if ($streamEvents->isEmpty()) {

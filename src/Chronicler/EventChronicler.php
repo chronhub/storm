@@ -67,7 +67,7 @@ class EventChronicler implements EventableChronicler
 
     public function retrieveAll(StreamName $streamName, AggregateIdentity $aggregateId, string $direction = 'asc'): Generator
     {
-        $eventName = 'asc' === $direction ? self::ALL_STREAM_EVENT : self::ALL_REVERSED_STREAM_EVENT;
+        $eventName = $direction === 'asc' ? self::ALL_STREAM_EVENT : self::ALL_REVERSED_STREAM_EVENT;
 
         $story = $this->tracker->newStory($eventName);
 

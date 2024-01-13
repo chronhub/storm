@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Serializer;
 use Chronhub\Storm\Contracts\Reporter\Reporting;
 use Chronhub\Storm\Contracts\Serializer\ContentSerializer;
 use InvalidArgumentException;
+
 use function is_a;
 
 final class MessageContentSerializer implements ContentSerializer

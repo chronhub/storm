@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Reporter;
 
 use Chronhub\Storm\Contracts\Reporter\CommandReporter;
 use Chronhub\Storm\Reporter\Concern\HasConstructableReporter;
+
 use function array_shift;
 
 final class ReportCommand implements CommandReporter

@@ -39,6 +39,6 @@ final class ConsumeQuery implements MessageSubscriber
 
                     $story->markHandled(true);
                 }
-        }, OnDispatchPriority::INVOKE_HANDLER->value);
+            }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

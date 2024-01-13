@@ -24,6 +24,6 @@ final class ConsumeEvent implements MessageSubscriber
 
                 // Event handlers can be empty
                 $story->markHandled(true);
-        }, OnDispatchPriority::INVOKE_HANDLER->value);
+            }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

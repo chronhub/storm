@@ -9,7 +9,7 @@ use Countable;
 use Illuminate\Support\Collection;
 use JsonSerializable;
 
-interface RouteCollection extends JsonSerializable, Countable
+interface RouteCollection extends Countable, JsonSerializable
 {
     /**
      * @param class-string $messageName

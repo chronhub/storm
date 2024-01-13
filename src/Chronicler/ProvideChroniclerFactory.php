@@ -15,6 +15,7 @@ use Chronhub\Storm\Contracts\Tracker\TransactionalStreamTracker;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+
 use function is_string;
 
 trait ProvideChroniclerFactory

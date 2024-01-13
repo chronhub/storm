@@ -8,6 +8,7 @@ use Chronhub\Storm\Aggregate\HasAggregateBehaviour;
 use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRoot;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+
 use function count;
 
 class AggregateRootStub implements AggregateRoot

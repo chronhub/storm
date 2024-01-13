@@ -12,6 +12,7 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
+
 use function is_array;
 
 final class HandleRoute implements MessageSubscriber
@@ -48,6 +49,6 @@ final class HandleRoute implements MessageSubscriber
                 if ($isSync) {
                     $story->withConsumers($this->routeLocator->route($dispatchedMessage));
                 }
-        }, OnDispatchPriority::ROUTE->value);
+            }, OnDispatchPriority::ROUTE->value);
     }
 }

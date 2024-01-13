@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateIdentity;
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
 use Chronhub\Storm\Snapshot\ReconstituteAggregateFromSnapshot;
 use Chronhub\Storm\Tests\Stubs\Double\SomeEvent;
+
 use function count;
 
 class AggregateRootWithSnapshottingStub implements AggregateRootWithSnapshotting

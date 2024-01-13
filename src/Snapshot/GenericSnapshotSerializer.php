@@ -6,6 +6,7 @@ namespace Chronhub\Storm\Snapshot;
 
 use Chronhub\Storm\Contracts\Aggregate\AggregateRootWithSnapshotting;
 use Chronhub\Storm\Contracts\Snapshot\SnapshotSerializer;
+
 use function serialize;
 use function unserialize;
 

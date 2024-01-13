@@ -32,15 +32,14 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function reset(): void
     {
         $this->subscriber->interact(
-            fn(NotificationHub $hub) => $hub->trigger(new ProjectionRevised())
+            fn (NotificationHub $hub) => $hub->trigger(new ProjectionRevised())
         );
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-
         $this->subscriber->interact(
-            fn(NotificationHub $hub) => $hub->trigger(new ProjectionDiscarded($deleteEmittedEvents))
+            fn (NotificationHub $hub) => $hub->trigger(new ProjectionDiscarded($deleteEmittedEvents))
         );
     }
 

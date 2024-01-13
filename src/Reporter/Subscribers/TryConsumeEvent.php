@@ -37,6 +37,6 @@ final class TryConsumeEvent implements MessageSubscriber
                         MessageCollectedException::fromExceptions(...$exceptions)
                     );
                 }
-        }, OnDispatchPriority::INVOKE_HANDLER->value);
+            }, OnDispatchPriority::INVOKE_HANDLER->value);
     }
 }

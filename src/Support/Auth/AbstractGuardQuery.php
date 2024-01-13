@@ -10,6 +10,7 @@ use Chronhub\Storm\Contracts\Message\MessageAlias;
 use Chronhub\Storm\Contracts\Tracker\MessageStory;
 use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Reporter\DetachMessageListener;
+
 use function sprintf;
 
 abstract class AbstractGuardQuery implements MessageSubscriber

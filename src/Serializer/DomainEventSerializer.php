@@ -11,6 +11,7 @@ use Chronhub\Storm\Contracts\Serializer\StreamEventSerializer;
 use Chronhub\Storm\Reporter\DomainEvent;
 use InvalidArgumentException;
 use Symfony\Component\Serializer\Serializer;
+
 use function is_string;
 
 final readonly class DomainEventSerializer implements StreamEventSerializer

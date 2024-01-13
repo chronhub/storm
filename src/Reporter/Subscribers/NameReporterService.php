@@ -30,6 +30,6 @@ final class NameReporterService implements MessageSubscriber
                         $message->withHeader(Header::REPORTER_ID, $this->serviceId)
                     );
                 }
-        }, OnDispatchPriority::MESSAGE_FACTORY->value - 1);
+            }, OnDispatchPriority::MESSAGE_FACTORY->value - 1);
     }
 }

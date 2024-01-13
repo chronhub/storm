@@ -12,6 +12,7 @@ use Chronhub\Storm\Contracts\Tracker\MessageSubscriber;
 use Chronhub\Storm\Contracts\Tracker\MessageTracker;
 use Chronhub\Storm\Reporter\DetachMessageListener;
 use Chronhub\Storm\Reporter\OnDispatchPriority;
+
 use function sprintf;
 
 final class GuardCommand implements MessageSubscriber
@@ -19,8 +20,8 @@ final class GuardCommand implements MessageSubscriber
     use DetachMessageListener;
 
     public function __construct(
-       private readonly AuthorizeMessage $authorization,
-       private readonly MessageAlias $messageAlias
+        private readonly AuthorizeMessage $authorization,
+        private readonly MessageAlias $messageAlias
     ) {
     }
 
@@ -43,6 +44,6 @@ final class GuardCommand implements MessageSubscriber
                         sprintf('Unauthorized command %s', $messageName)
                     );
                 }
-        }, OnDispatchPriority::GUARD_COMMAND->value);
+            }, OnDispatchPriority::GUARD_COMMAND->value);
     }
 }

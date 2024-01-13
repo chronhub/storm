@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Routing\Registrar;
 use Chronhub\Storm\Reporter\DomainType;
 use Chronhub\Storm\Routing\Exceptions\RoutingViolation;
 use Illuminate\Support\Collection;
+
 use function array_merge;
 
 final class GroupRegistrar implements Registrar

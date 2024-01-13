@@ -9,6 +9,7 @@ use Chronhub\Storm\Contracts\Aggregate\AggregateType as Type;
 use Chronhub\Storm\Contracts\Message\EventHeader;
 use Chronhub\Storm\Reporter\DomainEvent;
 use InvalidArgumentException;
+
 use function class_exists;
 use function in_array;
 use function is_a;

@@ -7,6 +7,7 @@ namespace Chronhub\Storm\Tracker;
 use Chronhub\Storm\Contracts\Tracker\Listener;
 use Chronhub\Storm\Contracts\Tracker\Story;
 use SplPriorityQueue;
+
 use function iterator_to_array;
 use function uasort;
 
@@ -101,7 +102,7 @@ trait InteractWithQueueTracker
                     break;
                 }
 
-                if ($callback && true === $callback($story)) {
+                if ($callback && $callback($story) === true) {
                     break;
                 }
             }

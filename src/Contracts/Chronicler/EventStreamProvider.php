@@ -16,7 +16,7 @@ interface EventStreamProvider
      * @param non-empty-string      $streamName
      * @param non-empty-string|null $category
      */
-    public function createStream(string $streamName, ?string $streamTable, string $category = null): bool;
+    public function createStream(string $streamName, ?string $streamTable, ?string $category = null): bool;
 
     /**
      * Delete stream by name
