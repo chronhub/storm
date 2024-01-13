@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Workflow;
 
-use Chronhub\Storm\Projector\Stream\GapType;
+use Chronhub\Storm\Projector\Checkpoint\GapType;
 use Chronhub\Storm\Projector\Workflow\Watcher\StopWatcher;
 
 class HaltOn

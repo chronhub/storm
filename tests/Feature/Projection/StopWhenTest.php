@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Feature\Projection;
 
 use Chronhub\Storm\Contracts\Projector\EmitterScope;
+use Chronhub\Storm\Projector\Checkpoint\GapType;
 use Chronhub\Storm\Projector\Scope\EmitterAccess;
-use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Workflow\HaltOn;
 use Chronhub\Storm\Stream\StreamName;
 use Chronhub\Storm\Tests\Factory\InMemoryFactory;

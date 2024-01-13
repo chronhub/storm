@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Support\Notification\Checkpoint;
 
 use Chronhub\Storm\Contracts\Projector\Subscriptor;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
 use DateTimeImmutable;
 
 final readonly class CheckpointInserted

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Support\Notification\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Stream\GapType;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
+use Chronhub\Storm\Projector\Checkpoint\GapType;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\GapDetected;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\RecoverableGapDetected;

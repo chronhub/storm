@@ -19,6 +19,18 @@ final readonly class ProjectQuery implements QueryProjector
     ) {
     }
 
+    public function run(bool $inBackground): void
+    {
+        $this->describeIfNeeded();
+
+        $this->subscriber->start($this->context, $inBackground);
+    }
+
+    public function reset(): void
+    {
+        $this->subscriber->resets();
+    }
+
     public function filter(QueryFilter $queryFilter): static
     {
         $this->context->withQueryFilter($queryFilter);
@@ -31,17 +43,5 @@ final readonly class ProjectQuery implements QueryProjector
         $this->context->withKeepState();
 
         return $this;
-    }
-
-    public function run(bool $inBackground): void
-    {
-        $this->describeIfNeeded();
-
-        $this->subscriber->start($this->context, $inBackground);
-    }
-
-    public function reset(): void
-    {
-        $this->subscriber->resets();
     }
 }

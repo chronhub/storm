@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Support\Notification\Handler;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
-use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
+use Chronhub\Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Support\Notification\Batch\BatchReset;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\CheckpointInserted;
 use Chronhub\Storm\Projector\Support\Notification\Cycle\CycleIncremented;

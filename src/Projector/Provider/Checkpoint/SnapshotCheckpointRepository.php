@@ -6,7 +6,7 @@ namespace Chronhub\Storm\Projector\Provider\Checkpoint;
 
 use Chronhub\Storm\Contracts\Projector\RecognitionProvider;
 use Chronhub\Storm\Contracts\Projector\SnapshotRepository;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
 use Illuminate\Support\Collection;
 
 use function json_encode;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Projector\Stream;
+namespace Chronhub\Storm\Projector\Checkpoint;
 
 use Chronhub\Storm\Contracts\Projector\GapRecognition;
 

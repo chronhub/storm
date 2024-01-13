@@ -6,8 +6,8 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Projector\ContextReader;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Checkpoint\GapType;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Stream\GapType;
 use Chronhub\Storm\Projector\Support\Notification\Batch\BatchIncremented;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\GapDetected;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\RecoverableGapDetected;

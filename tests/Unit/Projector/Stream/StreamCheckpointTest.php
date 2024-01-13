@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Checkpoint\CheckpointCollection;
+use Chronhub\Storm\Projector\Checkpoint\CheckpointManager;
+use Chronhub\Storm\Projector\Checkpoint\GapDetector;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Stream\CheckpointCollection;
-use Chronhub\Storm\Projector\Stream\CheckpointManager;
-use Chronhub\Storm\Projector\Stream\GapDetector;
 
 beforeEach(function () {
     $this->clock = $this->createMock(SystemClock::class);

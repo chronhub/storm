@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Contracts\Projector;
 
-use Chronhub\Storm\Projector\Stream\Checkpoint;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
 use DateTimeImmutable;
 use JsonSerializable;
 

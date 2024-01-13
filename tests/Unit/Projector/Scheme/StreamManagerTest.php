@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Scheme;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Checkpoint\CheckpointManager;
 use Chronhub\Storm\Projector\Exceptions\RuntimeException;
 use Chronhub\Storm\Projector\Provider\EventStream\EventStreamLoader;
-use Chronhub\Storm\Projector\Stream\CheckpointManager;
 
 beforeEach(function (): void {
     $this->clock = $this->createMock(SystemClock::class);

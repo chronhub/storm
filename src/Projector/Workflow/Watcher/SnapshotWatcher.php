@@ -6,9 +6,9 @@ namespace Chronhub\Storm\Projector\Workflow\Watcher;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
+use Chronhub\Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
-use Chronhub\Storm\Projector\Stream\ShouldSnapshotCheckpoint;
 use Chronhub\Storm\Projector\Support\Notification\Management\SnapshotCheckpointCaptured;
 use Closure;
 use Illuminate\Support\Sleep;

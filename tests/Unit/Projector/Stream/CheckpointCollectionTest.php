@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Tests\Unit\Projector\Stream;
 
 use Chronhub\Storm\Contracts\Clock\SystemClock;
+use Chronhub\Storm\Projector\Checkpoint\CheckpointCollection;
+use Chronhub\Storm\Projector\Checkpoint\CheckpointFactory;
 use Chronhub\Storm\Projector\Exceptions\InvalidArgumentException;
-use Chronhub\Storm\Projector\Stream\CheckpointCollection;
-use Chronhub\Storm\Projector\Stream\CheckpointFactory;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {

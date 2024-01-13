@@ -23,13 +23,6 @@ final readonly class ProjectEmitter implements EmitterProjector
     ) {
     }
 
-    public function filter(ProjectionQueryFilter $queryFilter): static
-    {
-        $this->context->withQueryFilter($queryFilter);
-
-        return $this;
-    }
-
     public function run(bool $inBackground): void
     {
         $this->describeIfNeeded();
@@ -42,6 +35,13 @@ final readonly class ProjectEmitter implements EmitterProjector
         $this->subscriber->interact(
             fn (NotificationHub $hub) => $hub->trigger(new ProjectionRevised())
         );
+    }
+
+    public function filter(ProjectionQueryFilter $queryFilter): static
+    {
+        $this->context->withQueryFilter($queryFilter);
+
+        return $this;
     }
 
     public function delete(bool $deleteEmittedEvents): void

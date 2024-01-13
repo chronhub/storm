@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Chronhub\Storm\Projector\Subscription;
 
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
+use Chronhub\Storm\Projector\Checkpoint\Checkpoint;
 use Chronhub\Storm\Projector\ProjectionStatus;
 use Chronhub\Storm\Projector\Repository\ProjectionResult;
-use Chronhub\Storm\Projector\Stream\Checkpoint;
 use Chronhub\Storm\Projector\Support\Notification\Batch\BatchReset;
 use Chronhub\Storm\Projector\Support\Notification\Batch\IsBatchReached;
 use Chronhub\Storm\Projector\Support\Notification\Checkpoint\CheckpointReset;

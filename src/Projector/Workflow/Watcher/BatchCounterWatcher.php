@@ -18,7 +18,7 @@ class BatchCounterWatcher
      */
     public function __construct(public readonly int $limit)
     {
-        /** @phpstan-ignore-next-line  */
+        /** @phpstan-ignore-next-line */
         if ($limit < 1) {
             throw new InvalidArgumentException('Batch counter limit must be greater than 0');
         }
