@@ -47,11 +47,7 @@ trait InteractWithPersistentSubscription
 
     private function setupWatcher(ContextReader $context, bool $keepRunning): void
     {
-        //        $this->subscriptor->watcher()->stopWhen()->subscribe($this->management->hub(), $context->haltOnCallback());
-        //        $this->subscriptor->watcher()->snapshot()->subscribe($this->management->hub());
-
         $this->subscriptor->watcher()->subscribe($this->management->hub(), $context);
-
         $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
         $this->subscriptor->watcher()->sprint()->continue();
     }

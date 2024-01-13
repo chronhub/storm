@@ -19,7 +19,6 @@ use Chronhub\Storm\Projector\Support\Notification\Sprint\SprintStopped;
 use Chronhub\Storm\Projector\Support\Notification\Status\CurrentStatus;
 use Chronhub\Storm\Projector\Support\Notification\Status\StatusChanged;
 use Chronhub\Storm\Projector\Support\Notification\Status\StatusDisclosed;
-use Chronhub\Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
 use Chronhub\Storm\Projector\Support\Notification\UserState\CurrentUserState;
 use Chronhub\Storm\Projector\Support\Notification\UserState\UserStateChanged;
 use Chronhub\Storm\Projector\Support\Notification\UserState\UserStateRestored;
@@ -114,11 +113,6 @@ trait InteractWithManagement
     public function getName(): string
     {
         return $this->projectionRepository->projectionName();
-    }
-
-    public function getProcessedStream(): string
-    {
-        return $this->hub->expect(CurrentProcessedStream::class);
     }
 
     public function hub(): NotificationHub

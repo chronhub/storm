@@ -12,9 +12,7 @@ interface Management
     public function close(): void;
 
     /**
-     * Get the current stream name processed.
+     * Get the notification hub.
      */
-    public function getProcessedStream(): string;
-
     public function hub(): NotificationHub;
 }

@@ -7,7 +7,6 @@ namespace Chronhub\Storm\Projector\Subscription;
 use Chronhub\Storm\Contracts\Projector\NotificationHub;
 use Chronhub\Storm\Contracts\Projector\QueryManagement;
 use Chronhub\Storm\Projector\Support\Notification\Sprint\SprintStopped;
-use Chronhub\Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
 
 final readonly class QueryingManagement implements QueryManagement
 {
@@ -18,11 +17,6 @@ final readonly class QueryingManagement implements QueryManagement
     public function close(): void
     {
         $this->hub->notify(SprintStopped::class);
-    }
-
-    public function getProcessedStream(): string
-    {
-        return $this->hub->expect(CurrentProcessedStream::class);
     }
 
     public function hub(): NotificationHub

@@ -10,7 +10,7 @@ use Chronhub\Storm\Projector\Stream\Checkpoint;
 interface PersistentManagement extends Management
 {
     /**
-     * Start the persistent subscription and resume the projection.
+     * Mount the persistent subscription and resume the projection.
      */
     public function rise(): void;
 
