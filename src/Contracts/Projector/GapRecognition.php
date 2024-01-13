@@ -7,7 +7,7 @@ namespace Chronhub\Storm\Contracts\Projector;
 interface GapRecognition
 {
     /**
-     * Is recoverable if gap is detected.
+     * Is recoverable if a gap is detected.
      */
     public function isRecoverable(): bool;
 
@@ -17,7 +17,7 @@ interface GapRecognition
     public function hasGap(): bool;
 
     /**
-     * Check if it has retry when gap is detected.
+     * Check if it has retry when a gap is detected.
      */
     public function hasRetry(): bool;
 

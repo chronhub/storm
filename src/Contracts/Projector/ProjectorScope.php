@@ -11,8 +11,8 @@ use Chronhub\Storm\Reporter\DomainEvent;
 interface ProjectorScope
 {
     /**
-     * Acknowledge the event stream only once.
-     * Otherwise, it will return null.
+     * Acknowledge the event stream only once,
+     * or, it will return null.
      */
     public function ack(string $event): ?static;
 
@@ -49,7 +49,7 @@ interface ProjectorScope
     public function mergeState(string $field, mixed $value): static;
 
     /**
-     * Conditional
+     * Apply the callback on truthy condition or the fallback applied.
      */
     public function when(bool $condition, null|callable|array $callback = null, null|callable|array $fallback = null): ?static;
 

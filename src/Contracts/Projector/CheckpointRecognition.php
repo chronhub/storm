@@ -12,13 +12,12 @@ interface CheckpointRecognition extends JsonSerializable
 {
     /**
      * Refresh event streams.
-     *
-     * Happens once when projector is started and at the end of each loop,
-     * unless projection is stopped or optional "only once discovery" is enabled
      */
     public function refreshStreams(array $eventStreams): void;
 
     /**
+     * Insert stream checkpoint.
+     *
      * @param  positive-int $streamPosition
      * @return Checkpoint   the last checkpoint inserted with or without gap
      */
@@ -50,7 +49,6 @@ interface CheckpointRecognition extends JsonSerializable
 
     /**
      * Sleep when a gap is detected.
-     * It also decrements the retries left.
      */
     public function sleepWhenGap(): void;
 
