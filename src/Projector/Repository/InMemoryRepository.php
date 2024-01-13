@@ -15,7 +15,7 @@ use Chronhub\Storm\Projector\Repository\Mapper\CreateData;
 use Chronhub\Storm\Projector\Repository\Mapper\PersistData;
 use Chronhub\Storm\Projector\Repository\Mapper\ReleaseData;
 use Chronhub\Storm\Projector\Repository\Mapper\ResetData;
-use Chronhub\Storm\Projector\Repository\Mapper\StartAgain;
+use Chronhub\Storm\Projector\Repository\Mapper\StartAgainData;
 use Chronhub\Storm\Projector\Repository\Mapper\StartData;
 use Chronhub\Storm\Projector\Repository\Mapper\StopData;
 use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockData;
@@ -72,7 +72,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
 
     public function startAgain(ProjectionStatus $projectionStatus): void
     {
-        $data = new StartAgain($projectionStatus->value, $this->lockManager->acquire());
+        $data = new StartAgainData($projectionStatus->value, $this->lockManager->acquire());
 
         $this->updateProjection($data);
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository\Mapper;
 
-final readonly class StartAgain extends ProjectionDTO
+final readonly class StartAgainData extends ProjectionDTO
 {
     public function __construct(public string $status, public string $lockedUntil)
     {
