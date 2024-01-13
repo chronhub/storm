@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Projector\Repository\Mapper;
 
-final readonly class UpdateStatusDataDto extends ProjectionDataDTO
+final readonly class CreateData extends ProjectionDTO
 {
     public function __construct(public string $status)
     {

@@ -11,14 +11,14 @@ use Chronhub\Storm\Contracts\Projector\ProjectionRepository;
 use Chronhub\Storm\Contracts\Serializer\JsonSerializer;
 use Chronhub\Storm\Projector\Exceptions\ProjectionNotFound;
 use Chronhub\Storm\Projector\ProjectionStatus;
-use Chronhub\Storm\Projector\Repository\Mapper\CreateDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\PersistDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\ReleaseDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\ResetDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\StartAgainDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\StartDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\StopDataDTO;
-use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockDataDTO;
+use Chronhub\Storm\Projector\Repository\Mapper\CreateData;
+use Chronhub\Storm\Projector\Repository\Mapper\PersistData;
+use Chronhub\Storm\Projector\Repository\Mapper\ReleaseData;
+use Chronhub\Storm\Projector\Repository\Mapper\ResetData;
+use Chronhub\Storm\Projector\Repository\Mapper\StartAgain;
+use Chronhub\Storm\Projector\Repository\Mapper\StartData;
+use Chronhub\Storm\Projector\Repository\Mapper\StopData;
+use Chronhub\Storm\Projector\Repository\Mapper\UpdateLockData;
 
 // add datetime created_at, stopped_at, updated_at, reset_at, deleted_at, deleted_with_emitted_events_at
 // which should be handled by a ProjectionTimeTracker for storage, log, db, etc...
@@ -39,21 +39,21 @@ final readonly class InMemoryRepository implements ProjectionRepository
 
     public function create(ProjectionStatus $status): void
     {
-        $data = new CreateDataDTO($status->value);
+        $data = new CreateData($status->value);
 
         $this->provider->createProjection($this->projectionName(), $data);
     }
 
     public function start(ProjectionStatus $projectionStatus): void
     {
-        $data = new StartDataDTO($projectionStatus->value, $this->lockManager->acquire());
+        $data = new StartData($projectionStatus->value, $this->lockManager->acquire());
 
         $this->provider->acquireLock($this->projectionName(), $data);
     }
 
     public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void
     {
-        $data = new StopDataDTO(
+        $data = new StopData(
             $projectionStatus->value,
             $this->serializer->encode($projectionDetail->userState),
             $this->serializer->encode($projectionDetail->checkpoints),
@@ -65,21 +65,21 @@ final readonly class InMemoryRepository implements ProjectionRepository
 
     public function release(): void
     {
-        $data = new ReleaseDataDTO(ProjectionStatus::IDLE->value, null);
+        $data = new ReleaseData(ProjectionStatus::IDLE->value, null);
 
         $this->updateProjection($data);
     }
 
     public function startAgain(ProjectionStatus $projectionStatus): void
     {
-        $data = new StartAgainDataDTO($projectionStatus->value, $this->lockManager->acquire());
+        $data = new StartAgain($projectionStatus->value, $this->lockManager->acquire());
 
         $this->updateProjection($data);
     }
 
     public function persist(ProjectionResult $projectionDetail): void
     {
-        $data = new PersistDataDTO(
+        $data = new PersistData(
             $this->serializer->encode($projectionDetail->userState),
             $this->serializer->encode($projectionDetail->checkpoints),
             $this->lockManager->refresh()
@@ -90,7 +90,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
 
     public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void
     {
-        $data = new ResetDataDTO(
+        $data = new ResetData(
             $currentStatus->value,
             $this->serializer->encode($projectionDetail->userState),
             $this->serializer->encode($projectionDetail->checkpoints),
@@ -121,7 +121,7 @@ final readonly class InMemoryRepository implements ProjectionRepository
     public function updateLock(): void
     {
         if ($this->lockManager->shouldRefresh()) {
-            $data = new UpdateLockDataDTO($this->lockManager->refresh());
+            $data = new UpdateLockData($this->lockManager->refresh());
 
             $this->updateProjection($data);
         }
